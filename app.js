@@ -21,30 +21,64 @@ const availableConditions = [
 let currentTurnIndex = 0;
 let roundNumber = 1;
 
-function getSortedCreatures() {
-    const sortedCreatures = [...creatures];
+function getTypeSortValue(type) {
+    if (type === "player") {
+        return 1;
+    }
 
-    sortedCreatures.sort(function(a, b) {
+    if (type === "npc") {
+        return 2;
+    }
+
+    if (type === "monster") {
+        return 3;
+    }
+
+    return 4;
+}
+
+function getHandCards() {
+    const handCards = creatures.filter(function(creature) {
+        return creature.isInCombat === true;
+    });
+
+    handCards.sort(function(a, b) {
         if (a.initiative !== b.initiative) {
             return b.initiative - a.initiative;
         }
 
-        if (a.type === "player" && b.type !== "player") {
-            return -1;
+        const typeDifference = getTypeSortValue(a.type) - getTypeSortValue(b.type);
+
+        if (typeDifference !== 0) {
+            return typeDifference;
         }
 
-        if (a.type !== "player" && b.type === "player") {
-            return 1;
-        }
-
-        return 0;
+        return a.name.localeCompare(b.name);
     });
 
-    return sortedCreatures;
+    return handCards;
 }
 
-function ensureCurrentTurnIndexIsValid(sortedCreatures) {
-    if (sortedCreatures.length === 0) {
+function getDeckCards() {
+    const deckCards = creatures.filter(function(creature) {
+        return creature.isInCombat === false;
+    });
+
+    deckCards.sort(function(a, b) {
+        const typeDifference = getTypeSortValue(a.type) - getTypeSortValue(b.type);
+
+        if (typeDifference !== 0) {
+            return typeDifference;
+        }
+
+        return a.name.localeCompare(b.name);
+    });
+
+    return deckCards;
+}
+
+function ensureCurrentTurnIndexIsValid(handCards) {
+    if (handCards.length === 0) {
         currentTurnIndex = 0;
         roundNumber = 1;
         return;
@@ -54,56 +88,110 @@ function ensureCurrentTurnIndexIsValid(sortedCreatures) {
         currentTurnIndex = 0;
     }
 
-    if (currentTurnIndex >= sortedCreatures.length) {
-        currentTurnIndex = sortedCreatures.length - 1;
+    if (currentTurnIndex >= handCards.length) {
+        currentTurnIndex = handCards.length - 1;
     }
 }
 
-function getActiveCreature(sortedCreatures) {
-    ensureCurrentTurnIndexIsValid(sortedCreatures);
+function getActiveCard(handCards) {
+    ensureCurrentTurnIndexIsValid(handCards);
 
-    if (sortedCreatures.length === 0) {
+    if (handCards.length === 0) {
         return null;
     }
 
-    return sortedCreatures[currentTurnIndex];
+    return handCards[currentTurnIndex];
 }
 
 function nextTurn() {
-    const sortedCreatures = getSortedCreatures();
+    const handCards = getHandCards();
 
-    if (sortedCreatures.length === 0) {
+    if (handCards.length === 0) {
         return;
     }
 
     currentTurnIndex = currentTurnIndex + 1;
 
-    if (currentTurnIndex >= sortedCreatures.length) {
+    if (currentTurnIndex >= handCards.length) {
         currentTurnIndex = 0;
         roundNumber = roundNumber + 1;
     }
 
-    renderCreatures();
+    renderCards();
 }
 
 function previousTurn() {
-    const sortedCreatures = getSortedCreatures();
+    const handCards = getHandCards();
 
-    if (sortedCreatures.length === 0) {
+    if (handCards.length === 0) {
         return;
     }
 
     currentTurnIndex = currentTurnIndex - 1;
 
     if (currentTurnIndex < 0) {
-        currentTurnIndex = sortedCreatures.length - 1;
+        currentTurnIndex = handCards.length - 1;
 
         if (roundNumber > 1) {
             roundNumber = roundNumber - 1;
         }
     }
 
-    renderCreatures();
+    renderCards();
+}
+
+function scrollCardRow(rowElementId, direction) {
+    const rowElement = document.querySelector(`#${rowElementId}`);
+
+    if (rowElement === null) {
+        return;
+    }
+
+    const maximumScrollLeft = rowElement.scrollWidth - rowElement.clientWidth;
+    const scrollTolerance = 4;
+    const scrollAmount = rowElement.clientWidth * 0.85;
+
+    if (maximumScrollLeft <= 0) {
+        return;
+    }
+
+    if (direction === "right") {
+        const isAtRightEnd = rowElement.scrollLeft >= maximumScrollLeft - scrollTolerance;
+
+        if (isAtRightEnd) {
+            rowElement.scrollTo({
+                left: 0,
+                behavior: "smooth"
+            });
+
+            return;
+        }
+
+        rowElement.scrollBy({
+            left: scrollAmount,
+            behavior: "smooth"
+        });
+
+        return;
+    }
+
+    if (direction === "left") {
+        const isAtLeftEnd = rowElement.scrollLeft <= scrollTolerance;
+
+        if (isAtLeftEnd) {
+            rowElement.scrollTo({
+                left: maximumScrollLeft,
+                behavior: "smooth"
+            });
+
+            return;
+        }
+
+        rowElement.scrollBy({
+            left: -scrollAmount,
+            behavior: "smooth"
+        });
+    }
 }
 
 function applyDamage(creature, amount) {
@@ -177,10 +265,40 @@ function removeCreatureById(id) {
         return creature.id !== id;
     });
 
-    const sortedCreatures = getSortedCreatures();
-    ensureCurrentTurnIndexIsValid(sortedCreatures);
+    const handCards = getHandCards();
+    ensureCurrentTurnIndexIsValid(handCards);
 
-    renderCreatures();
+    renderCards();
+}
+
+function moveCardToHand(creatureId) {
+    const creature = findCreatureById(creatureId);
+
+    if (creature === null) {
+        return;
+    }
+
+    creature.isInCombat = true;
+
+    const handCards = getHandCards();
+    ensureCurrentTurnIndexIsValid(handCards);
+
+    renderCards();
+}
+
+function moveCardToDeck(creatureId) {
+    const creature = findCreatureById(creatureId);
+
+    if (creature === null) {
+        return;
+    }
+
+    creature.isInCombat = false;
+
+    const handCards = getHandCards();
+    ensureCurrentTurnIndexIsValid(handCards);
+
+    renderCards();
 }
 
 function getHpChangeAmount(creatureId) {
@@ -198,7 +316,7 @@ function handleDamageButtonClick(creatureId) {
     const amount = getHpChangeAmount(creatureId);
 
     applyDamage(creature, amount);
-    renderCreatures();
+    renderCards();
 }
 
 function handleHealingButtonClick(creatureId) {
@@ -206,7 +324,7 @@ function handleHealingButtonClick(creatureId) {
     const amount = getHpChangeAmount(creatureId);
 
     applyHealing(creature, amount);
-    renderCreatures();
+    renderCards();
 }
 
 function handleTempHpButtonClick(creatureId) {
@@ -214,7 +332,7 @@ function handleTempHpButtonClick(creatureId) {
     const amount = getHpChangeAmount(creatureId);
 
     applyTempHp(creature, amount);
-    renderCreatures();
+    renderCards();
 }
 
 function getHpPercent(creature) {
@@ -253,51 +371,46 @@ function getHpDescription(creature) {
     return "fast besiegt";
 }
 
-function getPublicHpDisplayHtml(creature) {
-    const hpPercent = getHpPercent(creature);
-
+function getHpVisibilityLabel(creature) {
     if (creature.hpVisibility === "full") {
-        return `
-            <div class="hp-display">
-                <p>Spieler sehen: HP ${creature.hp} / ${creature.maxHp}</p>
-            </div>
-        `;
+        return "full";
     }
 
     if (creature.hpVisibility === "bar") {
-        return `
-            <div class="hp-display">
-                <p>Spieler sehen: HP-Zustand ${hpPercent}%</p>
-
-                <div class="hp-bar-outer">
-                    <div
-                        class="hp-bar-inner"
-                        style="width: ${hpPercent}%;"
-                    ></div>
-                </div>
-            </div>
-        `;
+        return "bar";
     }
 
     if (creature.hpVisibility === "descriptive") {
-        return `
-            <div class="hp-display">
-                <p>Spieler sehen: ${getHpDescription(creature)}</p>
-            </div>
-        `;
+        return "Zustand";
     }
 
     if (creature.hpVisibility === "hidden") {
-        return `
-            <div class="hp-display">
-                <p>Spieler sehen: HP verborgen</p>
-            </div>
-        `;
+        return "verborgen";
     }
+
+    return "unbekannt";
+}
+
+function createDmHpBarHtml(creature) {
+    const hpPercent = getHpPercent(creature);
 
     return `
         <div class="hp-display">
-            <p>Spieler-HP-Anzeige unbekannt</p>
+
+            <div class="hp-bar-outer">
+                <div
+                    class="hp-bar-inner"
+                    style="width: ${hpPercent}%;"
+                ></div>
+            </div>
+        </div>
+    `;
+}
+
+function getPublicHpDisplayHtml(creature) {
+    return `
+        <div class="hp-display">
+            <p>Spieler sehen: ${getHpVisibilityLabel(creature)}</p>
         </div>
     `;
 }
@@ -349,7 +462,7 @@ function addConditionToCreature(creatureId) {
 
     creature.conditions.push(conditionName);
 
-    renderCreatures();
+    renderCards();
 }
 
 function removeConditionFromCreature(creatureId, conditionName) {
@@ -363,7 +476,7 @@ function removeConditionFromCreature(creatureId, conditionName) {
         return condition !== conditionName;
     });
 
-    renderCreatures();
+    renderCards();
 }
 
 function getConditionClassName(conditionName) {
@@ -417,12 +530,21 @@ function clearAddCreatureError() {
     showAddCreatureError("");
 }
 
+function getNumberedCreatureName(baseName, index, quantity) {
+    if (quantity === 1) {
+        return baseName;
+    }
+
+    return `${baseName} ${index + 1}`;
+}
+
 function handleAddCreatureButtonClick() {
     clearAddCreatureError();
 
     const nameInputElement = document.querySelector("#new-creature-name");
     const publicNameInputElement = document.querySelector("#new-creature-public-name");
     const typeSelectElement = document.querySelector("#new-creature-type");
+    const quantityInputElement = document.querySelector("#new-creature-quantity");
     const initiativeInputElement = document.querySelector("#new-creature-initiative");
     const hpInputElement = document.querySelector("#new-creature-hp");
     const maxHpInputElement = document.querySelector("#new-creature-max-hp");
@@ -430,18 +552,21 @@ function handleAddCreatureButtonClick() {
     const acInputElement = document.querySelector("#new-creature-ac");
     const passivePerceptionInputElement = document.querySelector("#new-creature-passive-perception");
     const passiveInsightInputElement = document.querySelector("#new-creature-passive-insight");
+    const isInCombatInputElement = document.querySelector("#new-creature-is-in-combat");
 
     if (
         nameInputElement === null ||
         publicNameInputElement === null ||
         typeSelectElement === null ||
+        quantityInputElement === null ||
         initiativeInputElement === null ||
         hpInputElement === null ||
         maxHpInputElement === null ||
         hpVisibilitySelectElement === null ||
         acInputElement === null ||
         passivePerceptionInputElement === null ||
-        passiveInsightInputElement === null
+        passiveInsightInputElement === null ||
+        isInCombatInputElement === null
     ) {
         showAddCreatureError("Ein Formularfeld wurde nicht gefunden. Bitte prüfe die IDs in index.html.");
         return;
@@ -450,6 +575,7 @@ function handleAddCreatureButtonClick() {
     const name = nameInputElement.value.trim();
     const publicName = publicNameInputElement.value.trim();
 
+    const quantity = Number(quantityInputElement.value);
     const initiative = Number(initiativeInputElement.value);
     const hp = Number(hpInputElement.value);
     const maxHp = Number(maxHpInputElement.value);
@@ -458,12 +584,22 @@ function handleAddCreatureButtonClick() {
     const passiveInsight = Number(passiveInsightInputElement.value);
 
     if (name === "") {
-        showAddCreatureError("Bitte gib einen Namen ein.");
+        showAddCreatureError("Bitte gib einen internen Namen ein.");
         return;
     }
 
     if (publicName === "") {
         showAddCreatureError("Bitte gib einen öffentlichen Namen ein.");
+        return;
+    }
+
+    if (!Number.isFinite(quantity) || quantity < 1) {
+        showAddCreatureError("Die Anzahl muss mindestens 1 sein.");
+        return;
+    }
+
+    if (quantity > 20) {
+        showAddCreatureError("Die Anzahl darf höchstens 20 sein.");
         return;
     }
 
@@ -497,142 +633,192 @@ function handleAddCreatureButtonClick() {
         return;
     }
 
-    const newCreature = {
-        id: getNextCreatureId(),
-        name: name,
-        publicName: publicName,
-        type: typeSelectElement.value,
-        initiative: initiative,
-        hp: hp,
-        maxHp: maxHp,
-        tempHp: 0,
-        armorClass: armorClass,
-        passivePerception: passivePerception,
-        passiveInsight: passiveInsight,
-        hpVisibility: hpVisibilitySelectElement.value,
-        conditions: []
-    };
+    for (let index = 0; index < quantity; index = index + 1) {
+        const newCreature = {
+            id: getNextCreatureId(),
+            name: getNumberedCreatureName(name, index, quantity),
+            publicName: getNumberedCreatureName(publicName, index, quantity),
+            type: typeSelectElement.value,
+            initiative: initiative,
+            hp: hp,
+            maxHp: maxHp,
+            tempHp: 0,
+            armorClass: armorClass,
+            passivePerception: passivePerception,
+            passiveInsight: passiveInsight,
+            hpVisibility: hpVisibilitySelectElement.value,
+            conditions: [],
+            isInCombat: isInCombatInputElement.checked
+        };
 
-    creatures.push(newCreature);
+        creatures.push(newCreature);
+    }
 
-    renderCreatures();
+    const handCards = getHandCards();
+    ensureCurrentTurnIndexIsValid(handCards);
+
+    renderCards();
+}
+
+function createCardMenuHtml(creature) {
+    const isOnHand = creature.isInCombat === true;
+
+    const moveToHandDisabled = isOnHand ? "disabled" : "";
+    const moveToDeckDisabled = isOnHand ? "" : "disabled";
+
+    return `
+        <details class="card-menu">
+            <summary
+                class="card-menu-summary"
+                title="Kartenmenü öffnen"
+                aria-label="Kartenmenü öffnen"
+            >
+                ☰
+            </summary>
+
+            <div class="card-menu-panel">
+                <button
+                    class="card-menu-danger"
+                    onclick="removeCreatureById(${creature.id})"
+                >
+                    Karte entfernen
+                </button>
+
+                <button
+                    onclick="moveCardToHand(${creature.id})"
+                    ${moveToHandDisabled}
+                >
+                    Karte auf die Hand nehmen
+                </button>
+
+                <button
+                    onclick="moveCardToDeck(${creature.id})"
+                    ${moveToDeckDisabled}
+                >
+                    Karte ins Deck verschieben
+                </button>
+            </div>
+        </details>
+    `;
 }
 
 function createCreatureCardHtml(creature, isActive) {
     return `
         <article class="creature-card ${isActive ? "active" : ""}">
-            <button
-                class="creature-delete-button"
-                onclick="removeCreatureById(${creature.id})"
-                title="Kreatur löschen"
-                aria-label="Kreatur löschen"
-            >
-                ×
-            </button>
+            <div class="creature-card-inner">
+                <div class="creature-card-title-row">
+                    <div class="creature-card-header">
+                        <h3>
+                            ${creature.name}
+                            <span class="creature-public-alias">
+                                aka "${creature.publicName}"
+                            </span>
+                        </h3>
+                    </div>
 
-            <div class="creature-card-top">
+                    ${createCardMenuHtml(creature)}
+                </div>
+
                 <div class="creature-image-placeholder">
                     Bild folgt
                 </div>
 
-                <div class="creature-card-header">
-                    <h3>
-                        ${creature.name}
-                        <span class="creature-public-alias">
-                            aka "${creature.publicName}"
-                        </span>
-                    </h3>
+                <div class="creature-type-line">
+                    <p>
+                        ${creature.type} · ${creature.isInCombat ? "auf der Hand" : "im Deck"}
+                    </p>
+                </div>
 
-                    <div class="creature-subtitle">
-                        <p>Typ: ${creature.type}</p>
+                <div class="creature-card-section">
+                    <h4>HP</h4>
+
+                    <div class="creature-stat-grid">
+                        <p>Aktuell: ${creature.hp} / ${creature.maxHp}</p>
+                        <p>Temp: ${creature.tempHp}</p>
+                    </div>
+
+                    ${createDmHpBarHtml(creature)}
+                    ${getPublicHpDisplayHtml(creature)}
+                </div>
+
+                <div class="creature-card-section">
+                    <h4>Kampfwerte</h4>
+
+                    <div class="creature-stat-grid">
+                        <p>Ini: ${creature.initiative}</p>
+                        <p>AC: ${creature.armorClass}</p>
                     </div>
                 </div>
-            </div>
 
-            <div class="creature-card-section">
-                <h4>Kampfwerte</h4>
+                <div class="creature-card-section">
+                    <h4>Passive Werte</h4>
 
-                <div class="creature-stat-grid">
-                    <p>Initiative: ${creature.initiative}</p>
-                    <p>AC: ${creature.armorClass}</p>
-                    <p>HP: ${creature.hp} / ${creature.maxHp}</p>
-                    <p>Temp HP: ${creature.tempHp}</p>
-                </div>
-            </div>
-
-            <div class="creature-card-section">
-                <h4>Passive Werte</h4>
-
-                <div class="creature-stat-grid">
-                    <p>Passive Perception: ${creature.passivePerception}</p>
-                    <p>Passive Insight: ${creature.passiveInsight}</p>
-                </div>
-            </div>
-
-            <div class="creature-card-section">
-                <h4>Spieler-Anzeige-Vorschau</h4>
-
-                <p class="creature-single-line">
-                    Spieler-HP-Modus: ${creature.hpVisibility}
-                </p>
-
-                ${getPublicHpDisplayHtml(creature)}
-            </div>
-
-            <div class="creature-card-section">
-                <h4>Conditions</h4>
-
-                <div class="condition-chip-list">
-                    ${createConditionChipsHtml(creature)}
+                    <div class="creature-stat-grid">
+                        <p>Perception: ${creature.passivePerception}</p>
+                        <p>Insight: ${creature.passiveInsight}</p>
+                    </div>
                 </div>
 
-                <div class="condition-controls">
-                    <select id="condition-select-${creature.id}">
-                        ${createConditionOptionsHtml()}
-                    </select>
+                <div class="creature-card-section">
+                    <h4>Conditions</h4>
 
-                    <button onclick="addConditionToCreature(${creature.id})">
-                        Condition hinzufügen
-                    </button>
+                    <div class="condition-chip-list">
+                        ${createConditionChipsHtml(creature)}
+                    </div>
+
+                    <div class="condition-controls">
+                        <select id="condition-select-${creature.id}">
+                            ${createConditionOptionsHtml()}
+                        </select>
+
+                        <button onclick="addConditionToCreature(${creature.id})">
+                            Condition hinzufügen
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="creature-card-section">
-                <h4>Aktionen</h4>
+                <div class="creature-card-section">
+                    <h4>Kampfaktionen</h4>
 
-                <div class="creature-actions">
-                    <input
-                        id="hp-change-amount-${creature.id}"
-                        type="number"
-                        min="0"
-                        value="0"
-                    >
+                    <div class="creature-actions">
+                        <input
+                            id="hp-change-amount-${creature.id}"
+                            type="number"
+                            min="0"
+                            value="0"
+                        >
 
-                    <button onclick="handleDamageButtonClick(${creature.id})">
-                        Schaden
-                    </button>
+                        <button onclick="handleDamageButtonClick(${creature.id})">
+                            Schaden
+                        </button>
 
-                    <button onclick="handleHealingButtonClick(${creature.id})">
-                        Heilung
-                    </button>
+                        <button onclick="handleHealingButtonClick(${creature.id})">
+                            Heilung
+                        </button>
 
-                    <button onclick="handleTempHpButtonClick(${creature.id})">
-                        Temp HP
-                    </button>
+                        <button onclick="handleTempHpButtonClick(${creature.id})">
+                            Temp HP
+                        </button>
+                    </div>
                 </div>
             </div>
         </article>
     `;
 }
 
-function renderTurnInfo(sortedCreatures) {
+function renderTurnInfo(handCards) {
     const turnInfoElement = document.querySelector("#turn-info");
-    const activeCreature = getActiveCreature(sortedCreatures);
 
-    if (activeCreature === null) {
+    if (turnInfoElement === null) {
+        return;
+    }
+
+    const activeCard = getActiveCard(handCards);
+
+    if (activeCard === null) {
         turnInfoElement.innerHTML = `
             <h2>Runde ${roundNumber}</h2>
-            <p>Keine Kreaturen im Encounter.</p>
+            <p>Keine Karten auf der Hand.</p>
         `;
 
         return;
@@ -642,33 +828,53 @@ function renderTurnInfo(sortedCreatures) {
         <h2>Runde ${roundNumber}</h2>
 
         <p class="turn-label">
-            Turn ${currentTurnIndex + 1} von ${sortedCreatures.length}
+            Turn ${currentTurnIndex + 1} von ${handCards.length}
         </p>
 
         <p class="active-creature-name">
-            Aktiv: ${activeCreature.publicName}
+            Aktiv: ${activeCard.publicName}
         </p>
     `;
 }
 
-function renderCreatures() {
-    const creatureListElement = document.querySelector("#creature-list");
+function renderCardList(elementId, listCards, activeCard) {
+    const listElement = document.querySelector(elementId);
 
-    const sortedCreatures = getSortedCreatures();
+    if (listElement === null) {
+        return;
+    }
 
-    ensureCurrentTurnIndexIsValid(sortedCreatures);
-    renderTurnInfo(sortedCreatures);
+    if (listCards.length === 0) {
+        listElement.innerHTML = `
+            <p class="empty-list-message">
+                Keine Karten vorhanden.
+            </p>
+        `;
+        return;
+    }
 
     let html = "";
 
-    for (let index = 0; index < sortedCreatures.length; index = index + 1) {
-        const creature = sortedCreatures[index];
-        const isActive = index === currentTurnIndex;
+    for (const card of listCards) {
+        const isActive = activeCard !== null && card.id === activeCard.id;
 
-        html += createCreatureCardHtml(creature, isActive);
+        html += createCreatureCardHtml(card, isActive);
     }
 
-    creatureListElement.innerHTML = html;
+    listElement.innerHTML = html;
 }
 
-renderCreatures();
+function renderCards() {
+    const handCards = getHandCards();
+    const deckCards = getDeckCards();
+
+    ensureCurrentTurnIndexIsValid(handCards);
+
+    const activeCard = getActiveCard(handCards);
+
+    renderTurnInfo(handCards);
+    renderCardList("#hand-card-list", handCards, activeCard);
+    renderCardList("#deck-card-list", deckCards, activeCard);
+}
+
+renderCards();
