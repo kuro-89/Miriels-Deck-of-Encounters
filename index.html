@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Combat Tracker v0.1 - DM-Ansicht by Miriel</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="app-header">
+            <h1>D&D Combat Tracker v0.1</h1>
+            <p>DM-Ansicht</p>
+            <p>build 2026-06-21 by Miriel</p>
+        </header>
+
+        <section class="turn-section">
+            <div id="turn-info" class="turn-info"></div>
+
+            <div class="turn-actions">
+                <button onclick="previousTurn()">Vorheriger Zug</button>
+                <button onclick="nextTurn()">Nächster Zug</button>
+            </div>
+        </section>
+
+        <section class="add-creature-section">
+            <h2>Neue Kreatur hinzufügen</h2>
+
+            <p id="add-creature-error" class="form-error"></p>
+
+            <div class="add-creature-form">
+                <div class="form-field">
+                    <label for="new-creature-name">Name</label>
+                    <input id="new-creature-name" type="text" value="Bandit A">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-public-name">Öffentlicher Name</label>
+                    <input id="new-creature-public-name" type="text" value="Bandit">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-type">Typ</label>
+                    <select id="new-creature-type">
+                        <option value="player">Player</option>
+                        <option value="monster" selected>Monster</option>
+                        <option value="npc">NPC</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-initiative">Initiative</label>
+                    <input id="new-creature-initiative" type="number" value="10">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-hp">HP</label>
+                    <input id="new-creature-hp" type="number" min="0" value="10">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-max-hp">Max HP</label>
+                    <input id="new-creature-max-hp" type="number" min="1" value="10">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-hp-visibility">Spieler-HP-Anzeige</label>
+                    <select id="new-creature-hp-visibility">
+                        <option value="full" selected>HP vollständig anzeigen</option>
+                        <option value="bar">Nur HP-Balken anzeigen</option>
+                        <option value="descriptive">Nur Beschreibung anzeigen</option>
+                        <option value="hidden">HP verbergen</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-ac">AC</label>
+                    <input id="new-creature-ac" type="number" min="0" value="10">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-passive-perception">Passive Perception</label>
+                    <input id="new-creature-passive-perception" type="number" min="0" value="10">
+                </div>
+
+                <div class="form-field">
+                    <label for="new-creature-passive-insight">Passive Insight</label>
+                    <input id="new-creature-passive-insight" type="number" min="0" value="10">
+                </div>
+
+                <button class="add-creature-button" onclick="handleAddCreatureButtonClick()">
+                    Kreatur hinzufügen
+                </button>
+            </div>
+        </section>
+
+        <section class="creature-list-section">
+            <h2>Kreaturen</h2>
+
+            <div id="creature-list" class="creature-list"></div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
