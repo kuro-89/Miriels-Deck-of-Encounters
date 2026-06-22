@@ -194,6 +194,39 @@ function scrollCardRow(rowElementId, direction) {
     }
 }
 
+function getElementCenterScrollLeft(rowElement, childElement) {
+    const rowVisibleWidth = rowElement.clientWidth;
+    const childLeft = childElement.offsetLeft;
+    const childWidth = childElement.offsetWidth;
+
+    return childLeft - (rowVisibleWidth / 2) + (childWidth / 2);
+}
+
+function centerActivePublicPreviewCard() {
+    const previewElement = document.querySelector("#public-preview-list");
+
+    if (previewElement === null) {
+        return;
+    }
+
+    const activePreviewCard = previewElement.querySelector(".public-preview-card.active");
+
+    if (activePreviewCard === null) {
+        return;
+    }
+
+    const targetScrollLeft = getElementCenterScrollLeft(previewElement, activePreviewCard);
+
+    previewElement.scrollTo({
+        left: targetScrollLeft,
+        behavior: "smooth"
+    });
+}
+
+function scrollPublicPreview(direction) {
+    scrollCardRow("public-preview-list", direction);
+}
+
 function applyDamage(creature, amount) {
     if (creature === null) {
         return;
@@ -514,6 +547,139 @@ function createConditionChipsHtml(creature) {
     }
 
     return html;
+}
+
+function getPublicHpPreviewHtml(creature) {
+    const hpPercent = getHpPercent(creature);
+
+    if (creature.hpVisibility === "full") {
+        return `
+            <div class="public-preview-section-box">
+                <h4>HP</h4>
+                <p>${creature.hp} / ${creature.maxHp} HP</p>
+
+                <div class="hp-bar-outer">
+                    <div
+                        class="hp-bar-inner"
+                        style="width: ${hpPercent}%;"
+                    ></div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (creature.hpVisibility === "bar") {
+        return `
+            <div class="public-preview-section-box">
+                <h4>HP</h4>
+                <p>${hpPercent}%</p>
+
+                <div class="hp-bar-outer">
+                    <div
+                        class="hp-bar-inner"
+                        style="width: ${hpPercent}%;"
+                    ></div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (creature.hpVisibility === "descriptive") {
+        return `
+            <div class="public-preview-section-box">
+                <h4>HP</h4>
+                <p>${getHpDescription(creature)}</p>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="public-preview-section-box">
+            <h4>HP</h4>
+            <p>HP verborgen</p>
+        </div>
+    `;
+}
+
+function createPublicConditionChipsHtml(creature) {
+    if (creature.conditions.length === 0) {
+        return `
+            <p class="condition-empty">
+                Keine Conditions sichtbar.
+            </p>
+        `;
+    }
+
+    let html = "";
+
+    for (const condition of creature.conditions) {
+        html += `
+            <span class="condition-chip ${getConditionClassName(condition)}">
+                <span class="condition-chip-name">
+                    ${condition}
+                </span>
+            </span>
+        `;
+    }
+
+    return html;
+}
+
+function createPublicPreviewCardHtml(creature, isActive) {
+    return `
+        <article class="public-preview-card ${isActive ? "active" : ""}" data-creature-id="${creature.id}">
+            <div class="public-preview-card-inner">
+                <h3 class="public-preview-title">
+                    ${creature.publicName}
+                </h3>
+
+                <div class="public-preview-image-placeholder">
+                    Bild folgt
+                </div>
+
+                <p class="public-preview-type">
+                    ${creature.type}
+                </p>
+
+                ${getPublicHpPreviewHtml(creature)}
+
+                <div class="public-preview-section-box">
+                    <h4>Conditions</h4>
+
+                    <div class="condition-chip-list">
+                        ${createPublicConditionChipsHtml(creature)}
+                    </div>
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+function renderPublicPreview(handCards, activeCard) {
+    const previewElement = document.querySelector("#public-preview-list");
+
+    if (previewElement === null) {
+        return;
+    }
+
+    if (handCards.length === 0) {
+        previewElement.innerHTML = `
+            <p class="empty-list-message">
+                Keine Karten auf der Hand. Die öffentliche Vorschau ist leer.
+            </p>
+        `;
+        return;
+    }
+
+    let html = "";
+
+    for (const card of handCards) {
+        const isActive = activeCard !== null && card.id === activeCard.id;
+
+        html += createPublicPreviewCardHtml(card, isActive);
+    }
+
+    previewElement.innerHTML = html;
 }
 
 function showAddCreatureError(message) {
@@ -873,6 +1039,8 @@ function renderCards() {
     const activeCard = getActiveCard(handCards);
 
     renderTurnInfo(handCards);
+    renderPublicPreview(handCards, activeCard);
+    centerActivePublicPreviewCard();
     renderCardList("#hand-card-list", handCards, activeCard);
     renderCardList("#deck-card-list", deckCards, activeCard);
 }

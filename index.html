@@ -10,7 +10,7 @@
 <body>
     <main class="app">
         <header class="app-header">
-            <h1>D&D Combat Tracker V 0.2</h1>
+            <h1>D&D Combat Tracker V 0.3</h1>
             <p>DM-Ansicht</p>
             <p>build 2026-06-22 by kuro</p>
         </header>
@@ -21,6 +21,37 @@
             <div class="turn-actions">
                 <button onclick="previousTurn()">Vorheriger Zug</button>
                 <button onclick="nextTurn()">Nächster Zug</button>
+            </div>
+        </section>
+
+        <section class="public-preview-section">
+            <h2>Öffentliche Spieler-Vorschau</h2>
+
+            <p class="section-info-card">
+                Diese Vorschau zeigt, was Spieler später ungefähr sehen könnten.
+                Sie zeigt nur Karten auf der Hand und keine geheimen DM-Werte.
+            </p>
+
+            <div class="public-preview-shell">
+                <button
+                    class="public-preview-button public-preview-button-left"
+                    onclick="scrollPublicPreview('left')"
+                    aria-label="Öffentliche Vorschau nach links scrollen"
+                    title="Nach links scrollen"
+                >
+                    ‹
+                </button>
+
+                <div id="public-preview-list" class="public-preview-list"></div>
+
+                <button
+                    class="public-preview-button public-preview-button-right"
+                    onclick="scrollPublicPreview('right')"
+                    aria-label="Öffentliche Vorschau nach rechts scrollen"
+                    title="Nach rechts scrollen"
+                >
+                    ›
+                </button>
             </div>
         </section>
 
