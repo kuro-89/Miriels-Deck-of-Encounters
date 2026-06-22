@@ -12,6 +12,7 @@ This project is currently in an early browser-only phase.
 Implemented so far:
 
 - Static browser app using HTML, CSS and JavaScript
+- Add creatures through a form
 - Sort creatures by initiative
 - Track the current turn and round
 - Move to the previous or next turn
@@ -42,3 +43,6 @@ Planned future features include:
 - Separate routes such as `/dm` and `/player`
 - Optional NAS deployment
 - Optional desktop app packaging with Electron or Tauri
+
+
+Copyright (c) 2026 kuro
