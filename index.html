@@ -21,7 +21,7 @@
                     </p>
 
                     <p class="app-build-info">
-                        v0.4.1 build 2026-06-24 by kuro
+                        v0.4.0 build 2026-06-24 by kuro
                     </p>
 
                     <div class="app-view-actions" aria-label="Ansicht wechseln">
@@ -269,6 +269,22 @@
 
                 <div id="storage-status" class="storage-status">
                     Browser-Speicher: wird geprüft …
+                </div>
+
+                <div class="selection-control-panel">
+                    <div id="selection-status" class="selection-status">
+                        0 Karten ausgewählt
+                    </div>
+
+                    <div class="selection-actions">
+                        <button onclick="selectAllHandCards()">
+                            Alle Handkarten auswählen
+                        </button>
+
+                        <button onclick="clearCardSelection()">
+                            Auswahl leeren
+                        </button>
+                    </div>
                 </div>
 
                 <div id="turn-info" class="turn-info"></div>

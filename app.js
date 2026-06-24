@@ -31,7 +31,8 @@ function createDemoCreatures() {
             hpVisibility: "full",
             imageData: "Images/miriel_img.png",
             conditions: [],
-            isInCombat: true
+            isInCombat: true,
+            isSelected: false
         },
         {
             id: 2,
@@ -48,7 +49,8 @@ function createDemoCreatures() {
             hpVisibility: "full",
             imageData: "Images/liora_img.png",
             conditions: [],
-            isInCombat: true
+            isInCombat: true,
+            isSelected: false
         },
         {
             id: 3,
@@ -65,7 +67,8 @@ function createDemoCreatures() {
             hpVisibility: "full",
             imageData: "Images/suica_img.png",
             conditions: [],
-            isInCombat: true
+            isInCombat: true,
+            isSelected: false
         }
     ];
 }
@@ -91,11 +94,15 @@ const availableConditions = [
 let currentTurnIndex = 0;
 let roundNumber = 1;
 
+// null bedeutet: Die öffentliche Vorschau folgt automatisch der aktiven Karte.
+// Eine Zahl bedeutet: Die Spieler haben bewusst diese Karten-ID ausgewählt.
 let manuallySelectedPublicCardId = null;
 
+// Diese Werte brauchen wir für Swipe-Gesten auf Touch-Geräten.
 let publicPreviewTouchStartX = null;
 let publicPreviewTouchStartY = null;
 
+// Diese Variable verhindert, dass ein Trackpad-Scroll zu viele Karten auf einmal überspringt.
 let publicPreviewWheelIsCoolingDown = false;
 
 
@@ -365,9 +372,8 @@ function clearSavedBrowserState() {
     alert("Der gespeicherte Browser-Zustand wurde gelöscht.");
 }
 
-
 // ============================================================
-// 3. Grundlegende Karten-Abfragen und Sortierung
+// 2. Grundlegende Karten-Abfragen und Sortierung
 // ============================================================
 
 function getTypeSortValue(type) {
@@ -428,7 +434,7 @@ function getDeckCards() {
 
 
 // ============================================================
-// 4. Öffentliche Auswahl-Helfer
+// 3. Öffentliche Auswahl-Helfer
 // ============================================================
 
 function hasManualPublicSelection() {
@@ -453,7 +459,73 @@ function clearManualPublicSelection() {
 
 
 // ============================================================
-// 5. Turn-Logik
+// 3b. DM-Zielauswahl für spätere AOE-Aktionen
+// ============================================================
+
+function getSelectedHandCards() {
+    return getHandCards().filter(function(creature) {
+        return creature.isSelected === true;
+    });
+}
+
+function getSelectedHandCardCount() {
+    return getSelectedHandCards().length;
+}
+
+function toggleCreatureSelection(creatureId) {
+    const creature = findCreatureById(creatureId);
+
+    if (creature === null) {
+        return;
+    }
+
+    if (creature.isInCombat !== true) {
+        return;
+    }
+
+    creature.isSelected = creature.isSelected !== true;
+
+    renderCards();
+}
+
+function clearCardSelection() {
+    for (const creature of creatures) {
+        creature.isSelected = false;
+    }
+
+    renderCards();
+}
+
+function selectAllHandCards() {
+    for (const creature of creatures) {
+        if (creature.isInCombat === true) {
+            creature.isSelected = true;
+        }
+    }
+
+    renderCards();
+}
+
+function updateSelectionStatus() {
+    const selectionStatusElement = document.querySelector("#selection-status");
+
+    if (selectionStatusElement === null) {
+        return;
+    }
+
+    const selectedCount = getSelectedHandCardCount();
+
+    if (selectedCount === 1) {
+        selectionStatusElement.textContent = "1 Karte ausgewählt";
+        return;
+    }
+
+    selectionStatusElement.textContent = `${selectedCount} Karten ausgewählt`;
+}
+
+
+// ============================================================
+// 4. Turn-Logik
 // ============================================================
 
 function ensureCurrentTurnIndexIsValid(handCards) {
@@ -532,7 +604,7 @@ function resetCombatTurnCounter() {
 
 
 // ============================================================
-// 6. Scroll- und Fokus-Logik
+// 5. Scroll- und Fokus-Logik
 // ============================================================
 
 function scrollCardRow(rowElementId, direction) {
@@ -736,7 +808,7 @@ function setupPublicPreviewNavigation() {
 
 
 // ============================================================
-// 7. Karten finden, verschieben, entfernen und Combat-Aufräumen
+// 6. Karten finden, verschieben, entfernen und Combat-Aufräumen
 // ============================================================
 
 function findCreatureById(id) {
@@ -799,6 +871,7 @@ function moveCardToDeck(creatureId) {
     }
 
     creature.isInCombat = false;
+    creature.isSelected = false;
 
     if (manuallySelectedPublicCardId === creatureId) {
         clearManualPublicSelection();
@@ -814,6 +887,7 @@ function moveAllHandCardsToDeck() {
     for (const creature of creatures) {
         if (creature.isInCombat === true) {
             creature.isInCombat = false;
+            creature.isSelected = false;
         }
     }
 
@@ -841,6 +915,7 @@ function moveHandCardsOfTypeToDeck(type) {
     for (const creature of creatures) {
         if (creature.isInCombat === true && creature.type === type) {
             creature.isInCombat = false;
+            creature.isSelected = false;
         }
     }
 
@@ -912,7 +987,7 @@ function deleteAllCards() {
 
 
 // ============================================================
-// 8. HP und Kampfaktionen
+// 7. HP und Kampfaktionen
 // ============================================================
 
 function getHpChangeAmount(creatureId) {
@@ -1069,7 +1144,7 @@ function getHpVisibilityLabel(creature) {
 
 
 // ============================================================
-// 9. Conditions
+// 8. Conditions
 // ============================================================
 
 function createConditionOptionsHtml() {
@@ -1142,7 +1217,7 @@ function getConditionClassName(conditionName) {
 
 
 // ============================================================
-// 10. Bilder lokal einlesen
+// 9. Bilder lokal einlesen
 // ============================================================
 
 function readImageFileAsDataUrl(file) {
@@ -1163,12 +1238,12 @@ function readImageFileAsDataUrl(file) {
 
 
 // ============================================================
-// 11. Encounter exportieren und importieren
+// 10. Encounter exportieren und importieren
 // ============================================================
 
 function createEncounterExportData() {
     return {
-        formatName: "Miriel's Deck of Encounters Encounter",
+        formatName: "TTRPG Combat Tracker Encounter",
         formatVersion: 1,
         exportedAt: new Date().toISOString(),
         encounter: {
@@ -1189,7 +1264,7 @@ function createExportFileName() {
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
 
-    return `miriels-deck-encounter-${year}-${month}-${day}-${hours}-${minutes}.json`;
+    return `ttrpg-combat-encounter-${year}-${month}-${day}-${hours}-${minutes}.json`;
 }
 
 function downloadTextFile(fileName, textContent) {
@@ -1370,7 +1445,8 @@ function createImportedCreature(rawCreature, usedIds) {
         hpVisibility: getSafeHpVisibility(rawCreature.hpVisibility),
         imageData: getSafeString(rawCreature.imageData, ""),
         conditions: getSafeConditions(rawCreature.conditions),
-        isInCombat: rawCreature.isInCombat === true
+        isInCombat: rawCreature.isInCombat === true,
+        isSelected: rawCreature.isSelected === true
     };
 }
 
@@ -1512,7 +1588,7 @@ function getSafeConditions(value) {
 
 
 // ============================================================
-// 12. Öffentliche Spieler-Daten
+// 11. Öffentliche Spieler-Daten
 // ============================================================
 
 function createPublicHpData(creature) {
@@ -1641,7 +1717,7 @@ function getPublicTurnWindow(publicCards) {
 
 
 // ============================================================
-// 13. HTML-Erzeugung: Bilder, HP und Conditions
+// 12. HTML-Erzeugung: Bilder, HP und Conditions
 // ============================================================
 
 function createCreatureImageHtml(creature) {
@@ -1825,7 +1901,7 @@ function createConditionChipsHtml(creature) {
 
                 <button
                     class="condition-chip-remove"
-                    onclick="removeConditionFromCreature(${creature.id}, '${condition}')"
+                    onclick="event.stopPropagation(); removeConditionFromCreature(${creature.id}, '${condition}')"
                     title="${condition} entfernen"
                     aria-label="${condition} entfernen"
                 >
@@ -1864,7 +1940,7 @@ function createPublicConditionChipsHtml(publicCard) {
 
 
 // ============================================================
-// 14. HTML-Erzeugung: Öffentliche Spieler-Vorschau
+// 13. HTML-Erzeugung: Öffentliche Spieler-Vorschau
 // ============================================================
 
 function getPublicStageLabel(slotName) {
@@ -2040,7 +2116,7 @@ function createPublicTurnStatusHtml(handCards, activeCard) {
 
 
 // ============================================================
-// 15. HTML-Erzeugung: DM-Karten
+// 14. HTML-Erzeugung: DM-Karten
 // ============================================================
 
 function createCardMenuHtml(creature) {
@@ -2050,7 +2126,7 @@ function createCardMenuHtml(creature) {
     const moveToDeckDisabled = isOnHand ? "" : "disabled";
 
     return `
-        <details class="card-menu">
+        <details class="card-menu" onclick="event.stopPropagation()">
             <summary
                 class="card-menu-summary"
                 title="Kartenmenü öffnen"
@@ -2088,6 +2164,22 @@ function createCardMenuHtml(creature) {
 function createCreatureCardHtml(creature, isActive) {
     const isCompactDeckCard = creature.isInCombat === false;
 
+    const selectableCardClass = creature.isInCombat === true
+        ? "selectable-card"
+        : "";
+
+    const selectedTargetCardClass = creature.isInCombat === true && creature.isSelected === true
+        ? "selected-target-card"
+        : "";
+
+    const selectionClickAttribute = creature.isInCombat === true
+        ? `onclick="toggleCreatureSelection(${creature.id})"`
+        : "";
+
+    const selectedTargetLabelHtml = creature.isInCombat === true && creature.isSelected === true
+        ? `<span class="selected-target-label">ausgewählt</span>`
+        : "";
+
     const combatOnlySectionsHtml = isCompactDeckCard
         ? ""
         : `
@@ -2098,7 +2190,7 @@ function createCreatureCardHtml(creature, isActive) {
                     ${createConditionChipsHtml(creature)}
                 </div>
 
-                <div class="condition-controls">
+                <div class="condition-controls" onclick="event.stopPropagation()">
                     <select id="condition-select-${creature.id}">
                         ${createConditionOptionsHtml()}
                     </select>
@@ -2112,7 +2204,7 @@ function createCreatureCardHtml(creature, isActive) {
             <div class="creature-card-section">
                 <h4>Kampfaktionen</h4>
 
-                <div class="creature-actions">
+                <div class="creature-actions" onclick="event.stopPropagation()">
                     <input
                         id="hp-change-amount-${creature.id}"
                         type="number"
@@ -2138,7 +2230,10 @@ function createCreatureCardHtml(creature, isActive) {
         `;
 
     return `
-        <article class="creature-card ${isActive ? "active" : ""} ${isCompactDeckCard ? "deck-card-compact" : ""}">
+        <article
+            class="creature-card ${isActive ? "active" : ""} ${isCompactDeckCard ? "deck-card-compact" : ""} ${selectableCardClass} ${selectedTargetCardClass}"
+            ${selectionClickAttribute}
+        >
             <div class="creature-card-inner">
                 <div class="creature-card-title-row">
                     <div class="creature-card-header">
@@ -2159,6 +2254,8 @@ function createCreatureCardHtml(creature, isActive) {
                     <p>
                         ${creature.type} · ${creature.isInCombat ? "auf der Hand" : "im Deck"}
                     </p>
+
+                    ${selectedTargetLabelHtml}
                 </div>
 
                 <div class="creature-card-section">
@@ -2197,9 +2294,8 @@ function createCreatureCardHtml(creature, isActive) {
     `;
 }
 
-
 // ============================================================
-// 16. Formular: Neue Karte hinzufügen
+// 15. Formular: Neue Karte hinzufügen
 // ============================================================
 
 function showAddCreatureError(message) {
@@ -2350,7 +2446,8 @@ async function handleAddCreatureButtonClick() {
             hpVisibility: hpVisibilitySelectElement.value,
             imageData: imageData,
             conditions: [],
-            isInCombat: isInCombatInputElement.checked
+            isInCombat: isInCombatInputElement.checked,
+            isSelected: false
         };
 
         creatures.push(newCreature);
@@ -2364,7 +2461,7 @@ async function handleAddCreatureButtonClick() {
 
 
 // ============================================================
-// 17. Rendering
+// 16. Rendering
 // ============================================================
 
 function renderTurnInfo(handCards) {
@@ -2490,6 +2587,7 @@ function renderCards() {
     if (appView === "dm") {
         renderCardList("#hand-card-list", handCards, activeCard);
         renderCardList("#deck-card-list", deckCards, activeCard);
+        updateSelectionStatus();
     }
 
     saveAndBroadcastAppState();
@@ -2497,7 +2595,7 @@ function renderCards() {
 
 
 // ============================================================
-// 18. Start der App
+// 17. Start der App
 // ============================================================
 
 applyAppViewToPage();
