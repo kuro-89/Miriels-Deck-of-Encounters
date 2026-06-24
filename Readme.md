@@ -1,15 +1,11 @@
-# D&D Combat Tracker
+# Miriel’s Deck of Encounters
 
-v.0.3 by kuro
+v0.4.0 by kuro
 
+A card-based fantasy tabletop encounter and initiative tracker for d20-style roleplaying games.
 
+This is an unofficial personal learning project. It is not affiliated with, endorsed, sponsored, or approved by any tabletop roleplaying game publisher.
 
-
-A browser-based D&D 5e combat tracker by kuro.
-
-## Current Version
-
-v0.3.2
 
 ## Current Status
 
@@ -19,7 +15,7 @@ This project is currently a local browser-only web app built with:
 - CSS
 - JavaScript
 
-There is currently no backend, no database, and no persistent save system.
+There is currently no backend, no database, and no server-side persistent save system.
 
 The app runs locally in the browser by opening `index.html`.
 
@@ -43,6 +39,7 @@ The app runs locally in the browser by opening `index.html`.
 - Move cards between hand and deck.
 - Move all cards or cards of a specific type between hand and deck.
 - Remove individual cards.
+- Delete all cards.
 - Track:
   - Current HP
   - Max HP
@@ -54,11 +51,16 @@ The app runs locally in the browser by opening `index.html`.
   - Damage
   - Healing
   - Temporary HP
-- Add and remove D&D conditions.
+- Add and remove conditions.
 - Clear all temporary HP.
 - Clear conditions from all cards currently on hand.
 - Local image selection for creature cards.
+- Demo cards with local image paths.
+- JSON export for the current encounter.
+- JSON import to restore a saved encounter.
 - Public player preview with filtered information.
+- Public preview spotlight navigation by clicking, horizontal scrolling, or swiping.
+- Card-based DM layout with hand, deck, and public initiative ribbon.
 
 ## Public Player Preview
 
@@ -77,6 +79,8 @@ It includes:
 - Publicly visible conditions
 
 Players can click a card in the public initiative ribbon to display it as the main card.
+
+The large spotlight preview can also be navigated by horizontal trackpad scrolling, `Shift + mouse wheel`, or touch swiping on supported devices.
 
 ### Color Logic
 
@@ -105,17 +109,46 @@ Each creature can have a public HP visibility mode:
 
 The DM always sees the full HP information.
 
+## Encounter Export and Import
+
+The current encounter can be exported as a JSON file and imported again later.
+
+The exported JSON includes:
+
+- App format name
+- Export timestamp
+- Round number
+- Current turn index
+- Manual public preview selection
+- All creature cards
+- Card zone state
+- HP and temporary HP
+- Conditions
+- Initiative values
+- Public HP visibility mode
+- Image data or image paths
+
+Importing an encounter replaces the current browser state.
+
+### Image Data in JSON
+
+There are two possible image cases:
+
+- Demo images use local paths such as `Images/miriel_img.png`.
+- Images selected through the browser form are stored as Base64 data inside the current browser state and can make exported JSON files much larger.
+
+Use only images that you have the right to use.
+
 ## Image Handling
 
-Images are currently selected locally in the browser.
+Images selected through the form are currently processed locally in the browser.
 
 At the moment:
 
 - Images are not uploaded to a server.
-- Images are not saved to GitHub.
-- Images are not stored persistently.
-- Images only exist in the current browser session.
-- Reloading the page removes all cards and image data.
+- Images selected through the form are stored only in the current browser state.
+- Images selected through the form can be included in exported JSON files.
+- Reloading the page resets the browser state unless the encounter was exported and imported again.
 
 Use only images that you have the right to use.
 
@@ -123,9 +156,8 @@ Do not add copyrighted artwork directly to this repository unless you have permi
 
 ## Known Limitations
 
-- No persistent saving yet.
-- Reloading the page clears all creatures and combat state.
-- No JSON export/import yet.
+- No automatic persistent saving yet.
+- Reloading the page resets the current browser state unless an encounter was exported and imported again.
 - No separate DM and player pages yet.
 - The public player preview is currently only a filtered view inside the same browser app.
 - Because everything is still client-side, hidden information is not truly secure yet.
@@ -150,9 +182,7 @@ This is not fully implemented yet, because the project is still a local browser-
 
 Possible next steps:
 
-- JSON export for the current encounter.
-- JSON import to restore saved encounters.
-- Persistent local storage.
+- Automatic local saving with `localStorage`.
 - Separate DM and player views.
 - Node.js and Express backend.
 - Shared encounter state on the server.
@@ -160,54 +190,52 @@ Possible next steps:
 - Local network access for players.
 - Optional NAS deployment.
 - Optional Electron or Tauri desktop version.
-
-## Suggested Next Development Step
-
-The next recommended development session is:
-
-**Session 36: JSON Export and Import**
-
-Goal:
-
-Save the current cards, deck, hand, round, turn, HP, conditions, and images as a JSON file, then load that JSON file again later.
-
-This would make the tracker much more useful for real session preparation.
+- DM control panel for turn management and future group effects.
+- Group actions such as applying damage, healing, temporary HP, or conditions to multiple cards at once.
 
 ## Project Structure
 
 ```text
-D&D-Combat-Tracker/
+Miriels-Deck-of-Encounters/
 ├── index.html
 ├── style.css
 ├── app.js
-└── Readme.md
+├── Readme.md
+└── Images/
+    ├── README.md
+    ├── miriel_img.png
+    ├── liora_img.png
+    └── suica_img.png
+```
 
 ## AI-Generated Images
 
 Some demo character images in this repository were generated with ChatGPT/OpenAI image generation.
 
-They are original character illustrations created for this project and are not intended to copy or reproduce official Dungeons & Dragons artwork, third-party character art, or copyrighted franchise characters.
+They are original character illustrations created for this project and are not intended to copy or reproduce official tabletop RPG artwork, third-party character art, or copyrighted franchise characters.
 
-These images are included only as demo/test assets for the combat tracker.
+These images are included only as demo/test assets for Miriel’s Deck of Encounters.
 
-## Copyright, License, and Asset Usage
+## Copyright, License, and Usage
 
 Copyright (c) 2026 kuro.
 
 No open-source license has been chosen for this project.
 
-This means that the source code is publicly visible if this repository is public, but no permission is granted to copy, modify, redistribute, publish, or reuse the code in other projects without explicit written permission from the author.
+This means that the source code is publicly visible if this repository is public, but no permission is granted to copy, modify, redistribute, publish, reuse, sublicense, or incorporate the code into other projects without explicit written permission from the author.
 
 All rights are reserved.
+
+Do not copy, fork for reuse, modify, redistribute, publish, mirror, reupload, or use this project or parts of this project in another project without explicit written permission from the author.
 
 ### Image Assets
 
 The images in the `Images/` folder are AI-generated character images created for this project.
 
-They depict original D&D player characters and are included only as demo/test assets for this combat tracker.
+They depict original player characters and are included only as demo/test assets for Miriel’s Deck of Encounters.
 
 The image assets are not licensed for reuse, redistribution, modification, publication, training datasets, commercial use, or use in other projects.
 
-Do not copy, extract, reuse, edit, redistribute, or republish these images without explicit written permission from the author.
+Do not copy, extract, reuse, edit, redistribute, republish, mirror, reupload, or use these images in any other project without explicit written permission from the author.
 
-These images are not official Dungeons & Dragons artwork and are not intended to copy or reproduce official Dungeons & Dragons artwork, third-party character art, or copyrighted franchise characters.
+These images are not official artwork and are not intended to copy or reproduce official artwork, third-party character art, or copyrighted franchise characters.

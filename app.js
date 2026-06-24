@@ -87,6 +87,13 @@ let roundNumber = 1;
 // Eine Zahl bedeutet: Die Spieler haben bewusst diese Karten-ID ausgewählt.
 let manuallySelectedPublicCardId = null;
 
+// Diese Werte brauchen wir für Swipe-Gesten auf Touch-Geräten.
+let publicPreviewTouchStartX = null;
+let publicPreviewTouchStartY = null;
+
+// Diese Variable verhindert, dass ein Trackpad-Scroll zu viele Karten auf einmal überspringt.
+let publicPreviewWheelIsCoolingDown = false;
+
 
 // ============================================================
 // 2. Grundlegende Karten-Abfragen und Sortierung
@@ -325,6 +332,137 @@ function resetPublicFocusToActiveCard() {
     renderCards();
 }
 
+function navigatePublicPreview(direction) {
+    const handCards = getHandCards();
+
+    if (handCards.length === 0) {
+        return;
+    }
+
+    const activeCard = getActiveCard(handCards);
+    const publicCards = createPublicEncounterState(handCards, activeCard);
+
+    if (publicCards.length === 0) {
+        return;
+    }
+
+    const focusedIndex = getFocusedPublicCardIndex(publicCards);
+    let nextFocusedIndex = focusedIndex;
+
+    if (direction === "right") {
+        nextFocusedIndex = focusedIndex + 1;
+
+        if (nextFocusedIndex >= publicCards.length) {
+            nextFocusedIndex = 0;
+        }
+    }
+
+    if (direction === "left") {
+        nextFocusedIndex = focusedIndex - 1;
+
+        if (nextFocusedIndex < 0) {
+            nextFocusedIndex = publicCards.length - 1;
+        }
+    }
+
+    manuallySelectedPublicCardId = publicCards[nextFocusedIndex].id;
+
+    renderCards();
+}
+
+function handlePublicPreviewWheel(event) {
+    const absoluteDeltaX = Math.abs(event.deltaX);
+    const absoluteDeltaY = Math.abs(event.deltaY);
+
+    const isHorizontalScroll = absoluteDeltaX > absoluteDeltaY * 1.6;
+    const isShiftWheelScroll = event.shiftKey === true && absoluteDeltaY > 0;
+
+    if (isHorizontalScroll === false && isShiftWheelScroll === false) {
+        return;
+    }
+
+    event.preventDefault();
+
+    if (publicPreviewWheelIsCoolingDown === true) {
+        return;
+    }
+
+    publicPreviewWheelIsCoolingDown = true;
+
+    const scrollValue = isHorizontalScroll ? event.deltaX : event.deltaY;
+
+    if (scrollValue > 0) {
+        navigatePublicPreview("right");
+    } else {
+        navigatePublicPreview("left");
+    }
+
+    setTimeout(function() {
+        publicPreviewWheelIsCoolingDown = false;
+    }, 700);
+}
+
+function handlePublicPreviewTouchStart(event) {
+    if (event.touches.length === 0) {
+        return;
+    }
+
+    publicPreviewTouchStartX = event.touches[0].clientX;
+    publicPreviewTouchStartY = event.touches[0].clientY;
+}
+
+function handlePublicPreviewTouchEnd(event) {
+    if (
+        publicPreviewTouchStartX === null ||
+        publicPreviewTouchStartY === null ||
+        event.changedTouches.length === 0
+    ) {
+        publicPreviewTouchStartX = null;
+        publicPreviewTouchStartY = null;
+        return;
+    }
+
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndY = event.changedTouches[0].clientY;
+
+    const deltaX = touchEndX - publicPreviewTouchStartX;
+    const deltaY = touchEndY - publicPreviewTouchStartY;
+
+    const absoluteDeltaX = Math.abs(deltaX);
+    const absoluteDeltaY = Math.abs(deltaY);
+
+    publicPreviewTouchStartX = null;
+    publicPreviewTouchStartY = null;
+
+    const minimumSwipeDistance = 50;
+    const isMostlyHorizontalSwipe = absoluteDeltaX > absoluteDeltaY * 1.4;
+
+    if (absoluteDeltaX < minimumSwipeDistance || isMostlyHorizontalSwipe === false) {
+        return;
+    }
+
+    if (deltaX < 0) {
+        navigatePublicPreview("right");
+    } else {
+        navigatePublicPreview("left");
+    }
+}
+
+function setupPublicPreviewNavigation() {
+    const publicPreviewElement = document.querySelector("#public-preview-list");
+
+    if (publicPreviewElement === null) {
+        return;
+    }
+
+    publicPreviewElement.addEventListener("wheel", handlePublicPreviewWheel, {
+        passive: false
+    });
+
+    publicPreviewElement.addEventListener("touchstart", handlePublicPreviewTouchStart);
+    publicPreviewElement.addEventListener("touchend", handlePublicPreviewTouchEnd);
+}
+
 
 // ============================================================
 // 6. Karten finden, verschieben, entfernen und Combat-Aufräumen
@@ -500,6 +638,7 @@ function deleteAllCards() {
 
     renderCards();
 }
+
 
 // ============================================================
 // 7. HP und Kampfaktionen
@@ -735,7 +874,356 @@ function readImageFileAsDataUrl(file) {
 
 
 // ============================================================
-// 10. Öffentliche Spieler-Daten
+// 10. Encounter exportieren und importieren
+// ============================================================
+
+function createEncounterExportData() {
+    return {
+        formatName: "Miriel's Deck of Encounters Encounter",
+        formatVersion: 1,
+        exportedAt: new Date().toISOString(),
+        encounter: {
+            roundNumber: roundNumber,
+            currentTurnIndex: currentTurnIndex,
+            manuallySelectedPublicCardId: manuallySelectedPublicCardId,
+            creatures: creatures
+        }
+    };
+}
+
+function createExportFileName() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+
+    return `miriels-deck-encounter-${year}-${month}-${day}-${hours}-${minutes}.json`;
+}
+
+function downloadTextFile(fileName, textContent) {
+    const fileBlob = new Blob([textContent], {
+        type: "application/json"
+    });
+
+    const temporaryUrl = URL.createObjectURL(fileBlob);
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = temporaryUrl;
+    downloadLink.download = fileName;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    URL.revokeObjectURL(temporaryUrl);
+}
+
+function exportEncounter() {
+    const exportData = createEncounterExportData();
+    const jsonText = JSON.stringify(exportData, null, 4);
+    const fileName = createExportFileName();
+
+    downloadTextFile(fileName, jsonText);
+}
+
+function triggerEncounterImport() {
+    const fileInputElement = document.querySelector("#encounter-import-file");
+
+    if (fileInputElement === null) {
+        alert("Das Import-Dateifeld wurde nicht gefunden.");
+        return;
+    }
+
+    fileInputElement.value = "";
+    fileInputElement.click();
+}
+
+function readTextFile(file) {
+    return new Promise(function(resolve, reject) {
+        const reader = new FileReader();
+
+        reader.addEventListener("load", function() {
+            resolve(reader.result);
+        });
+
+        reader.addEventListener("error", function() {
+            reject(new Error("Die Datei konnte nicht gelesen werden."));
+        });
+
+        reader.readAsText(file);
+    });
+}
+
+async function handleEncounterImportFileChange(event) {
+    const fileInputElement = event.target;
+
+    if (fileInputElement.files.length === 0) {
+        return;
+    }
+
+    const importFile = fileInputElement.files[0];
+
+    try {
+        const fileText = await readTextFile(importFile);
+        const importData = JSON.parse(fileText);
+
+        importEncounterData(importData);
+    } catch (error) {
+        alert("Die Encounter-Datei konnte nicht importiert werden.");
+    }
+}
+
+function importEncounterData(importData) {
+    const shouldImport = confirm(
+        "Diesen Encounter importieren? Der aktuelle Zustand wird ersetzt."
+    );
+
+    if (shouldImport === false) {
+        return;
+    }
+
+    const encounterData = getEncounterDataFromImport(importData);
+
+    if (encounterData === null) {
+        alert("Die Datei enthält keinen gültigen Encounter.");
+        return;
+    }
+
+    const importedCreatures = createImportedCreatures(encounterData.creatures);
+
+    creatures = importedCreatures;
+    roundNumber = getSafePositiveInteger(encounterData.roundNumber, 1);
+    currentTurnIndex = getSafeNonNegativeInteger(encounterData.currentTurnIndex, 0);
+
+    if (isImportedPublicSelectionValid(encounterData.manuallySelectedPublicCardId, creatures)) {
+        manuallySelectedPublicCardId = Number(encounterData.manuallySelectedPublicCardId);
+    } else {
+        clearManualPublicSelection();
+    }
+
+    const handCards = getHandCards();
+    ensureCurrentTurnIndexIsValid(handCards);
+
+    renderCards();
+}
+
+function getEncounterDataFromImport(importData) {
+    if (importData === null || typeof importData !== "object") {
+        return null;
+    }
+
+    if (
+        importData.encounter !== undefined &&
+        importData.encounter !== null &&
+        typeof importData.encounter === "object" &&
+        Array.isArray(importData.encounter.creatures)
+    ) {
+        return importData.encounter;
+    }
+
+    if (Array.isArray(importData.creatures)) {
+        return importData;
+    }
+
+    if (Array.isArray(importData)) {
+        return {
+            roundNumber: 1,
+            currentTurnIndex: 0,
+            manuallySelectedPublicCardId: null,
+            creatures: importData
+        };
+    }
+
+    return null;
+}
+
+function createImportedCreatures(rawCreatures) {
+    const importedCreatures = [];
+    const usedIds = [];
+
+    for (const rawCreature of rawCreatures) {
+        if (rawCreature !== null && typeof rawCreature === "object") {
+            const importedCreature = createImportedCreature(rawCreature, usedIds);
+
+            importedCreatures.push(importedCreature);
+            usedIds.push(importedCreature.id);
+        }
+    }
+
+    return importedCreatures;
+}
+
+function createImportedCreature(rawCreature, usedIds) {
+    const id = createImportedCreatureId(rawCreature.id, usedIds);
+
+    const maxHp = getSafePositiveInteger(rawCreature.maxHp, 1);
+    const hp = clampNumber(
+        getSafeNonNegativeInteger(rawCreature.hp, maxHp),
+        0,
+        maxHp
+    );
+
+    return {
+        id: id,
+        name: getSafeString(rawCreature.name, `Karte ${id}`),
+        publicName: getSafeString(rawCreature.publicName, `Karte ${id}`),
+        type: getSafeCreatureType(rawCreature.type),
+        initiative: getSafeInteger(rawCreature.initiative, 0),
+        hp: hp,
+        maxHp: maxHp,
+        tempHp: getSafeNonNegativeInteger(rawCreature.tempHp, 0),
+        armorClass: getSafeNonNegativeInteger(rawCreature.armorClass, 10),
+        passivePerception: getSafeNonNegativeInteger(rawCreature.passivePerception, 10),
+        passiveInsight: getSafeNonNegativeInteger(rawCreature.passiveInsight, 10),
+        hpVisibility: getSafeHpVisibility(rawCreature.hpVisibility),
+        imageData: getSafeString(rawCreature.imageData, ""),
+        conditions: getSafeConditions(rawCreature.conditions),
+        isInCombat: rawCreature.isInCombat === true
+    };
+}
+
+function createImportedCreatureId(rawId, usedIds) {
+    const numericId = Number(rawId);
+
+    if (
+        Number.isInteger(numericId) &&
+        numericId > 0 &&
+        usedIds.includes(numericId) === false
+    ) {
+        return numericId;
+    }
+
+    let nextId = 1;
+
+    while (usedIds.includes(nextId)) {
+        nextId = nextId + 1;
+    }
+
+    return nextId;
+}
+
+function isImportedPublicSelectionValid(importedSelectionId, importedCreatures) {
+    if (importedSelectionId === null) {
+        return false;
+    }
+
+    const numericSelectionId = Number(importedSelectionId);
+
+    if (Number.isInteger(numericSelectionId) === false) {
+        return false;
+    }
+
+    for (const creature of importedCreatures) {
+        if (creature.id === numericSelectionId) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function getSafeString(value, fallbackValue) {
+    if (typeof value !== "string") {
+        return fallbackValue;
+    }
+
+    const trimmedValue = value.trim();
+
+    if (trimmedValue === "") {
+        return fallbackValue;
+    }
+
+    return trimmedValue;
+}
+
+function getSafeInteger(value, fallbackValue) {
+    const numberValue = Number(value);
+
+    if (Number.isInteger(numberValue)) {
+        return numberValue;
+    }
+
+    return fallbackValue;
+}
+
+function getSafePositiveInteger(value, fallbackValue) {
+    const numberValue = Number(value);
+
+    if (Number.isInteger(numberValue) && numberValue > 0) {
+        return numberValue;
+    }
+
+    return fallbackValue;
+}
+
+function getSafeNonNegativeInteger(value, fallbackValue) {
+    const numberValue = Number(value);
+
+    if (Number.isInteger(numberValue) && numberValue >= 0) {
+        return numberValue;
+    }
+
+    return fallbackValue;
+}
+
+function clampNumber(value, minimum, maximum) {
+    if (value < minimum) {
+        return minimum;
+    }
+
+    if (value > maximum) {
+        return maximum;
+    }
+
+    return value;
+}
+
+function getSafeCreatureType(value) {
+    if (value === "player" || value === "npc" || value === "monster") {
+        return value;
+    }
+
+    return "monster";
+}
+
+function getSafeHpVisibility(value) {
+    if (
+        value === "full" ||
+        value === "bar" ||
+        value === "descriptive" ||
+        value === "hidden"
+    ) {
+        return value;
+    }
+
+    return "full";
+}
+
+function getSafeConditions(value) {
+    if (Array.isArray(value) === false) {
+        return [];
+    }
+
+    const safeConditions = [];
+
+    for (const condition of value) {
+        if (
+            availableConditions.includes(condition) &&
+            safeConditions.includes(condition) === false
+        ) {
+            safeConditions.push(condition);
+        }
+    }
+
+    return safeConditions;
+}
+
+
+// ============================================================
+// 11. Öffentliche Spieler-Daten
 // ============================================================
 
 function createPublicHpData(creature) {
@@ -856,7 +1344,7 @@ function getPublicTurnWindow(publicCards) {
 
 
 // ============================================================
-// 11. HTML-Erzeugung: Bilder, HP und Conditions
+// 12. HTML-Erzeugung: Bilder, HP und Conditions
 // ============================================================
 
 function createCreatureImageHtml(creature) {
@@ -1030,7 +1518,7 @@ function createPublicConditionChipsHtml(publicCard) {
 
 
 // ============================================================
-// 12. HTML-Erzeugung: Öffentliche Spieler-Vorschau
+// 13. HTML-Erzeugung: Öffentliche Spieler-Vorschau
 // ============================================================
 
 function getPublicStageLabel(slotName) {
@@ -1206,7 +1694,7 @@ function createPublicTurnStatusHtml(handCards, activeCard) {
 
 
 // ============================================================
-// 13. HTML-Erzeugung: DM-Karten
+// 14. HTML-Erzeugung: DM-Karten
 // ============================================================
 
 function createCardMenuHtml(creature) {
@@ -1365,7 +1853,7 @@ function createCreatureCardHtml(creature, isActive) {
 
 
 // ============================================================
-// 14. Formular: Neue Karte hinzufügen
+// 15. Formular: Neue Karte hinzufügen
 // ============================================================
 
 function showAddCreatureError(message) {
@@ -1530,7 +2018,7 @@ async function handleAddCreatureButtonClick() {
 
 
 // ============================================================
-// 15. Rendering
+// 16. Rendering
 // ============================================================
 
 function renderTurnInfo(handCards) {
@@ -1658,7 +2146,8 @@ function renderCards() {
 
 
 // ============================================================
-// 16. Start der App
+// 17. Start der App
 // ============================================================
 
+setupPublicPreviewNavigation();
 renderCards();
