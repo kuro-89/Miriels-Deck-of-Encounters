@@ -209,6 +209,127 @@ body {
 }
 
 /* ============================================================
+   Header-Kurzanleitung
+   ============================================================ */
+
+.app-header-help {
+    border-radius: var(--radius-large);
+}
+
+.app-header-help-summary {
+    display: block;
+
+    cursor: default;
+    list-style: none;
+}
+
+.app-header-help-summary::-webkit-details-marker {
+    display: none;
+}
+
+.app-header-help-summary::after {
+    content: none;
+    display: none;
+}
+
+.app-header-help .app-header-card {
+    margin-bottom: 0;
+}
+
+.app-help-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 34px;
+    padding: 8px 12px;
+
+    border: 1px solid rgba(138, 180, 248, 0.36);
+    border-radius: 999px;
+
+    background: rgba(38, 50, 65, 0.84);
+    color: var(--color-blue-soft);
+
+    cursor: pointer;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.app-header-help:not([open]) .app-help-button::before {
+    content: "Kurzanleitung";
+}
+
+.app-header-help[open] .app-help-button::before {
+    content: "Anleitung schließen";
+}
+
+.app-header-help:not([open]) .app-help-button::after {
+    content: "▾";
+}
+
+.app-header-help[open] .app-help-button::after {
+    content: "▴";
+}
+
+.app-help-button:hover {
+    border-color: var(--color-blue);
+
+    background: rgba(48, 63, 82, 0.94);
+    color: #ffffff;
+}
+
+.app-help-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+
+    margin-top: 16px;
+    padding: 18px 20px 20px;
+
+    border: 1px solid rgba(240, 198, 116, 0.22);
+    border-radius: var(--radius-large);
+
+    background:
+        radial-gradient(circle at top left, rgba(240, 198, 116, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(37, 37, 44, 0.92), rgba(31, 31, 36, 0.96));
+
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.app-help-card {
+    padding: 16px;
+
+    border: 1px solid rgba(240, 198, 116, 0.16);
+    border-radius: 14px;
+
+    background:
+        linear-gradient(135deg, rgba(18, 18, 22, 0.42), rgba(31, 31, 36, 0.72));
+}
+
+.app-help-card h2 {
+    margin: 0 0 10px;
+
+    color: var(--color-gold);
+    font-size: 17px;
+}
+
+.app-help-card p {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.app-help-card p + p {
+    margin-top: 10px;
+}
+
+/* ============================================================
    Gemeinsame Panel-Optik
    ============================================================ */
 
@@ -318,7 +439,6 @@ body {
     letter-spacing: -0.03em;
 }
 
-/* Alte Texte im HTML unsichtbar machen und durch einheitliches Label ersetzen */
 .public-preview-summary-hint,
 .details-toggle-label,
 .details-toggle-button,
@@ -571,6 +691,24 @@ button:disabled,
         linear-gradient(135deg, rgba(104, 44, 44, 0.96), rgba(58, 34, 34, 0.96)) !important;
 }
 
+.end-combat-button {
+    border-color: rgba(255, 159, 159, 0.38);
+
+    background:
+        linear-gradient(135deg, rgba(86, 38, 38, 0.88), rgba(48, 31, 31, 0.94));
+
+    color: #ffb7b7;
+}
+
+.end-combat-button:hover {
+    border-color: var(--color-danger);
+
+    background:
+        linear-gradient(135deg, rgba(104, 44, 44, 0.96), rgba(58, 34, 34, 0.96));
+
+    color: #ffd0d0;
+}
+
 input,
 select {
     width: 100%;
@@ -606,23 +744,33 @@ select:focus {
 }
 
 .turn-info {
-    padding: 16px;
+    display: grid;
+    grid-template-columns: max-content max-content;
+    align-items: center;
+    justify-content: start;
+    column-gap: 14px;
 
-    border: 1px solid rgba(138, 180, 248, 0.26);
+    padding: 14px 16px;
+
+    border: 1px solid rgba(240, 198, 116, 0.18);
     border-radius: 14px;
 
     background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.14), transparent 36%),
-        linear-gradient(135deg, rgba(38, 50, 65, 0.78), rgba(31, 31, 36, 0.88));
+        radial-gradient(circle at top left, rgba(240, 198, 116, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(31, 31, 36, 0.82), rgba(18, 18, 22, 0.88));
 
     box-shadow:
         inset 0 0 0 1px rgba(255, 255, 255, 0.025);
 }
 
+.turn-info-main {
+    width: max-content;
+}
+
 .turn-info h2 {
     margin: 0;
 
-    color: var(--color-blue);
+    color: var(--color-gold);
     font-size: 28px;
 }
 
@@ -638,7 +786,7 @@ select:focus {
 }
 
 .active-creature-name {
-    color: #ffffff;
+    color: var(--color-blue-soft);
     font-size: 22px;
     font-weight: 700;
 }
@@ -649,6 +797,17 @@ select:focus {
     flex-wrap: wrap;
 
     margin-top: 14px;
+}
+
+.turn-actions-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.turn-actions-inline button {
+    white-space: nowrap;
 }
 
 .combat-action-row {
@@ -690,7 +849,7 @@ select:focus {
 }
 
 .selection-status {
-    color: var(--color-blue);
+    color: var(--color-gold);
     font-size: 18px;
     font-weight: 900;
 }
@@ -710,14 +869,21 @@ select:focus {
 }
 
 .selection-actions button {
-    border-color: rgba(138, 180, 248, 0.36);
-    background: rgba(38, 50, 65, 0.84);
-    color: var(--color-blue-soft);
+    border-color: rgba(240, 198, 116, 0.36);
+
+    background:
+        linear-gradient(135deg, rgba(74, 63, 40, 0.88), rgba(58, 51, 34, 0.88));
+
+    color: var(--color-gold);
 }
 
 .selection-actions button:hover {
-    border-color: var(--color-blue);
-    background: rgba(48, 63, 82, 0.94);
+    border-color: var(--color-gold);
+
+    background:
+        linear-gradient(135deg, rgba(88, 75, 48, 0.96), rgba(68, 58, 38, 0.96));
+
+    color: #ffe2a0;
 }
 
 .mass-action-field {
@@ -933,10 +1099,10 @@ select:focus {
 }
 
 .creature-card.active {
-    border-color: var(--color-gold);
+    border-color: var(--color-blue);
 
     box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.20),
+        0 0 0 3px rgba(138, 180, 248, 0.28),
         0 16px 34px rgba(0, 0, 0, 0.40);
 
     transform: translateY(-8px);
@@ -954,12 +1120,22 @@ select:focus {
     transform: translateY(-8px);
 }
 
-.creature-card.selected-target-card {
+.creature-card.selected-target-card,
+.creature-card.selected-deck-card {
+    border-color: var(--color-gold);
+
+    box-shadow:
+        0 0 0 3px rgba(240, 198, 116, 0.30),
+        0 16px 32px rgba(0, 0, 0, 0.38);
+}
+
+.creature-card.active.selected-target-card {
     border-color: var(--color-blue);
 
     box-shadow:
-        0 0 0 3px rgba(138, 180, 248, 0.22),
-        0 16px 32px rgba(0, 0, 0, 0.38);
+        0 0 0 3px rgba(138, 180, 248, 0.30),
+        0 0 0 7px rgba(240, 198, 116, 0.18),
+        0 18px 38px rgba(0, 0, 0, 0.45);
 }
 
 .creature-card-inner {
@@ -980,14 +1156,22 @@ select:focus {
 
 .creature-card.active .creature-card-inner {
     background:
-        radial-gradient(circle at top left, rgba(240, 198, 116, 0.12), transparent 34%),
-        linear-gradient(180deg, rgba(51, 43, 29, 0.98), rgba(31, 31, 36, 0.98));
+        radial-gradient(circle at top left, rgba(138, 180, 248, 0.16), transparent 34%),
+        linear-gradient(180deg, rgba(42, 57, 76, 0.96), rgba(31, 31, 36, 0.98));
 }
 
-.creature-card.selected-target-card .creature-card-inner {
+.creature-card.selected-target-card .creature-card-inner,
+.creature-card.selected-deck-card .creature-card-inner {
     background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.14), transparent 34%),
-        linear-gradient(180deg, rgba(42, 57, 76, 0.92), rgba(31, 31, 36, 0.98));
+        radial-gradient(circle at top left, rgba(240, 198, 116, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(57, 47, 29, 0.96), rgba(31, 31, 36, 0.98));
+}
+
+.creature-card.active.selected-target-card .creature-card-inner {
+    background:
+        radial-gradient(circle at top left, rgba(138, 180, 248, 0.16), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(240, 198, 116, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(42, 57, 76, 0.96), rgba(31, 31, 36, 0.98));
 }
 
 .creature-card-title-row {
@@ -1090,6 +1274,10 @@ select:focus {
     text-align: left;
 }
 
+/* ============================================================
+   Bilder
+   ============================================================ */
+
 .creature-image-box,
 .public-preview-image-box {
     display: flex;
@@ -1107,7 +1295,9 @@ select:focus {
 
 .creature-image-box {
     width: 100%;
-    height: 220px;
+    height: auto;
+
+    aspect-ratio: 4 / 3;
 
     border-radius: 10px;
 }
@@ -1118,8 +1308,28 @@ select:focus {
     border-radius: 9px;
 }
 
+.public-stage-card .public-preview-image-box,
+.public-stage-slot.focused .public-preview-image-box {
+    height: auto;
+    aspect-ratio: 4 / 3;
+}
+
+.public-ribbon-image-crop .public-preview-image-box {
+    width: 54px;
+    height: 54px;
+    min-height: 54px;
+
+    aspect-ratio: 1 / 1;
+
+    border-radius: 10px;
+}
+
 .creature-image-placeholder,
 .public-preview-image-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     width: 100%;
     height: 100%;
 
@@ -1132,14 +1342,18 @@ select:focus {
 .public-preview-image {
     display: block;
 
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
 
-    object-fit: contain;
+    object-fit: cover;
     object-position: center center;
 }
+
+/* ============================================================
+   Karteninhalt
+   ============================================================ */
 
 .creature-type-line {
     display: flex;
@@ -1163,17 +1377,18 @@ select:focus {
     margin: 0;
 }
 
-.selected-target-label {
+.selected-target-label,
+.selected-deck-label {
     display: inline-flex;
     align-items: center;
 
     padding: 4px 8px;
 
-    border: 1px solid rgba(138, 180, 248, 0.38);
+    border: 1px solid rgba(240, 198, 116, 0.48);
     border-radius: 999px;
 
-    background: rgba(138, 180, 248, 0.13);
-    color: var(--color-blue-soft);
+    background: rgba(240, 198, 116, 0.18);
+    color: var(--color-gold);
 
     font-size: 11px;
     font-weight: 900;
@@ -1469,7 +1684,7 @@ select:focus {
     border-color: var(--color-blue);
 
     box-shadow:
-        0 0 0 3px rgba(138, 180, 248, 0.24),
+        0 0 0 3px rgba(138, 180, 248, 0.28),
         0 18px 38px rgba(0, 0, 0, 0.45);
 }
 
@@ -1477,7 +1692,7 @@ select:focus {
     border-color: var(--color-gold);
 
     box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.26),
+        0 0 0 3px rgba(240, 198, 116, 0.34),
         0 18px 38px rgba(0, 0, 0, 0.45);
 }
 
@@ -1513,14 +1728,6 @@ select:focus {
 
 .public-stage-slot.focused .public-stage-title {
     font-size: 22px;
-}
-
-.public-stage-card .public-preview-image-box {
-    height: 160px;
-}
-
-.public-stage-slot.focused .public-preview-image-box {
-    height: 220px;
 }
 
 .public-preview-type {
@@ -1647,7 +1854,7 @@ select:focus {
     background: rgba(38, 50, 65, 0.86);
 
     box-shadow:
-        0 0 0 2px rgba(138, 180, 248, 0.20),
+        0 0 0 2px rgba(138, 180, 248, 0.22),
         0 10px 22px rgba(0, 0, 0, 0.32);
 }
 
@@ -1657,7 +1864,7 @@ select:focus {
     background: rgba(51, 43, 29, 0.86);
 
     box-shadow:
-        0 0 0 2px rgba(240, 198, 116, 0.18),
+        0 0 0 2px rgba(240, 198, 116, 0.30),
         0 10px 22px rgba(0, 0, 0, 0.32);
 }
 
@@ -1679,14 +1886,6 @@ select:focus {
 
 .public-ribbon-card.selected-card .public-ribbon-marker {
     background: var(--color-gold);
-}
-
-.public-ribbon-image-crop .public-preview-image-box {
-    width: 54px;
-    height: 54px;
-    min-height: 54px;
-
-    border-radius: 10px;
 }
 
 .public-ribbon-text {
@@ -1716,7 +1915,81 @@ select:focus {
 }
 
 /* ============================================================
-   Formular: Neue Karte
+   Deck-Auswahl
+   ============================================================ */
+
+.deck-selection-panel {
+    display: grid;
+    gap: 6px;
+
+    margin: 0 0 14px;
+    padding: 12px 14px;
+
+    border: 1px solid rgba(240, 198, 116, 0.20);
+    border-radius: 14px;
+
+    background:
+        linear-gradient(135deg, rgba(58, 51, 34, 0.42), rgba(18, 18, 22, 0.52));
+}
+
+.deck-selection-status {
+    color: var(--color-gold);
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.deck-selection-names {
+    color: var(--color-text-muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+/* ============================================================
+   Karteneditor
+   ============================================================ */
+
+.edit-creature-section {
+    margin-bottom: 32px;
+    padding: 24px;
+
+    border: 1px solid rgba(138, 180, 248, 0.26);
+    border-radius: var(--radius-large);
+
+    background:
+        radial-gradient(circle at top left, rgba(138, 180, 248, 0.12), transparent 34%),
+        radial-gradient(circle at top right, rgba(240, 198, 116, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(38, 50, 65, 0.86), rgba(31, 31, 36, 0.98));
+
+    box-shadow: var(--shadow-panel);
+}
+
+.edit-creature-section-hidden {
+    display: none;
+}
+
+.edit-creature-header h2 {
+    color: var(--color-blue);
+}
+
+.edit-creature-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.edit-creature-actions button:first-child {
+    border-color: rgba(138, 180, 248, 0.38);
+    background: rgba(38, 50, 65, 0.84);
+    color: var(--color-blue-soft);
+}
+
+.edit-creature-actions button:first-child:hover {
+    border-color: var(--color-blue);
+    background: rgba(48, 63, 82, 0.94);
+}
+
+/* ============================================================
+   Formular: Neue Karte + Editor
    ============================================================ */
 
 .form-error {
@@ -1828,6 +2101,52 @@ select:focus {
     justify-self: start;
 
     padding: 10px 16px;
+}
+
+.condition-checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.condition-checkbox-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 7px 10px;
+
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+
+    color: #ffffff;
+
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+
+    opacity: 0.72;
+}
+
+.condition-checkbox-field:hover {
+    opacity: 0.95;
+}
+
+.condition-checkbox-field input {
+    width: 16px;
+    height: 16px;
+
+    accent-color: var(--color-gold);
+}
+
+.condition-checkbox-field:has(input:checked) {
+    opacity: 1;
+
+    box-shadow:
+        0 0 0 2px rgba(240, 198, 116, 0.24),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 /* ============================================================
@@ -1976,6 +2295,10 @@ body.player-view .public-preview-section {
 }
 
 @media (max-width: 760px) {
+    .app-help-content {
+        grid-template-columns: 1fr;
+    }
+
     .section-header-row {
         align-items: flex-start;
     }
@@ -1983,6 +2306,23 @@ body.player-view .public-preview-section {
     .section-menu-panel {
         right: 0;
         max-width: calc(100vw - 48px);
+    }
+
+    .turn-info {
+        grid-template-columns: 1fr;
+        row-gap: 14px;
+    }
+
+    .turn-info-main {
+        width: auto;
+    }
+
+    .turn-actions-inline {
+        width: 100%;
+    }
+
+    .turn-actions-inline button {
+        flex: 1 1 150px;
     }
 }
 
@@ -2050,6 +2390,14 @@ body.player-view .public-preview-section {
         padding: 7px 10px;
 
         font-size: 12px;
+    }
+
+    .app-help-content {
+        padding: 16px;
+    }
+
+    .app-help-button {
+        width: 100%;
     }
 
     .public-preview-section > summary,
@@ -2158,6 +2506,20 @@ body.player-view .public-preview-section {
         justify-self: stretch;
     }
 
+    .edit-creature-section {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .edit-creature-actions button {
+        flex: 1 1 160px;
+    }
+
+    .condition-checkbox-field {
+        flex: 1 1 150px;
+        justify-content: flex-start;
+    }
+
     .card-row-shell {
         grid-template-columns: 1fr 1fr;
         gap: 8px;
@@ -2195,8 +2557,11 @@ body.player-view .public-preview-section {
         min-height: 0;
     }
 
-    .creature-image-box {
-        height: 200px;
+    .creature-image-box,
+    .public-stage-card .public-preview-image-box,
+    .public-stage-slot.focused .public-preview-image-box {
+        height: auto;
+        aspect-ratio: 4 / 3;
     }
 
     .public-three-card-stage {
@@ -2215,10 +2580,6 @@ body.player-view .public-preview-section {
     .public-stage-title {
         padding: 7px 8px;
         font-size: 18px;
-    }
-
-    .public-stage-slot.focused .public-preview-image-box {
-        height: 170px;
     }
 
     .public-preview-section-box {
@@ -2317,522 +2678,1042 @@ body.player-view .public-preview-section {
         min-height: 44px;
     }
 }
+
 /* ============================================================
-   Session 45: Kurzanleitung als Header-Aktion
+   Final Theme: Dark Arcane Table
+   Konsolidierter Design-Stand für GitHub
    ============================================================ */
 
-.app-header-help {
-    border-radius: var(--radius-large);
+:root {
+    --color-bg: #19151d;
+    --color-bg-dark: #100d14;
+    --color-panel: #211b27;
+    --color-panel-light: #2a2231;
+
+    --color-gold: #d8b36a;
+    --color-gold-soft: #e8d7a8;
+
+    --color-blue: #80b7ff;
+    --color-blue-soft: #d8eaff;
+
+    --color-danger: #ff8f9a;
+
+    --color-purple: #7c5bb6;
+    --color-purple-soft: #b9a1e6;
+
+    --color-text: #f7f2ff;
+    --color-text-muted: #c9c0d3;
+    --color-text-soft: #9f96aa;
+
+    --border-soft: rgba(216, 179, 106, 0.16);
+    --border-medium: rgba(216, 179, 106, 0.26);
+    --border-blue: rgba(128, 183, 255, 0.34);
 }
 
-.app-header-help-summary {
-    display: block;
+/* ============================================================
+   Grundfläche
+   ============================================================ */
 
-    cursor: default;
-    list-style: none;
+body {
+    background:
+        radial-gradient(circle at top left, rgba(124, 91, 182, 0.12), transparent 34%),
+        radial-gradient(circle at top right, rgba(216, 179, 106, 0.055), transparent 28%),
+        linear-gradient(180deg, #19151d, #100d14 74%);
+    color: var(--color-text);
 }
 
-.app-header-help-summary::-webkit-details-marker {
-    display: none;
-}
+/* ============================================================
+   Header
+   ============================================================ */
 
-.app-header-help-summary::after {
-    content: none;
-    display: none;
-}
-
-.app-header-help .app-header-card {
-    margin-bottom: 0;
-}
-
-.app-help-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    min-height: 34px;
-    padding: 8px 12px;
-
-    border: 1px solid rgba(138, 180, 248, 0.36);
-    border-radius: 999px;
-
-    background: rgba(38, 50, 65, 0.84);
-    color: var(--color-blue-soft);
-
-    cursor: pointer;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 800;
-}
-
-.app-header-help:not([open]) .app-help-button::before {
-    content: "Kurzanleitung";
-}
-
-.app-header-help[open] .app-help-button::before {
-    content: "Anleitung schließen";
-}
-
-.app-header-help:not([open]) .app-help-button::after {
-    content: "▾";
-}
-
-.app-header-help[open] .app-help-button::after {
-    content: "▴";
-}
-
-.app-help-button:hover {
-    border-color: var(--color-blue);
-
-    background: rgba(48, 63, 82, 0.94);
-    color: #ffffff;
-}
-
-.app-help-content {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-
-    margin-top: 16px;
-    padding: 18px 20px 20px;
-
-    border: 1px solid rgba(240, 198, 116, 0.22);
-    border-radius: var(--radius-large);
+.app-header-card {
+    border-color: rgba(216, 179, 106, 0.28);
 
     background:
-        radial-gradient(circle at top left, rgba(240, 198, 116, 0.08), transparent 34%),
-        linear-gradient(135deg, rgba(37, 37, 44, 0.92), rgba(31, 31, 36, 0.96));
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.14), transparent 30%),
+        radial-gradient(circle at 78% 48%, rgba(124, 91, 182, 0.20), transparent 44%),
+        linear-gradient(135deg, #2a201d, #19151d 56%, #100d14);
+
+    box-shadow:
+        0 20px 44px rgba(0, 0, 0, 0.46),
+        0 0 46px rgba(124, 91, 182, 0.08),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.app-header-art {
+    left: 38%;
+    right: 0;
+    width: auto;
+}
+
+.app-header-text,
+.app-view-actions {
+    position: relative;
+    z-index: 5;
+}
+
+.app-header-art::before {
+    background:
+        linear-gradient(
+            90deg,
+            #19151d 0%,
+            rgba(25, 21, 29, 0.98) 10%,
+            rgba(25, 21, 29, 0.90) 24%,
+            rgba(25, 21, 29, 0.68) 40%,
+            rgba(25, 21, 29, 0.38) 58%,
+            rgba(25, 21, 29, 0.14) 76%,
+            rgba(25, 21, 29, 0.04) 100%
+        ),
+        radial-gradient(circle at 72% 48%, rgba(124, 91, 182, 0.14), transparent 36%),
+        linear-gradient(
+            180deg,
+            rgba(16, 13, 20, 0.06),
+            rgba(16, 13, 20, 0.44)
+        );
+}
+
+.app-header-art::after {
+    background:
+        radial-gradient(circle at 72% 48%, rgba(124, 91, 182, 0.14), transparent 34%),
+        radial-gradient(circle at 84% 25%, rgba(216, 179, 106, 0.06), transparent 24%),
+        linear-gradient(90deg, rgba(25, 21, 29, 0.18), transparent 50%);
+}
+
+.app-header-art img {
+    filter:
+        saturate(0.92)
+        contrast(1.04)
+        brightness(0.78);
+}
+
+.app-kicker {
+    color: var(--color-purple-soft);
+}
+
+.app-tagline {
+    color: var(--color-gold-soft);
+}
+
+.app-build-info {
+    color: var(--color-text-soft);
+}
+
+/* ============================================================
+   Gemeinsame Panels
+   ============================================================ */
+
+.public-preview-section,
+.combat-control-section,
+.creature-list-section,
+.add-creature-section,
+.edit-creature-section {
+    border-color: rgba(216, 179, 106, 0.18);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.055), transparent 28%),
+        radial-gradient(circle at top right, rgba(124, 91, 182, 0.095), transparent 34%),
+        linear-gradient(135deg, rgba(28, 23, 33, 0.98), rgba(15, 12, 18, 0.98));
+
+    box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.40),
+        0 0 38px rgba(124, 91, 182, 0.035),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.032);
+}
+
+.section-header-row,
+.public-preview-section > summary,
+.public-preview-summary,
+.add-creature-summary {
+    border-bottom-color: rgba(216, 179, 106, 0.15);
+}
+
+.section-header-row h2,
+.combat-control-section h2,
+.creature-list-section h2,
+.public-preview-section > summary h2,
+.public-preview-summary > span:first-child,
+.add-creature-summary > span:first-child,
+.dashboard-group-title,
+.edit-creature-header h2 {
+    color: var(--color-gold-soft);
+    text-shadow: 0 0 16px rgba(216, 179, 106, 0.08);
+}
+
+/* ============================================================
+   Buttons und Menüs
+   ============================================================ */
+
+button,
+.add-creature-form button,
+.mass-action-buttons button,
+.selection-actions button,
+.cleanup-action-buttons button,
+.section-menu-panel button,
+.card-menu-panel button,
+.public-focus-reset-button,
+.section-menu-summary,
+.public-preview-summary-hint,
+.details-toggle-label,
+.details-toggle-button,
+.public-preview-toggle-label {
+    border-color: rgba(124, 91, 182, 0.36);
+
+    background:
+        radial-gradient(circle at top left, rgba(124, 91, 182, 0.12), transparent 40%),
+        linear-gradient(135deg, rgba(42, 32, 56, 0.92), rgba(23, 18, 30, 0.96));
+
+    color: var(--color-purple-soft);
+
+    box-shadow:
+        0 8px 16px rgba(0, 0, 0, 0.16),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.026);
+}
+
+button:hover,
+.add-creature-form button:hover,
+.mass-action-buttons button:hover,
+.selection-actions button:hover,
+.cleanup-action-buttons button:hover,
+.section-menu-panel button:hover,
+.card-menu-panel button:hover,
+.public-focus-reset-button:hover,
+.section-menu-summary:hover {
+    transform: translateY(-1px);
+
+    border-color: rgba(216, 179, 106, 0.42);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.10), transparent 40%),
+        linear-gradient(135deg, rgba(52, 40, 64, 0.98), rgba(32, 25, 40, 0.98));
+
+    color: var(--color-gold-soft);
+
+    box-shadow:
+        0 12px 22px rgba(0, 0, 0, 0.26),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.038);
+}
+
+.section-menu-summary::after {
+    color: var(--color-purple-soft);
+}
+
+.section-menu-panel,
+.card-menu-panel {
+    border-color: rgba(216, 179, 106, 0.20);
+
+    background:
+        radial-gradient(circle at top left, rgba(124, 91, 182, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(32, 26, 39, 0.98), rgba(16, 13, 20, 0.98));
+}
+
+.public-preview-summary-hint,
+.details-toggle-label,
+.details-toggle-button,
+.public-preview-toggle-label {
+    min-height: 40px;
+    padding: 9px 14px;
+}
+
+/* Gefährliche Aktionen */
+.card-menu-danger,
+.section-menu-panel .card-menu-danger,
+.end-combat-button {
+    border-color: rgba(255, 143, 154, 0.42) !important;
+
+    background:
+        linear-gradient(135deg, rgba(92, 35, 49, 0.94), rgba(48, 22, 31, 0.98)) !important;
+
+    color: #ffc7cd !important;
+}
+
+.card-menu-danger:hover,
+.section-menu-panel .card-menu-danger:hover,
+.end-combat-button:hover {
+    border-color: var(--color-danger) !important;
+
+    background:
+        linear-gradient(135deg, rgba(116, 45, 62, 0.98), rgba(62, 27, 39, 0.98)) !important;
+
+    color: #ffe2e5 !important;
+}
+
+/* ============================================================
+   Encounter-Steuerung
+   ============================================================ */
+
+.combat-control-section {
+    position: relative;
+    overflow: hidden;
+
+    background:
+        radial-gradient(circle at 12% 0%, rgba(216, 179, 106, 0.10), transparent 26%),
+        radial-gradient(circle at 86% 12%, rgba(124, 91, 182, 0.14), transparent 34%),
+        radial-gradient(circle at 50% 110%, rgba(0, 0, 0, 0.42), transparent 42%),
+        linear-gradient(135deg, rgba(30, 24, 34, 0.99), rgba(12, 10, 15, 0.99));
+
+    box-shadow:
+        0 22px 46px rgba(0, 0, 0, 0.48),
+        0 0 52px rgba(124, 91, 182, 0.055),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.combat-control-section::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 22px;
+    right: 22px;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(216, 179, 106, 0.46),
+            rgba(124, 91, 182, 0.30),
+            transparent
+        );
+
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.combat-control-section::after {
+    content: "";
+
+    position: absolute;
+    top: 76px;
+    right: -120px;
+
+    width: 360px;
+    height: 360px;
+
+    background: radial-gradient(circle, rgba(124, 91, 182, 0.10), transparent 66%);
+
+    pointer-events: none;
+}
+
+.combat-control-section > * {
+    position: relative;
+    z-index: 1;
+}
+
+.combat-control-section .section-header-row {
+    align-items: center;
+
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+
+    border-bottom-color: rgba(216, 179, 106, 0.18);
+}
+
+.combat-control-section .section-header-row h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--color-gold-soft);
+    font-size: 25px;
+    text-shadow: 0 0 18px rgba(216, 179, 106, 0.10);
+}
+
+.combat-control-section .section-header-row h2::before {
+    content: "✦";
+
+    color: var(--color-purple-soft);
+    font-size: 18px;
+    text-shadow: 0 0 14px rgba(124, 91, 182, 0.35);
+}
+
+.combat-control-section .section-menu-summary {
+    min-height: 40px;
+    min-width: 170px;
+    padding: 9px 14px;
+
+    border-color: rgba(124, 91, 182, 0.42);
+
+    background:
+        radial-gradient(circle at top left, rgba(124, 91, 182, 0.18), transparent 38%),
+        linear-gradient(135deg, rgba(44, 33, 58, 0.96), rgba(20, 16, 27, 0.98));
+
+    box-shadow:
+        0 8px 18px rgba(0, 0, 0, 0.22),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+/* Turn-Anzeige */
+.turn-info {
+    position: relative;
+    overflow: hidden;
+
+    column-gap: 18px;
+    padding: 20px 22px;
+
+    border-color: rgba(216, 179, 106, 0.28);
+    border-radius: 16px;
+
+    background:
+        linear-gradient(90deg, rgba(216, 179, 106, 0.075), transparent 38%),
+        radial-gradient(circle at 18% 10%, rgba(216, 179, 106, 0.08), transparent 30%),
+        radial-gradient(circle at 82% 20%, rgba(124, 91, 182, 0.14), transparent 34%),
+        linear-gradient(135deg, rgba(27, 21, 28, 0.98), rgba(9, 8, 12, 0.98));
+
+    box-shadow:
+        0 14px 30px rgba(0, 0, 0, 0.30),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.turn-info::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 20px;
+    right: 20px;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(216, 179, 106, 0.62),
+            rgba(128, 183, 255, 0.30),
+            transparent
+        );
+
+    opacity: 0.75;
+}
+
+.turn-info-main {
+    padding-right: 6px;
+}
+
+.turn-info h2 {
+    color: var(--color-gold-soft);
+    font-size: 32px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.turn-info p {
+    color: var(--color-text-muted);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.turn-label {
+    color: var(--color-text-muted);
+}
+
+.active-creature-name {
+    color: #ffffff;
+
+    text-shadow:
+        0 0 14px rgba(128, 183, 255, 0.34),
+        0 0 28px rgba(128, 183, 255, 0.14);
+}
+
+/* Encounter-Kacheln */
+.control-group,
+.combat-log-panel {
+    position: relative;
+    overflow: hidden;
+
+    padding: 18px;
+
+    border-color: rgba(216, 179, 106, 0.18);
+    border-radius: 16px;
+
+    background:
+        radial-gradient(circle at 18% 0%, rgba(216, 179, 106, 0.06), transparent 28%),
+        radial-gradient(circle at 100% 0%, rgba(124, 91, 182, 0.075), transparent 32%),
+        linear-gradient(135deg, rgba(24, 19, 27, 0.94), rgba(10, 8, 12, 0.96));
 
     box-shadow:
         0 12px 26px rgba(0, 0, 0, 0.24),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
-.app-help-card {
-    padding: 16px;
+.control-group::before,
+.combat-log-panel::before {
+    content: "";
 
-    border: 1px solid rgba(240, 198, 116, 0.16);
-    border-radius: 14px;
+    position: absolute;
+    top: 0;
+    left: 16px;
+    right: 16px;
+
+    height: 1px;
 
     background:
-        linear-gradient(135deg, rgba(18, 18, 22, 0.42), rgba(31, 31, 36, 0.72));
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(216, 179, 106, 0.46),
+            rgba(124, 91, 182, 0.24),
+            transparent
+        );
 }
 
-.app-help-card h2 {
-    margin: 0 0 10px;
+.control-group h3,
+.combat-log-panel h3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-bottom: 14px;
+
+    color: var(--color-gold-soft);
+    font-size: 17px;
+    letter-spacing: -0.01em;
+}
+
+/* Icons */
+.selection-control-panel h3::before {
+    content: "◆";
+    color: var(--color-gold);
+    font-size: 12px;
+}
+
+.combat-action-row .control-group:nth-child(2) h3::before {
+    content: "✚";
+    color: var(--color-blue-soft);
+    font-size: 13px;
+}
+
+.combat-action-row .control-group:nth-child(3) h3::before {
+    content: "☽";
+    color: var(--color-purple-soft);
+    font-size: 14px;
+}
+
+.combat-support-row .control-group h3::before {
+    content: "⚙";
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.combat-log-panel h3::before {
+    content: "✧";
+    color: var(--color-purple-soft);
+    font-size: 13px;
+}
+
+/* Wichtig: Ziele-Bereich ohne innere Fremdfläche */
+.selection-control-panel {
+    display: grid;
+    gap: 10px;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.selection-control-panel::before,
+.selection-control-panel::after {
+    content: none !important;
+    display: none !important;
+}
+
+.selection-status {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
 
     color: var(--color-gold);
-    font-size: 17px;
+    font-size: 21px;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+
+    text-shadow: 0 0 14px rgba(216, 179, 106, 0.12);
 }
 
-.app-help-card p {
+.selection-target-names {
     margin: 0;
 
     color: var(--color-text-muted);
     font-size: 14px;
-    line-height: 1.5;
-}
-
-.app-help-card p + p {
-    margin-top: 10px;
-}
-
-@media (max-width: 760px) {
-    .app-help-content {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 560px) {
-    .app-help-content {
-        padding: 16px;
-    }
-
-    .app-help-button {
-        width: 100%;
-    }
-}
-
-/* ============================================================
-   Session 46: Karten bearbeiten + Deck-Auswahl
-   ============================================================ */
-
-.deck-selection-panel {
-    display: grid;
-    gap: 6px;
-
-    margin: 0 0 14px;
-    padding: 12px 14px;
-
-    border: 1px solid rgba(138, 180, 248, 0.20);
-    border-radius: 14px;
-
-    background:
-        linear-gradient(135deg, rgba(38, 50, 65, 0.42), rgba(18, 18, 22, 0.52));
-}
-
-.deck-selection-status {
-    color: var(--color-blue);
-    font-size: 16px;
-    font-weight: 900;
-}
-
-.deck-selection-names {
-    color: var(--color-text-muted);
-    font-size: 13px;
     line-height: 1.45;
 }
 
-.creature-card.selected-deck-card {
+/* Button-Akzente */
+.selection-actions button {
+    border-color: rgba(216, 179, 106, 0.36);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.12), transparent 40%),
+        linear-gradient(135deg, rgba(72, 55, 31, 0.84), rgba(42, 32, 24, 0.90));
+
+    color: var(--color-gold-soft);
+}
+
+.selection-actions button:hover {
     border-color: var(--color-gold);
 
-    box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.22),
-        0 16px 32px rgba(0, 0, 0, 0.38);
-}
-
-.creature-card.selected-deck-card .creature-card-inner {
     background:
-        radial-gradient(circle at top left, rgba(240, 198, 116, 0.15), transparent 34%),
-        linear-gradient(180deg, rgba(57, 47, 29, 0.94), rgba(31, 31, 36, 0.98));
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.18), transparent 40%),
+        linear-gradient(135deg, rgba(86, 66, 36, 0.98), rgba(54, 40, 28, 0.98));
+
+    color: #fff0c7;
 }
 
-.selected-deck-label {
-    display: inline-flex;
-    align-items: center;
-
-    padding: 4px 8px;
-
-    border: 1px solid rgba(240, 198, 116, 0.38);
-    border-radius: 999px;
-
-    background: rgba(240, 198, 116, 0.13);
-    color: var(--color-gold);
-
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+.mass-action-buttons button:nth-child(1) {
+    border-color: rgba(255, 143, 154, 0.30);
 }
 
-.edit-creature-section {
-    margin-bottom: 32px;
-    padding: 24px;
-
-    border: 1px solid rgba(138, 180, 248, 0.26);
-    border-radius: var(--radius-large);
-
-    background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.12), transparent 34%),
-        radial-gradient(circle at top right, rgba(240, 198, 116, 0.08), transparent 34%),
-        linear-gradient(135deg, rgba(38, 50, 65, 0.86), rgba(31, 31, 36, 0.98));
-
-    box-shadow: var(--shadow-panel);
+.mass-action-buttons button:nth-child(1):hover {
+    border-color: rgba(255, 143, 154, 0.54);
+    color: #ffd0d5;
 }
 
-.edit-creature-section-hidden {
-    display: none;
+.mass-action-buttons button:nth-child(2) {
+    border-color: rgba(216, 179, 106, 0.32);
 }
 
-.edit-creature-header h2 {
-    color: var(--color-blue);
+.mass-action-buttons button:nth-child(2):hover {
+    border-color: rgba(216, 179, 106, 0.58);
+    color: var(--color-gold-soft);
 }
 
-.edit-creature-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.mass-action-buttons button:nth-child(3) {
+    border-color: rgba(128, 183, 255, 0.32);
 }
 
-.edit-creature-actions button:first-child {
-    border-color: rgba(138, 180, 248, 0.38);
-    background: rgba(38, 50, 65, 0.84);
+.mass-action-buttons button:nth-child(3):hover {
+    border-color: rgba(128, 183, 255, 0.58);
     color: var(--color-blue-soft);
 }
 
-.edit-creature-actions button:first-child:hover {
-    border-color: var(--color-blue);
-    background: rgba(48, 63, 82, 0.94);
-}
+/* Log */
+.combat-log-panel {
+    border-color: rgba(124, 91, 182, 0.20);
 
-@media (max-width: 560px) {
-    .edit-creature-section {
-        padding: 16px;
-        border-radius: 16px;
-    }
-
-    .edit-creature-actions button {
-        flex: 1 1 160px;
-    }
-}
-
-/* ============================================================
-   Session 47: Bilddarstellung und Kartenlayout stabilisieren
-   ============================================================ */
-
-/*
-   Empfohlenes Kartenbildformat:
-   - Querformat, ungefähr 16:11
-   - Gute Größen: 1200 x 825 px oder 900 x 620 px
-
-   Die Bildbox behält dadurch ein stabiles Verhältnis.
-   Das eigentliche Bild füllt den Rahmen mit object-fit: cover.
-   Das heißt: Die Karte sieht einheitlich aus, aber am Rand kann etwas
-   vom Bild abgeschnitten werden, wenn das Quellbild ein anderes Format hat.
-*/
-.creature-image-box {
-    height: auto;
-    aspect-ratio: 16 / 11;
-}
-
-.public-stage-card .public-preview-image-box,
-.public-stage-slot.focused .public-preview-image-box {
-    height: auto;
-    aspect-ratio: 16 / 11;
-}
-
-.creature-image,
-.public-preview-image {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    max-height: none;
-
-    object-fit: cover;
-    object-position: center center;
-}
-
-.creature-image-placeholder,
-.public-preview-image-placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Die kleinen Initiative-Thumbnails bleiben bewusst kompakt und quadratisch. */
-.public-ribbon-image-crop .public-preview-image-box {
-    aspect-ratio: 1 / 1;
-}
-
-/* Deck-Auswahl nutzt dieselbe blaue Auswahlsprache wie Hand-Ziele. */
-.creature-card.selected-deck-card {
-    border-color: var(--color-blue);
-
-    box-shadow:
-        0 0 0 3px rgba(138, 180, 248, 0.22),
-        0 16px 32px rgba(0, 0, 0, 0.38);
-}
-
-.creature-card.selected-deck-card .creature-card-inner {
     background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.14), transparent 34%),
-        linear-gradient(180deg, rgba(42, 57, 76, 0.92), rgba(31, 31, 36, 0.98));
+        radial-gradient(circle at top right, rgba(124, 91, 182, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(15, 12, 19, 0.96), rgba(7, 6, 9, 0.98));
 }
 
-.selected-deck-label {
-    border-color: rgba(138, 180, 248, 0.38);
-    background: rgba(138, 180, 248, 0.13);
+.storage-status {
+    padding: 7px 11px;
+
+    border-color: rgba(128, 183, 255, 0.24);
+
+    background:
+        radial-gradient(circle at top left, rgba(128, 183, 255, 0.08), transparent 42%),
+        linear-gradient(135deg, rgba(25, 33, 47, 0.84), rgba(12, 10, 16, 0.90));
+
     color: var(--color-blue-soft);
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.022);
 }
 
-/* Die aktive Karte wird beim Hover nicht flacher. */
-.creature-card.active.selectable-card:hover {
-    transform: translateY(-8px);
+.combat-log-list {
+    max-height: 205px;
 }
 
-@media (max-width: 560px) {
-    .creature-image-box,
-    .public-stage-card .public-preview-image-box,
-    .public-stage-slot.focused .public-preview-image-box {
-        height: auto;
-        aspect-ratio: 16 / 11;
-    }
+.combat-log-entry {
+    border-color: rgba(124, 91, 182, 0.20);
+    border-radius: 11px;
+
+    background:
+        linear-gradient(135deg, rgba(28, 22, 36, 0.68), rgba(10, 8, 12, 0.78));
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
 }
 
+.combat-log-time {
+    color: var(--color-purple-soft);
+    text-shadow: 0 0 10px rgba(124, 91, 182, 0.18);
+}
+
+.combat-log-text {
+    color: var(--color-text-muted);
+}
 
 /* ============================================================
-   Session 48: Conditions im Karteneditor
+   Karten und Spieleransicht
    ============================================================ */
 
-.condition-checkbox-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.creature-card {
+    border-color: rgba(216, 179, 106, 0.34);
 
-    margin-top: 12px;
-}
-
-.condition-checkbox-field {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 7px 10px;
-
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 999px;
-
-    color: #ffffff;
-
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 800;
-
-    opacity: 0.72;
-}
-
-.condition-checkbox-field:hover {
-    opacity: 0.95;
-}
-
-.condition-checkbox-field input {
-    width: 16px;
-    height: 16px;
-
-    accent-color: var(--color-blue);
-}
-
-.condition-checkbox-field:has(input:checked) {
-    opacity: 1;
+    background:
+        linear-gradient(135deg, rgba(95, 70, 48, 0.92), rgba(43, 33, 26, 0.98) 48%, rgba(19, 15, 13, 0.98));
 
     box-shadow:
-        0 0 0 2px rgba(138, 180, 248, 0.22),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        0 16px 32px rgba(0, 0, 0, 0.44),
+        0 0 28px rgba(124, 91, 182, 0.045),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
-@media (max-width: 560px) {
-    .condition-checkbox-field {
-        flex: 1 1 150px;
-        justify-content: flex-start;
-    }
-}
-
-/* ============================================================
-   Session 50: Kampf beenden
-   ============================================================ */
-
-.end-combat-button {
-    border-color: rgba(255, 159, 159, 0.38);
+.creature-card-inner,
+.public-stage-card-inner {
+    border-color: rgba(216, 179, 106, 0.26);
 
     background:
-        linear-gradient(135deg, rgba(86, 38, 38, 0.88), rgba(48, 31, 31, 0.94));
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.075), transparent 28%),
+        linear-gradient(180deg, rgba(42, 32, 25, 0.96), rgba(21, 17, 15, 0.98));
 
-    color: #ffb7b7;
+    box-shadow: inset 0 0 0 1px rgba(124, 91, 182, 0.075);
 }
 
-.end-combat-button:hover {
-    border-color: var(--color-danger);
+.creature-card-title-row,
+.public-stage-title {
+    border-color: rgba(216, 179, 106, 0.22);
 
     background:
-        linear-gradient(135deg, rgba(104, 44, 44, 0.96), rgba(58, 34, 34, 0.96));
-
-    color: #ffd0d0;
+        linear-gradient(135deg, rgba(34, 25, 21, 0.94), rgba(18, 14, 13, 0.94));
 }
 
-/* ============================================================
-   Farblogik vereinheitlichen
-   Blau = aktiv / am Zug
-   Gold = ausgewählt / manuell fokussiert
-   ============================================================ */
+.creature-card-header h3,
+.creature-card-section h4,
+.public-stage-title,
+.public-preview-section-box h4,
+.public-initiative-title {
+    color: var(--color-gold-soft);
+}
 
-/* DM-Ansicht: Aktive Handkarte ist blau. */
-.creature-card.active {
+.creature-type-line,
+.creature-card-section,
+.public-preview-type,
+.public-preview-section-box {
+    border-color: rgba(216, 179, 106, 0.14);
+
+    background:
+        linear-gradient(135deg, rgba(27, 21, 18, 0.86), rgba(16, 13, 12, 0.90));
+
+    color: var(--color-text-muted);
+}
+
+.creature-image-box,
+.public-preview-image-box {
+    border-color: rgba(216, 179, 106, 0.28);
+
+    background:
+        radial-gradient(circle at center, rgba(124, 91, 182, 0.08), transparent 42%),
+        linear-gradient(135deg, rgba(13, 10, 12, 0.90), rgba(31, 23, 20, 0.94));
+
+    box-shadow: inset 0 0 0 1px rgba(124, 91, 182, 0.08);
+}
+
+/* Aktiv = Blau */
+.creature-card.active,
+.public-stage-slot.focused.auto-active-focus .public-stage-card {
     border-color: var(--color-blue);
 
     box-shadow:
-        0 0 0 3px rgba(138, 180, 248, 0.26),
-        0 16px 34px rgba(0, 0, 0, 0.40);
-
-    transform: translateY(-8px);
+        0 0 0 3px rgba(128, 183, 255, 0.30),
+        0 18px 38px rgba(0, 0, 0, 0.46);
 }
 
 .creature-card.active .creature-card-inner {
+    border-color: rgba(128, 183, 255, 0.34);
+
     background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.16), transparent 34%),
-        linear-gradient(180deg, rgba(42, 57, 76, 0.96), rgba(31, 31, 36, 0.98));
+        radial-gradient(circle at top left, rgba(128, 183, 255, 0.13), transparent 28%),
+        linear-gradient(180deg, rgba(38, 48, 64, 0.96), rgba(20, 18, 22, 0.98));
 }
 
-/* DM-Ansicht: Ausgewählte Handkarten sind gold. */
-.creature-card.selected-target-card {
-    border-color: var(--color-gold);
-
-    box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.30),
-        0 16px 32px rgba(0, 0, 0, 0.38);
-}
-
-.creature-card.selected-target-card .creature-card-inner {
-    background:
-        radial-gradient(circle at top left, rgba(240, 198, 116, 0.18), transparent 34%),
-        linear-gradient(180deg, rgba(57, 47, 29, 0.96), rgba(31, 31, 36, 0.98));
-}
-
-.selected-target-label {
-    border-color: rgba(240, 198, 116, 0.48);
-    background: rgba(240, 198, 116, 0.18);
-    color: var(--color-gold);
-}
-
-/* DM-Ansicht: Ausgewählte Deckkarten sind ebenfalls gold. */
-.creature-card.selected-deck-card {
-    border-color: var(--color-gold);
-
-    box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.30),
-        0 16px 32px rgba(0, 0, 0, 0.38);
-}
-
-.creature-card.selected-deck-card .creature-card-inner {
-    background:
-        radial-gradient(circle at top left, rgba(240, 198, 116, 0.18), transparent 34%),
-        linear-gradient(180deg, rgba(57, 47, 29, 0.96), rgba(31, 31, 36, 0.98));
-}
-
-.selected-deck-label {
-    border-color: rgba(240, 198, 116, 0.48);
-    background: rgba(240, 198, 116, 0.18);
-    color: var(--color-gold);
-}
-
-/*
-   Sonderfall:
-   Eine Karte kann aktiv UND ausgewählt sein.
-   Dann soll "aktiv" wichtiger bleiben: blauer Außenrahmen,
-   aber mit goldener Zusatzmarkierung.
-*/
-.creature-card.active.selected-target-card {
-    border-color: var(--color-blue);
-
-    box-shadow:
-        0 0 0 3px rgba(138, 180, 248, 0.30),
-        0 0 0 7px rgba(240, 198, 116, 0.18),
-        0 18px 38px rgba(0, 0, 0, 0.45);
-}
-
-.creature-card.active.selected-target-card .creature-card-inner {
-    background:
-        radial-gradient(circle at top left, rgba(138, 180, 248, 0.16), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(240, 198, 116, 0.12), transparent 34%),
-        linear-gradient(180deg, rgba(42, 57, 76, 0.96), rgba(31, 31, 36, 0.98));
-}
-
-/* Spieleransicht bleibt bei derselben Logik:
-   aktiv = blau, manuell ausgewählt = gold.
-   Wir verstärken Gold nur etwas, damit es sichtbarer ist.
-*/
+/* Auswahl = Gold */
+.creature-card.selected-target-card,
+.creature-card.selected-deck-card,
 .public-stage-slot.focused.manual-selected-focus .public-stage-card {
     border-color: var(--color-gold);
 
     box-shadow:
-        0 0 0 3px rgba(240, 198, 116, 0.34),
-        0 18px 38px rgba(0, 0, 0, 0.45);
+        0 0 0 3px rgba(216, 179, 106, 0.30),
+        0 18px 38px rgba(0, 0, 0, 0.46);
+}
+
+.selected-target-label,
+.selected-deck-label {
+    border-color: rgba(216, 179, 106, 0.44);
+    background: rgba(216, 179, 106, 0.13);
+    color: var(--color-gold-soft);
+}
+
+/* HP */
+.hp-bar-outer,
+.temp-hp-bar-outer {
+    border-color: rgba(124, 91, 182, 0.18);
+    background: rgba(13, 10, 12, 0.92);
+}
+
+.hp-bar-inner {
+    background: linear-gradient(90deg, #b8924f, var(--color-gold));
+}
+
+.temp-hp-bar-inner {
+    background: linear-gradient(90deg, #5fa8ff, var(--color-blue));
+}
+
+/* Spielerstatus */
+.public-three-card-stage {
+    border-color: rgba(216, 179, 106, 0.17);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.045), transparent 30%),
+        radial-gradient(circle at top right, rgba(124, 91, 182, 0.08), transparent 34%),
+        linear-gradient(135deg, rgba(20, 16, 25, 0.90), rgba(10, 8, 12, 0.96));
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.022);
+}
+
+.public-stage-card {
+    border-color: rgba(216, 179, 106, 0.34);
+
+    background:
+        linear-gradient(135deg, rgba(95, 70, 48, 0.92), rgba(43, 33, 26, 0.98) 48%, rgba(19, 15, 13, 0.98));
+}
+
+.public-turn-status-item,
+.public-ribbon-card {
+    border-color: rgba(216, 179, 106, 0.14);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.04), transparent 36%),
+        linear-gradient(135deg, rgba(28, 22, 34, 0.88), rgba(14, 11, 18, 0.94));
+}
+
+.public-turn-status-item strong {
+    color: var(--color-gold-soft);
+}
+
+.public-turn-status-active,
+.public-ribbon-card.active-turn-card {
+    border-color: rgba(128, 183, 255, 0.34);
+
+    background:
+        radial-gradient(circle at top left, rgba(128, 183, 255, 0.10), transparent 36%),
+        linear-gradient(135deg, rgba(35, 55, 82, 0.88), rgba(14, 11, 18, 0.94));
+}
+
+.public-turn-status-active strong {
+    color: var(--color-blue-soft);
 }
 
 .public-ribbon-card.selected-card {
     border-color: var(--color-gold);
+    background: rgba(52, 40, 34, 0.86);
+}
+
+/* ============================================================
+   Scroll-Buttons
+   ============================================================ */
+
+.card-row-button {
+    position: relative;
+    overflow: hidden;
+
+    width: 52px;
+
+    border-color: rgba(216, 179, 106, 0.26);
+    border-radius: 18px;
+
+    background:
+        radial-gradient(circle at center, rgba(216, 179, 106, 0.08), transparent 52%),
+        radial-gradient(circle at top, rgba(124, 91, 182, 0.10), transparent 44%),
+        linear-gradient(180deg, rgba(34, 25, 22, 0.88), rgba(13, 10, 12, 0.96));
+
+    color: rgba(232, 215, 168, 0.78);
+    font-size: 42px;
+
+    text-shadow:
+        0 0 12px rgba(216, 179, 106, 0.14),
+        0 0 20px rgba(124, 91, 182, 0.10);
 
     box-shadow:
-        0 0 0 2px rgba(240, 198, 116, 0.30),
-        0 10px 22px rgba(0, 0, 0, 0.32);
+        0 12px 24px rgba(0, 0, 0, 0.26),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.026),
+        inset 0 0 24px rgba(216, 179, 106, 0.045);
+}
+
+.card-row-button::before {
+    content: none;
+    display: none;
+}
+
+.card-row-button:hover {
+    transform: translateY(-1px);
+
+    border-color: rgba(216, 179, 106, 0.44);
+
+    background:
+        radial-gradient(circle at center, rgba(216, 179, 106, 0.13), transparent 54%),
+        radial-gradient(circle at top, rgba(124, 91, 182, 0.12), transparent 44%),
+        linear-gradient(180deg, rgba(45, 33, 27, 0.94), rgba(16, 12, 14, 0.98));
+
+    color: var(--color-gold-soft);
+
+    box-shadow:
+        0 16px 30px rgba(0, 0, 0, 0.32),
+        0 0 24px rgba(216, 179, 106, 0.07),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+        inset 0 0 26px rgba(216, 179, 106, 0.065);
+}
+
+.public-initiative-button {
+    border-color: rgba(216, 179, 106, 0.24);
+
+    background:
+        radial-gradient(circle at center, rgba(216, 179, 106, 0.05), transparent 48%),
+        linear-gradient(180deg, rgba(34, 25, 22, 0.88), rgba(13, 10, 12, 0.96));
+
+    color: rgba(232, 215, 168, 0.78);
+}
+
+.public-initiative-button:hover {
+    border-color: rgba(216, 179, 106, 0.42);
+
+    background:
+        radial-gradient(circle at center, rgba(216, 179, 106, 0.09), transparent 48%),
+        linear-gradient(180deg, rgba(45, 33, 27, 0.94), rgba(16, 12, 14, 0.98));
+
+    color: var(--color-gold-soft);
+}
+
+/* ============================================================
+   Deck-Auswahl, Formulare, Footer
+   ============================================================ */
+
+.deck-selection-panel {
+    border-color: rgba(216, 179, 106, 0.20);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.07), transparent 30%),
+        linear-gradient(135deg, rgba(31, 24, 27, 0.84), rgba(13, 10, 16, 0.90));
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.022);
+}
+
+.deck-selection-status {
+    color: var(--color-gold);
+    text-shadow: 0 0 12px rgba(216, 179, 106, 0.10);
+}
+
+.form-group {
+    border-color: rgba(216, 179, 106, 0.15);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.045), transparent 30%),
+        linear-gradient(135deg, rgba(24, 19, 29, 0.78), rgba(13, 10, 16, 0.88));
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.018);
+}
+
+.form-group legend {
+    color: var(--color-gold-soft);
+}
+
+.form-field label,
+.checkbox-field,
+.mass-action-field label {
+    color: var(--color-text-muted);
+}
+
+input,
+select {
+    min-height: 42px;
+
+    border-color: rgba(124, 91, 182, 0.28);
+    border-radius: 12px;
+
+    background:
+        radial-gradient(circle at top left, rgba(124, 91, 182, 0.06), transparent 40%),
+        linear-gradient(135deg, rgba(9, 7, 12, 0.96), rgba(17, 13, 22, 0.96));
+
+    color: var(--color-text);
+
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.020);
+}
+
+input:focus,
+select:focus {
+    border-color: rgba(124, 91, 182, 0.64);
+
+    box-shadow:
+        0 0 0 3px rgba(124, 91, 182, 0.16),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.026);
+}
+
+.checkbox-field input,
+.condition-checkbox-field input {
+    accent-color: var(--color-purple);
+}
+
+.condition-checkbox-field {
+    border-color: rgba(124, 91, 182, 0.22);
+}
+
+.condition-checkbox-field:has(input:checked) {
+    box-shadow:
+        0 0 0 2px rgba(124, 91, 182, 0.22),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.app-footer {
+    border-top-color: rgba(216, 179, 106, 0.14);
+}
+
+.project-notice {
+    border-color: rgba(216, 179, 106, 0.16);
+
+    background:
+        radial-gradient(circle at top left, rgba(216, 179, 106, 0.045), transparent 30%),
+        radial-gradient(circle at top right, rgba(124, 91, 182, 0.06), transparent 34%),
+        linear-gradient(135deg, rgba(30, 24, 36, 0.92), rgba(16, 13, 20, 0.92));
+}
+
+.project-notice summary {
+    color: var(--color-gold-soft);
+}
+
+/* ============================================================
+   Mobile Korrekturen
+   ============================================================ */
+
+@media (max-width: 560px) {
+    .combat-control-section::after {
+        display: none;
+    }
+
+    .turn-info {
+        padding: 16px;
+    }
+
+    .turn-info h2 {
+        font-size: 28px;
+    }
+
+    .control-group,
+    .combat-log-panel {
+        padding: 16px;
+    }
+
+    button:hover,
+    .card-row-button:hover,
+    .public-initiative-button:hover,
+    .public-preview-section > summary:hover .public-preview-summary-hint,
+    .public-preview-section > summary:hover .public-preview-toggle-label,
+    .public-preview-summary:hover .public-preview-summary-hint,
+    .add-creature-summary:hover .details-toggle-label,
+    .add-creature-summary:hover .details-toggle-button {
+        transform: none;
+    }
+
+    .card-row-button {
+        width: auto;
+        min-height: 52px;
+
+        font-size: 30px;
+    }
 }
