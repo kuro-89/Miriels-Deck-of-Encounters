@@ -837,11 +837,22 @@ button:disabled,
 
 .long-rest-button,
 button.long-rest-button {
-    border-color: rgba(127, 185, 255, 0.34) !important;
+    border-color: rgba(193, 176, 255, 0.28) !important;
 
     background:
-        radial-gradient(circle at top left, rgba(127, 185, 255, 0.10), transparent 42%),
-        linear-gradient(135deg, rgba(25, 33, 52, 0.88), rgba(12, 10, 18, 0.96)) !important;
+        radial-gradient(circle at top left, rgba(140, 107, 232, 0.12), transparent 42%),
+        linear-gradient(135deg, rgba(31, 24, 46, 0.92), rgba(13, 10, 20, 0.98)) !important;
+
+    color: var(--color-arcane-soft) !important;
+}
+
+.long-rest-button:hover,
+button.long-rest-button:hover {
+    border-color: rgba(127, 185, 255, 0.42) !important;
+
+    background:
+        radial-gradient(circle at top left, rgba(127, 185, 255, 0.09), transparent 42%),
+        linear-gradient(135deg, rgba(34, 38, 63, 0.92), rgba(13, 10, 20, 0.98)) !important;
 
     color: var(--color-active-soft) !important;
 }
