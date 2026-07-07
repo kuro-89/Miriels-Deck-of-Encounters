@@ -1,319 +1,403 @@
 # Miriel’s Deck of Encounters
 
-v0.4.3 by kuro
+v0.7.0 by kuro**
 
-A card-based fantasy tabletop encounter and initiative tracker for d20-style roleplaying games.
+Miriel’s Deck of Encounters is a local, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It is designed as a personal game master tool for preparing encounter cards, running initiative, tracking HP and conditions, and presenting selected public information on a separate tabletop display.
 
-This is an unofficial personal learning project. It is not affiliated with, endorsed, sponsored, or approved by any tabletop roleplaying game publisher.
+This is an unofficial, non-commercial, private personal project. It is not affiliated with, endorsed, sponsored, or approved by any tabletop roleplaying game publisher, platform, brand, or rights holder.
 
 ## Current Status
 
-This project is currently a local browser-only web app built with:
+The project is currently a static browser-only web app built with:
 
 - HTML
 - CSS
 - JavaScript
 
-There is currently no backend, no database, and no server-side save system.
+There is no backend, no database, no account system, and no server-side save system.
 
-The app runs locally in the browser by opening `index.html`.
+The app runs locally by opening `index.html` in a browser. It uses browser-local storage and local tab synchronization so that the game master view and the tabletop display can stay in sync on the same device or browser environment.
 
-The current version already uses browser-local saving with `localStorage` and local tab synchronization. This means the current encounter can survive a page reload in the same browser, but it is still not a real database or server-backed save system.
+The current app is intended for private local use only.
+
+## Main Views
+
+### Spielleiter-Ansicht
+
+The game master view is the main control surface. It contains:
+
+- The active **Spieltisch** for the running encounter.
+- The **Kartendeck** for preparation and reserve cards.
+- The **Spielleiter-Atelier** with tools, card editing, presentation controls, and archive functions.
+- Full internal card data, private notes, HP values, actions, traits, spells, inventory, and encounter controls.
+
+### Spieltisch-Anzeige
+
+The tabletop display is a passive public display intended for a second browser tab, external monitor, beamer, or shared screen.
+
+It shows only public encounter information, such as:
+
+- Current round and turn.
+- The active public card.
+- Previous and next cards in the initiative stage.
+- Public initiative ribbon.
+- Public HP display according to each card’s visibility mode.
+- Publicly visible conditions.
+- Miriels Schautafel for round calls, initiative previews, and manual image/text boards.
+
+Before an encounter is started, the tabletop display hides cards and initiative information and shows a waiting board instead.
 
 ## Implemented Features
 
+### Encounter Start Gate
+
+The public tabletop display is locked until the game master starts the encounter.
+
+Before start:
+
+- Public cards are hidden.
+- Initiative is hidden.
+- Turn information is hidden.
+- Miriels Schautafel shows the waiting message.
+
+After start:
+
+- The public stage is shown.
+- The encounter begins at round 1.
+- Miriels Schautafel displays the starting round call.
+
+The start/end action is handled by one state-dependent button in the round controls:
+
+- **Starten** before the encounter begins.
+- **Beenden** while the encounter is running.
+
 ### Core Card System
 
-- Create creature cards.
-- Create multiple copies of the same creature at once.
-- Separate internal DM name and public player-facing name.
-- Creature types:
-  - Player
-  - NPC
-  - Monster
-- Card zones:
-  - Cards on hand
-  - Card deck
-- Only cards on hand participate in the current encounter.
-- Move individual cards between hand and deck.
-- Move all cards or cards of a specific type between hand and deck.
-- Select multiple deck cards and move only the selected cards onto the hand.
-- Remove individual cards.
-- Delete all cards.
+The app supports creature and encounter cards with:
 
-### Combat Tracking
-
-- Initiative-based turn order.
-- Automatic sorting by initiative.
-- Round and turn counter.
-- Previous turn and next turn controls.
-- Active card highlight.
-- Encounter cleanup actions:
-  - Reset turn counter.
-  - Remove all temporary HP.
-  - Clear conditions from all cards currently on hand.
-
-### Creature Data
-
-Each creature card currently supports:
-
-- Internal DM name.
+- Internal game master name.
 - Public player-facing name.
-- Creature type.
-- Initiative.
-- Current HP.
-- Max HP.
-- Temporary HP.
+- Card type: Player, NPC, or Monster.
+- Card zone: hand or deck.
+- Initiative value.
+- Current HP, max HP, and temporary HP.
 - Armor Class.
-- Passive Perception.
-- Passive Insight.
-- Public HP visibility mode.
+- Passive values.
 - Conditions.
-- Image path or locally stored image data.
-- Card zone state: on hand or in deck.
-- Selection state for DM actions.
-
-### Card Editing
-
-Existing cards can be edited through the card menu.
-
-The card editor currently supports editing:
-
-- Internal name.
-- Public name.
-- Type.
-- Initiative.
-- Current HP.
-- Max HP.
-- Temporary HP.
-- Armor Class.
-- Passive Perception.
-- Passive Insight.
 - Public HP visibility mode.
-- Image path or a newly selected local image file.
-- Whether the card is currently on the hand.
-- Conditions by checkbox list.
+- Image path or locally stored browser image data.
+- Actions, traits, spells, notes, and inventory text.
+- Item/action display support for selected inventory entries.
 
-### Combat Actions
+Cards can be created, copied, edited, moved between hand and deck, selected, focused, archived, imported, exported, and removed.
 
-For selected cards currently on the hand, the DM can:
+### Spieltisch
+
+The Spieltisch is the active encounter surface. It includes:
+
+- Round and turn information.
+- Previous/next turn controls.
+- Encounter start/end control.
+- Focus card.
+- Card detail tabs.
+- Initiative hand ribbon.
+- Game master console with encounter chronicle and table whisper preview.
+
+The current active card is highlighted in blue. Selected targets are highlighted in gold. Critical or destructive actions use ruby/red.
+
+### Card Detail Tabs
+
+The active card detail panel supports structured tabs for:
+
+- Profile.
+- Actions.
+- Traits.
+- Spells.
+- Notes.
+- Inventory.
+
+This keeps larger cards readable while allowing the game master to inspect relevant information during a running encounter.
+
+### Spielleiter-Atelier
+
+The Spielleiter-Atelier is the game master’s tool area. It contains:
+
+- Werkzeugkiste.
+- Kartenschmiede.
+- Miriels Schautafel controls.
+- Archiv.
+
+It is intended for quick game master actions without turning the main Spieltisch into a heavy editing surface.
+
+### Werkzeugkiste
+
+The Werkzeugkiste supports actions on selected targets, including:
 
 - Apply damage.
 - Apply healing.
 - Set temporary HP.
-- Add a condition.
-- Remove a condition.
+- Add conditions.
+- Remove conditions.
 
 Damage is applied to temporary HP first before reducing normal HP.
 
-### Conditions
+### Kartenschmiede
 
-Implemented condition handling includes:
+The Kartenschmiede is used to create and edit cards. It supports card data such as:
 
-- Add and remove conditions through group actions.
-- Edit a card’s conditions directly in the card editor.
-- Display conditions as colored chips.
-- Use official D&D 5e condition names.
-- Additional support for `concentrating` as a practical combat marker.
+- Names.
+- Type.
+- Initiative.
+- HP and temporary HP.
+- Armor Class.
+- Passive values.
+- Public HP visibility.
+- Image path or uploaded image.
+- Conditions.
+- Actions.
+- Traits.
+- Spells.
+- Notes.
+- Inventory.
 
-### Public Player Preview
+Images selected in the browser are processed locally before being stored in the browser state.
 
-The current player preview shows public combat information based on the cards currently on hand.
+### Kartendeck
 
-It includes:
+The Kartendeck is the preparation and reserve area. It supports:
 
-- Current round.
-- Current turn.
-- The creature currently taking its turn.
-- Previous card.
-- Main displayed card.
-- Next card.
-- Public initiative ribbon.
-- Public HP display based on the selected visibility mode.
-- Publicly visible conditions.
+- Searching.
+- Filtering.
+- Sorting.
+- Selecting multiple deck cards.
+- Moving selected cards to the hand.
+- Managing card reserves before or during an encounter.
 
-Players can click a card in the public initiative ribbon to display it as the main card.
+Cards in the deck are not automatically part of the active initiative until moved to the hand.
 
-The large spotlight preview can also be navigated by horizontal trackpad scrolling, `Shift + mouse wheel`, or touch swiping on supported devices.
+### Miriels Schautafel
 
-### DM View and Player View
+Miriels Schautafel is the public presentation board inside the tabletop display.
 
-The app can be opened in two view modes:
+It supports:
 
-- DM view: `?view=dm`
-- Player view: `?view=player`
+- Waiting board before encounter start.
+- Round calls.
+- Initiative previews.
+- Manual image boards.
+- Manual text boards.
+- Image + text boards.
+- Text size presets.
+- Text position presets.
+- Board preview in the Spielleiter-Atelier.
 
-The DM view shows the full encounter controls and all internal card data.
+Manual Schautafel boards can be used for locations, clues, atmosphere, scene images, announcements, or table-facing messages.
 
-The player view hides DM-only interface sections and shows the public preview.
+### Spieltisch-Anzeige
 
-Both views currently still run inside the same browser app. This is useful for local testing and for a second tab or external monitor, but it is not yet secure separation.
+The Spieltisch-Anzeige is the passive player-facing display. It is opened with:
 
-### Local Saving and Tab Synchronization
+```text
+?view=player
+```
 
-The app stores the current encounter state in the browser with `localStorage`.
+The Spielleiter-Ansicht is opened with:
+
+```text
+?view=dm
+```
+
+Both views currently run inside the same local browser app. This is useful for a local second display, but it is not a secure separation of private and public information.
+
+### Local Saving and Synchronization
+
+The app stores encounter state in the browser using `localStorage`.
 
 The state includes:
 
+- Encounter name.
+- Encounter start state.
 - Round number.
 - Current turn index.
-- Public preview selection.
-- Combat log messages.
-- All creature cards.
+- Creature/card list.
 - Card zone state.
 - HP and temporary HP.
 - Conditions.
 - Initiative values.
-- Public HP visibility mode.
-- Image data or image paths.
+- Public HP visibility settings.
+- Combat log / encounter chronicle.
+- Table whisper preview state.
+- Miriels Schautafel settings.
+- Locally stored image data where applicable.
 
-DM and player tabs can stay synchronized locally through `BroadcastChannel`, with a polling fallback for the player view.
+Local tab synchronization uses `BroadcastChannel` with a fallback strategy for player display updates.
+
+Browser-local saving is convenient, but it remains tied to the current browser and device. It is not a database and not a server-backed save system.
 
 ### Encounter Export and Import
 
-The current encounter can be exported as a JSON file and imported again later.
+Encounter state can be exported as JSON and imported again later.
 
-Importing an encounter replaces the current browser state.
+The archive area supports save/load workflows for:
 
-Use JSON export for a more deliberate backup. Browser-local saving is convenient, but it is still tied to the current browser and device.
+- Browser storage.
+- Encounter export.
+- Encounter import.
+- Demo cards.
+- Reset and cleanup functions.
 
-### Image Handling
+Exported JSON files are recommended for backups or prepared sessions.
 
-Images selected through the form are currently processed locally in the browser.
+### UI and Visual Design
 
-There are two possible image cases:
+The app uses a dark fantasy interface with:
 
-- Project images can use local paths such as `Images/miriel_img.png`.
-- Images selected through the browser form are stored as Base64 data in the current browser state and can make exported JSON files much larger.
-
-Recommended card image format:
-
-- Wide landscape format.
-- Roughly 16:11.
-- Good sizes:
-  - `1200 × 825 px`
-  - `900 × 620 px`
-
-The card image frame uses `object-fit: cover`, so images fill the frame consistently. If the source image has a different aspect ratio, parts of the image can be cropped at the edges.
-
-Use only images that you have the right to use.
-
-Do not add copyrighted artwork directly to this repository unless you have permission to do so.
-
-### UI Features
-
-- Card-like layout inspired by trading card games.
-- Horizontal card rows for hand and deck.
+- Card-like panels.
+- Arcane background artwork.
+- Distinct areas for Spieltisch, Kartendeck, Atelier, and Spieltisch-Anzeige.
+- Horizontal card ribbons.
 - Scroll buttons for card rows.
-- Compact deck cards.
-- Area menus for larger management actions.
-- Collapsible public player preview.
-- Collapsible new-card form.
-- Header-based quick guide.
-- Combat log for visible DM actions.
-- Responsive layout for smaller screens.
+- Compact feed-style game master console.
+- Header-based handbuch / quick guide.
+- Responsive behavior for desktop and larger tablet displays.
+
+The current target layout is desktop, laptop, and larger tablet landscape use. Smartphone layouts are not the primary target yet.
 
 ## Color Logic
 
-The app uses a simple color language:
+The app uses a consistent color language:
 
-- Gold highlights the active combat card or important fantasy UI framing.
-- Blue highlights selected DM targets and selected deck cards.
-- In the public preview, blue means the active turn card.
-- In the public preview, gold means a manually selected preview card.
+- **Blue**: active card, current turn, focus, selected UI state.
+- **Gold**: target selection or target-related actions.
+- **Ruby / red**: damage, delete, end, or critical actions.
+- **Violet / lilac**: neutral magical UI, structure, and emphasis.
 
-## HP Visibility Modes
+Gold is intentionally reserved for target or goal states and is not used for ordinary buttons.
 
-Each creature can have a public HP visibility mode:
+## Public HP Visibility Modes
 
-- `full`  
-  Players see current HP, max HP, and an HP bar.
+Each card can define how much HP information is visible on the tabletop display.
 
-- `bar`  
-  Players see only an HP bar.
+### `full`
 
-- `descriptive`  
-  Players see a descriptive state such as “lightly injured” or “almost defeated”.
+Players see:
 
-- `hidden`  
-  Players do not see HP information.
+- Current HP.
+- Max HP.
+- HP bar.
+- Public damage state.
 
-The DM always sees the full HP information.
+### `bar`
+
+Players see:
+
+- HP bar.
+- Public damage state.
+
+### `descriptive`
+
+Players see only a descriptive state or aura, without HP numbers and without a normal HP bar.
+
+### `hidden`
+
+Players see no public HP information.
+
+The game master always sees the internal HP values.
+
+## Image Handling
+
+The app uses two image types:
+
+1. Project images referenced by file path, for example card images in `Images/` or UI backgrounds in `assets/`.
+2. Browser-selected images converted to local browser data and stored in the current browser state.
+
+Browser-selected image data can increase local storage use and exported JSON file size. Large uploaded board images are processed before storage where possible.
+
+Recommended card image handling for project assets:
+
+- Use images that are already optimized for the card frame.
+- Prefer a maximum long edge of roughly `1100 px` for demo card images.
+- Use good compression rather than full-resolution source files for bundled demo assets.
+- Keep large background and header assets at higher resolution because they fill broad UI areas.
+
+Use only images that you have the right to use.
+
+Do not add copyrighted artwork directly to this project unless you have explicit permission to do so.
 
 ## Current Architecture
 
-The app is currently a static browser app.
+The project is currently a static browser app.
 
-There is one shared encounter state in `app.js`.
-
-The central creature list is stored in the `creatures` array. Rendering follows the pattern:
+There is one shared encounter state in `app.js`. Rendering follows this general pattern:
 
 ```text
 State changes -> renderCards() -> UI is rebuilt from the current state
 ```
 
-The code is organized into sections for:
+The code is organized around:
 
-- Global data and constants.
-- View mode, browser storage, and tab synchronization.
+- Global state and constants.
+- View mode handling.
+- Browser storage.
+- Tab synchronization.
 - Card queries and sorting.
-- Public preview selection helpers.
-- DM card selection.
-- Turn logic.
-- Scroll and focus logic.
-- Card movement and combat cleanup.
+- Turn and round logic.
+- Scroll and focus preservation.
+- Card movement.
 - HP and combat actions.
 - Conditions.
-- Image loading.
-- Encounter export and import.
-- Public player data.
+- Image processing.
+- Import and export.
+- Public display data.
+- Miriels Schautafel.
 - HTML generation.
 - Card editing.
-- New card creation.
 - Rendering.
 
-The project intentionally remains simple for now. The current focus is learning JavaScript, DOM rendering, state management, and application structure step by step before introducing a backend or module system.
+The project intentionally remains framework-free and build-step-free for now.
 
-## Important Architecture Note
+## Important Security Note
 
-The long-term goal is to have one shared encounter state.
+The current app is a local browser prototype. The player-facing display is not a secure client.
 
-Later, the DM view should receive the full encounter data, while the player view should receive only public data.
+Hidden information is hidden in the interface, but the full state can still exist in the same browser-side JavaScript application.
 
-Secret values should not merely be hidden with CSS. They should not be sent to the player view at all.
-
-This is not fully implemented yet, because the project is still a local browser-only prototype.
+A future server-backed version should send only public data to player clients. Secret values should not merely be hidden with CSS or client-side rendering logic.
 
 ## Known Limitations
-- Passive Investigation Value missing
+
 - No backend.
-- No Node.js.
-- No Express server.
 - No database.
-- No real server-side persistent saving yet.
-- Browser-local saving depends on the current browser and device.
-- The player view is still part of the same browser app.
-- Hidden information is not truly secure yet because everything is still client-side.
-- No network access for other devices yet.
-- No deployment setup yet.
+- No server-side persistence.
 - No user accounts.
+- No real multi-device network mode yet.
+- No secure separation between game master data and player-facing data.
+- Browser-local saving depends on the current browser and device.
+- Browser-selected images can increase state and export size.
+- Smartphone layouts are not fully supported.
+- No deployment setup.
 - No server-side image upload.
 
-## Planned Features
+## Planned / Possible Future Features
 
-Possible future features include:
+Possible future directions include:
 
-- Node.js and Express backend.
-- Separate routes such as `/dm` and `/player`.
-- Shared encounter state on the server.
-- Public data filtering on the server.
-- Local network access for phones, tablets, or a second monitor.
+- Server-backed encounter state.
+- Separate secure DM and player routes.
+- Public-data filtering on the server.
+- Local network access for phones, tablets, and second monitors.
+- Interactive player device views.
+- Player-side table whisper input.
+- Player-side limited damage/healing proposals.
 - More robust save/load management.
-- Image upload through a backend.
-- Optional NAS deployment.
-- Optional desktop app packaging with Electron or Tauri.
+- Backend image upload.
+- Optional desktop packaging.
+
+These are not promises or public roadmap commitments. The project is currently private and developed for personal use.
 
 ## Project Structure
+
+Typical local project structure:
 
 ```text
 Miriels-Deck-of-Encounters/
@@ -321,42 +405,68 @@ Miriels-Deck-of-Encounters/
 ├── style.css
 ├── app.js
 ├── Readme.md
-└── Images/
-    ├── README.md
-    ├── miriel_img.png
-    ├── liora_img.png
-    ├── suica_img.png
-    └── borstibald_img.png
+├── Images/
+│   ├── miriel_img.png
+│   ├── liora_img.png
+│   ├── suica_img.png
+│   ├── borstibald_img.png
+│   └── ...
+└── assets/
+    ├── Miriel_header_app_banner_v1.png
+    ├── background_stage_table_v1.png
+    ├── background_deck_archive_v1.png
+    ├── background_atelier_forge_v1.png
+    ├── background_notice_board_miriel.png
+    └── items/
+        └── ...
 ```
 
-## AI-Generated Images
+The exact asset list may change during development.
 
-Some demo character images in this repository were generated with ChatGPT/OpenAI image generation.
+## AI-Generated and Project-Created Assets
 
-They are original character illustrations created for this project and are not intended to copy or reproduce official tabletop RPG artwork, third-party character art, or copyrighted franchise characters.
+Some images used in this project were generated or edited with AI image tools and then selected, adapted, or organized for this private project.
 
-These images are included only as demo/test assets for Miriel’s Deck of Encounters.
+They are intended as original project/demo/test assets for Miriel’s Deck of Encounters. They are not intended to copy or reproduce official tabletop RPG artwork, third-party character art, copyrighted franchise characters, logos, or protected brands.
+
+Do not use any image, background, character illustration, icon, item image, or other asset from this project in another project without explicit written permission from the author.
 
 ## Copyright, License, and Usage
 
 Copyright (c) 2026 kuro.
 
-No open-source license has been chosen for this project.
+All rights reserved.
 
-This means that the source code is publicly visible if this repository is public, but no permission is granted to copy, modify, redistribute, publish, reuse, sublicense, or incorporate the code into other projects without explicit written permission from the author.
+This project is currently private and not offered for public use.
 
-All rights are reserved.
+No open-source license has been chosen. No license is granted.
 
-Do not copy, fork for reuse, modify, redistribute, publish, mirror, reupload, or use this project or parts of this project in another project without explicit written permission from the author.
+You may not copy, fork, reuse, modify, redistribute, publish, mirror, reupload, sublicense, train on, sell, package, or incorporate this project, its source code, its text, its UI design, or its assets into another project without explicit written permission from the author.
 
-### Image Assets
+If this repository, a ZIP archive, a screenshot, or any part of the project becomes visible or accessible to someone else, that does not grant permission to use it.
 
-The images in the `Images/` folder are AI-generated character images created for this project.
+### Source Code
 
-They depict original player characters and encounter test assets and are included only as demo/test assets for Miriel’s Deck of Encounters.
+The source code is proprietary and private unless the author explicitly states otherwise in writing.
 
-The image assets are not licensed for reuse, redistribution, modification, publication, training datasets, commercial use, or use in other projects.
+No permission is granted to copy, modify, reuse, redistribute, publish, mirror, reupload, sublicense, or incorporate the source code into any other project.
 
-Do not copy, extract, reuse, edit, redistribute, republish, mirror, reupload, or use these images in any other project without explicit written permission from the author.
+### Image and Asset Usage
 
-These images are not official artwork and are not intended to copy or reproduce official artwork, third-party character art, or copyrighted franchise characters.
+All images and assets in `Images/`, `assets/`, and any related project folders are reserved for this project only.
+
+They are not licensed for reuse, redistribution, modification, publication, training datasets, commercial use, non-commercial use, fan projects, templates, asset packs, or use in other software or media projects.
+
+Do not copy, extract, edit, redistribute, republish, mirror, reupload, or use these assets without explicit written permission from the author.
+
+### Third-Party Rights
+
+This project should not include third-party copyrighted material unless the author has permission to use it.
+
+If any third-party material is accidentally included, it should be removed or replaced. This project does not claim ownership of third-party rights, brands, systems, trademarks, or copyrighted works.
+
+## Personal Use Notice
+
+Miriel’s Deck of Encounters is currently maintained as a private personal tool and learning project by kuro.
+
+It is not currently released as a public product, open-source project, template, asset pack, or reusable software library.

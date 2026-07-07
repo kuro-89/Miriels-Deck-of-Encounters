@@ -1,297 +1,2208 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Miriel's Deck of Encounters</title>
-
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <main class="app">
-        <header class="app-header">
-            <details class="app-header-help">
-                <summary class="app-header-help-summary">
-                    <div class="app-header-card">
-                        <div class="app-header-text">
-                            <p id="app-view-kicker" class="app-kicker">DM-Ansicht</p>
-                            <h1>Miriel’s Deck of Encounters</h1>
-                            <p class="app-tagline">A card-based encounter &amp; initiative tracker</p>
-                            <p class="app-build-info">v0.4.3 build 2026-06-26-16-35 by kuro</p>
-                            <div class="app-view-actions" aria-label="Ansicht wechseln">
-                                <button id="open-dm-view-button" type="button" onclick="openAppView('dm')">DM-Ansicht öffnen</button>
-                                <button id="open-player-view-button" type="button" onclick="openAppView('player')">Spieler-Ansicht öffnen</button>
-                                <span class="app-help-button"></span>
-                            </div>
-                        </div>
-                        <div class="app-header-art" aria-hidden="true">
-                            <img src="assets/miriel_header_banner.png" alt="Miriel mit ihrem Kartendeck">
-                        </div>
-                    </div>
-                </summary>
-
-                <div class="app-help-content">
-                    <article class="app-help-card"><h2>Grundidee</h2><p>Miriel's Deck of Encounters soll den Spielleiter bei der Verwaltung von Encountern unterstützen. Das Kartendeck ist dein Vorrat. Karten auf der Hand sind die Kreaturen, die gerade am aktuellen Encounter teilnehmen.</p><p>Die DM-Ansicht enthält alle internen Werte. Die Spieleransicht zeigt nur öffentliche Informationen wie öffentlichen Namen, sichtbare HP-Anzeige und Conditions.</p></article>
-                    <article class="app-help-card"><h2>Vorbereitung</h2><p>Lege neue Karten an oder nutze Demo-Karten als Startpunkt. Karten im Deck nehmen noch nicht am Kampf teil.</p><p>Nimm nur die Karten auf die Hand, die im aktuellen Encounter beteiligt sind. So bleibt die Initiative übersichtlich.</p></article>
-                    <article class="app-help-card"><h2>Kampf leiten</h2><p>Karten auf der Hand werden nach Initiative sortiert. Die aktive Karte wird hervorgehoben. Mit den Turn-Buttons wechselst du zur vorherigen oder nächsten Kreatur.</p><p>Klicke Handkarten an, um sie als Ziele auszuwählen. Danach kannst du Schaden, Heilung, Temp HP oder Conditions auf alle ausgewählten Ziele anwenden.</p></article>
-                    <article class="app-help-card"><h2>Speichern &amp; Spieleransicht</h2><p>Der Browser speichert den aktuellen Zustand lokal. Dadurch können DM-Ansicht und Spieleransicht auf demselben Gerät synchron bleiben.</p><p>Für eine langfristige Sicherung solltest du den Encounter als JSON-Datei exportieren.</p></article>
-                </div>
-            </details>
-        </header>
-
-        <details open class="public-preview-section">
-            <summary>
-                <h2>Vorschau der Spieler-Ansicht</h2>
-                <span class="public-preview-toggle-label"></span>
-            </summary>
-            <div class="public-preview-content">
-                <div id="public-preview-list" class="public-preview-list"></div>
-                <h3 class="public-initiative-title">Initiative</h3>
-                <div class="public-initiative-shell">
-                    <button class="public-initiative-button" onclick="scrollPublicPreview('left')" aria-label="Öffentliche Initiative-Leiste nach links scrollen" title="Nach links scrollen">‹</button>
-                    <div id="public-preview-ribbon" class="public-preview-ribbon"></div>
-                    <button class="public-initiative-button" onclick="scrollPublicPreview('right')" aria-label="Öffentliche Initiative-Leiste nach rechts scrollen" title="Nach rechts scrollen">›</button>
-                </div>
-            </div>
-        </details>
-
-        <div class="dm-dashboard dm-only">
-            <section class="dm-dashboard-group current-combat-dashboard">
-                <section class="combat-control-section encounter-command-section">
-                    <div class="section-header-row">
-                        <div>
-                            <p class="section-eyebrow">Combat Command</p>
-                            <h2>Encounter-Steuerung</h2>
-                        </div>
-                    </div>
-
-                    <div class="encounter-control-layout">
-                        <div id="turn-info" class="turn-info turn-control-card"></div>
-
-                        <div class="turn-command-actions" aria-label="Encounter-Aktionen">
-                            <button onclick="resetCombatTurnCounter()">
-                                Zähler zurücksetzen
-                            </button>
-
-                            <button
-                                class="end-combat-button"
-                                onclick="endCombat()"
-                            >
-                                Encounter beenden
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="creature-list-section hand-zone-section">
-                    <div class="section-header-row">
-                        <div><p class="section-eyebrow">Active Encounter</p><h2>Karten auf der Hand</h2></div>
-                        <div class="section-toolbar">
-                            <details class="section-menu">
-                                <summary class="section-menu-summary">Hand-Aktionen</summary>
-                                <div class="section-menu-panel">
-                                    <button onclick="moveAllHandCardsToDeck()">Alle Karten ins Deck verschieben</button>
-                                    <button onclick="moveHandCardsOfTypeToDeck('player')">Alle Player ins Deck</button>
-                                    <button onclick="moveHandCardsOfTypeToDeck('npc')">Alle NPCs ins Deck</button>
-                                    <button onclick="moveHandCardsOfTypeToDeck('monster')">Alle Monster ins Deck</button>
-                                </div>
-                            </details>
-                        </div>
-                    </div>
-                    <div class="card-row-shell">
-                        <button class="card-row-button card-row-button-left" onclick="scrollCardRow('hand-card-list', 'left')" aria-label="Karten auf der Hand nach links scrollen" title="Nach links scrollen">‹</button>
-                        <div id="hand-card-list" class="creature-list"></div>
-                        <button class="card-row-button card-row-button-right" onclick="scrollCardRow('hand-card-list', 'right')" aria-label="Karten auf der Hand nach rechts scrollen" title="Nach rechts scrollen">›</button>
-                    </div>
-                </section>
-
-                <section class="combat-control-section combat-actions-panel dm-action-panel">
-                    <div class="section-header-row">
-                        <div>
-                            <p class="section-eyebrow">DM Panel</p>
-                            <h2>DM-Steuerung</h2>
-                        </div>
-                    </div>
-
-                    <div class="combat-action-row">
-                        <div class="control-group target-control-group">
-                            <h3>Ziele</h3>
-                            <div class="selection-control-panel">
-                                <div id="selection-status" class="selection-status">0 Karten ausgewählt</div>
-                                <div id="selection-target-names" class="selection-target-names">Keine Ziele ausgewählt.</div>
-                                <div class="selection-actions">
-                                    <button onclick="selectAllHandCards()">Hand auswählen</button>
-                                    <button onclick="clearCardSelection()">Auswahl leeren</button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="control-group hp-action-control-group">
-                            <h3>HP-Aktion</h3>
-                            <div class="mass-action-field"><label for="group-action-amount">Betrag</label><input id="group-action-amount" type="number" min="0" value="0"></div>
-                            <div class="mass-action-buttons">
-                                <button onclick="applyDamageToSelectedCards()">Schaden</button>
-                                <button onclick="applyHealingToSelectedCards()">Heilung</button>
-                                <button onclick="applyTempHpToSelectedCards()">Temp HP setzen</button>
-                            </div>
-                        </div>
-                        <div class="control-group condition-action-control-group">
-                            <h3>Condition-Aktion</h3>
-                            <div class="mass-action-field">
-                                <label for="group-condition-select">Condition</label>
-                                <select id="group-condition-select">
-                                    <option value="blinded">blinded</option><option value="charmed">charmed</option><option value="deafened">deafened</option><option value="frightened">frightened</option><option value="grappled">grappled</option><option value="incapacitated">incapacitated</option><option value="invisible">invisible</option><option value="paralyzed">paralyzed</option><option value="petrified">petrified</option><option value="poisoned">poisoned</option><option value="prone">prone</option><option value="restrained">restrained</option><option value="stunned">stunned</option><option value="unconscious">unconscious</option><option value="concentrating">concentrating</option>
-                                </select>
-                            </div>
-                            <div class="mass-action-buttons">
-                                <button onclick="addConditionToSelectedCards()">Condition hinzufügen</button>
-                                <button onclick="removeConditionFromSelectedCards()">Condition entfernen</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="combat-management-row">
-                        <div class="control-group management-control-group">
-                            <h3>Verwaltung</h3>
-
-                            <div class="management-button-row">
-                                <button onclick="saveCurrentStateManually()">
-                                    Speichern
-                                </button>
-
-                                <button onclick="exportEncounter()">
-                                    Exportieren
-                                </button>
-
-                                <button onclick="triggerEncounterImport()">
-                                    Importieren
-                                </button>
-
-                                <button
-                                    class="long-rest-button"
-                                    onclick="longRest()"
-                                >
-                                    Lange Rast
-                                </button>
-                            </div>
-
-                            <details class="inline-details-menu management-more-menu">
-                                <summary>
-                                    Weitere Verwaltungsaktionen
-                                </summary>
-
-                                <div class="inline-details-panel">
-                                    <button onclick="clearAllTempHp()">
-                                        Alle Temp HP entfernen
-                                    </button>
-
-                                    <button onclick="clearConditionsFromHandCards()">
-                                        Conditions der Handkarten entfernen
-                                    </button>
-
-                                    <button onclick="reloadDemoCards()">
-                                        Demo-Karten neu laden
-                                    </button>
-
-                                    <button onclick="clearSavedBrowserState()">
-                                        Browser-Zustand löschen
-                                    </button>
-
-                                    <button
-                                        class="card-menu-danger"
-                                        onclick="deleteAllCards()"
-                                    >
-                                        Alle Karten löschen
-                                    </button>
-                                </div>
-                            </details>
-
-                            <input
-                                id="encounter-import-file"
-                                type="file"
-                                accept=".json,application/json"
-                                style="display: none;"
-                                onchange="handleEncounterImportFileChange(event)"
-                            >
-                        </div>
-
-                        <div class="combat-log-panel">
-                            <div class="combat-log-header">
-                                <h3>Encounter-Log</h3>
-                                <div id="storage-status" class="storage-status">Browser-Speicher: wird geprüft …</div>
-                            </div>
-                            <div id="combat-log-list" class="combat-log-list">
-                                <p class="combat-log-empty">Noch keine Aktionen.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </section>
-
-            <section class="dm-dashboard-group preparation-dashboard">
-                <section class="creature-list-section deck-zone-section">
-                    <div class="section-header-row">
-                        <div><p class="section-eyebrow">Preparation</p><h2>Kartendeck</h2></div>
-                        <div class="section-toolbar">
-                            <details class="section-menu">
-                                <summary class="section-menu-summary">Deck-Aktionen</summary>
-                                <div class="section-menu-panel">
-                                    <button onclick="moveSelectedDeckCardsToHand()">Ausgewählte Deck-Karten auf die Hand nehmen</button>
-                                    <button onclick="selectAllDeckCards()">Alle Deck-Karten auswählen</button>
-                                    <button onclick="clearDeckSelection()">Deck-Auswahl leeren</button>
-                                    <button onclick="moveAllDeckCardsToHand()">Alle Deck-Karten auf die Hand nehmen</button>
-                                    <button onclick="moveDeckCardsOfTypeToHand('player')">Alle Player auf die Hand</button>
-                                    <button onclick="moveDeckCardsOfTypeToHand('npc')">Alle NPCs auf die Hand</button>
-                                    <button onclick="moveDeckCardsOfTypeToHand('monster')">Alle Monster auf die Hand</button>
-                                </div>
-                            </details>
-                        </div>
-                    </div>
-                    <div class="deck-selection-panel"><div id="deck-selection-status" class="deck-selection-status">0 Deck-Karten ausgewählt</div><div id="deck-selection-names" class="deck-selection-names">Keine Deck-Karten ausgewählt.</div></div>
-                    <div class="card-row-shell">
-                        <button class="card-row-button card-row-button-left" onclick="scrollCardRow('deck-card-list', 'left')" aria-label="Kartendeck nach links scrollen" title="Nach links scrollen">‹</button>
-                        <div id="deck-card-list" class="creature-list"></div>
-                        <button class="card-row-button card-row-button-right" onclick="scrollCardRow('deck-card-list', 'right')" aria-label="Kartendeck nach rechts scrollen" title="Nach rechts scrollen">›</button>
-                    </div>
-                </section>
-
-                <section id="edit-creature-section" class="edit-creature-section edit-creature-section-hidden">
-                    <div class="section-header-row edit-creature-header"><h2 id="edit-creature-title">Karte bearbeiten</h2><button onclick="closeEditCreatureForm()">Bearbeiten abbrechen</button></div>
-                    <p id="edit-creature-error" class="form-error"></p>
-                    <div class="add-creature-form edit-creature-form">
-                        <fieldset class="form-group"><legend>Basisdaten</legend><div class="form-grid form-grid-four"><div class="form-field"><label for="edit-creature-name">Interner Name</label><input id="edit-creature-name" type="text"></div><div class="form-field"><label for="edit-creature-public-name">Öffentlicher Name</label><input id="edit-creature-public-name" type="text"></div><div class="form-field"><label for="edit-creature-type">Typ</label><select id="edit-creature-type"><option value="player">Player</option><option value="npc">NPC</option><option value="monster">Monster</option></select></div><div class="form-field"><label for="edit-creature-hp-visibility">Spieler-HP-Anzeige</label><select id="edit-creature-hp-visibility"><option value="full">HP vollständig anzeigen</option><option value="bar">Nur HP-Balken anzeigen</option><option value="descriptive">Nur Beschreibung anzeigen</option><option value="hidden">HP verbergen</option></select></div><div class="form-field form-field-wide-four"><label for="edit-creature-image-path">Bildpfad oder gespeicherte Bilddaten</label><input id="edit-creature-image-path" type="text" placeholder="Images/beispiel.png"><p class="form-hint">Für Projektbilder kannst du hier einen Pfad wie <strong>Images/monster.png</strong> eintragen. Wenn du unten eine neue Bilddatei auswählst, ersetzt sie diesen Wert.</p></div><div class="form-field form-field-wide-four"><label for="edit-creature-image">Neues Bild auswählen</label><input id="edit-creature-image" type="file" accept="image/*"></div></div></fieldset>
-                        <fieldset class="form-group"><legend>Kampfwerte</legend><div class="form-grid form-grid-four"><div class="form-field"><label for="edit-creature-initiative">Initiative</label><input id="edit-creature-initiative" type="number"></div><div class="form-field"><label for="edit-creature-hp">HP</label><input id="edit-creature-hp" type="number" min="0"></div><div class="form-field"><label for="edit-creature-max-hp">Max HP</label><input id="edit-creature-max-hp" type="number" min="1"></div><div class="form-field"><label for="edit-creature-temp-hp">Temp HP</label><input id="edit-creature-temp-hp" type="number" min="0"></div><div class="form-field"><label for="edit-creature-ac">AC</label><input id="edit-creature-ac" type="number" min="0"></div><div class="form-field"><label for="edit-creature-passive-perception">Passive Perception</label><input id="edit-creature-passive-perception" type="number" min="0"></div><div class="form-field"><label for="edit-creature-passive-insight">Passive Insight</label><input id="edit-creature-passive-insight" type="number" min="0"></div></div></fieldset>
-                        <fieldset class="form-group"><legend>Conditions</legend><p class="form-hint">Hake alle Conditions an, die diese Karte aktuell hat. Beim Speichern wird die Conditions-Liste der Karte daraus neu aufgebaut.</p><div id="edit-creature-condition-list" class="condition-checkbox-list"></div></fieldset>
-                        <fieldset class="form-group form-group-compact"><legend>Kartenstatus</legend><label class="checkbox-field" for="edit-creature-is-in-combat"><input id="edit-creature-is-in-combat" type="checkbox"><span>Karte ist auf der Hand</span></label></fieldset>
-                        <div class="edit-creature-actions"><button onclick="handleEditCreatureSaveButtonClick()">Änderungen speichern</button><button onclick="closeEditCreatureForm()">Abbrechen</button></div>
-                    </div>
-                </section>
-
-                <details class="add-creature-section add-creature-details">
-                    <summary class="add-creature-summary"><span>Neue Karte hinzufügen</span><span class="details-toggle-button"></span></summary>
-                    <div class="add-creature-body"><p id="add-creature-error" class="form-error"></p><div class="add-creature-form">
-                        <fieldset class="form-group"><legend>Basisdaten</legend><div class="form-grid form-grid-four"><div class="form-field"><label for="new-creature-name">Interner Name</label><input id="new-creature-name" type="text" value="Goblin"></div><div class="form-field"><label for="new-creature-public-name">Öffentlicher Name</label><input id="new-creature-public-name" type="text" value="Boblin der Goblin"></div><div class="form-field"><label for="new-creature-type">Typ</label><select id="new-creature-type"><option value="player">Player</option><option value="npc">NPC</option><option value="monster" selected>Monster</option></select></div><div class="form-field"><label for="new-creature-quantity">Anzahl</label><input id="new-creature-quantity" type="number" min="1" max="20" value="1"></div><div class="form-field form-field-wide-four"><label for="new-creature-image">Bild auswählen</label><input id="new-creature-image" type="file" accept="image/*"><p class="form-hint">Bilder werden lokal im Browser verarbeitet und nicht hochgeladen. Verwende nur Bilder, für die du die nötigen Rechte hast.</p></div></div></fieldset>
-                        <fieldset class="form-group"><legend>Kampfwerte</legend><div class="form-grid form-grid-four"><div class="form-field"><label for="new-creature-initiative">Initiative</label><input id="new-creature-initiative" type="number" value="10"></div><div class="form-field"><label for="new-creature-hp">HP</label><input id="new-creature-hp" type="number" min="0" value="10"></div><div class="form-field"><label for="new-creature-max-hp">Max HP</label><input id="new-creature-max-hp" type="number" min="1" value="10"></div><div class="form-field"><label for="new-creature-ac">AC</label><input id="new-creature-ac" type="number" min="0" value="10"></div></div></fieldset>
-                        <fieldset class="form-group"><legend>Passive Werte</legend><div class="form-grid form-grid-two"><div class="form-field"><label for="new-creature-passive-perception">Passive Perception</label><input id="new-creature-passive-perception" type="number" min="0" value="10"></div><div class="form-field"><label for="new-creature-passive-insight">Passive Insight</label><input id="new-creature-passive-insight" type="number" min="0" value="10"></div></div></fieldset>
-                        <fieldset class="form-group form-group-compact"><legend>Öffentliche Informationen</legend><div class="form-field form-field-medium"><label for="new-creature-hp-visibility">Spieler-HP-Anzeige</label><select id="new-creature-hp-visibility"><option value="full" selected>HP vollständig anzeigen</option><option value="bar">Nur HP-Balken anzeigen</option><option value="descriptive">Nur Beschreibung anzeigen</option><option value="hidden">HP verbergen</option></select></div></fieldset>
-                        <fieldset class="form-group form-group-compact"><legend>Kartenstatus</legend><label class="checkbox-field" for="new-creature-is-in-combat"><input id="new-creature-is-in-combat" type="checkbox"><span>Direkt auf die Hand nehmen</span></label></fieldset>
-                        <button class="add-creature-button" onclick="handleAddCreatureButtonClick()">Karte hinzufügen</button>
-                    </div></div>
-                </details>
-            </section>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Miriel's Deck of Encounters
+  </title>
+  <link href="style.css?v=0.6.59" rel="stylesheet"/>
+ </head>
+ <body>
+  <main class="app">
+   <!-- Header -->
+   <header class="app-header">
+    <details class="app-header-help">
+     <summary class="app-header-help-summary">
+      <div class="app-header-card">
+       <div class="app-header-text">
+        <p class="app-kicker" id="app-view-kicker">
+         Spielleiter-Ansicht
+        </p>
+        <h1>
+         Miriel&rsquo;s Deck of Encounters
+        </h1>
+        <p class="app-tagline">
+         Ein spielkartenbasierter Encounter-Manager f&uuml;r Pen-and-Paper-Rollenspiele
+        </p>
+        <div aria-label="Ansicht wechseln" class="app-view-actions">
+         <button id="open-dm-view-button" onclick="openAppView('dm')" type="button">
+          Spielleiter-Ansicht öffnen
+         </button>
+         <button id="open-player-view-button" onclick="openAppView('player')" type="button">
+          Spieltisch-Anzeige öffnen
+         </button>
+         <span class="app-help-button">
+         </span>
         </div>
-
-        <footer class="app-footer">
-            <details class="project-notice">
-                <summary>Projekt- und Nutzungshinweise</summary>
-                <div class="project-notice-content">
-                    <p>Miriel’s Deck of Encounters ist ein privates Hobbyprojekt zur Unterstützung privater Fantasy-Tabletop-Runden.</p>
-                    <p>Diese Website ist nicht kommerziell. Es gibt keine Werbung, kein Tracking, keine kostenpflichtigen Dienste und keine offiziellen Verbindungen zu Rechteinhabern von Rollenspielsystemen.</p>
-                    <p>Alle Projektdateien, Texte, Designs und Bilder sind nicht zur Wiederverwendung, Veränderung oder Weiterverbreitung freigegeben, sofern nicht ausdrücklich etwas anderes angegeben ist.</p>
-                    <p>Die App speichert Encounter-Daten nur lokal im Browser dieses Geräts. Es werden durch die App selbst keine Encounter-Daten an einen Server gesendet.</p>
-                </div>
-            </details>
-        </footer>
-    </main>
-
-    <script src="app.js"></script>
-</body>
+       </div>
+       <div aria-hidden="true" class="app-header-art">
+        <img alt="Miriel mit Kartenmagie" src="assets/Miriel_header_app_banner_v1.png"/>
+       </div>
+      </div>
+     </summary>
+     <div class="app-help-content">
+      <article class="app-help-card app-help-card-wide">
+       <p class="section-eyebrow">
+        Handbuch
+       </p>
+       <h2>
+        Miriel&rsquo;s Deck of Encounters verwenden
+       </h2>
+       <p>
+        Bereite Karten im <strong>Kartendeck</strong> vor, f&uuml;hre den laufenden Encounter am <strong>Spieltisch</strong> und teile ausgew&auml;hlte Informationen &uuml;ber die <strong>Spieltisch-Anzeige</strong>.
+       </p>
+       <p>
+        <strong>Kartendeck</strong> = Vorbereitung &middot; <strong>Spieltisch</strong> = laufender Encounter &middot; <strong>Spielleiter-Atelier</strong> = Werkzeuge, Kartenschmiede und Archiv &middot; <strong>Spieltisch-Anzeige</strong> = passive Anzeige f&uuml;r Spieler, Beamer oder zweiten Bildschirm.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Kartendeck
+       </h2>
+       <p>
+        Unten bereitest du Karten vor, suchst, filterst und sortierst sie. Karten im Deck sind Reserve und erscheinen noch nicht automatisch im Encounter.
+       </p>
+       <p>
+        Mit <strong>Auswahl auf die Hand</strong> legst du vorbereitete Karten in den aktiven Spieltisch.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Spieltisch
+       </h2>
+       <p>
+        Der <strong>Spieltisch</strong> ist die laufende Encounter-Fl&auml;che. Oben steuerst du Runde, Zugfolge und Start oder Ende des Encounters.
+       </p>
+       <p>
+        Links steht die <strong>Fokuskarte</strong>, in der Mitte die <strong>Kartendetails</strong>, rechts die <strong>Spielleiter-Konsole</strong>.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Runde und Zugfolge
+       </h2>
+       <p>
+        In der <strong>Rundensteuerung</strong> wechselst du zwischen vorherigem und n&auml;chstem Zug. <strong>Starten</strong> gibt die Spieltisch-Anzeige frei, <strong>Beenden</strong> sperrt sie wieder.
+       </p>
+       <p>
+        Die aktive Karte wird <strong class="help-color help-color-blue">blau</strong> markiert; Ziele werden <strong class="help-color help-color-gold">gold</strong> markiert.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Ziele und Zust&auml;nde
+       </h2>
+       <p>
+        Markiere Handkarten als <strong>Ziel</strong>, um Schaden, Heilung, tempor&auml;re HP oder Conditions gesammelt anzuwenden.
+       </p>
+       <p>
+        <strong class="help-color help-color-blue">Blau</strong> zeigt Fokus oder aktive Auswahl, <strong class="help-color help-color-gold">Gold</strong> zeigt Ziele, <strong class="help-color help-color-ruby">Rubin</strong> steht f&uuml;r Schaden und kritische Aktionen.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Spieltisch-Anzeige
+       </h2>
+       <p>
+        Die <strong>Spieltisch-Anzeige</strong> zeigt nur &ouml;ffentliche Informationen f&uuml;r Spieler, Beamer, Stream oder zweiten Bildschirm.
+       </p>
+       <p>
+        Vor dem Start bleiben Karten und Initiative verborgen. Nach dem Start erscheinen B&uuml;hne, Initiative und <strong>Miriels Schautafel</strong>.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Spielleiter-Atelier
+       </h2>
+       <p>
+        Das <strong>Atelier</strong> &ouml;ffnest du oben rechts im Spieltisch. Es b&uuml;ndelt Werkzeugkiste, Kartenschmiede, Miriels Schautafel und Archiv.
+       </p>
+       <p>
+        Nutze es f&uuml;r schnelle Spielleiter-Aktionen, ohne den Spieltisch zu verlassen.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Werkzeugkiste
+       </h2>
+       <p>
+        In der <strong>Werkzeugkiste</strong> wendest du Schaden, Heilung, tempor&auml;re HP und Conditions auf ausgew&auml;hlte Ziele an.
+       </p>
+       <p>
+        Sie ist f&uuml;r schnelle Aktionen w&auml;hrend des laufenden Encounters gedacht.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Kartenschmiede
+       </h2>
+       <p>
+        In der <strong>Kartenschmiede</strong> erstellst und bearbeitest du Karten. Dort pflegst du Werte, Bilder, Aktionen, Traits, Spells, Notizen und Inventar.
+       </p>
+       <p>
+        Die Schmiede ist f&uuml;r Vorbereitung und Nachbearbeitung gedacht.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Miriels Schautafel
+       </h2>
+       <p>
+        Im Atelier steuerst du, was auf <strong>Miriels Schautafel</strong> erscheint: Rundenruf, Initiativefolge oder eine eigene Bild- und Texttafel.
+       </p>
+       <p>
+        Eigene Tafeln eignen sich f&uuml;r Orte, Hinweise, Stimmungen oder Szenenbilder.
+       </p>
+      </article>
+      <article class="app-help-card">
+       <h2>
+        Archiv und Speicher
+       </h2>
+       <p>
+        Im <strong>Archiv</strong> verwaltest du Browser-Speicher, Import, Export, Demo-Karten und Reset-Funktionen.
+       </p>
+       <p>
+        Exportierte Encounter-Dateien eignen sich f&uuml;r Backups oder vorbereitete Sessions auf anderen Ger&auml;ten.
+       </p>
+      </article>
+     </div>
+    </details>
+   </header>
+   <section aria-labelledby="mobile-support-notice-title" class="mobile-support-notice">
+    <div class="mobile-support-notice-card">
+     <p class="section-eyebrow">
+      Display-Hinweis
+     </p>
+     <h2 id="mobile-support-notice-title">
+      Diese App ist noch nicht f&uuml;r Smartphones optimiert.
+     </h2>
+     <p>
+      Miriel&rsquo;s Deck of Encounters ist derzeit als Spielleiter-Ansicht f&uuml;r Laptop-, Desktop- und gr&ouml;&szlig;ere Tablet-Displays ausgelegt. Bitte &ouml;ffne die App auf einem gr&ouml;&szlig;eren Bildschirm.
+     </p>
+    </div>
+   </section>
+   <!-- Spieltisch-Anzeige: in der Spielleiter-Ansicht per CSS ausgeblendet, in der Player-View sichtbar -->
+   <details class="public-preview-section" open="">
+    <summary>
+     <div class="public-preview-title-block">
+      <h2>
+       Miriel&rsquo;s Deck of Encounters
+      </h2>
+      <span>
+       Spieltisch
+      </span>
+     </div>
+     <span class="public-preview-toggle-label">
+     </span>
+    </summary>
+    <div class="public-preview-content">
+     <div class="public-preview-list" id="public-preview-list">
+     </div>
+     <h3 class="public-initiative-title">
+      Initiative
+     </h3>
+     <div class="public-initiative-shell">
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach links scrollen" class="public-initiative-button" onclick="scrollPublicPreview('left')" title="Nach links scrollen">
+       &lsaquo;
+      </button>
+      <div class="public-preview-ribbon" id="public-preview-ribbon">
+      </div>
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach rechts scrollen" class="public-initiative-button" onclick="scrollPublicPreview('right')" title="Nach rechts scrollen">
+       &rsaquo;
+      </button>
+     </div>
+    </div>
+   </details>
+   <!-- DM-Spielansicht -->
+   <div class="dm-dashboard dm-only">
+    <section class="dm-game-view active-hand-view">
+     <div class="active-hand-title-row">
+      <div>
+       <p class="section-eyebrow">
+        Aktiver Encounter
+       </p>
+       <h2>
+        Spieltisch
+       </h2>
+       <p class="active-hand-view-subtitle">
+        Karten f&uuml;hren, Encounter steuern und das Spielleiter-Atelier nutzen.
+       </p>
+      </div>
+      <div aria-label="Aktueller Encounter-Name" class="active-hand-encounter-card">
+       <p class="section-eyebrow active-hand-encounter-eyebrow">
+        Encounter
+       </p>
+       <strong data-encounter-name-display="">
+        Unbenannter Encounter
+       </strong>
+      </div>
+     </div>
+     <div class="active-hand-root">
+      <section aria-label="Karten auf der Hand in Initiative-Reihenfolge" class="active-hand-board">
+       <div aria-label="Aktiver Kampftisch" class="active-hand-grid">
+        <section aria-label="Aktive Runde" class="active-hand-panel active-round-panel">
+         <p class="section-eyebrow">
+          Aktive Runde
+         </p>
+         <div class="active-round-content" id="turn-info">
+         </div>
+        </section>
+        <section aria-label="Rundensteuerung" class="active-hand-panel round-control-panel">
+         <p class="section-eyebrow">
+          Rundensteuerung
+         </p>
+         <div class="round-control-actions" id="turn-actions">
+         </div>
+        </section>
+        <section aria-label="Spielleiter-Atelier" class="active-hand-panel dm-command-panel">
+         <p class="section-eyebrow">
+          Spielleiter-Atelier
+         </p>
+         <button class="dm-actions-open-button" onclick="openDmActionDrawer()" type="button">
+          Atelier &ouml;ffnen
+         </button>
+        </section>
+        <section aria-label="Fokuskarte" class="active-hand-panel focus-stage-panel-shell">
+         <p class="section-eyebrow">
+          Fokuskarte
+         </p>
+         <div class="focus-stage-shell">
+          <div class="focus-stage-rail focus-stage-rail-left">
+           <button aria-label="Vorherige Fokuskarte" class="focus-stage-arrow focus-stage-arrow-left" onclick="focusAdjacentHandCreature('previous')" title="Vorherige Karte fokussieren">
+            &lsaquo;
+           </button>
+          </div>
+          <div class="focus-stage-card-well">
+           <div class="focus-stage-card-slot" id="focused-card-panel">
+           </div>
+          </div>
+          <div class="focus-stage-rail focus-stage-rail-right">
+           <button aria-label="N&auml;chste Fokuskarte" class="focus-stage-arrow focus-stage-arrow-right" onclick="focusAdjacentHandCreature('next')" title="N&auml;chste Karte fokussieren">
+            &rsaquo;
+           </button>
+          </div>
+         </div>
+        </section>
+        <section aria-label="Kartendetails" class="active-hand-details-panel" id="card-detail-panel">
+        </section>
+        <aside aria-label="Spielleiter-Konsole" class="dm-console-panel">
+         <div class="dm-console-panel-header">
+          <p class="section-eyebrow">
+           Spielleiter-Konsole
+          </p>
+         </div>
+         <div aria-label="Encounter Chronik" class="dm-console-zone dm-console-log-section">
+          <div class="dm-console-section-title-row">
+           <p class="dm-console-section-title">
+            Encounter Chronik
+           </p>
+           <span>
+            Letzte Ereignisse
+           </span>
+          </div>
+          <div class="dm-console-scroll-content" id="dm-console-log-content">
+           <div class="combat-log-list">
+            <p class="combat-log-empty">
+             Noch keine Aktionen.
+            </p>
+           </div>
+          </div>
+         </div>
+         <div aria-label="Tischgefl&uuml;ster" class="dm-console-zone dm-console-chat-section">
+          <div class="dm-console-section-title-row">
+           <p class="dm-console-section-title">
+            Tischgefl&uuml;ster
+           </p>
+           <span>
+            Preview
+           </span>
+          </div>
+          <div class="dm-console-scroll-content" id="dm-console-chat-content">
+          </div>
+         </div>
+         <div aria-label="Spielleiter-Chat-Eingabe" class="dm-console-compose" id="dm-console-compose">
+         </div>
+        </aside>
+       </div>
+       <section aria-label="Karten auf der Hand" class="active-hand-lane">
+        <div class="active-hand-lane-header">
+         <p class="section-eyebrow">
+          Karten auf der Hand in Initiative-Reihenfolge
+         </p>
+         <details class="section-menu active-hand-lane-menu">
+          <summary class="section-menu-summary">
+           Hand verwalten
+          </summary>
+          <div class="section-menu-panel">
+           <button onclick="moveAllHandCardsToDeck()">
+            Alle Karten ins Deck verschieben
+           </button>
+           <button onclick="moveHandCardsOfTypeToDeck('player')">
+            Alle Spieler ins Deck
+           </button>
+           <button onclick="moveHandCardsOfTypeToDeck('npc')">
+            Alle NPCs ins Deck
+           </button>
+           <button onclick="moveHandCardsOfTypeToDeck('monster')">
+            Alle Monster ins Deck
+           </button>
+          </div>
+         </details>
+        </div>
+        <div class="active-hand-lane-shell">
+         <button aria-label="Handband nach links scrollen" class="active-hand-lane-scroll" onclick="scrollCardRow('hand-ribbon-list', 'left')" title="Nach links scrollen">
+          &lsaquo;
+         </button>
+         <div class="active-hand-lane-list" id="hand-ribbon-list">
+         </div>
+         <button aria-label="Handband nach rechts scrollen" class="active-hand-lane-scroll" onclick="scrollCardRow('hand-ribbon-list', 'right')" title="Nach rechts scrollen">
+          &rsaquo;
+         </button>
+        </div>
+       </section>
+      </section>
+      <aside aria-label="Spielleiter-Atelier" class="ah-dm-action-drawer" id="dm-action-drawer">
+       <section class="ah-drawer-panel toolkit-drawer-panel">
+        <div aria-hidden="true" class="toolkit-art-layer">
+        </div>
+        <div class="section-header-row dm-drawer-header-row toolkit-drawer-header-row">
+         <div>
+          <p class="section-eyebrow">
+           Kampf, Karten &amp; Verwaltung
+          </p>
+          <h2>
+           Spielleiter-Atelier
+          </h2>
+         </div>
+         <div class="toolkit-header-actions">
+          <button aria-label="Hilfe zum Spielleiter-Atelier &ouml;ffnen" class="toolkit-help-toggle" onclick="toggleAtelierHelp()" title="Hilfe" type="button">
+           ?
+          </button>
+          <button aria-label="Spielleiter-Atelier schlie&szlig;en" class="dm-drawer-close-button" onclick="closeDmActionDrawer()" title="Schlie&szlig;en" type="button">
+           &times;
+          </button>
+         </div>
+        </div>
+        <div class="toolkit-help-panel toolkit-help-panel-hidden" id="atelier-help-panel">
+         <div class="toolkit-help-grid">
+          <p>
+           <strong>
+            Werkzeugkiste:
+           </strong>
+           Ziele w&auml;hlen, Schaden, Heilung, Temp HP, Conditions und Initiative steuern.
+          </p>
+          <p>
+           <strong>
+            Kartenschmiede:
+           </strong>
+           Fokuskarte bearbeiten, neue Karte anlegen oder zum Kartendeck springen.
+          </p>
+          <p>
+           <strong>
+            Miriels Schautafel:
+           </strong>
+           &Ouml;ffentliche Anzeigen, Initiative-Folge und sp&auml;ter geteilte Bilder steuern.
+          </p>
+          <p>
+           <strong>
+            Archiv:
+           </strong>
+           Speichern, Import, Export und gr&ouml;&szlig;ere Aufr&auml;umaktionen b&uuml;ndeln.
+          </p>
+          <p>
+           <strong>
+            Farben:
+           </strong>
+           Blau markiert Fokus, Gold Zielbezug, Rubin Schaden oder kritische Aktionen.
+          </p>
+         </div>
+        </div>
+        <nav aria-label="Atelier-Bereiche" class="atelier-nav">
+         <button aria-controls="atelier-panel-toolbox" class="atelier-nav-button atelier-nav-button-active" onclick="setAtelierPanel('toolbox')" type="button">
+          Werkzeugkiste
+         </button>
+         <button aria-controls="atelier-panel-forge" class="atelier-nav-button" onclick="setAtelierPanel('forge')" type="button">
+          Kartenschmiede
+         </button>
+         <button aria-controls="atelier-panel-board" class="atelier-nav-button" onclick="setAtelierPanel('board')" type="button">
+          Miriels Schautafel
+         </button>
+         <button aria-controls="atelier-panel-archive" class="atelier-nav-button" onclick="setAtelierPanel('archive')" type="button">
+          Archiv
+         </button>
+        </nav>
+        <div class="toolkit-section-stack">
+         <div class="atelier-panel atelier-panel-active" data-atelier-panel="toolbox" id="atelier-panel-toolbox">
+          <section aria-label="Zielauswahl" class="toolkit-section toolkit-section-targets">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Zielauswahl
+             </h3>
+            </div>
+           </div>
+           <div class="toolkit-target-strip">
+            <div>
+             <div class="selection-status" id="selection-status">
+              0 Ziele ausgew&auml;hlt
+             </div>
+             <div class="selection-target-names" id="selection-target-names">
+              Keine Ziele ausgew&auml;hlt.
+             </div>
+            </div>
+            <div class="selection-actions toolkit-inline-actions">
+             <button onclick="selectAllHandCards()" type="button">
+              Alle w&auml;hlen
+             </button>
+             <button onclick="clearCardSelection()" type="button">
+              Leeren
+             </button>
+            </div>
+           </div>
+          </section>
+          <section aria-label="Schaden und Heilung" class="toolkit-section toolkit-section-hp hp-action-control-group">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Schaden &amp; Heilung
+             </h3>
+            </div>
+           </div>
+           <div class="toolkit-full-field">
+            <label class="sr-only" for="group-action-amount">
+             HP-Wert
+            </label>
+            <input aria-label="HP-Wert" id="group-action-amount" min="0" type="number" value="0"/>
+           </div>
+           <div class="mass-action-buttons toolkit-button-row toolkit-hp-button-row">
+            <button class="damage-action-button" onclick="applyDamageToSelectedCards()" title="Schaden auf ausgew&auml;hlte Handkarten anwenden" type="button">
+             Schaden
+            </button>
+            <button onclick="applyHealingToSelectedCards()" title="Heilung auf ausgew&auml;hlte Handkarten anwenden" type="button">
+             Heilung
+            </button>
+            <button onclick="applyTempHpToSelectedCards()" title="Tempor&auml;re HP auf ausgew&auml;hlte Handkarten setzen" type="button">
+             Temp HP
+            </button>
+           </div>
+          </section>
+          <section aria-label="Condition" class="toolkit-section toolkit-section-condition condition-action-control-group">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Condition
+             </h3>
+            </div>
+           </div>
+           <div class="toolkit-full-field">
+            <label class="sr-only" for="group-condition-select">
+             Condition
+            </label>
+            <select aria-label="Condition ausw&auml;hlen" id="group-condition-select">
+             <option selected="" value="blessed">
+              Blessed
+             </option>
+             <option value="blinded">
+              Blinded
+             </option>
+             <option value="charmed">
+              Charmed
+             </option>
+             <option value="concentrating">
+              Concentrating
+             </option>
+             <option value="cursed">
+              Cursed
+             </option>
+             <option value="deafened">
+              Deafened
+             </option>
+             <option value="enlarged">
+              Enlarged
+             </option>
+             <option value="exhausted">
+              Exhausted
+             </option>
+             <option value="frightened">
+              Frightened
+             </option>
+             <option value="grappled">
+              Grappled
+             </option>
+             <option value="hasted">
+              Hasted
+             </option>
+             <option value="hexed">
+              Hexed
+             </option>
+             <option value="hunters-mark">
+              Hunter's Mark
+             </option>
+             <option value="incapacitated">
+              Incapacitated
+             </option>
+             <option value="invisible">
+              Invisible
+             </option>
+             <option value="magical-effect">
+              Magical Effect
+             </option>
+             <option value="paralyzed">
+              Paralyzed
+             </option>
+             <option value="petrified">
+              Petrified
+             </option>
+             <option value="physical-effect">
+              Physical Effect
+             </option>
+             <option value="poisoned">
+              Poisoned
+             </option>
+             <option value="prone">
+              Prone
+             </option>
+             <option value="raging">
+              Raging
+             </option>
+             <option value="restrained">
+              Restrained
+             </option>
+             <option value="stunned">
+              Stunned
+             </option>
+             <option value="unconscious">
+              Unconscious
+             </option>
+            </select>
+           </div>
+           <div class="mass-action-buttons toolkit-two-button-row">
+            <button onclick="addConditionToSelectedCards()" title="Condition hinzuf&uuml;gen" type="button">
+             Hinzuf&uuml;gen
+            </button>
+            <button onclick="removeConditionFromSelectedCards()" title="Condition entfernen" type="button">
+             Entfernen
+            </button>
+           </div>
+          </section>
+          <section aria-label="Initiative" class="toolkit-section toolkit-section-initiative">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Initiative
+             </h3>
+            </div>
+           </div>
+           <div aria-label="Initiative-Werkzeuge" class="toolkit-initiative-compact">
+            <label class="sr-only" for="initiative-action-value">
+             Initiative
+            </label>
+            <input aria-label="Initiative" id="initiative-action-value" type="number" value="0"/>
+            <button onclick="applyInitiativeToSelectedCards()" type="button">
+             Set
+            </button>
+            <button onclick="rollInitiativeForSelectedCards()" type="button">
+             Ziele w&uuml;rfeln
+            </button>
+            <button onclick="rollInitiativeForHandEnemies()" type="button">
+             Gegner w&uuml;rfeln
+            </button>
+           </div>
+          </section>
+          <section aria-label="Erholung" class="toolkit-section toolkit-section-rest">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Erholung
+             </h3>
+            </div>
+           </div>
+           <div class="drawer-action-buttons drawer-action-buttons-single">
+            <button class="long-rest-button" onclick="longRest()" type="button">
+             Lange Rast durchf&uuml;hren
+            </button>
+           </div>
+          </section>
+         </div>
+         <div class="atelier-panel" data-atelier-panel="forge" id="atelier-panel-forge">
+          <section aria-label="Kartenschmiede" class="toolkit-section toolkit-section-forge">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Kartenschmiede
+             </h3>
+            </div>
+           </div>
+           <div class="drawer-action-buttons drawer-action-buttons-readable toolkit-cardforge-actions">
+            <button class="toolkit-primary-action card-forge-open-button" onclick="openFocusedCardForgeFromToolkit()" type="button">
+             Fokuskarte bearbeiten
+            </button>
+            <button class="card-forge-open-button" onclick="openNewCardForgeFromToolkit()" type="button">
+             Neue Karte schmieden
+            </button>
+            <button onclick="openDeckLibraryFromToolkit()" type="button">
+             Kartendeck anzeigen
+            </button>
+           </div>
+          </section>
+         </div>
+         <div class="atelier-panel" data-atelier-panel="board" id="atelier-panel-board">
+          <section aria-label="Miriels Schautafel" class="toolkit-section toolkit-section-board">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Miriels Schautafel
+             </h3>
+            </div>
+           </div>
+           <div class="miriel-board-control-stack">
+            <section class="miriel-board-subsection miriel-board-status-section" aria-label="Dauerhafte Anzeige">
+             <div class="miriel-board-subsection-heading">
+              <div>
+               <p class="section-eyebrow">Aktuell sichtbar</p>
+               <h4 id="miriel-board-current-status">Nichts</h4>
+              </div>
+             </div>
+             <div aria-label="Schautafel zeigt dauerhaft" class="miriel-board-mode-switch">
+              <button aria-pressed="true" class="miriel-board-mode-button miriel-board-mode-button-active" data-miriel-board-persistent-mode="off" onclick="setMirielBoardPersistentMode('off')" type="button">
+               Nichts
+              </button>
+              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="initiative" onclick="setMirielBoardPersistentMode('initiative')" type="button">
+               Initiativefolge
+              </button>
+              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="manual" onclick="setMirielBoardPersistentMode('manual')" type="button">
+               Eigene Tafel
+              </button>
+             </div>
+            </section>
+            <section class="miriel-board-subsection miriel-board-manual-section-controls" aria-label="Eigene Tafel vorbereiten">
+             <div class="miriel-board-subsection-heading">
+              <div>
+               <p class="section-eyebrow">Eigene Tafel</p>
+               <h4>Bild und Text teilen</h4>
+              </div>
+              <span>Vorschau</span>
+             </div>
+             <div class="miriel-board-manual-preview" id="miriel-board-manual-preview">
+              <div class="miriel-board-manual-preview-empty">
+               <span>✧</span>
+               <strong>Keine eigene Tafel vorbereitet</strong>
+               <small>W&auml;hle ein Bild oder schreibe Text.</small>
+              </div>
+             </div>
+             <input class="miriel-board-manual-image-input" id="miriel-board-manual-image-input" accept="image/*" onchange="handleMirielBoardManualImageInput(event)" type="file"/>
+             <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable miriel-board-image-actions">
+              <label class="miriel-board-image-picker" for="miriel-board-manual-image-input">
+               Bild w&auml;hlen
+              </label>
+              <button onclick="clearMirielBoardManualImage()" type="button">
+               Bild entfernen
+              </button>
+             </div>
+             <div class="toolkit-textarea-card miriel-board-text-card">
+              <div class="miriel-board-text-header">
+               <label for="miriel-board-manual-text">
+                Text
+               </label>
+               <div class="miriel-board-text-tools">
+                <label class="miriel-board-inline-select" for="miriel-board-manual-text-size">
+                 <span>Schriftgr&ouml;&szlig;e</span>
+                 <select id="miriel-board-manual-text-size" onchange="setMirielBoardManualTextSize(this.value)">
+                  <option value="small">
+                   klein
+                  </option>
+                  <option selected="" value="normal">
+                   normal
+                  </option>
+                  <option value="large">
+                   gro&szlig;
+                  </option>
+                  <option value="dramatic">
+                   dramatisch
+                  </option>
+                 </select>
+                </label>
+                <label class="miriel-board-inline-select" for="miriel-board-manual-text-position">
+                 <span>Position</span>
+                 <select id="miriel-board-manual-text-position" onchange="setMirielBoardManualTextPosition(this.value)">
+                  <option value="top">
+                   oben
+                  </option>
+                  <option value="middle">
+                   Mitte
+                  </option>
+                  <option selected="" value="bottom">
+                   unten
+                  </option>
+                 </select>
+                </label>
+                <button onclick="clearMirielBoardManualText()" type="button">
+                 Text leeren
+                </button>
+               </div>
+              </div>
+              <textarea id="miriel-board-manual-text" maxlength="700" oninput="setMirielBoardManualText(this.value)" placeholder="Was sollen die Spieler sehen?"></textarea>
+             </div>
+            </section>
+            <section class="miriel-board-subsection miriel-board-automation-section" aria-label="Schautafel-Automatik">
+             <div class="miriel-board-subsection-heading miriel-board-automation-heading">
+              <div>
+               <p class="section-eyebrow">Automatik</p>
+               <h4>Rundenruf und Initiativefolge</h4>
+              </div>
+              <label class="miriel-board-inline-select" for="miriel-board-duration-select">
+               <span>Dauer</span>
+               <select id="miriel-board-duration-select" onchange="setMirielBoardDurationMode(this.value)">
+                <option value="short">
+                 kurz
+                </option>
+                <option selected="" value="normal">
+                 normal
+                </option>
+                <option value="long">
+                 lang
+                </option>
+               </select>
+              </label>
+             </div>
+             <label class="toolkit-checkbox-card" for="miriel-board-auto-turn-checkbox">
+              <input id="miriel-board-auto-turn-checkbox" onchange="toggleMirielBoardAutoTurn(this.checked)" type="checkbox"/>
+              <span>
+               <strong>
+                Nach jedem Zug Initiativefolge einblenden
+               </strong>
+              </span>
+             </label>
+             <label class="toolkit-checkbox-card" for="miriel-board-new-round-checkbox">
+              <input checked="" id="miriel-board-new-round-checkbox" onchange="toggleMirielBoardNewRoundCall(this.checked)" type="checkbox"/>
+              <span>
+               <strong>
+                Bei neuer Runde Rundenruf einblenden
+               </strong>
+              </span>
+             </label>
+            </section>
+           </div>
+          </section>
+         </div>
+         <div class="atelier-panel" data-atelier-panel="archive" id="atelier-panel-archive">
+          <section aria-label="Archiv und Daten" class="toolkit-section toolkit-section-data">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Archiv &amp; Daten
+             </h3>
+            </div>
+           </div>
+           <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
+            <button onclick="saveCurrentStateManually()" type="button">
+             Im Browser speichern
+            </button>
+            <button onclick="clearSavedBrowserState()" type="button">
+             Lokale Daten l&ouml;schen
+            </button>
+            <button onclick="exportEncounter()" type="button">
+             Encounter exportieren
+            </button>
+            <button onclick="triggerEncounterImport()" type="button">
+             Encounter importieren
+            </button>
+           </div>
+          </section>
+          <section aria-label="Demo-Karten verwalten" class="toolkit-section toolkit-section-demo">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Demo-Karten
+             </h3>
+            </div>
+           </div>
+           <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
+            <button onclick="reloadDemoCards()" type="button">
+             Demo-Karten laden
+            </button>
+            <button onclick="removeDemoCards()" type="button">
+             Demo-Karten entfernen
+            </button>
+           </div>
+          </section>
+          <section aria-label="Aufr&auml;umen und Reset" class="toolkit-section toolkit-section-cleanup">
+           <div class="toolkit-section-heading">
+            <div>
+             <h3>
+              Aufr&auml;umen &amp; Reset
+             </h3>
+            </div>
+           </div>
+           <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
+            <button onclick="clearAllTempHp()" type="button">
+             Temp HP entfernen
+            </button>
+            <button onclick="clearConditionsFromHandCards()" type="button">
+             Conditions entfernen
+            </button>
+            <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
+             Encounter leeren
+            </button>
+           </div>
+          </section>
+         </div>
+         <input accept=".json,application/json" id="encounter-import-file" onchange="handleEncounterImportFileChange(event)" style="display: none;" type="file"/>
+         <div aria-labelledby="deck-import-preview-title" aria-modal="true" class="deck-import-preview deck-import-preview-hidden" id="deck-import-preview" role="dialog">
+          <div class="deck-import-preview-card">
+           <p class="section-eyebrow">
+            Import-Vorschau
+           </p>
+           <h3 id="deck-import-preview-title">
+            Encounter importieren
+           </h3>
+           <p class="deck-import-preview-file" id="deck-import-preview-file">
+            Importdatei
+           </p>
+           <p class="deck-import-preview-name" id="deck-import-preview-name">
+            Encounter: Unbenannter Encounter
+           </p>
+           <p class="deck-import-preview-summary" id="deck-import-preview-summary">
+            0 Karten gefunden.
+           </p>
+           <p class="deck-import-preview-warning">
+            W&auml;hle, ob die Karten nur zum Deck hinzugef&uuml;gt werden oder ob der aktuelle Encounter durch die Importdatei ersetzt wird.
+           </p>
+           <div class="deck-import-preview-actions">
+            <button onclick="confirmDeckImportAppend()" type="button">
+             Zum Deck hinzuf&uuml;gen
+            </button>
+            <button onclick="confirmDeckImportReplace()" type="button">
+             Aktuellen Zustand ersetzen
+            </button>
+            <button onclick="closeDeckImportPreview()" type="button">
+             Abbrechen
+            </button>
+           </div>
+          </div>
+         </div>
+        </div>
+       </section>
+      </aside>
+     </div>
+    </section>
+    <!-- DM-Vorbereitungsansicht -->
+    <section class="dm-preparation-view preparation-dashboard">
+     <section aria-label="Kartendeck und Kartenverwaltung" class="preparation-table">
+      <div class="preparation-layout preparation-layout-clean">
+       <section aria-label="Kartendeck" class="deck-workbench">
+        <div class="deck-workbench-header">
+         <div class="deck-workbench-heading">
+          <p class="section-eyebrow">
+           Vorbereitung
+          </p>
+          <div class="deck-title-row">
+           <h2>
+            Kartendeck
+           </h2>
+          </div>
+          <p class="deck-workbench-subtitle">
+           Karten schmieden, organisieren und f&uuml;r den Spieltisch vorbereiten.
+          </p>
+         </div>
+         <div aria-label="Aktueller Encounter-Name" class="deck-encounter-card">
+          <p class="section-eyebrow deck-encounter-eyebrow">
+           Encounter
+          </p>
+          <strong data-encounter-name-display="">
+           Unbenannter Encounter
+          </strong>
+          <button onclick="renameEncounter()" type="button">
+           Umbenennen
+          </button>
+         </div>
+        </div>
+        <div class="deck-command-grid">
+         <div aria-label="Deck-Filter" class="deck-control-panel">
+          <p class="section-eyebrow deck-panel-eyebrow">
+           Deck-Filter
+          </p>
+          <div class="deck-filter-row">
+           <label class="deck-search-field" for="deck-search-input">
+            <span>
+             Suche
+            </span>
+            <input autocomplete="off" id="deck-search-input" oninput="setDeckSearchQuery(this.value)" placeholder="Karten suchen &hellip;" type="search"/>
+           </label>
+           <label class="deck-filter-field" for="deck-type-filter">
+            <span>
+             Typ
+            </span>
+            <select id="deck-type-filter" onchange="setDeckTypeFilter(this.value)">
+             <option value="all">
+              Alle
+             </option>
+             <option value="player">
+              Player
+             </option>
+             <option value="npc">
+              NPC
+             </option>
+             <option value="monster">
+              Monster
+             </option>
+            </select>
+           </label>
+           <label class="deck-filter-field" for="deck-sort-mode">
+            <span>
+             Sortierung
+            </span>
+            <select id="deck-sort-mode" onchange="setDeckSortMode(this.value)">
+             <option value="name">
+              Name A&ndash;Z
+             </option>
+             <option value="type">
+              Typ
+             </option>
+             <option value="initiativeModifier">
+              Initiative-Modifikator
+             </option>
+             <option value="hp">
+              HP
+             </option>
+            </select>
+           </label>
+          </div>
+         </div>
+         <div aria-label="Deck verwalten" class="deck-manage-panel">
+          <p class="section-eyebrow deck-panel-eyebrow">
+           Deck verwalten
+          </p>
+          <div class="deck-manage-actions deck-manage-actions-compact">
+           <button class="deck-to-hand-bulk-button" onclick="moveSelectedDeckCardsToHand()" type="button">
+            Auswahl auf die Hand
+           </button>
+           <button class="card-forge-open-button" onclick="openNewCardForge()" type="button">
+            Kartenschmiede &ouml;ffnen
+           </button>
+           <details class="section-menu deck-more-menu">
+            <summary class="section-menu-summary" role="button">
+             Weitere Funktionen
+            </summary>
+            <div class="section-menu-panel deck-more-menu-panel">
+             <div class="deck-more-menu-group">
+              <p>
+               Auswahl
+              </p>
+              <button onclick="selectVisibleDeckCards()" type="button">
+               Sichtbare w&auml;hlen
+              </button>
+              <button onclick="clearDeckSelection()" type="button">
+               Auswahl leeren
+              </button>
+             </div>
+             <div class="deck-more-menu-group">
+              <p>
+               Speichern &amp; Laden
+              </p>
+              <button onclick="exportEncounter()" type="button">
+               Encounter exportieren
+              </button>
+              <button onclick="triggerEncounterImport()" type="button">
+               Encounter importieren
+              </button>
+             </div>
+             <div class="deck-more-menu-group">
+              <p>
+               Demo &amp; Reset
+              </p>
+              <button onclick="reloadDemoCards()" type="button">
+               Demo-Karten laden
+              </button>
+              <button onclick="removeDemoCards()" type="button">
+               Demo-Karten entfernen
+              </button>
+              <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
+               Encounter leeren
+              </button>
+             </div>
+            </div>
+           </details>
+          </div>
+         </div>
+        </div>
+        <div aria-label="Deck-Auswahl" class="deck-selection-panel deck-selection-compact">
+         <div class="deck-selection-status" id="deck-selection-status">
+          Auswahl: 0 &middot; Sichtbar: 0 / 0
+         </div>
+         <div class="deck-selection-names" id="deck-selection-names">
+          Keine Deck-Karten ausgew&auml;hlt.
+         </div>
+        </div>
+        <div class="deck-card-ribbon-shell">
+         <button aria-label="Kartendeck nach links scrollen" class="deck-card-scroll-button" onclick="scrollCardRow('deck-card-list', 'left')" title="Nach links scrollen" type="button">
+          &lsaquo;
+         </button>
+         <div class="deck-card-grid" id="deck-card-list">
+         </div>
+         <button aria-label="Kartendeck nach rechts scrollen" class="deck-card-scroll-button" onclick="scrollCardRow('deck-card-list', 'right')" title="Nach rechts scrollen" type="button">
+          &rsaquo;
+         </button>
+        </div>
+       </section>
+      </div>
+      <aside aria-label="Karteneditor" class="card-forge card-forge-drawer" id="card-forge-drawer">
+       <div class="card-forge-header">
+        <div>
+         <p class="section-eyebrow">
+          Card Forge
+         </p>
+         <h3>
+          Kartenschmiede
+         </h3>
+        </div>
+        <button onclick="closeCardForgeDrawer()" type="button">
+         Schlie&szlig;en
+        </button>
+       </div>
+       <section class="edit-creature-section edit-creature-section-hidden card-forge-panel card-forge-panel-hidden" id="edit-creature-section">
+        <div class="card-forge-mode-row">
+         <div>
+          <p class="section-eyebrow">
+           Karte bearbeiten
+          </p>
+          <h2 id="edit-creature-title">
+           Karte bearbeiten
+          </h2>
+         </div>
+         <button onclick="openNewCardForge()" type="button">
+          Neue Karte
+         </button>
+        </div>
+        <p class="form-error" id="edit-creature-error">
+        </p>
+        <div class="add-creature-form edit-creature-form card-forge-form">
+         <div aria-label="Bearbeitungsbereiche" class="forge-tab-bar" role="tablist">
+          <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
+           Fokuskarte
+          </button>
+          <button class="forge-tab-button" data-forge-tab="values" onclick="setForgeTab('values')" role="tab" type="button">
+           Profil
+          </button>
+          <button class="forge-tab-button" data-forge-tab="actions" onclick="setForgeTab('actions')" role="tab" type="button">
+           Aktionen
+          </button>
+          <button class="forge-tab-button" data-forge-tab="traits" onclick="setForgeTab('traits')" role="tab" type="button">
+           Traits
+          </button>
+          <button class="forge-tab-button" data-forge-tab="notes" onclick="setForgeTab('notes')" role="tab" type="button">
+           Notizen
+          </button>
+          <button class="forge-tab-button" data-forge-tab="spells" onclick="setForgeTab('spells')" role="tab" type="button">
+           Spells
+          </button>
+          <button class="forge-tab-button" data-forge-tab="inventory" onclick="setForgeTab('inventory')" role="tab" type="button">
+           Inventar
+          </button>
+         </div>
+         <div class="forge-tab-grid">
+          <fieldset class="form-group forge-tab-panel forge-tab-basis forge-tab-active">
+           <legend>
+            Fokuskarte
+           </legend>
+           <div class="forge-input-section forge-focus-identity-section">
+            <h4>
+             Identit&auml;t &amp; Spieltisch
+            </h4>
+            <div class="form-grid form-grid-four">
+             <div class="form-field">
+              <label for="edit-creature-name">
+               Interner Name
+              </label>
+              <input id="edit-creature-name" type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-public-name">
+               &Ouml;ffentlicher Name
+              </label>
+              <input id="edit-creature-public-name" type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-type">
+               Typ
+              </label>
+              <select id="edit-creature-type">
+               <option value="player">
+                Player
+               </option>
+               <option value="npc">
+                NPC
+               </option>
+               <option value="monster">
+                Monster
+               </option>
+              </select>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-hp-visibility">
+               Spieler-HP-Anzeige
+              </label>
+              <select id="edit-creature-hp-visibility">
+               <option value="full">
+                HP vollst&auml;ndig anzeigen
+               </option>
+               <option value="bar">
+                Nur HP-Balken anzeigen
+               </option>
+               <option value="descriptive">
+                Nur Beschreibung anzeigen
+               </option>
+               <option value="hidden">
+                HP verbergen
+               </option>
+              </select>
+             </div>
+             <div class="form-field form-field-wide-four">
+              <label for="edit-creature-image-path">
+               Bildpfad oder gespeicherte Bilddaten
+              </label>
+              <input id="edit-creature-image-path" placeholder="Images/beispiel.png" type="text"/>
+             </div>
+             <div class="form-field form-field-wide-four">
+              <label for="edit-creature-image">
+               Neues Bild ausw&auml;hlen
+              </label>
+              <input accept="image/*" id="edit-creature-image" type="file"/>
+             </div>
+             <label class="checkbox-field form-field-wide-four" for="edit-creature-is-in-combat">
+              <input id="edit-creature-is-in-combat" type="checkbox"/>
+              <span>
+               Karte ist auf der Hand
+              </span>
+             </label>
+            </div>
+           </div>
+           <div class="forge-input-section forge-focus-section">
+            <h4>
+             Kampfwerte
+            </h4>
+            <div class="form-grid form-grid-four">
+             <div class="form-field">
+              <label for="edit-creature-hp">
+               Aktuelle HP
+              </label>
+              <input id="edit-creature-hp" min="0" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-max-hp">
+               Max HP
+              </label>
+              <input id="edit-creature-max-hp" min="1" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-temp-hp">
+               Temp HP
+              </label>
+              <input id="edit-creature-temp-hp" min="0" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-ac">
+               AC
+              </label>
+              <input id="edit-creature-ac" min="0" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-initiative">
+               Feste Initiative optional
+              </label>
+              <input id="edit-creature-initiative" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-initiative-modifier">
+               Initiative-Mod
+              </label>
+              <input id="edit-creature-initiative-modifier" placeholder="+3" type="text"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section forge-focus-section">
+            <h4>
+             Passive Werte
+            </h4>
+            <div class="form-grid form-grid-three">
+             <div class="form-field">
+              <label for="edit-creature-passive-perception">
+               Passive Perception
+              </label>
+              <input id="edit-creature-passive-perception" min="0" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-passive-insight">
+               Passive Insight
+              </label>
+              <input id="edit-creature-passive-insight" min="0" type="number"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-passive-investigation">
+               Passive Investigation
+              </label>
+              <input id="edit-creature-passive-investigation" min="0" type="number"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section forge-condition-block forge-focus-section">
+            <h4>
+             Start-Conditions
+            </h4>
+            <div class="condition-checkbox-list" id="edit-creature-condition-list">
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-values">
+           <legend>
+            Profil
+           </legend>
+           <div class="forge-input-section">
+            <h4>
+             Attribute
+            </h4>
+            <div class="forge-ability-editor-grid">
+             <div class="forge-ability-editor-card">
+              <strong>
+               STR
+              </strong>
+              <input aria-label="Strength Score" id="edit-creature-strength-score" type="number" value="10"/>
+              <input aria-label="Strength Modifier" id="edit-creature-strength-modifier" type="text" value="+0"/>
+             </div>
+             <div class="forge-ability-editor-card">
+              <strong>
+               DEX
+              </strong>
+              <input aria-label="Dexterity Score" id="edit-creature-dexterity-score" type="number" value="10"/>
+              <input aria-label="Dexterity Modifier" id="edit-creature-dexterity-modifier" type="text" value="+0"/>
+             </div>
+             <div class="forge-ability-editor-card">
+              <strong>
+               CON
+              </strong>
+              <input aria-label="Constitution Score" id="edit-creature-constitution-score" type="number" value="10"/>
+              <input aria-label="Constitution Modifier" id="edit-creature-constitution-modifier" type="text" value="+0"/>
+             </div>
+             <div class="forge-ability-editor-card">
+              <strong>
+               INT
+              </strong>
+              <input aria-label="Intelligence Score" id="edit-creature-intelligence-score" type="number" value="10"/>
+              <input aria-label="Intelligence Modifier" id="edit-creature-intelligence-modifier" type="text" value="+0"/>
+             </div>
+             <div class="forge-ability-editor-card">
+              <strong>
+               WIS
+              </strong>
+              <input aria-label="Wisdom Score" id="edit-creature-wisdom-score" type="number" value="10"/>
+              <input aria-label="Wisdom Modifier" id="edit-creature-wisdom-modifier" type="text" value="+0"/>
+             </div>
+             <div class="forge-ability-editor-card">
+              <strong>
+               CHA
+              </strong>
+              <input aria-label="Charisma Score" id="edit-creature-charisma-score" type="number" value="10"/>
+              <input aria-label="Charisma Modifier" id="edit-creature-charisma-modifier" type="text" value="+0"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section forge-profile-movement-section">
+            <h4>
+             Bewegung &amp; Wahrnehmung
+            </h4>
+            <div class="form-grid form-grid-two">
+             <div class="form-field">
+              <label for="edit-creature-speed">
+               Speed
+              </label>
+              <input id="edit-creature-speed" placeholder="30 ft." type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-senses">
+               Senses
+              </label>
+              <input id="edit-creature-senses" type="text"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section forge-profile-defense-section">
+            <h4>
+             Verteidigung
+            </h4>
+            <div class="form-grid form-grid-two">
+             <div class="form-field form-field-wide-four">
+              <label for="edit-creature-saving-throws">
+               Saving Throws
+              </label>
+              <input id="edit-creature-saving-throws" type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-resistances">
+               Resistenzen
+              </label>
+              <input id="edit-creature-resistances" type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-immunities">
+               Immunit&auml;ten
+              </label>
+              <input id="edit-creature-immunities" type="text"/>
+             </div>
+             <div class="form-field form-field-wide-four">
+              <label for="edit-creature-vulnerabilities">
+               Verwundbarkeiten
+              </label>
+              <input id="edit-creature-vulnerabilities" type="text"/>
+             </div>
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-actions">
+           <legend>
+            Aktionen
+           </legend>
+           <div class="forge-input-section">
+            <h4>
+             Aktionen verwalten
+            </h4>
+            <textarea class="action-forge-hidden-textarea" hidden="" id="edit-creature-actions-text"></textarea>
+            <div class="forge-action-manager" id="edit-creature-action-manager">
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-traits">
+           <legend>
+            Traits
+           </legend>
+           <div class="forge-input-section">
+            <h4>
+             Ressourcen
+            </h4>
+            <div class="form-field">
+             <label for="edit-creature-special-resources">
+              Ressourcen / Recharge / Uses
+             </label>
+             <input id="edit-creature-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
+            </div>
+           </div>
+           <div class="forge-input-section">
+            <h4>
+             Traits verwalten
+            </h4>
+            <textarea class="trait-forge-hidden-textarea" hidden="" id="edit-creature-traits-text"></textarea>
+            <div class="forge-trait-manager" id="edit-creature-trait-manager">
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-notes">
+           <legend>
+            Notizen
+           </legend>
+           <div class="forge-input-section forge-notes-manager-section">
+            <div class="forge-manager-heading-row">
+             <div>
+              <h4>
+               Notizabschnitte
+              </h4>
+             </div>
+             <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('edit-creature')" type="button">
+              Abschnitt hinzuf&uuml;gen
+             </button>
+            </div>
+            <textarea class="forge-notes-hidden-textarea" hidden="" id="edit-creature-notes"></textarea>
+            <div class="forge-note-manager" id="edit-creature-note-manager">
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-spells">
+           <legend>
+            Spells
+           </legend>
+           <div class="forge-input-section spell-forge-basis-section">
+            <h4>
+             Spellcasting Basis
+            </h4>
+            <div class="form-grid form-grid-three">
+             <div class="form-field">
+              <label for="edit-creature-spellcasting-ability">
+               Ability
+              </label>
+              <select id="edit-creature-spellcasting-ability">
+               <option value="">
+                &mdash;
+               </option>
+               <option value="INT">
+                INT
+               </option>
+               <option value="WIS">
+                WIS
+               </option>
+               <option value="CHA">
+                CHA
+               </option>
+              </select>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spellcasting-save-dc">
+               Save DC
+              </label>
+              <input id="edit-creature-spellcasting-save-dc" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spellcasting-attack">
+               Spell Attack
+              </label>
+              <input id="edit-creature-spellcasting-attack" placeholder="+5" type="text"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section spell-forge-slots-section">
+            <h4>
+             Spell Slots
+            </h4>
+            <div class="spell-slot-editor-grid">
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-1">
+               1st
+              </label>
+              <input id="edit-creature-spell-slots-1" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-2">
+               2nd
+              </label>
+              <input id="edit-creature-spell-slots-2" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-3">
+               3rd
+              </label>
+              <input id="edit-creature-spell-slots-3" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-4">
+               4th
+              </label>
+              <input id="edit-creature-spell-slots-4" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-5">
+               5th
+              </label>
+              <input id="edit-creature-spell-slots-5" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-6">
+               6th
+              </label>
+              <input id="edit-creature-spell-slots-6" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-7">
+               7th
+              </label>
+              <input id="edit-creature-spell-slots-7" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-8">
+               8th
+              </label>
+              <input id="edit-creature-spell-slots-8" max="9" min="0" type="number" value="0"/>
+             </div>
+             <div class="form-field">
+              <label for="edit-creature-spell-slots-9">
+               9th
+              </label>
+              <input id="edit-creature-spell-slots-9" max="9" min="0" type="number" value="0"/>
+             </div>
+            </div>
+           </div>
+           <div class="forge-input-section spell-forge-list-section">
+            <h4>
+             Zauber verwalten
+            </h4>
+            <textarea class="spell-forge-hidden-textarea" hidden="" id="edit-creature-structured-spells"></textarea>
+            <div class="forge-spell-manager" id="edit-creature-spell-manager">
+            </div>
+           </div>
+           <div class="forge-input-section spell-forge-legacy-section">
+            <h4>
+             Legacy-Text
+            </h4>
+            <div class="form-field">
+             <label for="edit-creature-spell-save-dc">
+              Alter Spell Save DC / Spell Attack Text
+             </label>
+             <input id="edit-creature-spell-save-dc" placeholder="DC 14 &middot; Spell Attack +6" type="text"/>
+            </div>
+            <div class="form-field">
+             <label for="edit-creature-spells-text">
+              Alter Zauber-/F&auml;higkeiten-Text
+             </label>
+             <textarea id="edit-creature-spells-text" rows="5"></textarea>
+            </div>
+           </div>
+          </fieldset>
+          <fieldset class="form-group forge-tab-panel forge-tab-inventory">
+           <legend>
+            Inventar
+           </legend>
+           <div class="forge-input-section inventory-forge-currency-section">
+            <h4>
+             Geldbeutel
+            </h4>
+            <div class="inventory-currency-edit-grid">
+             <label class="form-field">
+              <span>
+               Gold
+              </span>
+              <input id="edit-creature-currency-gp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+             </label>
+             <label class="form-field">
+              <span>
+               Silber
+              </span>
+              <input id="edit-creature-currency-sp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+             </label>
+             <label class="form-field">
+              <span>
+               Kupfer
+              </span>
+              <input id="edit-creature-currency-cp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+             </label>
+            </div>
+           </div>
+           <textarea hidden="" id="edit-creature-inventory-cards"></textarea>
+           <textarea hidden="" id="edit-creature-inventory-list"></textarea>
+           <div class="forge-inventory-manager" id="edit-creature-inventory-manager">
+           </div>
+           <div class="forge-input-section spell-forge-legacy-section">
+            <h4>
+             Legacy-Text
+            </h4>
+            <div class="form-field">
+             <label for="edit-creature-inventory-text">
+              Alter Inventar-/Loot-Text
+             </label>
+             <textarea id="edit-creature-inventory-text" rows="5"></textarea>
+            </div>
+           </div>
+          </fieldset>
+         </div>
+         <div class="edit-creature-actions">
+          <button onclick="handleEditCreatureSaveButtonClick()" type="button">
+           &Auml;nderungen speichern
+          </button>
+          <button onclick="closeCardForgeDrawer()" type="button">
+           Abbrechen
+          </button>
+         </div>
+        </div>
+       </section>
+       <section class="add-creature-section add-creature-details card-forge-panel">
+        <div class="card-forge-mode-row">
+         <div>
+          <p class="section-eyebrow">
+           Karte erschaffen
+          </p>
+          <h3>
+           Neue Karte
+          </h3>
+         </div>
+        </div>
+        <div class="add-creature-body">
+         <p class="form-error" id="add-creature-error">
+         </p>
+         <div class="add-creature-form card-forge-form">
+          <div aria-label="Eingabebereiche" class="forge-tab-bar" role="tablist">
+           <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
+            Fokuskarte
+           </button>
+           <button class="forge-tab-button" data-forge-tab="values" onclick="setForgeTab('values')" role="tab" type="button">
+            Profil
+           </button>
+           <button class="forge-tab-button" data-forge-tab="actions" onclick="setForgeTab('actions')" role="tab" type="button">
+            Aktionen
+           </button>
+           <button class="forge-tab-button" data-forge-tab="traits" onclick="setForgeTab('traits')" role="tab" type="button">
+            Traits
+           </button>
+           <button class="forge-tab-button" data-forge-tab="notes" onclick="setForgeTab('notes')" role="tab" type="button">
+            Notizen
+           </button>
+           <button class="forge-tab-button" data-forge-tab="spells" onclick="setForgeTab('spells')" role="tab" type="button">
+            Spells
+           </button>
+           <button class="forge-tab-button" data-forge-tab="inventory" onclick="setForgeTab('inventory')" role="tab" type="button">
+            Inventar
+           </button>
+          </div>
+          <div class="forge-tab-grid">
+           <fieldset class="form-group forge-tab-panel forge-tab-basis forge-tab-active">
+            <legend>
+             Fokuskarte
+            </legend>
+            <div class="forge-input-section forge-focus-identity-section">
+             <h4>
+              Identit&auml;t &amp; Spieltisch
+             </h4>
+             <div class="form-grid form-grid-four">
+              <div class="form-field">
+               <label for="new-creature-name">
+                Interner Name
+               </label>
+               <input id="new-creature-name" type="text" value="Goblin"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-public-name">
+                &Ouml;ffentlicher Name
+               </label>
+               <input id="new-creature-public-name" type="text" value="Boblin der Goblin"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-type">
+                Typ
+               </label>
+               <select id="new-creature-type">
+                <option value="player">
+                 Player
+                </option>
+                <option value="npc">
+                 NPC
+                </option>
+                <option selected="" value="monster">
+                 Monster
+                </option>
+               </select>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-quantity">
+                Anzahl
+               </label>
+               <input id="new-creature-quantity" max="20" min="1" type="number" value="1"/>
+              </div>
+              <div class="form-field form-field-wide-four">
+               <label for="new-creature-image">
+                Bild ausw&auml;hlen
+               </label>
+               <input accept="image/*" id="new-creature-image" type="file"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-hp-visibility">
+                Spieler-HP-Anzeige
+               </label>
+               <select id="new-creature-hp-visibility">
+                <option selected="" value="full">
+                 HP vollst&auml;ndig anzeigen
+                </option>
+                <option value="bar">
+                 Nur HP-Balken anzeigen
+                </option>
+                <option value="descriptive">
+                 Nur Beschreibung anzeigen
+                </option>
+                <option value="hidden">
+                 HP verbergen
+                </option>
+               </select>
+              </div>
+              <label class="checkbox-field" for="new-creature-is-in-combat">
+               <input id="new-creature-is-in-combat" type="checkbox"/>
+               <span>
+                Direkt auf die Hand nehmen
+               </span>
+              </label>
+             </div>
+            </div>
+            <div class="forge-input-section forge-focus-section">
+             <h4>
+              Kampfwerte
+             </h4>
+             <div class="form-grid form-grid-four">
+              <div class="form-field">
+               <label for="new-creature-hp">
+                Aktuelle HP
+               </label>
+               <input id="new-creature-hp" min="0" type="number" value="10"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-max-hp">
+                Max HP
+               </label>
+               <input id="new-creature-max-hp" min="1" type="number" value="10"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-temp-hp">
+                Temp HP
+               </label>
+               <input id="new-creature-temp-hp" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-ac">
+                AC
+               </label>
+               <input id="new-creature-ac" min="0" type="number" value="10"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-initiative">
+                Feste Initiative optional
+               </label>
+               <input id="new-creature-initiative" placeholder="leer = vor Kampf w&uuml;rfeln" type="number"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-initiative-modifier">
+                Initiative-Mod
+               </label>
+               <input id="new-creature-initiative-modifier" placeholder="+3" type="text" value="+0"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section forge-focus-section">
+             <h4>
+              Passive Werte
+             </h4>
+             <div class="form-grid form-grid-three">
+              <div class="form-field">
+               <label for="new-creature-passive-perception">
+                Passive Perception
+               </label>
+               <input id="new-creature-passive-perception" min="0" type="number" value="10"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-passive-insight">
+                Passive Insight
+               </label>
+               <input id="new-creature-passive-insight" min="0" type="number" value="10"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-passive-investigation">
+                Passive Investigation
+               </label>
+               <input id="new-creature-passive-investigation" min="0" type="number" value="10"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section forge-condition-block forge-focus-section">
+             <h4>
+              Start-Conditions
+             </h4>
+             <div class="condition-checkbox-list" id="new-creature-condition-list">
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-values">
+            <legend>
+             Profil
+            </legend>
+            <div class="forge-input-section">
+             <h4>
+              Attribute
+             </h4>
+             <div class="forge-ability-editor-grid">
+              <div class="forge-ability-editor-card">
+               <strong>
+                STR
+               </strong>
+               <input aria-label="Strength Score" id="new-creature-strength-score" type="number" value="10"/>
+               <input aria-label="Strength Modifier" id="new-creature-strength-modifier" type="text" value="+0"/>
+              </div>
+              <div class="forge-ability-editor-card">
+               <strong>
+                DEX
+               </strong>
+               <input aria-label="Dexterity Score" id="new-creature-dexterity-score" type="number" value="10"/>
+               <input aria-label="Dexterity Modifier" id="new-creature-dexterity-modifier" type="text" value="+0"/>
+              </div>
+              <div class="forge-ability-editor-card">
+               <strong>
+                CON
+               </strong>
+               <input aria-label="Constitution Score" id="new-creature-constitution-score" type="number" value="10"/>
+               <input aria-label="Constitution Modifier" id="new-creature-constitution-modifier" type="text" value="+0"/>
+              </div>
+              <div class="forge-ability-editor-card">
+               <strong>
+                INT
+               </strong>
+               <input aria-label="Intelligence Score" id="new-creature-intelligence-score" type="number" value="10"/>
+               <input aria-label="Intelligence Modifier" id="new-creature-intelligence-modifier" type="text" value="+0"/>
+              </div>
+              <div class="forge-ability-editor-card">
+               <strong>
+                WIS
+               </strong>
+               <input aria-label="Wisdom Score" id="new-creature-wisdom-score" type="number" value="10"/>
+               <input aria-label="Wisdom Modifier" id="new-creature-wisdom-modifier" type="text" value="+0"/>
+              </div>
+              <div class="forge-ability-editor-card">
+               <strong>
+                CHA
+               </strong>
+               <input aria-label="Charisma Score" id="new-creature-charisma-score" type="number" value="10"/>
+               <input aria-label="Charisma Modifier" id="new-creature-charisma-modifier" type="text" value="+0"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section forge-profile-movement-section">
+             <h4>
+              Bewegung &amp; Wahrnehmung
+             </h4>
+             <div class="form-grid form-grid-two">
+              <div class="form-field">
+               <label for="new-creature-speed">
+                Speed
+               </label>
+               <input id="new-creature-speed" placeholder="30 ft." type="text"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-senses">
+                Senses
+               </label>
+               <input id="new-creature-senses" type="text"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section forge-profile-defense-section">
+             <h4>
+              Verteidigung
+             </h4>
+             <div class="form-grid form-grid-two">
+              <div class="form-field form-field-wide-four">
+               <label for="new-creature-saving-throws">
+                Saving Throws
+               </label>
+               <input id="new-creature-saving-throws" type="text"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-resistances">
+                Resistenzen
+               </label>
+               <input id="new-creature-resistances" type="text"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-immunities">
+                Immunit&auml;ten
+               </label>
+               <input id="new-creature-immunities" type="text"/>
+              </div>
+              <div class="form-field form-field-wide-four">
+               <label for="new-creature-vulnerabilities">
+                Verwundbarkeiten
+               </label>
+               <input id="new-creature-vulnerabilities" type="text"/>
+              </div>
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-actions">
+            <legend>
+             Aktionen
+            </legend>
+            <div class="forge-input-section">
+             <h4>
+              Aktionen verwalten
+             </h4>
+             <textarea class="action-forge-hidden-textarea" hidden="" id="new-creature-actions-text"></textarea>
+             <div class="forge-action-manager" id="new-creature-action-manager">
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-traits">
+            <legend>
+             Traits
+            </legend>
+            <div class="forge-input-section">
+             <h4>
+              Ressourcen
+             </h4>
+             <div class="form-field">
+              <label for="new-creature-special-resources">
+               Ressourcen / Recharge / Uses
+              </label>
+              <input id="new-creature-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
+             </div>
+            </div>
+            <div class="forge-input-section">
+             <h4>
+              Traits verwalten
+             </h4>
+             <textarea class="trait-forge-hidden-textarea" hidden="" id="new-creature-traits-text"></textarea>
+             <div class="forge-trait-manager" id="new-creature-trait-manager">
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-notes">
+            <legend>
+             Notizen
+            </legend>
+            <div class="forge-input-section forge-notes-manager-section">
+             <div class="forge-manager-heading-row">
+              <div>
+               <h4>
+                Notizabschnitte
+               </h4>
+              </div>
+              <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('new-creature')" type="button">
+               Abschnitt hinzuf&uuml;gen
+              </button>
+             </div>
+             <textarea class="forge-notes-hidden-textarea" hidden="" id="new-creature-notes"></textarea>
+             <div class="forge-note-manager" id="new-creature-note-manager">
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-spells">
+            <legend>
+             Spells
+            </legend>
+            <div class="forge-input-section spell-forge-basis-section">
+             <h4>
+              Spellcasting Basis
+             </h4>
+             <div class="form-grid form-grid-three">
+              <div class="form-field">
+               <label for="new-creature-spellcasting-ability">
+                Ability
+               </label>
+               <select id="new-creature-spellcasting-ability">
+                <option value="">
+                 &mdash;
+                </option>
+                <option value="INT">
+                 INT
+                </option>
+                <option value="WIS">
+                 WIS
+                </option>
+                <option value="CHA">
+                 CHA
+                </option>
+               </select>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spellcasting-save-dc">
+                Save DC
+               </label>
+               <input id="new-creature-spellcasting-save-dc" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spellcasting-attack">
+                Spell Attack
+               </label>
+               <input id="new-creature-spellcasting-attack" placeholder="+5" type="text"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section spell-forge-slots-section">
+             <h4>
+              Spell Slots
+             </h4>
+             <div class="spell-slot-editor-grid">
+              <div class="form-field">
+               <label for="new-creature-spell-slots-1">
+                1st
+               </label>
+               <input id="new-creature-spell-slots-1" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-2">
+                2nd
+               </label>
+               <input id="new-creature-spell-slots-2" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-3">
+                3rd
+               </label>
+               <input id="new-creature-spell-slots-3" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-4">
+                4th
+               </label>
+               <input id="new-creature-spell-slots-4" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-5">
+                5th
+               </label>
+               <input id="new-creature-spell-slots-5" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-6">
+                6th
+               </label>
+               <input id="new-creature-spell-slots-6" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-7">
+                7th
+               </label>
+               <input id="new-creature-spell-slots-7" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-8">
+                8th
+               </label>
+               <input id="new-creature-spell-slots-8" max="9" min="0" type="number" value="0"/>
+              </div>
+              <div class="form-field">
+               <label for="new-creature-spell-slots-9">
+                9th
+               </label>
+               <input id="new-creature-spell-slots-9" max="9" min="0" type="number" value="0"/>
+              </div>
+             </div>
+            </div>
+            <div class="forge-input-section spell-forge-list-section">
+             <h4>
+              Zauber verwalten
+             </h4>
+             <textarea class="spell-forge-hidden-textarea" hidden="" id="new-creature-structured-spells"></textarea>
+             <div class="forge-spell-manager" id="new-creature-spell-manager">
+             </div>
+            </div>
+            <div class="forge-input-section spell-forge-legacy-section">
+             <h4>
+              Legacy-Text
+             </h4>
+             <div class="form-field">
+              <label for="new-creature-spell-save-dc">
+               Alter Spell Save DC / Spell Attack Text
+              </label>
+              <input id="new-creature-spell-save-dc" placeholder="DC 14 &middot; Spell Attack +6" type="text"/>
+             </div>
+             <div class="form-field">
+              <label for="new-creature-spells-text">
+               Alter Zauber-/F&auml;higkeiten-Text
+              </label>
+              <textarea id="new-creature-spells-text" rows="5"></textarea>
+             </div>
+            </div>
+           </fieldset>
+           <fieldset class="form-group forge-tab-panel forge-tab-inventory">
+            <legend>
+             Inventar
+            </legend>
+            <div class="forge-input-section inventory-forge-currency-section">
+             <h4>
+              Geldbeutel
+             </h4>
+             <div class="inventory-currency-edit-grid">
+              <label class="form-field">
+               <span>
+                Gold
+               </span>
+               <input id="new-creature-currency-gp" min="0" type="number" value="0"/>
+              </label>
+              <label class="form-field">
+               <span>
+                Silber
+               </span>
+               <input id="new-creature-currency-sp" min="0" type="number" value="0"/>
+              </label>
+              <label class="form-field">
+               <span>
+                Kupfer
+               </span>
+               <input id="new-creature-currency-cp" min="0" type="number" value="0"/>
+              </label>
+             </div>
+            </div>
+            <textarea hidden="" id="new-creature-inventory-cards"></textarea>
+            <textarea hidden="" id="new-creature-inventory-list"></textarea>
+            <div class="forge-inventory-manager" id="new-creature-inventory-manager">
+            </div>
+            <div class="forge-input-section spell-forge-legacy-section">
+             <h4>
+              Legacy-Text
+             </h4>
+             <div class="form-field">
+              <label for="new-creature-inventory-text">
+               Alter Inventar-/Loot-Text
+              </label>
+              <textarea id="new-creature-inventory-text" rows="5"></textarea>
+             </div>
+            </div>
+           </fieldset>
+          </div>
+          <button class="add-creature-button" onclick="handleAddCreatureButtonClick()" type="button">
+           Karte hinzuf&uuml;gen
+          </button>
+         </div>
+        </div>
+       </section>
+      </aside>
+     </section>
+    </section>
+   </div>
+   <!-- Footer -->
+   <footer class="app-footer">
+    <div class="app-footer-summary">
+     <div>
+      <strong>
+       Miriel&rsquo;s Deck of Encounters
+      </strong>
+      <span>
+       v0.7.0 build 2026-07-07-18-22 by kuro
+      </span>
+     </div>
+     <p>
+      Nicht-kommerzielles, unabhängiges Fanprojekt für private Pen-and-Paper-Runden.
+     </p>
+    </div>
+    <details class="project-notice">
+     <summary>
+      Projekt- und Nutzungshinweise
+     </summary>
+     <div class="project-notice-content">
+      <section>
+       <h2>
+        Fanprojekt
+       </h2>
+       <p>
+        Miriel&rsquo;s Deck of Encounters ist ein nicht-kommerzielles, unabhängiges Fanprojekt zur Unterstützung privater Pen-and-Paper-Runden.
+       </p>
+       <p>
+        Dieses Projekt ist nicht offiziell, nicht gesponsert und nicht mit einem Rollenspielverlag oder einer Rollenspielmarke verbunden.
+       </p>
+      </section>
+      <section>
+       <h2>
+        Marken und Spielinhalte
+       </h2>
+       <p>
+        Einige Demo-Karten können Begriffe aus bekannten Pen-and-Paper-Regelsystemen enthalten. Diese Begriffe und Marken gehören ihren jeweiligen Rechteinhabern. Die Nennung dient nur der Beschreibung privater Spielinhalte und stellt keine offizielle Verbindung oder Empfehlung dar.
+       </p>
+       <p>
+        Soweit Inhalte auf Material von Wizards of the Coast beruhen: Diese Inhalte sind inoffizieller Fan Content. Nicht genehmigt oder unterstützt von Wizards. Teile der verwendeten Begriffe können Eigentum von Wizards of the Coast LLC sein.
+       </p>
+      </section>
+      <section>
+       <h2>
+        Eigene Inhalte und Bilder
+       </h2>
+       <p>
+        Die App enthält keine offiziellen Regelbücher, Logos oder offiziellen Artworks von Rollenspielverlagen. Bitte verwende nur Texte, Bilder und Spieldaten, für die du die nötigen Rechte oder eine passende Nutzungserlaubnis hast.
+       </p>
+       <p>
+        Bildhinweis: Die Demo- und Headerbilder wurden vom Projektinhaber mithilfe generativer KI erstellt und sind keine offiziellen Artworks von Rollenspielverlagen.
+       </p>
+      </section>
+      <section>
+       <h2>
+        Lokaler Speicher
+       </h2>
+       <p>
+        Die App speichert Daten lokal im Browser dieses Geräts. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Encounter exportieren“.
+       </p>
+      </section>
+     </div>
+    </details>
+   </footer>
+  </main>
+  <script src="app.js?v=0.6.59">
+  </script>
+ </body>
 </html>
