@@ -513,7 +513,7 @@ function createDemoCreatures() {
             spellsText: "Coded Whisper. A nearly silent phrase carries meaning only to the intended listener.\nRain Veil. Street rain and fog distort her outline for a few seconds.\nMoonfaden Mark. A tiny silver thread marks a door, pocket or package until dawn.\nFalse Trail. Footprints and drips appear to lead down the wrong alley.",
             inventoryText: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nThree coded street tokens\nBlack ribbon with a silver thread",
             hpVisibility: "descriptive",
-            imageData: "Images/Veyra.png",
+            imageData: "Images/veyra.png",
             conditions: [],
             isInCombat: false,
             isSelected: false
