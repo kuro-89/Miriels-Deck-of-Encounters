@@ -862,22 +862,39 @@ function applyAppViewToPage() {
     }
 }
 
-function getDemoCardsAutoloadEnabled() {
+function getBrowserStorageItem(storageKey) {
     try {
-        return localStorage.getItem(demoCardsAutoloadStorageKey) !== "false";
+        return localStorage.getItem(storageKey);
     } catch (error) {
-        return true;
+        return null;
     }
+}
+
+function setBrowserStorageItem(storageKey, storageValue) {
+    try {
+        localStorage.setItem(storageKey, storageValue);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function removeBrowserStorageItem(storageKey) {
+    try {
+        localStorage.removeItem(storageKey);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function getDemoCardsAutoloadEnabled() {
+    return getBrowserStorageItem(demoCardsAutoloadStorageKey) !== "false";
 }
 
 function setDemoCardsAutoloadEnabled(isEnabled) {
     demoCardsAutoloadEnabled = isEnabled === true;
-
-    try {
-        localStorage.setItem(demoCardsAutoloadStorageKey, demoCardsAutoloadEnabled ? "true" : "false");
-    } catch (error) {
-        // Browser-Speicher kann in privaten oder restriktiven Umgebungen blockiert sein.
-    }
+    setBrowserStorageItem(demoCardsAutoloadStorageKey, demoCardsAutoloadEnabled ? "true" : "false");
 }
 
 function shouldAutoloadDemoCards() {
@@ -962,15 +979,21 @@ function createPersistentAppState() {
 function saveAppStateToBrowser() {
     const persistentState = createPersistentAppState();
     const stateText = JSON.stringify(persistentState);
+    const wasSaved = setBrowserStorageItem(appStorageKey, stateText);
 
-    localStorage.setItem(appStorageKey, stateText);
+    if (wasSaved === false) {
+        updateStorageStatus("Browser-Speicher: nicht verfügbar");
+        return false;
+    }
+
     lastAppliedStateText = stateText;
-
     updateStorageStatus("Browser-Speicher: gespeichert");
 
     if (appView === "dm") {
         renderDmFeedPanel();
     }
+
+    return true;
 }
 
 function broadcastAppStateChange() {
@@ -992,12 +1015,13 @@ function saveAndBroadcastAppState() {
         return;
     }
 
-    saveAppStateToBrowser();
-    broadcastAppStateChange();
+    if (saveAppStateToBrowser() === true) {
+        broadcastAppStateChange();
+    }
 }
 
 function loadAppStateFromBrowser() {
-    const savedStateText = localStorage.getItem(appStorageKey);
+    const savedStateText = getBrowserStorageItem(appStorageKey);
 
     if (savedStateText === null) {
         updateStorageStatus("Browser-Speicher: leer");
@@ -1085,7 +1109,7 @@ function applyImportedEncounterState(importData) {
 }
 
 function applyExternalAppStateAndRender() {
-    const savedStateText = localStorage.getItem(appStorageKey);
+    const savedStateText = getBrowserStorageItem(appStorageKey);
 
     if (savedStateText === null) {
         return;
@@ -1163,10 +1187,14 @@ function updateStorageStatus(message) {
 
 function saveCurrentStateManually() {
     addCombatLogMessage("Zustand im Browser gespeichert.");
-    saveAppStateToBrowser();
-    broadcastAppStateChange();
 
-    alert("Der aktuelle Zustand wurde im Browser dieses Geräts gespeichert. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Encounter exportieren“.");
+    if (saveAppStateToBrowser() === true) {
+        broadcastAppStateChange();
+        alert("Der aktuelle Zustand wurde im Browser dieses Geräts gespeichert. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Encounter exportieren“.");
+        return;
+    }
+
+    alert("Der aktuelle Zustand konnte nicht im Browser gespeichert werden. Für Backups nutze bitte „Encounter exportieren“.");
 }
 
 function reloadDemoCards() {
@@ -1247,12 +1275,17 @@ function clearSavedBrowserState() {
         return;
     }
 
-    localStorage.removeItem(appStorageKey);
+    const wasRemoved = removeBrowserStorageItem(appStorageKey);
     lastAppliedStateText = "";
 
-    updateStorageStatus("Browser-Speicher: gelöscht");
+    if (wasRemoved === true) {
+        updateStorageStatus("Browser-Speicher: gelöscht");
+        alert("Lokale Browserdaten wurden gelöscht. Exportierte Dateien auf deinem Computer wurden nicht verändert.");
+        return;
+    }
 
-    alert("Lokale Browserdaten wurden gelöscht. Exportierte Dateien auf deinem Computer wurden nicht verändert.");
+    updateStorageStatus("Browser-Speicher: nicht verfügbar");
+    alert("Lokale Browserdaten konnten nicht gelöscht werden, weil der Browser-Speicher nicht verfügbar ist.");
 }
 
 // ============================================================
@@ -2531,8 +2564,20 @@ function createCreatureCopyName(baseName) {
     return copyName;
 }
 
+function clonePlainData(value) {
+    if (typeof structuredClone === "function") {
+        try {
+            return structuredClone(value);
+        } catch (error) {
+            // Fallback für ältere Browser oder nicht klonbare Werte.
+        }
+    }
+
+    return JSON.parse(JSON.stringify(value));
+}
+
 function cloneCreatureData(creature) {
-    return JSON.parse(JSON.stringify(creature));
+    return clonePlainData(creature);
 }
 
 function copyCreatureToDeck(creatureId) {
@@ -4959,19 +5004,6 @@ function getSafeNonNegativeInteger(value, fallbackValue) {
     return fallbackValue;
 }
 
-function clampNumber(value, minimum, maximum) {
-    if (value < minimum) {
-        return minimum;
-    }
-
-    if (value > maximum) {
-        return maximum;
-    }
-
-    return value;
-}
-
-
 // ============================================================
 // Spellcasting-Modell, Spell-Slot-Tracker und Forge-Parser
 // ============================================================
@@ -4989,18 +5021,6 @@ const spellLevelLabels = {
     9: "9th Level"
 };
 
-const spellLevelShortLabels = {
-    0: "0",
-    1: "1st",
-    2: "2nd",
-    3: "3rd",
-    4: "4th",
-    5: "5th",
-    6: "6th",
-    7: "7th",
-    8: "8th",
-    9: "9th"
-};
 
 function createEmptySpellSlots() {
     const slots = {};
@@ -6599,6 +6619,14 @@ function getCreatureActionReferences(creature) {
     return directActions.concat(traitActions, spellActions, itemActions);
 }
 
+function parseJsonValue(textValue, fallbackValue) {
+    try {
+        return JSON.parse(textValue);
+    } catch (error) {
+        return fallbackValue;
+    }
+}
+
 function getForgeActionsDraft(prefix) {
     const actionsElement = document.querySelector(`#${prefix}-actions-text`);
 
@@ -6606,11 +6634,14 @@ function getForgeActionsDraft(prefix) {
         return [];
     }
 
-    try {
-        return getSafeCreatureActions(JSON.parse(actionsElement.value), "");
-    } catch (error) {
-        return parseLegacyActionText(actionsElement.value);
+    const rawValue = actionsElement.value.trim();
+    const parsedValue = parseJsonValue(rawValue, null);
+
+    if (parsedValue !== null) {
+        return getSafeCreatureActions(parsedValue, "");
     }
+
+    return parseLegacyActionText(rawValue);
 }
 
 function setForgeActions(prefix, actions) {
@@ -8257,11 +8288,14 @@ function getForgeTraitsDraft(prefix) {
         return [];
     }
 
-    try {
-        return getSafeCreatureTraits(JSON.parse(traitsElement.value), "");
-    } catch (error) {
-        return parseLegacyTraitsText(traitsElement.value);
+    const rawValue = traitsElement.value.trim();
+    const parsedValue = parseJsonValue(rawValue, null);
+
+    if (parsedValue !== null) {
+        return getSafeCreatureTraits(parsedValue, "");
     }
+
+    return parseLegacyTraitsText(rawValue);
 }
 
 function setForgeTraits(prefix, traits) {
@@ -9832,10 +9866,12 @@ async function handleAddCreatureButtonClick() {
     }
 
     const startConditions = getNewConditionValues();
+    const createdDeckCreatureIds = [];
 
     for (let index = 0; index < quantity; index = index + 1) {
+        const newCreatureId = getNextCreatureId();
         const newCreature = {
-            id: getNextCreatureId(),
+            id: newCreatureId,
             name: getNumberedCreatureName(name, index, quantity),
             publicName: getNumberedCreatureName(publicName, index, quantity),
             type: typeSelectElement.value,
@@ -9885,12 +9921,24 @@ async function handleAddCreatureButtonClick() {
         };
 
         creatures.push(newCreature);
+
+        if (newCreature.isInCombat === false) {
+            createdDeckCreatureIds.push(newCreatureId);
+        }
     }
 
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
 
     renderCards();
+
+    if (createdDeckCreatureIds.length > 0) {
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                scrollToDeckCard(createdDeckCreatureIds[0], true);
+            });
+        });
+    }
 }
 
 // ============================================================
@@ -12087,11 +12135,11 @@ function getForgeInventoryDraft(prefix) {
     let list = fallback.list;
 
     if (cardsElement !== null && cardsElement.value.trim() !== "") {
-        try { cards = getSafeInventoryCards(JSON.parse(cardsElement.value), ""); } catch (error) { cards = fallback.cards; }
+        cards = getSafeInventoryCards(parseJsonValue(cardsElement.value, fallback.cards), "");
     }
 
     if (listElement !== null && listElement.value.trim() !== "") {
-        try { list = getSafeInventoryList(JSON.parse(listElement.value), ""); } catch (error) { list = fallback.list; }
+        list = getSafeInventoryList(parseJsonValue(listElement.value, fallback.list), "");
     }
 
     return {

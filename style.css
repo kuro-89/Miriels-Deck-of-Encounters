@@ -64,7 +64,7 @@ strong { color: var(--text-soft); }
 .section-eyebrow { margin: 0 0 4px; color: rgba(230,222,247,.78); font-size: 10px; font-weight: 950; letter-spacing: .13em; text-transform: uppercase; text-shadow: 0 0 10px rgba(198,181,255,.08); }
 .empty-list-message, .condition-empty, .combat-log-empty { margin: 0; color: var(--text-muted); font-size: 13px; }
 
-button, summary, input, select { font: inherit; }
+button, summary, input, select, textarea { font: inherit; }
 button, .app-help-button, .section-menu-summary, .inline-details-menu > summary, .public-focus-reset-button, .details-toggle-button, .public-preview-toggle-label, .preparation-deck-toggle-label {
     min-height: 32px;
     padding: 6px 11px;
@@ -95,7 +95,6 @@ label { color: var(--text-muted); font-size: 12px; font-weight: 800; }
     background: radial-gradient(circle at top left, rgba(255,123,138,.15), transparent 44%), linear-gradient(135deg, rgba(90,34,48,.94), rgba(35,15,24,.98));
 }
 .long-rest-button { border-color: rgba(127,185,255,.36); color: var(--active-soft); }
-.app-build-info { margin: 14px 0 0; color: var(--text-faint); font-size: 14px; }
 .app-help-button::before { content: "Handbuch"; font-size: 13px; }
 .app-help-content { display:grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap:14px; margin-top:16px; padding:18px; border:1px solid var(--border); border-radius:var(--radius-xl); background:rgba(12,9,18,.94); box-shadow:var(--shadow-panel); }
 .app-help-card { padding:16px; border:1px solid var(--border); border-radius:16px; background:rgba(23,18,33,.72); }
@@ -338,13 +337,6 @@ body.player-view .app { max-width: 1180px; }
 .combat-management-row { min-height:0; display:grid; grid-template-rows:auto auto; gap:10px; }
 .management-tool-grid { display:grid; grid-template-columns:minmax(0,1fr) max-content; gap:10px; align-items:start; }
 .initiative-tool { min-width:0; }
-.initiative-tool-main { display:grid; gap:5px; }
-.initiative-set-row { display:grid; grid-template-columns:minmax(0,1fr) 76px; gap:6px; align-items:center; }
-.initiative-set-row input { min-height:32px; }
-.initiative-set-row button { min-width:0; min-height:32px; padding-inline:8px; }
-.initiative-roll-actions { margin-top:7px; }
-.initiative-roll-actions button { width:100%; min-height:32px; padding-inline:8px; white-space:nowrap; }
-.initiative-tool-hint { margin:7px 0 0; color:var(--text-faint); font-size:12px; line-height:1.25; }
 .inline-details-menu { position:relative; justify-self:end; z-index:70; }
 .inline-details-menu > summary { display:inline-flex; list-style:none; min-width:156px; }
 .inline-details-panel { top: calc(100% + 8px); }
@@ -462,7 +454,7 @@ body.player-view .app { max-width: 1180px; }
 
 @media (max-width: 1180px) {
     .app { padding:18px; }
-    .game-view-layout { grid-template-columns:1fr; }
+    
     .combat-focus-grid { grid-template-columns:320px minmax(0,1fr); }
     .dm-feed-content { max-height:220px; }
 }
@@ -483,7 +475,7 @@ body.player-view .app { max-width: 1180px; }
     .focus-navigation-toolbar button { min-height: 30px; }
     .focused-title-block h3 { font-size: 16px; }
     .focused-creature-card-inner { gap:5px; padding:8px; }
-    .creature-card-section { padding:5px 7px; }
+    
     .creature-card-section h4 { font-size:10px; margin-bottom:3px; }
     .focused-resource-stack { gap:4px; }
     .dm-resource-meter { min-height:16px; }
@@ -506,7 +498,6 @@ body.player-view .app { max-width: 1180px; }
 }
 
 
-textarea { font: inherit; }
 textarea {
     width: 100%;
     min-height: 108px;
@@ -517,9 +508,8 @@ textarea {
     border-radius: 12px;
     background: linear-gradient(135deg, rgba(8,7,12,.98), rgba(17,13,25,.98));
 }
-textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 0 0 0 3px rgba(127,185,255,.12); }
 
-.preparation-dashboard { margin-top: 28px; }
+
 .preparation-table {
     padding: 14px;
     border: 1px solid var(--border);
@@ -530,7 +520,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 .preparation-table-header {
     display:flex;
     justify-content:space-between;
-    align-items:end;
+    align-items:center;
     gap:16px;
     padding: 8px 0 12px;
     border-bottom: 1px solid rgba(198,181,255,.12);
@@ -627,14 +617,9 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.focused-creature-card .creature-image-box,
-.focused-creature-card .creature-image-placeholder,
-.preparation-deck-card .creature-image-box,
-.preparation-deck-card .creature-image-placeholder {
-    aspect-ratio: 4 / 3;
-}
 
 .preparation-header-actions {
+    flex:0 0 auto;
     display:flex;
     align-items:center;
     justify-content:flex-end;
@@ -661,7 +646,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     top:18px;
     right:18px;
     bottom:18px;
-    z-index:400;
+    z-index:500;
     width:min(520px, calc(100vw - 36px));
     max-width:520px;
     display:grid;
@@ -812,13 +797,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.preparation-table-header {
-    align-items:center;
-}
 
-.preparation-header-actions {
-    flex:0 0 auto;
-}
 
 .forge-input-section {
     display:grid;
@@ -854,9 +833,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     gap:10px;
 }
 
-.card-forge .form-field-wide-four {
-    grid-column:1 / -1;
-}
 
 .inventory-card-picker-preview {
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -964,9 +940,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.card-forge-drawer {
-    z-index: 500;
-}
 
 .preparation-deck-card {
     cursor: pointer;
@@ -1002,29 +975,8 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     white-space:nowrap;
 }
 
-.game-view-layout {
-    grid-template-columns:minmax(0, 1fr) clamp(270px, 22vw, 320px);
-    align-items:stretch;
-}
-
 .combat-board {
     align-content:start;
-}
-
-.dm-feed-sidebar {
-    min-width:0;
-    display:grid;
-}
-
-.dm-feed-sidebar .dm-feed-panel {
-    min-height:0;
-    align-self:stretch;
-    display:grid;
-    grid-template-rows:auto minmax(0,1fr) auto;
-}
-
-.dm-feed-sidebar .dm-feed-content {
-    max-height:min(47vh, 430px);
 }
 
 .dm-action-drawer {
@@ -1172,9 +1124,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 @media (max-width: 1180px) {
-    .game-view-layout {
-        grid-template-columns:1fr;
-    }
+    
 
     .dm-feed-sidebar {
         order:3;
@@ -1253,10 +1203,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     padding-top:0;
 }
 
-.dm-console-window {
-    display:grid;
-    gap:8px;
-}
+
 
 .dm-console-section {
     min-width:0;
@@ -1418,10 +1365,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     line-height:1.2;
 }
 
-.dm-action-drawer .management-tool-row {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:start;
-}
 
 .dm-action-drawer .combat-management-row {
     gap:0;
@@ -1595,9 +1538,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         font-size:12px;
     }
 
-    .detail-tab-content {
-        padding-top:7px;
-    }
+    
 
     .detail-tab-content h4 {
         margin-bottom:5px;
@@ -1676,9 +1617,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         font-size:12px;
     }
 
-    .dm-feed-sidebar .dm-console-panel {
-        padding:9px;
-    }
+    
 
     .dm-feed-sidebar .dm-console-header h3 {
         font-size:16px;
@@ -1773,9 +1712,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     width:100%;
 }
 
-.drawer-tool-card {
-    align-content:start;
-}
 
 .drawer-tool-card h3 {
     margin-bottom:7px;
@@ -1836,47 +1772,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.dm-feed-sidebar {
-    align-content:start;
-}
-
-.dm-feed-sidebar .dm-console-panel {
-    align-self:start;
-    min-height:0;
-    max-height:none;
-    grid-template-rows:auto auto auto;
-}
-
-.dm-console-content {
-    min-height:0;
-    max-height:none;
-    overflow:visible;
-    padding-top:8px;
-}
-
-.dm-console-window {
-    display:grid;
-    gap:8px;
-}
-
-.dm-console-section {
-    min-height:0;
-    padding:8px;
-}
-
-.dm-console-log-section .combat-log-list,
-.dm-console-chat-section .dm-chat-placeholder-list {
-    max-height:104px;
-    overflow:hidden;
-}
-
-.dm-console-chat-section .dm-chat-placeholder-list {
-    max-height:118px;
-}
-
-.dm-feed-sidebar .dm-chat-input-shell {
-    margin-top:8px;
-}
 
 .detail-statblock-content {
     display:grid;
@@ -1887,10 +1782,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     margin-bottom:0;
 }
 
-.detail-statblock-section {
-    display:grid;
-    gap:6px;
-}
+
 
 .detail-statblock-section > h5 {
     margin:0;
@@ -2131,9 +2023,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         grid-template-columns:repeat(2,minmax(0,1fr));
     }
 
-    .detail-ability-grid {
-        grid-template-columns:repeat(3,minmax(0,1fr));
-    }
+    
 
     .detail-long-grid {
         grid-template-columns:1fr;
@@ -2156,133 +2046,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.detail-statblock-content {
-    gap:10px;
-}
 
-.detail-statblock-section.detail-ability-section {
-    order:-1;
-}
-
-.detail-ability-grid {
-    grid-template-columns:repeat(6,minmax(0,1fr));
-    gap:7px;
-}
-
-.detail-ability-card {
-    min-height:38px;
-    display:grid;
-    grid-template-columns:max-content minmax(0,1fr);
-    grid-template-areas:"label value";
-    align-items:center;
-    justify-items:start;
-    column-gap:6px;
-    padding:6px 7px;
-    text-align:left;
-}
-
-.detail-ability-card span {
-    grid-area:label;
-    font-size:9px;
-    line-height:1;
-}
-
-.detail-ability-card strong,
-.detail-ability-card em {
-    grid-area:value;
-    display:inline;
-}
-
-.detail-ability-card strong {
-    justify-self:end;
-    padding-right:22px;
-    font-size:14px;
-}
-
-.detail-ability-card em {
-    justify-self:end;
-    color:var(--text-muted);
-    font-size:10.5px;
-    transform:translateY(1px);
-}
-
-.detail-value-grid.detail-defense-grid,
-.detail-value-grid.detail-spell-grid {
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:7px;
-}
-
-.detail-stat-card {
-    min-height:50px;
-    padding:8px 9px;
-}
-
-.detail-stat-card strong {
-    font-size:12.5px;
-    line-height:1.25;
-}
-
-.detail-long-grid.detail-long-grid-full {
-    grid-template-columns:1fr;
-}
-
-.detail-long-grid-full .detail-long-card {
-    padding:9px 10px;
-}
-
-.detail-long-grid-full .detail-long-card p {
-    -webkit-line-clamp:3;
-    font-size:12.5px;
-    line-height:1.32;
-}
-
-.detail-spell-content {
-    display:grid;
-    gap:9px;
-}
-
-.card-forge .form-grid-four {
-    grid-template-columns:repeat(4,minmax(0,1fr));
-}
-
-@media (max-width: 1500px) and (max-height: 950px) {
-    .detail-ability-grid {
-        gap:6px;
-    }
-
-    .detail-ability-card {
-        min-height:34px;
-        padding:5px 6px;
-        column-gap:5px;
-    }
-
-    .detail-ability-card span {
-        font-size:8.5px;
-    }
-
-    .detail-ability-card strong {
-        font-size:13px;
-        padding-right:20px;
-    }
-
-    .detail-ability-card em {
-        font-size:10px;
-    }
-
-    .detail-stat-card {
-        min-height:48px;
-        padding:7px 8px;
-    }
-
-    .detail-stat-card strong {
-        font-size:12px;
-    }
-
-    .detail-long-grid-full .detail-long-card p {
-        -webkit-line-clamp:3;
-        font-size:12px;
-    }
-}
 
 @media (max-width: 1180px) {
     .detail-ability-grid {
@@ -2546,9 +2310,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 
-.game-view-layout {
-    align-items: stretch;
-}
 
 .combat-board {
     align-self: stretch;
@@ -2811,19 +2572,9 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     grid-template-rows: auto minmax(0, 1fr);
 }
 
-.detail-long-grid.detail-long-grid-full {
-    min-height: 0;
-    height: 100%;
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 8px;
-}
 
-.detail-long-grid-full .detail-long-card {
-    min-height: 0;
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr);
-}
+
+
 
 .detail-long-grid-full .detail-long-card p {
     -webkit-line-clamp: 6;
@@ -2872,10 +2623,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         height: auto;
     }
 
-    .dm-feed-sidebar .dm-console-panel {
-        height: auto;
-        min-height: 0;
-    }
+    
 
     .dm-feed-sidebar .dm-console-content,
     .dm-feed-sidebar .dm-feed-content.dm-console-content {
@@ -2961,13 +2709,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     grid-template-rows: auto auto;
 }
 
-.detail-long-grid.detail-long-grid-full {
-    height: auto;
-    min-height: 0;
-    display: grid;
-    grid-template-rows: auto auto;
-    gap: 7px;
-}
+
 
 .detail-long-grid-full .detail-long-card {
     min-height: 68px;
@@ -3024,14 +2766,9 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 @media (max-width: 1500px) and (max-height: 950px) {
-    .combat-board {
-        gap: 7px;
-    }
+    
 
-    .combat-focus-grid {
-        grid-template-columns: clamp(250px, 24vw, 286px) minmax(300px, 1fr);
-        gap: 8px;
-    }
+    
 
     .focus-navigation-toolbar,
     .focus-navigation-toolbar-above-card {
@@ -3084,18 +2821,11 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         gap: 7px;
     }
 
-    .dm-console-section {
-        padding: 8px;
-    }
+    
 
-    .dm-chat-input-row input,
-    .dm-chat-input-row button {
-        min-height: 30px;
-    }
+    
 
-    .full-width-hand-ribbon {
-        margin-top: 7px;
-    }
+    
 }
 
 
@@ -3245,14 +2975,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     padding: 9px;
 }
 
-.dm-console-log-section .combat-log-list,
-.dm-console-chat-section .dm-chat-placeholder {
-    min-height: 0;
-    height: 100%;
-    max-height: none;
-    overflow: auto;
-    align-content: start;
-}
+
 
 .dm-feed-sidebar .dm-chat-input-shell {
     min-height: 0;
@@ -3318,20 +3041,13 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 @media (max-width: 1180px) {
-    .game-view-layout {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-    }
+    
 
-    .combat-board,
-    .dm-feed-sidebar,
-    .full-width-hand-ribbon {
-        grid-column: 1;
-    }
+    
 
-    .combat-board { grid-row: 1; }
+    
     .dm-feed-sidebar { grid-row: 2; height: auto; }
-    .full-width-hand-ribbon { grid-row: 3; }
+    
 
     .dm-feed-sidebar .dm-console-panel {
         height: auto;
@@ -3458,9 +3174,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 @media (max-width: 1500px) and (max-height: 950px) {
-    .detail-statblock-content {
-        gap: 6px;
-    }
+    
 
     .detail-long-grid.detail-long-grid-full {
         gap: 6px;
@@ -3495,11 +3209,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     grid-template-rows: auto auto;
 }
 
-.combat-focus-grid {
-    height: auto;
-    min-height: 0;
-    align-items: start;
-}
+
 
 .focused-card-column,
 .card-detail-panel {
@@ -3623,9 +3333,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 @media (max-width: 1500px) and (max-height: 950px) {
-    .combat-board {
-        gap: 6px;
-    }
+    
 
     .combat-focus-grid {
         gap: 7px;
@@ -4347,14 +4055,33 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
 }
 
 .active-hand-focus-resource-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-items: start;
+    column-gap: 8px;
     margin-bottom: 4px;
 }
 
-.active-hand-focus-resource-header .active-hand-focus-section-title { margin: 0; }
+.active-hand-focus-resource-header .active-hand-focus-section-title {
+    width: 30px;
+    min-width: 30px;
+    max-width: 30px;
+    margin: 0;
+    overflow-wrap: normal;
+    text-align: left;
+    white-space: nowrap;
+    word-break: keep-all;
+}
+
+.active-hand-focus-resource-header .hp-visibility-inline {
+    min-width: 0;
+    overflow: visible;
+    line-height: 1.15;
+    overflow-wrap: normal;
+    text-align: right;
+    white-space: normal;
+    word-break: normal;
+}
 
 .active-hand-focus-resource-stack {
     display: grid;
@@ -5060,14 +4787,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         inset 0 1px 0 rgba(127,185,255,.12);
 }
 
-.active-hand-mini-card.active-turn-card.focused-hand-card.selected-target-card {
-    border-color: var(--border-gold);
-    box-shadow:
-        0 0 0 1px rgba(200,164,95,.22),
-        0 0 22px rgba(127,185,255,.24),
-        0 0 14px rgba(200,164,95,.10),
-        inset 0 1px 0 rgba(127,185,255,.12);
-}
+
 
 .active-hand-mini-main {
     min-width: 0;
@@ -6442,10 +6162,6 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         padding: 14px;
     }
 
-    .app-build-info {
-        font-size: 12px;
-    }
-
     .mobile-support-notice {
         display: block;
         margin: 0 0 20px;
@@ -6484,7 +6200,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     gap: 10px;
     align-items: flex-start;
 }
-.active-hand-trait-card-header h5 { margin: 0; }
+
 .active-hand-trait-tools {
     display: flex;
     flex-wrap: wrap;
@@ -8370,9 +8086,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
         linear-gradient(135deg, rgba(18,13,28,.76), rgba(7,6,11,.84));
 }
 
-.toolkit-section-heading {
-    margin-bottom: 8px;
-}
+
 
 .toolkit-section-heading .section-eyebrow {
     color: rgba(198,181,255,.66);
@@ -8683,9 +8397,7 @@ textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 
     box-shadow: 0 22px 46px rgba(0,0,0,.58), inset 0 0 0 1px rgba(255,255,255,.025);
 }
 
-.toolkit-condition-picker-menu-hidden {
-    display: none;
-}
+
 
 .toolkit-condition-picker-menu::-webkit-scrollbar {
     width: 8px;
@@ -8943,9 +8655,7 @@ button,
     opacity: .84;
 }
 
-.toolkit-section-condition {
-    overflow: visible;
-}
+
 
 .toolkit-section-condition.toolkit-condition-open {
     z-index: 80;
@@ -9102,16 +8812,9 @@ select.arcane-native-select {
     white-space: nowrap;
 }
 
-.arcane-select-chevron {
-    color: var(--arcane-soft);
-    font-size: 14px;
-    line-height: 1;
-    transition: transform .16s ease;
-}
 
-.arcane-select-button[aria-expanded="true"] .arcane-select-chevron {
-    transform: rotate(180deg);
-}
+
+
 
 .arcane-select-menu {
     display: none;
@@ -9134,13 +8837,9 @@ select.arcane-native-select {
     -webkit-overflow-scrolling: touch;
 }
 
-.arcane-select-wrapper.arcane-select-open .arcane-select-menu {
-    display: grid;
-}
 
-.arcane-select-menu::-webkit-scrollbar {
-    width: 8px;
-}
+
+
 
 .arcane-select-menu::-webkit-scrollbar-thumb {
     border-radius: 999px;
@@ -9317,9 +9016,7 @@ body {
     box-shadow: 0 22px 44px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.018), 0 0 18px rgba(127,185,255,.08);
 }
 
-.arcane-select-wrapper.arcane-select-open .arcane-select-menu {
-    display: grid;
-}
+
 
 .arcane-select-menu::-webkit-scrollbar {
     width: 8px;
@@ -11210,13 +10907,7 @@ body {
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.024), 0 0 18px rgba(127,185,255,.16), 0 10px 18px rgba(0,0,0,.26);
 }
 
-.app-build-info {
-    display: none;
-}
 
-.app-help-button::before {
-    content: "Handbuch";
-}
 
 .app-help-content {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -11286,9 +10977,7 @@ body {
     text-shadow: 0 0 14px rgba(198,181,255,.10);
 }
 
-.app-help-card strong {
-    color: var(--arcane-soft);
-}
+
 
 .active-hand-encounter-card {
     border-color: rgba(198,181,255,.14);
@@ -12394,10 +12083,7 @@ body.player-view .public-stage-slot.ghost .public-stage-title {
     text-align: center;
 }
 
-body.player-view .public-stage-slot.ghost .public-preview-type,
-body.player-view .public-stage-slot.ghost .public-preview-section-box {
-    display: none;
-}
+
 
 body.player-view .public-stage-slot.side .public-preview-section-box,
 body.player-view .public-stage-slot.side .public-preview-type {
@@ -12429,9 +12115,7 @@ body.player-view .public-stage-slot.focused .public-preview-image-box {
     height: clamp(340px, 51vh, 560px);
 }
 
-body.player-view .public-focus-reset-button {
-    display: none;
-}
+
 
 body.player-view .public-initiative-title {
     margin: 18px 0 10px;
@@ -12442,9 +12126,7 @@ body.player-view .public-initiative-shell {
     display: block;
 }
 
-body.player-view .public-initiative-button {
-    display: none;
-}
+
 
 body.player-view .public-preview-ribbon {
     gap: 12px;
@@ -13466,15 +13148,11 @@ body.player-view .public-stage-slot.next .public-preview-image-box {
         scrollbar-width: thin;
     }
 
-    .miriel-board-initiative-loop {
-        animation: none;
-    }
+    
 }
 
 @media (max-width: 980px) {
-    .miriel-board-alerts {
-        grid-template-columns: 1fr;
-    }
+    
 
     .miriel-board-alert-list {
         overflow-x: auto;
@@ -14218,10 +13896,7 @@ body.player-view .public-ribbon-card {
     padding: 8px 28px 8px 8px;
 }
 
-body.player-view .public-ribbon-image-crop .public-preview-image-box {
-    height: 60px;
-    min-height: 60px;
-}
+
 
 body.player-view .public-ribbon-text strong {
     font-size: 13px;
@@ -14325,13 +14000,7 @@ body.player-view .public-preview-title-block {
     gap: 18px;
 }
 
-body.player-view .public-preview-title-block h2 {
-    flex: 1 1 auto;
-    min-width: 0;
-    font-size: clamp(23px, 2.05vw, 29px);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+
 
 body.player-view .public-preview-title-block span {
     flex: 0 1 auto;
@@ -14681,15 +14350,9 @@ body.player-view .public-stage-slot {
     place-items: center;
 }
 
-body.player-view .public-stage-slot.ghost {
-    --slot-card-width: var(--public-ghost-card-width);
-    --slot-card-height: var(--public-ghost-card-height);
-}
 
-body.player-view .public-stage-slot.focused {
-    --slot-card-width: var(--public-active-card-width);
-    --slot-card-height: var(--public-active-card-height);
-}
+
+
 
 body.player-view .public-stage-slot-label {
     position: absolute;
@@ -14741,11 +14404,7 @@ body.player-view .public-stage-slot.next .public-stage-card-inner {
     padding: 8px;
 }
 
-body.player-view .public-stage-slot.ghost .public-stage-card-inner {
-    grid-template-rows: auto minmax(0, 1fr);
-    gap: 7px;
-    padding: 8px;
-}
+
 
 body.player-view .public-stage-title {
     min-width: 0;
@@ -14779,12 +14438,7 @@ body.player-view .public-image-placeholder {
     overflow: hidden;
 }
 
-body.player-view .public-preview-image-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
+
 
 body.player-view .public-stage-slot.focused .public-preview-image-box,
 body.player-view .public-stage-slot.previous .public-preview-image-box,
@@ -14801,10 +14455,7 @@ body.player-view .public-preview-type {
     white-space: nowrap;
 }
 
-body.player-view .public-preview-section-box {
-    min-height: 0;
-    overflow: hidden;
-}
+
 
 body.player-view .public-preview-section-box h4 {
     margin-bottom: 3px;
@@ -14837,10 +14488,7 @@ body.player-view .public-stage-slot.side .public-preview-type {
     font-size: 10px;
 }
 
-body.player-view .public-stage-slot.ghost .public-preview-type,
-body.player-view .public-stage-slot.ghost .public-preview-section-box {
-    display: none;
-}
+
 
 body.player-view .public-stage-slot.previous .condition-chip,
 body.player-view .public-stage-slot.next .condition-chip,
@@ -16836,9 +16484,7 @@ textarea:focus {
     max-width: min(92%, 980px);
 }
 
-body.player-view .miriel-board-overlay-manual .miriel-board-content {
-    grid-template-rows: auto minmax(0, 1fr);
-}
+
 
 body.player-view .miriel-board-overlay-manual .miriel-board-header {
     margin-bottom: 10px;
@@ -17901,3 +17547,4 @@ body.player-view .public-preview-title-block span {
         display: none;
     }
 }
+
