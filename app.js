@@ -155,11 +155,9 @@ function createDemoCreatures() {
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 13 · Spell Attack +5",
             specialResources: "Sneak Attack 4d6 · Cunning Action · Uncanny Dodge · Evasion · Arcane Trickster Slots 1st: 4, 2nd: 2",
-            traitsText: "Sneak Attack. Once per turn, deal +4d6 damage with a finesse or ranged weapon when you have advantage or an enemy of the target is within 5 ft. of it and you do not have disadvantage.\nExpertise. Proficiency bonus is doubled for chosen proficiencies; key demo skills are Perception, Investigation, Sleight of Hand and Stealth.\nMage Hand Legerdemain. Mage Hand can be invisible, manipulate objects or thieves' tools at range, and can be controlled with Cunning Action.\nEvasion. On Dexterity saves for half damage, take no damage on a success and half damage on a failure.\nFairy Flight. Flying speed equals walking speed.\nFairy Magic. Knows Druidcraft; can cast Faerie Fire and Enlarge/Reduce through fairy magic.",
-            actionsText: "Rapier. Melee Weapon Attack: +8 to hit, reach 5 ft.; Hit: 1d8+5 piercing. Can combine with Booming Blade for thunder rider damage.\nDagger. Melee or Ranged Weapon Attack: +8 to hit, reach 5 ft. or range 20/60 ft.; Hit: 1d4+5 piercing. Finesse, light, thrown.\nShortbow. Ranged Weapon Attack: +8 to hit, range 80/320 ft.; Hit: 1d6+5 piercing.\nCunning Action. Bonus action each turn to Dash, Disengage or Hide.\nUncanny Dodge. Reaction when a visible attacker hits: halve the attack's damage.\nTwo-Weapon Fighting. Available through standard actions when conditions fit.\nUse Magic. Arcane Trickster spellcasting using INT.",
             notes: "Charakterbogen: Rogue 7 · Fairy · Charlatan · Chaotic Neutral.\n\nPersönlichkeit: \"Die Welt ist meine Bühne und das Chaos ist meine Show.\" Dunkelschön/Miriel ist fasziniert von der Welt der Sterblichen und möchte sie neugierig, verspielt und oft ohne echtes Gespür für Gefahr erkunden.\n\nIdeal: Freiheit. Nichts ist wichtiger als die Freiheit, das eigene Leben so zu leben, wie es einem gefällt. Einschränkungen und Regeln der sterblichen Welt sind für sie Hindernisse, die es zu überwinden gilt.\n\nBindung: Dunkelschön hat sich geschworen, den Namen Miriel zu ehren und ihre Träume zu verwirklichen.\n\nMakel: Naiv im Umgang mit der Realität. Trotz all ihrer magischen Fähigkeiten hat Dunkelschön Schwierigkeiten, die Gefahren der sterblichen Welt zu erkennen, was sie oft in Schwierigkeiten bringt. Sie ist innerlich zerrissen zwischen ihrer eigenen chaotischen Natur und den Erwartungen, die sie als Miriel erfüllen möchte. Sobald sie sich ein Ziel gesetzt hat, kann sie stur und kompromisslos sein, selbst wenn das Ziel nicht in ihrem besten Interesse liegt.\n\nVerbündete: Befreundet mit Leander Moral, der sie nach der Flucht vor ihrer alten Crew in seiner Hütte bei Neverwinter versteckte. Befreundet mit der Bardin Mel; Miriel und Mel reisten als Performerinnen durch verschiedene Orte und nutzten Musik, Tanz und Ablenkung, um Zuschauer auszurauben.\n\nBackstory: Dunkelschön war einst ein freigeistiger Bewohner des Feywild, eines Ortes, wo die Grenzen zwischen Realität und Fantasie verschwimmen. Sie war mehr als nur eine Fee – sie war ein Ausdruck des Chaos selbst, eine Dienerin des Schabernacks. Ihre Existenz war geprägt von Freiheit, Launenhaftigkeit und der ständigen Suche nach Neuem. In den schillernden Wäldern des Feywild war sie eine Meisterin der Illusionen, Scherze und Spielereien, angetrieben von reiner Neugierde. Eines Tages wurde diese Neugier zu stark. Der Reiz des Unbekannten zog sie hinaus aus ihrer Heimat und in die echte Welt. Diese neue Welt, so starr und voller Regeln, war für Dunkelschön zugleich faszinierend und erschreckend. Keine ewige Dämmerung, kein flimmerndes Lichtspiel der Natur, sondern klare Linien, feste Strukturen und starre Realität. Einzig in einer Taverne fand sie das Chaos wieder. Kurz nach ihrer Ankunft traf Dunkelschön auf eine Halbelfen-Schurkin namens Miriel. Die beiden wurden schnell unzertrennliche Freundinnen. Miriel zeigte Dunkelschön die Feinheiten des Schurkenhandwerks und half ihr, sich in dieser ungewohnten Welt zurechtzufinden. Für Dunkelschön war Miriel ein Anker in einem Meer von Unbekanntem. Doch in einem Hinterhalt rivalisierender Diebesbanden wurde Miriel tödlich verwundet. In ihren letzten Momenten bat sie Dunkelschön, ihren Namen und ihren Traum anzunehmen – nicht nur, um ihr Andenken zu bewahren, sondern um all das zu erleben, was sie selbst nicht mehr erleben konnte.",
-            spellsText: "Cantrips: Minor Illusion; Mage Hand; Booming Blade; Druidcraft.\n1st Level: Disguise Self; Silent Image; Find Familiar; Silvery Barbs; Faerie Fire.\n2nd Level: Mirror Image; Enlarge/Reduce.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
-            inventoryText: "Cloak of Displacement; Goggles of Night; Studded Leather; Absurd großer Hexenhut; Dagger x2; Rapier; Shortbow; Arrows x20; Thieves' Tools; Disguise Kit; Forgery Kit; Backpack; Crowbar; Potion of Healing x2; Potion of Superior Healing; Potion of Supreme Healing; Bedroll; Candles x5; Costume Clothes x2; Rations; Waterskin; Rope; Pitons; Hammer; Tinderbox; Torches; blue mushrooms; brass bowl; powdered iron; fleece pieces; coins: 355 GP, 78 SP.",
+            demoSpellSeed: "Cantrips: Minor Illusion; Mage Hand; Booming Blade; Druidcraft.\n1st Level: Disguise Self; Silent Image; Find Familiar; Silvery Barbs; Faerie Fire.\n2nd Level: Mirror Image; Enlarge/Reduce.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
+            demoInventorySeed: "Cloak of Displacement; Goggles of Night; Studded Leather; Absurd großer Hexenhut; Dagger x2; Rapier; Shortbow; Arrows x20; Thieves' Tools; Disguise Kit; Forgery Kit; Backpack; Crowbar; Potion of Healing x2; Potion of Superior Healing; Potion of Supreme Healing; Bedroll; Candles x5; Costume Clothes x2; Rations; Waterskin; Rope; Pitons; Hammer; Tinderbox; Torches; Blue Mushrooms; Brass Bowl; Powdered Iron; Pieces of Fleece; coins: 355 GP, 78 SP.",
             hpVisibility: "full",
             imageData: "Images/miriel_img.png",
             conditions: [],
@@ -199,11 +197,9 @@ function createDemoCreatures() {
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 13 · Spell Attack +5",
             specialResources: "Arcane Recovery 1/LR · Wizardly Quill · Awakened Spellbook · Serpentine Spellcasting",
-            traitsText: "Magic Resistance. Advantage on saving throws against spells.\nPoison Resilience. Resistance to poison damage and advantage on saves to avoid or end the poisoned condition.\nRitual Adept. Wizard ritual casting support.\nScholar. One proficient Wizard skill gains Expertise; Investigation is the key demo expertise skill.\nAwakened Spellbook. Spellbook acts as focus; can replace damage type with another type in the spellbook; ritual casting shortcut once per long rest.\nSerpentine Spellcasting. Knows Poison Spray; can cast Animal Friendship on snakes; Suggestion once per long rest.",
-            actionsText: "Dagger. Melee or Ranged Weapon Attack: +4 to hit, reach 5 ft. or range 20/60 ft.; Hit: 1d4+2 piercing.\nQuarterstaff. Melee Weapon Attack: +1 to hit; Hit: 1d6-1 bludgeoning, versatile.\nWizardly Quill. Bonus action: create a magical quill that writes without ink, copies spells quickly, and can erase its writing within 5 ft.\nArcane Recovery. Special, 1/Long Rest: recover expended spell slots after a short rest, combined level up to 2.\nMagic. Cast wizard spells using INT; Spell Save DC 13, Spell Attack +5.",
             notes: "Charakterbogen: Wizard 3 · Yuan-ti · Urban Bounty Hunter · Chaotic Neutral.\n\nPersönlichkeit: Suica betrachtet Menschen wie Forschungsobjekte, aber nicht grausam – nur neugierig.\n\nIdeal: Magie ist die höchste Form von Wahrheit. Jede neue Formel ist ein Sieg über das Unbekannte.\n\nBindung: Ein ehemaliger Mentor glaubt, sie sei zu verspielt, um echte arkane Größe zu erreichen; Suica will das Gegenteil beweisen.\n\nMakel: Sie sammelt Wissen, auch wenn es gefährlich oder moralisch fragwürdig ist.\n\nBackstory: Suica wuchs in einer kleinen Yuan-Ti-Gemeinschaft auf, in der Magie nicht verehrt, sondern katalogisiert wurde. Zauber galten dort als Werkzeuge – und wer sie verstand, hatte Kontrolle über die Welt. Während andere Schüler diszipliniert und emotionslos studierten, zeigte Suica eine ungewöhnliche Neugier und einen trockenen, verspielten Humor, was ihr Mentor stets als Zeichen mangelnder Ernsthaftigkeit betrachtete. Um ihr praktisches Talent zu testen, wurde sie in eine menschliche Stadt geschickt, wo sie als Urban Bounty Hunter magische Verbrecher, verschwundene Magier und verbotene Artefakte verfolgte. Sie fand Gefallen an der Arbeit: Jeder Auftrag brachte neue Zauber, neue Theorien, neue Formeln, die sie in ihr wachsendes Zauberbuch eintrug. Heute betrachtet sie Menschen und ihre Taten mit akademischer Distanz. Mordfälle, Intrigen und Verschwörungen sind für sie weniger moralische Tragödien als komplexe Studienfälle – Gelegenheiten, die Grenzen der Magie zu erforschen und ihren Mentor eines Tages zu widerlegen.",
-            spellsText: "Cantrips: Mage Hand; Mind Sliver; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Self; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
-            inventoryText: "Dagger x2; Quarterstaff; Spellbook; Backpack; Robe; Book x2; Ink; Ink Pen x2; Parchment; Little Bag of Sand; Small Knife; Oil x10; Tinderbox; Lamp; Flute; Thieves' Tools; coins: 5 GP.",
+            demoSpellSeed: "Cantrips: Mage Hand; Mind Sliver; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Self; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
+            demoInventorySeed: "Dagger x2; Quarterstaff; Spellbook; Backpack; Robe; Book x2; Ink; Ink Pen x2; Parchment; Little Bag of Sand; Small Knife; Oil x10; Tinderbox; Lamp; Flute; Thieves' Tools; coins: 5 GP.",
             hpVisibility: "full",
             imageData: "Images/suica_img.png",
             conditions: [],
@@ -243,11 +239,9 @@ function createDemoCreatures() {
             senses: "Blindsight 10 ft.",
             spellSaveDc: "DC 12",
             specialResources: "Dust Burst 1/Encounter · Annoying Sweep Recharge 5–6 · False Object",
-            traitsText: "False Object. While motionless, Borstibald is indistinguishable from an ordinary broom until it moves or attacks.\nDusty Temper. The first time Borstibald takes damage in an encounter, each creature within 10 ft. has disadvantage on its next Perception check before the end of the round.\nHovering Household Menace. Borstibald ignores difficult terrain caused by clutter, furniture, spilled liquids or loose debris.",
-            actionsText: "Annoying Sweep. Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 1d6+2 bludgeoning, and the target must succeed on a DC 12 STR save or fall prone.\nDust Burst. Creatures in a 10 ft. cone must make a DC 12 CON save or become blinded until the end of their next turn.\nStartling Rattle. One creature within 30 ft. that can hear Borstibald must make a DC 12 WIS save or lose its reaction until the start of Borstibald's next turn.",
             notes: "Skurriles Objektmonster für chaotische Innenräume. Im Kampf soll Borstibald nerven, Sichtlinien stören und Ziele aus der Position bringen. Gute Demo-Karte für Conditions, Zielauswahl und kurze Aktionsblöcke.",
-            spellsText: "Dust Cloud. Magical dust briefly obscures a 10 ft. area.\nStartling Sweep. A rattling arcane shove interrupts enemy reactions.\nPetty Poltergeist Effect. Small unattended objects tremble, clatter or slide up to 5 ft.",
-            inventoryText: "Lose verzauberte Borsten\nVerbogenes Silbernägelchen\nStaubflocken mit schwacher Illusionsaura\nEin beleidigtes Knarren, das nicht in einen Beutel passt",
+            demoSpellSeed: "Dust Cloud. Magical dust briefly obscures a 10 ft. area.\nStartling Sweep. A rattling arcane shove interrupts enemy reactions.\nPetty Poltergeist Effect. Small unattended objects tremble, clatter or slide up to 5 ft.",
+            demoInventorySeed: "Lose verzauberte Borsten\nVerbogenes Silbernägelchen\nStaubflocken mit schwacher Illusionsaura\nEin beleidigtes Knarren, das nicht in einen Beutel passt",
             hpVisibility: "bar",
             imageData: "Images/borstibald_img.png",
             conditions: ["prone", "frightened"],
@@ -287,11 +281,9 @@ function createDemoCreatures() {
             senses: "Tremorsense 30 ft.",
             spellSaveDc: "DC 13",
             specialResources: "Shriek Bloom 1/Encounter · Fog Sap 3/day · Root Snare Recharge 5–6",
-            traitsText: "Rooted Ambusher. Nebelzahn has advantage on Stealth checks while partially buried in soil, fog or leaf litter.\nMist-Fed Hide. While standing in fog, dim light or heavy plant cover, Nebelzahn gains +2 AC against ranged attacks.\nScent of Warm Blood. Nebelzahn knows the direction of any bloodied creature within 30 ft. that is touching the ground.",
-            actionsText: "Root Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 2d6+3 piercing plus 1d6 poison.\nFog Sap. Ranged Spell Attack: +5 to hit, range 30 ft., one target. Hit: 2d6 poison, and the target's speed is reduced by 10 ft. until the end of its next turn.\nShriek Bloom. Each creature within 15 ft. must succeed on a DC 13 WIS save or become frightened until the end of its next turn.\nRoot Snare. One creature touching the ground within 20 ft. must succeed on a DC 13 STR save or become restrained until the end of Nebelzahn's next turn.",
             notes: "Ambusher für Wald, Sumpf und verwilderte Gärten. Beginnt idealerweise verborgen, isoliert ein Ziel mit Root Snare und zwingt die Gruppe, Positionierung ernst zu nehmen.",
-            spellsText: "Fog Sap. Toxic mist condensed into a sticky projectile.\nRoot Snare. Living roots hook around ankles and wrists.\nShriek Bloom. A sudden mandrake scream that weaponizes fear.",
-            inventoryText: "Mandrake root fang\nVial of grey sap\nCracked seed pod\nWet black leaves with faint necrotic veins",
+            demoSpellSeed: "Fog Sap. Toxic mist condensed into a sticky projectile.\nRoot Snare. Living roots hook around ankles and wrists.\nShriek Bloom. A sudden mandrake scream that weaponizes fear.",
+            demoInventorySeed: "Mandrake root fang\nVial of grey sap\nCracked seed pod\nWet black leaves with faint necrotic veins",
             hpVisibility: "descriptive",
             imageData: "Images/nebelzahn_mandrake.png",
             conditions: ["poisoned"],
@@ -331,11 +323,9 @@ function createDemoCreatures() {
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 14",
             specialResources: "Mirror Feather 2/Encounter · Steal Spark Recharge 6 · Thought Thief",
-            traitsText: "Mirror Feather. Twice per encounter, when a creature misses the Glimmerkrähe with an attack, the crow can flash a false reflection and move 10 ft. without provoking opportunity attacks.\nThought Thief. A creature hit by Steal Spark cannot take reactions until the start of its next turn.\nShiny Omen. The Glimmerkrähe has advantage on checks to notice magic items, reflective surfaces and hidden jewelry.",
-            actionsText: "Beak of Sparks. Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 1d4+4 piercing plus 1d6 lightning.\nSteal Spark. Ranged Spell Attack: +6 to hit, range 60 ft., one target. Hit: 2d6 psychic, and the target cannot take reactions until the start of its next turn.\nMirror Caw. One creature within 30 ft. must succeed on a DC 14 WIS save or have disadvantage on the next attack roll it makes before the end of its next turn.\nFlash Away. The Glimmerkrähe flies up to half its speed. This movement does not provoke opportunity attacks from a creature affected by Mirror Caw or Steal Spark.",
             notes: "Aktuelle Demo-Handkarte. Schneller arkaner Störer: zuerst Reaktionen brechen, dann aus der Reichweite fliegen. Ideal, um die neue Details-Navigation mit Actions, Traits und Spells zu demonstrieren.",
-            spellsText: "Mirror Feather. A defensive shimmer of broken reflections.\nSteal Spark. Psychic theft shaped like violet lightning.\nFlash Caw. A harsh arcane cry that leaves afterimages.\nGlint Trail. A visible trail of tiny star-like motes marks the crow's movement until initiative count 0.",
-            inventoryText: "Iridescent feather\nStolen copper ring\nCracked mirror bead\nTiny thought-splinter that whispers half a name",
+            demoSpellSeed: "Mirror Feather. A defensive shimmer of broken reflections.\nSteal Spark. Psychic theft shaped like violet lightning.\nFlash Caw. A harsh arcane cry that leaves afterimages.\nGlint Trail. A visible trail of tiny star-like motes marks the crow's movement until initiative count 0.",
+            demoInventorySeed: "Iridescent feather\nStolen copper ring\nCracked mirror bead\nTiny thought-splinter that whispers half a name",
             hpVisibility: "descriptive",
             imageData: "Images/glimmerkraehe.png",
             conditions: [],
@@ -375,11 +365,9 @@ function createDemoCreatures() {
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 15 · Spell Attack +7",
             specialResources: "Sorcery Points 5 · Metamagic: Empowered, Quickened · Hexblade's Curse 1/SR · Favored by the Gods 1/SR · Healing Hands 1/LR · Radiant Consumption 1/LR",
-            traitsText: "Celestial Resistance. Resistance to necrotic and radiant damage.\nEldritch Mind. Advantage on Constitution saving throws made to maintain concentration.\nWar Caster. Advantage on CON saves to maintain concentration, can perform somatic components with weapons or shield, and can use eligible spells for opportunity attacks.\nFavored by the Gods. Once per short rest, add 2d4 after failing a save or missing an attack, potentially changing the result.\nHex Warrior. Uses CHA for an eligible weapon after long rest; proficient with medium armor, shields and martial weapons.\nAgonizing Blast. Adds CHA modifier to Eldritch Blast damage.\nRepelling Blast. Eldritch Blast can push a Large or smaller creature up to 10 ft. away.\nCelestial Revelation: Radiant Consumption. Bonus action 1/LR: radiance for 1 minute, area radiant damage and extra radiant damage once per turn.",
-            actionsText: "Eldritch Blast. Ranged Spell Attack: +7 to hit, range 120 ft.; two beams; Hit: 1d10+4 force per beam.\nUnarmed Strike. Melee Attack: +2 to hit; Hit: 0 bludgeoning.\nHealing Hands. Action, 1/Long Rest: heal a creature a number of d4s equal to proficiency bonus.\nHexblade's Curse. Bonus Action, 1/Short Rest: curse a visible creature within 30 ft. for 1 minute; +3 damage, crit on 19–20, regain 7 HP if it dies.\nFont of Magic: Create Spell Slot. Bonus Action: spend 2/3/5 Sorcery Points to create a 1st/2nd/3rd-level spell slot.\nQuickened Spell. Spend 2 Sorcery Points to cast an action spell as a bonus action under metamagic restrictions.\nEmpowered Spell. Spend 1 Sorcery Point to reroll up to 4 damage dice and use the new rolls.\nMagical Cunning. 1/Long Rest: perform a 1-minute rite to regain up to 1 expended Pact Magic slot.",
             notes: "Charakterbogen: Sorcerer 5 / Warlock 3 · Aasimar · Hofbeamte · Chaotic Neutral.\n\nPersönlichkeit: Liora folgt eher ihrem Bauchgefühl als klugen Argumenten – oft bringt sie das in Schwierigkeiten, manchmal aber auch zu verborgenen Wahrheiten.\n\nIdeal: Freiheit. Niemand soll sie je wieder kontrollieren – nicht der Hof, nicht ihr Erbe, nicht einmal ihr Patron.\n\nBindung: Die Stimme ihres Patrons verfolgt sie; sie fürchtet sie und kann doch nicht von ihr loslassen.\n\nMakel: Sie gibt oft vor, mehr zu verstehen, als sie wirklich tut, und gerät dadurch in Gefahren, die sie nicht einschätzen kann.\n\nAussehen: Liora wirkt auf den ersten Blick wie eine junge, schöne Frau, doch bei genauerem Hinsehen verrät ihr Aussehen ihre aasimarische Herkunft und die Schatten, die an ihr nagen. Ihr Gesicht ist fein geschnitten, mit hohen Wangenknochen und vollen Lippen. Dunkle Schatten und verfärbte Stellen ziehen sich über ihre linke Gesichtshälfte und den Hals, wie eine brennende Spur von himmlischer Macht, die in Finsternis übergeht. Ihre Augen leuchten in goldenem Schimmer; ihr tiefviolettes Haar fällt in weichen Wellen über die Schultern. An manchen Stellen schimmert ihre Haut wie mit Sternenstaub überzogen, während andere Bereiche dunkel verfärbt wirken, als hätte sie eine Korrumpierung berührt.\n\nBackstory: Liora Veith war Hofübersetzerin, berühmt für ihre schillernde Erscheinung und ihre Gabe, Sprachen mit Leichtigkeit zu durchdringen. Ihr aasimarisches Erbe galt als Segen, ein lebendiges Symbol himmlischer Gunst. Doch unter der glänzenden Oberfläche nagten Zweifel: Ihr Licht war unruhig, ihre Aura unkontrolliert. In Momenten der Schwäche hörte sie eine Stimme, die ihr Trost versprach – der Flüsterton eines Patrons, verborgen in den Schatten der Welt. Er bot ihr Klarheit und Macht im Austausch für ihre Treue. Liora willigte ein, und ein Pakt wurde besiegelt: Eine Klinge aus Finsternis erschien in ihren Händen, so sicher wie das Versprechen der Stimme. Zunächst schien alles besser. Sie konnte ihr göttliches Erbe endlich lenken und ihre Aura bändigen. Doch der Preis kam bald. Ihr Patron zwang sie, ein geheimes Dokument zu übersetzen, das nur den Herrschern vorbehalten war. Sie gehorchte, doch die Stimme flüsterte weiter: „Gib es weiter.“ Liora tat, wie ihr geheißen. Die Intrige, die dadurch entfesselt wurde, endete im Mord an einem Würdenträger. Als man die Spur zurückverfolgte, fiel der Verdacht auf sie. Ihre regenbogenhafte Haut begann dunkle Male zu tragen – sichtbare Zeichen des Paktes. Vor aller Augen war sie nicht länger ein Himmelskind, sondern eine Verräterin, die ihr Erbe verkauft hatte. Der Hof verstieß sie, und ihre frühere Stellung wurde ausgelöscht. Nun wandert Liora zwischen zwei Welten: dem Licht, das sie nie ganz verlassen hat, und der Dunkelheit, die untrennbar in ihr brennt. Ihre Schuld lastet schwer, doch die Stimme ihres Patrons schweigt nie.",
-            spellsText: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Booming Blade; Eldritch Blast; Toll the Dead; Light.\n1st Level: Absorb Elements; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Gift of Alacrity; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Tasha's Mind Whip; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
-            inventoryText: "Cloak of Protection; Ring of Protection; Potion of Healing (Greater); Scale Mail; Shield; Billige Potion gegen Shrieker-Sporen x2; Ink; Clothes Common; Clothes Fine; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torch x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
+            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Booming Blade; Eldritch Blast; Toll the Dead; Light.\n1st Level: Absorb Elements; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Gift of Alacrity; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Tasha's Mind Whip; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
+            demoInventorySeed: "Cloak of Protection; Ring of Protection; Potion of Greater Healing; Scale Mail; Shield; Billiger Trank gegen Shrieker-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
             hpVisibility: "full",
             imageData: "Images/liora_img.png",
             conditions: [],
@@ -419,11 +407,9 @@ function createDemoCreatures() {
             senses: "Tremorsense 60 ft.",
             spellSaveDc: "DC 15",
             specialResources: "Grave Moss Regrowth 10 HP · Crushing Root Recharge 5–6 · Grave Pull 1/Encounter",
-            traitsText: "Grave Moss Regrowth. At the start of its turn, if the koloss is standing on soil or stone, it regains 10 HP unless it took fire damage since its last turn.\nHeavy Frame. The koloss has advantage on saving throws against being moved, knocked prone or grappled by creatures smaller than Huge.\nBurial Ground Anchor. Difficult terrain made of roots, rubble or graves does not cost the koloss extra movement.",
-            actionsText: "Crushing Root. Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 2d10+5 bludgeoning, and the target is grappled.\nGrave Pull. Each creature in a 15 ft. line must make a DC 15 STR save or be pulled 10 ft. toward the koloss and knocked prone.\nTombstone Slam. Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 2d8+5 bludgeoning plus 1d8 necrotic.\nMoss-Covered Roar. Each frightened or prone creature within 30 ft. takes 1d6 psychic damage as grave-moss whispers through the soil.",
             notes: "Boss- oder Elite-Demo-Karte. Der Koloss funktioniert als langsamer Raumkontrolleur: zieht Ziele in gefährliche Zonen, überlebt lange und zwingt die Gruppe zu Feuer- oder Mobilitätslösungen.",
-            spellsText: "Root Wall. Roots and grave soil rise as half cover until initiative count 0.\nGrave Pull. Necrotic roots drag creatures through mud and loose stones.\nMoss Regrowth. Green corpse-light knits cracked stone back together.",
-            inventoryText: "Moss-covered stone heart\nAncient coin fragments\nGrave-root fiber\nA cracked nameplate from an unknown tomb",
+            demoSpellSeed: "Root Wall. Roots and grave soil rise as half cover until initiative count 0.\nGrave Pull. Necrotic roots drag creatures through mud and loose stones.\nMoss Regrowth. Green corpse-light knits cracked stone back together.",
+            demoInventorySeed: "Moss-covered stone heart\nAncient coin fragments\nGrave-root fiber\nA cracked nameplate from an unknown tomb",
             hpVisibility: "descriptive",
             imageData: "Images/moosgruft_koloss.png",
             conditions: [],
@@ -463,11 +449,9 @@ function createDemoCreatures() {
             senses: "Darkvision 60 ft., mirror-sense 30 ft.",
             spellSaveDc: "DC 14",
             specialResources: "Reflective Skin 2/Encounter · Duplicate Flicker 1/day · False Step Recharge 5–6",
-            traitsText: "Reflective Skin. Twice per encounter, when a spell attack misses the molch, it can redirect a harmless shimmer toward another creature within 10 ft.; that creature has disadvantage on its next Perception check.\nMirror-Sense. The molch knows the location of creatures reflected in still water, polished metal or glass within 30 ft.\nDuplicate Flicker. Once per day, the molch creates an illusory duplicate that lasts until it is hit by an attack.",
-            actionsText: "Glass Bite. Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 1d6+3 piercing plus 1d6 psychic.\nFalse Step. One target within 30 ft. must make a DC 14 INT save or move 10 ft. in a direction of the molch's choice.\nShimmer Spit. Ranged Spell Attack: +5 to hit, range 30 ft., one target. Hit: 2d6 psychic, and the target cannot benefit from invisibility until the end of its next turn.\nRipple Swap. The molch swaps places with its duplicate or reflection within 30 ft.",
             notes: "Illusions-Störer für Wasser, Spiegelhallen oder Mondlichtszenen. Nutzt falsche Positionen und kleine Zwangsbewegungen statt roher Gewalt.",
-            spellsText: "Duplicate Flicker. A second silhouette peels out of the reflection.\nGlass Ripple. A ring of mirror-light distorts distance and aim.\nFalse Step. The target follows a reflection that is not really there.\nRipple Swap. The molch trades places with a nearby reflection.",
-            inventoryText: "Iridescent scale\nTiny mirror shard\nCold pond pearl\nWet glassy membrane that keeps reflecting the wrong sky",
+            demoSpellSeed: "Duplicate Flicker. A second silhouette peels out of the reflection.\nGlass Ripple. A ring of mirror-light distorts distance and aim.\nFalse Step. The target follows a reflection that is not really there.\nRipple Swap. The molch trades places with a nearby reflection.",
+            demoInventorySeed: "Iridescent scale\nTiny mirror shard\nCold pond pearl\nWet glassy membrane that keeps reflecting the wrong sky",
             hpVisibility: "bar",
             imageData: "Images/spiegelmolch.png",
             conditions: ["invisible"],
@@ -507,11 +491,9 @@ function createDemoCreatures() {
             senses: "Reads street patterns and tailing routes",
             spellSaveDc: "DC 13 · Coded Whispers",
             specialResources: "Dead Drop 2/day · Vanish in Rain 1/Encounter · Blackmail Thread 3",
-            traitsText: "Crowd Ghost. Veyra can attempt to Hide while lightly obscured by rain, fog, crowds or hanging laundry.\nInformant's Instinct. Veyra has advantage on Insight checks to determine whether a creature is lying about names, routes or allegiances.\nDead Drop Network. Once per scene, Veyra can plausibly know where a message, key or minor contraband item has been hidden nearby.",
-            actionsText: "Hidden Dagger. Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 1d4+4 piercing plus 1d6 poison if Veyra had advantage.\nCoded Warning. One ally within 60 ft. who can hear or see Veyra may immediately move up to 10 ft. without provoking opportunity attacks.\nVanish in Rain. Veyra moves up to her speed and attempts to Hide. She can use this even if only lightly obscured by rain, fog or street shadows.\nBlackmail Thread. One creature within 30 ft. must make a DC 13 WIS save or have disadvantage on the next attack roll it makes against Veyra or one of her allies before the end of its next turn.",
             notes: "NPC-Demo-Karte für soziale Encounters, Verfolgungen und geheime Übergaben. Veyra ist keine Frontkämpferin; sie kontrolliert Informationen, Fluchtwege und kleine taktische Fenster.",
-            spellsText: "Coded Whisper. A nearly silent phrase carries meaning only to the intended listener.\nRain Veil. Street rain and fog distort her outline for a few seconds.\nMoonfaden Mark. A tiny silver thread marks a door, pocket or package until dawn.\nFalse Trail. Footprints and drips appear to lead down the wrong alley.",
-            inventoryText: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nThree coded street tokens\nBlack ribbon with a silver thread",
+            demoSpellSeed: "Coded Whisper. A nearly silent phrase carries meaning only to the intended listener.\nRain Veil. Street rain and fog distort her outline for a few seconds.\nMoonfaden Mark. A tiny silver thread marks a door, pocket or package until dawn.\nFalse Trail. Footprints and drips appear to lead down the wrong alley.",
+            demoInventorySeed: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nThree coded street tokens\nBlack ribbon with a silver thread",
             hpVisibility: "descriptive",
             imageData: "Images/veyra.png",
             conditions: [],
@@ -525,27 +507,24 @@ function createDemoCreatures() {
 }
 
 function addDemoStructuredActions(creature) {
+    const { demoSpellSeed = "", demoInventorySeed = "", ...baseCreature } = creature;
     const demoActions = getDemoActionsForCreature(creature.id);
     const demoTraits = getDemoTraitsForCreature(creature.id);
     const demoSpellcasting = getDemoSpellcastingForCreature(creature);
+    const demoInventory = createInventoryDataFromLegacyText(demoInventorySeed);
 
-    const demoInventory = createInventoryDataFromLegacyText(creature.inventoryText);
     if (creature.id === 1) {
         demoInventory.cards.push(createInventoryCardFromTemplate("greaterHealing"));
     }
 
     return {
-        ...creature,
+        ...baseCreature,
         actions: demoActions,
-        actionsText: createActionsTextFromStructuredActions(demoActions),
         traits: demoTraits,
-        traitsText: createTraitsTextFromStructuredTraits(demoTraits),
         spellcasting: demoSpellcasting,
-        spellsText: createSpellListTextFromSpellcasting(demoSpellcasting),
         currency: demoInventory.currency,
         inventoryCards: demoInventory.cards,
         inventoryList: demoInventory.list,
-        inventoryText: createInventoryTextFromStructuredInventory(demoInventory),
         isDemoCard: true
     };
 }
@@ -704,7 +683,9 @@ function applySpellOverride(spellcasting, spellName, overrides) {
 }
 
 function getDemoSpellcastingForCreature(creature) {
-    const spellcasting = getSafeSpellcasting(creature.spellcasting, creature);
+    const spellcasting = createDefaultSpellcasting(creature);
+    spellcasting.spells = parseLegacySpellsText(creature.demoSpellSeed);
+    applyLegacySlotHints(spellcasting, { spellsText: creature.demoSpellSeed, spellSaveDc: creature.spellSaveDc });
 
     if (creature.id === 1) {
         applySpellOverride(spellcasting, "Silvery Barbs", { castingTime: "1 Reaction", range: "60 ft.", showAsAction: true, actionType: "reaction" });
@@ -944,7 +925,7 @@ function renderEncounterNameDisplay() {
 function createPersistentAppState() {
     return {
         formatName: "Miriel's Deck of Encounters Local State",
-        formatVersion: 1,
+        formatVersion: 2,
         savedAt: new Date().toISOString(),
         demoCardsAutoloadEnabled: demoCardsAutoloadEnabled,
         encounter: {
@@ -1031,6 +1012,11 @@ function loadAppStateFromBrowser() {
     try {
         const savedState = JSON.parse(savedStateText);
 
+        if (savedState.formatVersion !== 2) {
+            updateStorageStatus("Browser-Speicher: veraltet – bitte zurücksetzen");
+            return false;
+        }
+
         if (typeof savedState.demoCardsAutoloadEnabled === "boolean") {
             setDemoCardsAutoloadEnabled(savedState.demoCardsAutoloadEnabled);
         }
@@ -1063,14 +1049,13 @@ function applyImportedEncounterState(importData) {
         return;
     }
 
-    encounterName = getSafeEncounterName(encounterData.encounterName || encounterData.name || encounterData.deckName);
+    encounterName = getSafeEncounterName(encounterData.encounterName);
 
     const importedCreatures = createImportedCreatures(encounterData.creatures);
     creatures = importedCreatures;
     roundNumber = getSafePositiveInteger(encounterData.roundNumber, 1);
     currentTurnIndex = getSafeNonNegativeInteger(encounterData.currentTurnIndex, 0);
-    const hasCurrentStartGateVersion = getSafePositiveInteger(encounterData.encounterStartGateVersion, 0) >= 2;
-    isEncounterStarted = hasCurrentStartGateVersion === true && encounterData.isEncounterStarted === true;
+    isEncounterStarted = encounterData.isEncounterStarted === true;
 
     if (isImportedPublicSelectionValid(encounterData.manuallySelectedPublicCardId, creatures)) {
         manuallySelectedPublicCardId = Number(encounterData.manuallySelectedPublicCardId);
@@ -1089,16 +1074,13 @@ function applyImportedEncounterState(importData) {
     expandedSpellDetailKey = getSafeOptionalString(encounterData.expandedSpellDetailKey);
 
     combatLogMessages = getSafeCombatLogMessages(encounterData.combatLogMessages);
-    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, getSafeString(encounterData.sharedDmImageData, ""));
-    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, getSafeString(encounterData.sharedDmImageName, ""));
+    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, "");
+    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, "");
     mirielBoardManualText = getSafeString(encounterData.mirielBoardManualText, "");
     mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(encounterData.mirielBoardManualTextSize);
     mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(encounterData.mirielBoardManualTextPosition);
     mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(encounterData);
-    const hasCurrentMirielBoardAutomationDefaults = getSafePositiveInteger(encounterData.mirielBoardAutomationDefaultsVersion, 0) >= mirielBoardAutomationDefaultsVersion;
-    isMirielBoardAutoTurnEnabled = hasCurrentMirielBoardAutomationDefaults === true
-        ? encounterData.isMirielBoardAutoTurnEnabled === true
-        : false;
+    isMirielBoardAutoTurnEnabled = encounterData.isMirielBoardAutoTurnEnabled === true;
     mirielBoardDurationMode = getSafeMirielBoardDurationMode(encounterData.mirielBoardDurationMode);
     isMirielBoardNewRoundCallEnabled = encounterData.isMirielBoardNewRoundCallEnabled !== false;
     mirielBoardTriggerId = getSafeOptionalString(encounterData.mirielBoardTriggerId);
@@ -1353,15 +1335,29 @@ function normalizeDeckSearchText(value) {
 }
 
 function getCreatureDeckSearchText(creature) {
+    const traitText = getCreatureTraits(creature).map(function(trait) {
+        return `${trait.name} ${trait.description}`;
+    }).join(" ");
+    const actionText = getCreatureActions(creature).map(function(action) {
+        return `${action.name} ${action.description} ${action.attack} ${action.save} ${action.range} ${action.damage}`;
+    }).join(" ");
+    const spellText = getCreatureSpellcasting(creature).spells.map(function(spell) {
+        return `${spell.name} ${spell.description} ${spell.notes}`;
+    }).join(" ");
+    const inventory = getInventoryData(creature);
+    const inventoryText = [
+        ...inventory.cards.map(function(item) { return `${item.name} ${item.description} ${item.effect}`; }),
+        ...inventory.list.map(function(item) { return `${item.name} ${item.description} ${item.notes}`; })
+    ].join(" ");
     const searchableParts = [
         creature.name,
         creature.publicName,
         creature.type,
-        creature.traitsText,
-        creature.actionsText,
-        creature.spellsText,
+        traitText,
+        actionText,
+        spellText,
         creature.notes,
-        creature.inventoryText
+        inventoryText
     ];
 
     return normalizeDeckSearchText(searchableParts.join(" "));
@@ -3407,12 +3403,12 @@ function createDmConsoleComposeHtml() {
 function scrollDmChatToLatest() {
     window.requestAnimationFrame(function() {
         window.requestAnimationFrame(function() {
-            const chatScrollElements = document.querySelectorAll("#dm-console-chat-content, #dm-console-chat-content .dm-chat-placeholder, #dm-feed-content .dm-console-chat-section, #dm-feed-content .dm-chat-placeholder");
+            const chatScrollElements = document.querySelectorAll("#dm-console-chat-content, #dm-console-chat-content .dm-chat-placeholder");
             chatScrollElements.forEach(function(element) {
                 element.scrollTop = element.scrollHeight;
             });
 
-            const latestChatMessages = document.querySelectorAll("#dm-console-chat-content .dm-chat-message:last-child, #dm-feed-content .dm-chat-message:last-child");
+            const latestChatMessages = document.querySelectorAll("#dm-console-chat-content .dm-chat-message:last-child");
             latestChatMessages.forEach(function(messageElement) {
                 messageElement.scrollIntoView({ block: "end", inline: "nearest" });
             });
@@ -3427,12 +3423,12 @@ function scrollDmChatToLatest() {
 function scrollCombatLogToLatest() {
     window.requestAnimationFrame(function() {
         window.requestAnimationFrame(function() {
-            const logScrollElements = document.querySelectorAll("#dm-console-log-content, #dm-console-log-content .combat-log-list, #dm-feed-content .dm-console-log-section, #dm-feed-content .combat-log-list");
+            const logScrollElements = document.querySelectorAll("#dm-console-log-content, #dm-console-log-content .combat-log-list");
             logScrollElements.forEach(function(element) {
                 element.scrollTop = element.scrollHeight;
             });
 
-            const latestLogEntries = document.querySelectorAll("#dm-console-log-content .combat-log-entry:last-child, #dm-feed-content .combat-log-entry:last-child");
+            const latestLogEntries = document.querySelectorAll("#dm-console-log-content .combat-log-entry:last-child");
             latestLogEntries.forEach(function(logElement) {
                 logElement.scrollIntoView({ block: "end", inline: "nearest" });
             });
@@ -3445,14 +3441,10 @@ function scrollCombatLogToLatest() {
 }
 
 function renderDmFeedPanel() {
-    const legacyFeedContentElement = document.querySelector("#dm-feed-content");
     const logContentElement = document.querySelector("#dm-console-log-content");
     const chatContentElement = document.querySelector("#dm-console-chat-content");
     const composeElement = document.querySelector("#dm-console-compose");
 
-    if (legacyFeedContentElement !== null) {
-        legacyFeedContentElement.innerHTML = createUnifiedDmFeedHtml();
-    }
 
     if (logContentElement !== null) {
         logContentElement.innerHTML = createCombatLogHtml();
@@ -4097,7 +4089,7 @@ async function readAndOptimizeImageFileAsDataUrl(file) {
 function createEncounterExportData() {
     return {
         formatName: "Miriel\'s Deck of Encounters Encounter",
-        formatVersion: 1,
+        formatVersion: 2,
         exportedAt: new Date().toISOString(),
         encounter: {
             encounterName: encounterName,
@@ -4358,22 +4350,23 @@ function createImportedCreaturesForDeckAppend(rawCreatures) {
     return importedCreatures;
 }
 
-function importEncounterData(importData) {
-    const encounterData = getEncounterDataFromImport(importData);
-
-    if (encounterData === null) {
+function importEncounterData(encounterData) {
+    if (
+        encounterData === null ||
+        typeof encounterData !== "object" ||
+        Array.isArray(encounterData.creatures) === false
+    ) {
         alert("Die Datei enthält keinen gültigen Encounter.");
         return;
     }
 
     const importedCreatures = createImportedCreatures(encounterData.creatures);
 
-    encounterName = getSafeEncounterName(encounterData.encounterName || encounterData.name || encounterData.deckName);
+    encounterName = getSafeEncounterName(encounterData.encounterName);
     creatures = importedCreatures;
     roundNumber = getSafePositiveInteger(encounterData.roundNumber, 1);
     currentTurnIndex = getSafeNonNegativeInteger(encounterData.currentTurnIndex, 0);
-    const hasCurrentStartGateVersion = getSafePositiveInteger(encounterData.encounterStartGateVersion, 0) >= 2;
-    isEncounterStarted = hasCurrentStartGateVersion === true && encounterData.isEncounterStarted === true;
+    isEncounterStarted = encounterData.isEncounterStarted === true;
 
     if (isImportedPublicSelectionValid(encounterData.manuallySelectedPublicCardId, creatures)) {
         manuallySelectedPublicCardId = Number(encounterData.manuallySelectedPublicCardId);
@@ -4392,16 +4385,13 @@ function importEncounterData(importData) {
     expandedSpellDetailKey = getSafeOptionalString(encounterData.expandedSpellDetailKey);
 
     combatLogMessages = getSafeCombatLogMessages(encounterData.combatLogMessages);
-    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, getSafeString(encounterData.sharedDmImageData, ""));
-    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, getSafeString(encounterData.sharedDmImageName, ""));
+    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, "");
+    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, "");
     mirielBoardManualText = getSafeString(encounterData.mirielBoardManualText, "");
     mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(encounterData.mirielBoardManualTextSize);
     mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(encounterData.mirielBoardManualTextPosition);
     mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(encounterData);
-    const hasCurrentMirielBoardAutomationDefaults = getSafePositiveInteger(encounterData.mirielBoardAutomationDefaultsVersion, 0) >= mirielBoardAutomationDefaultsVersion;
-    isMirielBoardAutoTurnEnabled = hasCurrentMirielBoardAutomationDefaults === true
-        ? encounterData.isMirielBoardAutoTurnEnabled === true
-        : false;
+    isMirielBoardAutoTurnEnabled = encounterData.isMirielBoardAutoTurnEnabled === true;
     mirielBoardDurationMode = getSafeMirielBoardDurationMode(encounterData.mirielBoardDurationMode);
     isMirielBoardNewRoundCallEnabled = encounterData.isMirielBoardNewRoundCallEnabled !== false;
     mirielBoardTriggerId = getSafeOptionalString(encounterData.mirielBoardTriggerId);
@@ -4414,33 +4404,18 @@ function importEncounterData(importData) {
 }
 
 function getEncounterDataFromImport(importData) {
-    if (importData === null || typeof importData !== "object") {
+    if (
+        importData === null ||
+        typeof importData !== "object" ||
+        importData.formatVersion !== 2 ||
+        importData.encounter === null ||
+        typeof importData.encounter !== "object" ||
+        Array.isArray(importData.encounter.creatures) === false
+    ) {
         return null;
     }
 
-    if (
-        importData.encounter !== undefined &&
-        importData.encounter !== null &&
-        typeof importData.encounter === "object" &&
-        Array.isArray(importData.encounter.creatures)
-    ) {
-        return importData.encounter;
-    }
-
-    if (Array.isArray(importData.creatures)) {
-        return importData;
-    }
-
-    if (Array.isArray(importData)) {
-        return {
-            roundNumber: 1,
-            currentTurnIndex: 0,
-            manuallySelectedPublicCardId: null,
-            creatures: importData
-        };
-    }
-
-    return null;
+    return importData.encounter;
 }
 
 function createImportedCreatures(rawCreatures) {
@@ -4503,17 +4478,13 @@ function createImportedCreature(rawCreature, usedIds) {
         senses: getSafeOptionalString(rawCreature.senses),
         spellSaveDc: getSafeOptionalString(rawCreature.spellSaveDc),
         specialResources: getSafeOptionalString(rawCreature.specialResources),
-        traitsText: getSafeOptionalString(rawCreature.traitsText),
-        traits: getSafeCreatureTraits(rawCreature.traits, rawCreature.traitsText, rawCreature.specialResources),
-        actionsText: getSafeOptionalString(rawCreature.actionsText),
-        actions: getSafeCreatureActions(rawCreature.actions, rawCreature.actionsText),
+        traits: getSafeCreatureTraits(rawCreature.traits),
+        actions: getSafeCreatureActions(rawCreature.actions),
         notes: getSafeOptionalString(rawCreature.notes),
-        spellsText: getSafeOptionalString(rawCreature.spellsText),
         spellcasting: getSafeSpellcasting(rawCreature.spellcasting, rawCreature),
-        inventoryText: getSafeOptionalString(rawCreature.inventoryText),
-        currency: getSafeCurrency(rawCreature.currency, rawCreature.inventoryText),
-        inventoryCards: getSafeInventoryCards(rawCreature.inventoryCards, rawCreature.inventoryText),
-        inventoryList: getSafeInventoryList(rawCreature.inventoryList, rawCreature.inventoryText),
+        currency: getSafeCurrency(rawCreature.currency),
+        inventoryCards: getSafeInventoryCards(rawCreature.inventoryCards),
+        inventoryList: getSafeInventoryList(rawCreature.inventoryList),
         hpVisibility: getSafeHpVisibility(rawCreature.hpVisibility),
         imageData: getSafeString(rawCreature.imageData, ""),
         conditions: getSafeConditions(rawCreature.conditions),
@@ -4940,26 +4911,6 @@ function createDetailStatCardHtml(label, value, extraClassName = "") {
     `;
 }
 
-function createTraitTextForDetail(creature) {
-    const structuredText = createTraitsTextFromStructuredTraits(getCreatureTraits(creature));
-    if (structuredText !== "") {
-        return structuredText;
-    }
-
-    const specialResourcesText = getSafeOptionalString(creature.specialResources);
-    const traitsText = getSafeOptionalString(creature.traitsText);
-
-    if (specialResourcesText === "") {
-        return traitsText;
-    }
-
-    if (traitsText === "") {
-        return `Ressourcen. ${specialResourcesText}`;
-    }
-
-    return `Ressourcen. ${specialResourcesText}\n${traitsText}`;
-}
-
 function createDetailLongTextCardHtml(label, value, emptyText) {
     const safeValue = getSafeOptionalString(value);
     const contentHtml = safeValue === ""
@@ -5034,8 +4985,7 @@ function createEmptySpellSlots() {
 
 function createDefaultSpellcasting(rawCreature = {}) {
     const saveDcText = getSafeOptionalString(rawCreature.spellSaveDc);
-    const spellsText = getSafeOptionalString(rawCreature.spellsText);
-    const parsedSaveDc = parseSpellSaveDcText(`${saveDcText} ${spellsText}`);
+    const parsedSaveDc = parseSpellSaveDcText(saveDcText);
 
     return {
         ability: parsedSaveDc.ability,
@@ -5072,12 +5022,6 @@ function getSafeSpellcasting(rawSpellcasting, rawCreature = {}) {
         spellcasting.slots = getSafeSpellSlots(rawSpellcasting.slots);
         spellcasting.spells = getSafeSpellList(rawSpellcasting.spells);
     }
-
-    if (spellcasting.spells.length === 0) {
-        spellcasting.spells = parseLegacySpellsText(getSafeOptionalString(rawCreature.spellsText));
-    }
-
-    applyLegacySlotHints(spellcasting, rawCreature);
 
     return spellcasting;
 }
@@ -5492,6 +5436,20 @@ function createSpellcastingSummaryText(spellcasting) {
     return parts.length > 0 ? parts.join(" · ") : "Keine Spellcasting-Basis eingetragen.";
 }
 
+function createCreatureSpellSaveDcText(spellcasting) {
+    const parts = [];
+
+    if (spellcasting.saveDc > 0) {
+        parts.push(`DC ${spellcasting.saveDc}`);
+    }
+
+    if (spellcasting.attackBonus !== "") {
+        parts.push(`Spell Attack ${spellcasting.attackBonus}`);
+    }
+
+    return parts.join(" · ");
+}
+
 function createSpellcastingSummaryHtml(spellcasting) {
     const abilityText = spellcasting.ability !== "" ? spellcasting.ability : "—";
     const saveDcText = spellcasting.saveDc > 0 ? String(spellcasting.saveDc) : "—";
@@ -5732,11 +5690,11 @@ function createSpellListTextFromSpellcasting(spellcasting) {
     return spellcasting.spells.map(createSpellLineFromSpell).join("\n");
 }
 
-function parseSpellListText(spellListText, legacyText) {
+function parseSpellListText(spellListText) {
     const text = getSafeOptionalString(spellListText);
 
     if (text === "") {
-        return parseLegacySpellsText(legacyText);
+        return [];
     }
 
     return text
@@ -5777,8 +5735,8 @@ function parseSpellListText(spellListText, legacyText) {
         });
 }
 
-function readSpellcastingFromForge(prefix, legacySpellsText, legacySpellSaveDc) {
-    const base = createDefaultSpellcasting({ spellSaveDc: legacySpellSaveDc, spellsText: legacySpellsText });
+function readSpellcastingFromForge(prefix) {
+    const base = createDefaultSpellcasting();
     const abilityElement = document.querySelector(`#${prefix}-spellcasting-ability`);
     const saveDcElement = document.querySelector(`#${prefix}-spellcasting-save-dc`);
     const attackElement = document.querySelector(`#${prefix}-spellcasting-attack`);
@@ -5795,9 +5753,7 @@ function readSpellcastingFromForge(prefix, legacySpellsText, legacySpellSaveDc) 
         base.slots[String(level)] = { max: max, used: 0 };
     }
 
-    base.spells = parseSpellListText(spellListElement !== null ? spellListElement.value : "", legacySpellsText);
-    applyLegacySlotHints(base, { spellsText: legacySpellsText, spellSaveDc: legacySpellSaveDc });
-
+    base.spells = parseSpellListText(spellListElement !== null ? spellListElement.value : "");
     return base;
 }
 
@@ -5831,16 +5787,7 @@ function renderVisibleForgeSpellManager() {
 }
 
 function getForgeSpellcastingDraft(prefix) {
-    const spellListElement = document.querySelector(`#${prefix}-structured-spells`);
-    const legacyTextElement = document.querySelector(`#${prefix}-spells-text`);
-    const saveDcElement = document.querySelector(`#${prefix}-spell-save-dc`);
-    const spellListText = spellListElement !== null ? spellListElement.value : "";
-    const legacyText = legacyTextElement !== null ? legacyTextElement.value : "";
-    const legacySaveDc = saveDcElement !== null ? saveDcElement.value : "";
-    const draft = readSpellcastingFromForge(prefix, legacyText, legacySaveDc);
-
-    draft.spells = parseSpellListText(spellListText, legacyText);
-    return draft;
+    return readSpellcastingFromForge(prefix);
 }
 
 function setForgeSpellList(prefix, spells) {
@@ -5872,14 +5819,8 @@ function commitForgeSpellcastingIfEditing(prefix) {
         return;
     }
 
-    const spellsTextElement = document.querySelector("#edit-creature-spells-text");
-    const spellSaveDcElement = document.querySelector("#edit-creature-spell-save-dc");
-    const legacySpellsText = spellsTextElement !== null ? spellsTextElement.value : creature.spellsText || "";
-    const legacySpellSaveDc = spellSaveDcElement !== null ? spellSaveDcElement.value : creature.spellSaveDc || "";
-
-    creature.spellcasting = readSpellcastingFromForge(prefix, legacySpellsText, legacySpellSaveDc);
-    creature.spellsText = legacySpellsText;
-    creature.spellSaveDc = legacySpellSaveDc;
+    creature.spellcasting = readSpellcastingFromForge(prefix);
+    creature.spellSaveDc = createCreatureSpellSaveDcText(creature.spellcasting);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -6402,20 +6343,17 @@ function resetUsageCountersForCreature(creature, resetTypes) {
         return shouldReset(action) ? createCreatureAction({ ...action, used: 0 }, 0) : action;
     });
     creature.actions = actions;
-    creature.actionsText = createActionsTextFromStructuredActions(actions);
 
     const traits = getCreatureTraits(creature).map(function(trait) {
         return shouldReset(trait) ? createCreatureTrait({ ...trait, used: 0 }, 0) : trait;
     });
     creature.traits = traits;
-    creature.traitsText = createTraitsTextFromStructuredTraits(traits);
 
     const spellcasting = getCreatureSpellcasting(creature);
     spellcasting.spells = spellcasting.spells.map(function(spell) {
         return shouldReset(spell) ? createSpellObject({ ...spell, used: 0 }, 0) : spell;
     });
     creature.spellcasting = spellcasting;
-    creature.spellsText = createSpellListTextFromSpellcasting(spellcasting);
 }
 
 const creatureActionTypeLabels = {
@@ -6495,38 +6433,9 @@ function getActionTextFromStructuredAction(action) {
     return `${action.name}. ${details.join("; ")}`.trim();
 }
 
-function createActionsTextFromStructuredActions(actions) {
-    return getSafeCreatureActions(actions, "").map(getActionTextFromStructuredAction).join("\n");
-}
-
-function parseLegacyActionText(actionsText) {
-    const entries = splitDetailEntries(actionsText || "");
-
-    return entries.map(function(entry, index) {
-        const title = getDetailEntryTitle(entry, "Aktion", index);
-        const body = getDetailEntryBody(entry);
-        const combinedText = `${title}. ${body}`;
-        const lowerText = combinedText.toLowerCase();
-        const type = lowerText.includes("reaction") || lowerText.includes("reaktion")
-            ? "reaction"
-            : lowerText.includes("bonus action") || lowerText.includes("bonusaktion")
-                ? "bonus"
-                : lowerText.includes("special") || lowerText.includes("sonstiges") || lowerText.includes("sonder")
-                    ? "special"
-                    : "action";
-
-        return createCreatureAction({
-            id: `legacy-action-${index}`,
-            name: title,
-            type: type,
-            description: body
-        }, index);
-    });
-}
-
-function getSafeCreatureActions(value, legacyActionsText = "") {
+function getSafeCreatureActions(value) {
     if (Array.isArray(value) === false) {
-        return parseLegacyActionText(legacyActionsText);
+        return [];
     }
 
     return value
@@ -6540,7 +6449,7 @@ function getCreatureActions(creature) {
         return [];
     }
 
-    return getSafeCreatureActions(creature.actions, creature.actionsText);
+    return getSafeCreatureActions(creature.actions);
 }
 
 
@@ -6634,14 +6543,7 @@ function getForgeActionsDraft(prefix) {
         return [];
     }
 
-    const rawValue = actionsElement.value.trim();
-    const parsedValue = parseJsonValue(rawValue, null);
-
-    if (parsedValue !== null) {
-        return getSafeCreatureActions(parsedValue, "");
-    }
-
-    return parseLegacyActionText(rawValue);
+    return getSafeCreatureActions(parseJsonValue(actionsElement.value.trim(), []), "");
 }
 
 function setForgeActions(prefix, actions) {
@@ -6672,7 +6574,6 @@ function commitForgeActionsIfEditing(prefix) {
     }
 
     creature.actions = getForgeActionsDraft(prefix);
-    creature.actionsText = createActionsTextFromStructuredActions(creature.actions);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -7096,27 +6997,13 @@ function getSafeMirielBoardPersistentModeFromEncounter(encounterData) {
         return "off";
     }
 
-    const explicitMode = getSafeMirielBoardPersistentMode(encounterData.mirielBoardPersistentMode);
+    const mode = getSafeMirielBoardPersistentMode(encounterData.mirielBoardPersistentMode);
 
-    if (explicitMode === "manual" && hasEncounterManualBoardContent(encounterData) !== true) {
+    if (mode === "manual" && hasEncounterManualBoardContent(encounterData) !== true) {
         return "off";
     }
 
-    if (encounterData.mirielBoardPersistentMode === "manual" || encounterData.mirielBoardPersistentMode === "initiative" || encounterData.mirielBoardPersistentMode === "off") {
-        return explicitMode;
-    }
-
-    if (encounterData.isMirielBoardManuallyVisible === true) {
-        const legacyMode = getSafeMirielBoardContentMode(encounterData.mirielBoardContentMode);
-
-        if (legacyMode === "manual" && hasEncounterManualBoardContent(encounterData) === true) {
-            return "manual";
-        }
-
-        return "initiative";
-    }
-
-    return "off";
+    return mode;
 }
 
 function hasEncounterManualBoardContent(encounterData) {
@@ -7124,7 +7011,7 @@ function hasEncounterManualBoardContent(encounterData) {
         return false;
     }
 
-    const imageData = getSafeString(encounterData.mirielBoardManualImageData, getSafeString(encounterData.sharedDmImageData, ""));
+    const imageData = getSafeString(encounterData.mirielBoardManualImageData, "");
     const manualText = getSafeString(encounterData.mirielBoardManualText, "");
 
     return imageData !== "" || manualText.trim() !== "";
@@ -8288,14 +8175,7 @@ function getForgeTraitsDraft(prefix) {
         return [];
     }
 
-    const rawValue = traitsElement.value.trim();
-    const parsedValue = parseJsonValue(rawValue, null);
-
-    if (parsedValue !== null) {
-        return getSafeCreatureTraits(parsedValue, "");
-    }
-
-    return parseLegacyTraitsText(rawValue);
+    return getSafeCreatureTraits(parseJsonValue(traitsElement.value.trim(), []), "");
 }
 
 function setForgeTraits(prefix, traits) {
@@ -8325,7 +8205,6 @@ function commitForgeTraitsIfEditing(prefix) {
     }
 
     creature.traits = getForgeTraitsDraft(prefix);
-    creature.traitsText = createTraitsTextFromStructuredTraits(creature.traits);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -9313,15 +9192,12 @@ function openEditCreatureForm(creatureId) {
     setInputValue("edit-creature-immunities", creature.immunities || "");
     setInputValue("edit-creature-vulnerabilities", creature.vulnerabilities || "");
     setInputValue("edit-creature-senses", creature.senses || "");
-    setInputValue("edit-creature-spell-save-dc", creature.spellSaveDc || "");
     setInputValue("edit-creature-special-resources", creature.specialResources || "");
     writeTraitsToForge("edit-creature", creature);
     writeActionsToForge("edit-creature", creature);
     setForgeNotes("edit-creature", creature.notes || "");
-    setInputValue("edit-creature-spells-text", creature.spellsText || "");
     writeSpellcastingToForge("edit-creature", creature);
     renderForgeSpellManager("edit-creature");
-    setInputValue("edit-creature-inventory-text", creature.inventoryText || "");
     writeInventoryToForge("edit-creature", creature);
     renderForgeInventoryManager("edit-creature");
     setInputValue("edit-creature-hp-visibility", creature.hpVisibility);
@@ -9419,13 +9295,8 @@ async function handleEditCreatureSaveButtonClick() {
     const immunitiesInputElement = document.querySelector("#edit-creature-immunities");
     const vulnerabilitiesInputElement = document.querySelector("#edit-creature-vulnerabilities");
     const sensesInputElement = document.querySelector("#edit-creature-senses");
-    const spellSaveDcInputElement = document.querySelector("#edit-creature-spell-save-dc");
     const specialResourcesInputElement = document.querySelector("#edit-creature-special-resources");
-    const traitsTextInputElement = document.querySelector("#edit-creature-traits-text");
-    const actionsTextInputElement = document.querySelector("#edit-creature-actions-text");
     const notesInputElement = document.querySelector("#edit-creature-notes");
-    const spellsTextInputElement = document.querySelector("#edit-creature-spells-text");
-    const inventoryTextInputElement = document.querySelector("#edit-creature-inventory-text");
     const hpVisibilitySelectElement = document.querySelector("#edit-creature-hp-visibility");
     const isInCombatInputElement = document.querySelector("#edit-creature-is-in-combat");
     const conditionListElement = document.querySelector("#edit-creature-condition-list");
@@ -9463,13 +9334,8 @@ async function handleEditCreatureSaveButtonClick() {
         immunitiesInputElement === null ||
         vulnerabilitiesInputElement === null ||
         sensesInputElement === null ||
-        spellSaveDcInputElement === null ||
         specialResourcesInputElement === null ||
-        traitsTextInputElement === null ||
-        actionsTextInputElement === null ||
         notesInputElement === null ||
-        spellsTextInputElement === null ||
-        inventoryTextInputElement === null ||
         hpVisibilitySelectElement === null ||
         isInCombatInputElement === null ||
         conditionListElement === null
@@ -9608,20 +9474,16 @@ async function handleEditCreatureSaveButtonClick() {
     creature.immunities = immunitiesInputElement.value.trim();
     creature.vulnerabilities = vulnerabilitiesInputElement.value.trim();
     creature.senses = sensesInputElement.value.trim();
-    creature.spellSaveDc = spellSaveDcInputElement.value.trim();
+    creature.spellcasting = readSpellcastingFromForge("edit-creature");
+    creature.spellSaveDc = createCreatureSpellSaveDcText(creature.spellcasting);
     creature.specialResources = specialResourcesInputElement.value.trim();
     creature.traits = getForgeTraitsDraft("edit-creature");
-    creature.traitsText = createTraitsTextFromStructuredTraits(creature.traits);
     creature.actions = getForgeActionsDraft("edit-creature");
-    creature.actionsText = createActionsTextFromStructuredActions(creature.actions);
     creature.notes = getForgeNotesText("edit-creature");
-    creature.spellsText = spellsTextInputElement.value.trim();
-    creature.spellcasting = readSpellcastingFromForge("edit-creature", creature.spellsText, creature.spellSaveDc);
-    const nextInventory = readInventoryFromForge("edit-creature", inventoryTextInputElement.value.trim());
+    const nextInventory = readInventoryFromForge("edit-creature");
     creature.currency = nextInventory.currency;
     creature.inventoryCards = nextInventory.cards;
     creature.inventoryList = nextInventory.list;
-    creature.inventoryText = createInventoryTextFromStructuredInventory(nextInventory);
     creature.hpVisibility = hpVisibilitySelectElement.value;
     creature.imageData = imageData;
     creature.conditions = getEditConditionValues();
@@ -9703,13 +9565,8 @@ async function handleAddCreatureButtonClick() {
     const immunitiesInputElement = document.querySelector("#new-creature-immunities");
     const vulnerabilitiesInputElement = document.querySelector("#new-creature-vulnerabilities");
     const sensesInputElement = document.querySelector("#new-creature-senses");
-    const spellSaveDcInputElement = document.querySelector("#new-creature-spell-save-dc");
     const specialResourcesInputElement = document.querySelector("#new-creature-special-resources");
-    const traitsTextInputElement = document.querySelector("#new-creature-traits-text");
-    const actionsTextInputElement = document.querySelector("#new-creature-actions-text");
     const notesInputElement = document.querySelector("#new-creature-notes");
-    const spellsTextInputElement = document.querySelector("#new-creature-spells-text");
-    const inventoryTextInputElement = document.querySelector("#new-creature-inventory-text");
     const isInCombatInputElement = document.querySelector("#new-creature-is-in-combat");
     const conditionListElement = document.querySelector("#new-creature-condition-list");
 
@@ -9747,13 +9604,8 @@ async function handleAddCreatureButtonClick() {
         immunitiesInputElement === null ||
         vulnerabilitiesInputElement === null ||
         sensesInputElement === null ||
-        spellSaveDcInputElement === null ||
         specialResourcesInputElement === null ||
-        traitsTextInputElement === null ||
-        actionsTextInputElement === null ||
         notesInputElement === null ||
-        spellsTextInputElement === null ||
-        inventoryTextInputElement === null ||
         isInCombatInputElement === null ||
         conditionListElement === null
     ) {
@@ -9902,16 +9754,13 @@ async function handleAddCreatureButtonClick() {
             immunities: immunitiesInputElement.value.trim(),
             vulnerabilities: vulnerabilitiesInputElement.value.trim(),
             senses: sensesInputElement.value.trim(),
-            spellSaveDc: spellSaveDcInputElement.value.trim(),
+            spellSaveDc: createCreatureSpellSaveDcText(readSpellcastingFromForge("new-creature")),
             specialResources: specialResourcesInputElement.value.trim(),
             traits: getForgeTraitsDraft("new-creature"),
-            traitsText: createTraitsTextFromStructuredTraits(getForgeTraitsDraft("new-creature")),
             actions: getForgeActionsDraft("new-creature"),
-            actionsText: createActionsTextFromStructuredActions(getForgeActionsDraft("new-creature")),
             notes: getForgeNotesText("new-creature"),
-            spellsText: spellsTextInputElement.value.trim(),
-            spellcasting: readSpellcastingFromForge("new-creature", spellsTextInputElement.value.trim(), spellSaveDcInputElement.value.trim()),
-            ...createInventoryFieldsFromForge("new-creature", inventoryTextInputElement.value.trim()),
+            spellcasting: readSpellcastingFromForge("new-creature"),
+            ...createInventoryFieldsFromForge("new-creature"),
             hpVisibility: hpVisibilitySelectElement.value,
             imageData: imageData,
             conditions: startConditions.slice(),
@@ -10925,26 +10774,9 @@ function createCreatureTrait(rawTrait = {}, fallbackIndex = 0) {
     };
 }
 
-function parseLegacyTraitsText(traitsText, specialResourcesText = "") {
-    const combinedText = [
-        getSafeOptionalString(specialResourcesText) !== "" ? `Ressourcen. ${getSafeOptionalString(specialResourcesText)}` : "",
-        getSafeOptionalString(traitsText)
-    ].filter(Boolean).join("\n");
-    const entries = splitDetailEntries(combinedText, false);
-
-    return entries.map(function(entry, index) {
-        return createCreatureTrait({
-            id: `legacy-trait-${index}`,
-            name: getDetailEntryTitle(entry, "Trait", index),
-            category: index === 0 && entry.toLowerCase().startsWith("ressourcen") ? "resource" : "other",
-            description: getDetailEntryBody(entry)
-        }, index);
-    }).filter(function(trait) { return trait.name !== ""; });
-}
-
-function getSafeCreatureTraits(value, legacyTraitsText = "", specialResourcesText = "") {
+function getSafeCreatureTraits(value) {
     if (Array.isArray(value) === false) {
-        return parseLegacyTraitsText(legacyTraitsText, specialResourcesText);
+        return [];
     }
 
     return value
@@ -10958,7 +10790,7 @@ function getCreatureTraits(creature) {
         return [];
     }
 
-    return getSafeCreatureTraits(creature.traits, creature.traitsText, creature.specialResources);
+    return getSafeCreatureTraits(creature.traits);
 }
 
 function getTraitTextFromStructuredTrait(trait) {
@@ -10973,10 +10805,6 @@ function getTraitTextFromStructuredTrait(trait) {
     }
 
     return `${trait.name}. ${parts.join("; ")}`.trim();
-}
-
-function createTraitsTextFromStructuredTraits(traits) {
-    return getSafeCreatureTraits(traits, "").map(getTraitTextFromStructuredTrait).join("\n");
 }
 
 function createDetailEntryCardsHtml(value, emptyText, fallbackLabel, splitCommaList = false) {
@@ -11043,7 +10871,6 @@ function saveUsageActionReference(creature, actionReference) {
         if (trait !== undefined) {
             trait.used = actionReference.used;
             creature.traits = traits;
-            creature.traitsText = createTraitsTextFromStructuredTraits(traits);
         }
         return;
     }
@@ -11054,7 +10881,6 @@ function saveUsageActionReference(creature, actionReference) {
         if (spell !== undefined) {
             spell.used = actionReference.used;
             creature.spellcasting = spellcasting;
-            creature.spellsText = createSpellListTextFromSpellcasting(spellcasting);
         }
         return;
     }
@@ -11064,7 +10890,6 @@ function saveUsageActionReference(creature, actionReference) {
     if (action !== undefined) {
         action.used = actionReference.used;
         creature.actions = actions;
-        creature.actionsText = createActionsTextFromStructuredActions(actions);
     }
 }
 
@@ -11376,7 +11201,7 @@ function getInventoryItemSuggestion(name) {
         { test: /ink|parchment|book|pen/, category: "equipment", description: "Schreib- und Studienmaterial für Notizen, Forschung, Zauberformeln oder Dokumente." },
         { test: /rope/, category: "equipment", description: "Hempen rope, 50 ft.; Standardausrüstung für Klettern, Sichern und Improvisation." },
         { test: /rations|waterskin|bedroll|backpack|pouch|clothes|robe|tinderbox|hammer|pitons|crowbar|candles?/, category: "equipment", description: "Normale Reise- oder Abenteuerausrüstung. Meist nur relevant, wenn die Szene danach fragt." },
-        { test: /blue mushrooms|brass bowl|powdered iron|fleece pieces/, category: "equipment", description: "Zauberkomponente oder kurioser Vorratsgegenstand aus Miriels Ausrüstung." },
+        { test: /blue mushrooms|brass bowl|powdered iron|fleece pieces|pieces of fleece/, category: "equipment", description: "Zauberkomponente oder kurioser Vorratsgegenstand aus Miriels Ausrüstung." },
         { test: /versiegelte nachricht|coded street tokens|black ribbon|versteckter dolch/, category: "quest", description: "Story- oder Spionagegegenstand. Details können vom DM je nach Szene ergänzt werden." },
         { test: /coin|pearl|ring|scale|feather|shard|root|fang|sap|seed|leaves|borsten|silbernägelchen|staubflocken|nameplate|moss|stone heart|membrane/, category: "treasure", description: "Loot oder Trophäe. Kann als Hinweis, Materialkomponente oder verkaufbarer Fund verwendet werden." }
     ];
@@ -11416,16 +11241,15 @@ function createInventoryListItem(rawItem = {}, fallbackIndex = 0) {
     };
 }
 
-function getSafeCurrency(value, legacyText = "") {
-    const legacy = parseCurrencyFromInventoryText(legacyText);
+function getSafeCurrency(value) {
     if (value === null || typeof value !== "object") {
-        return legacy;
+        return { gp: 0, sp: 0, cp: 0 };
     }
 
     return {
-        gp: getSafeNonNegativeInteger(value.gp, legacy.gp),
-        sp: getSafeNonNegativeInteger(value.sp, legacy.sp),
-        cp: getSafeNonNegativeInteger(value.cp, legacy.cp)
+        gp: getSafeNonNegativeInteger(value.gp, 0),
+        sp: getSafeNonNegativeInteger(value.sp, 0),
+        cp: getSafeNonNegativeInteger(value.cp, 0)
     };
 }
 
@@ -11462,7 +11286,7 @@ function createCustomConsumableCardFromEntry(entry, fallbackIndex) {
     const item = createInventoryCard({
         id: `legacy-card-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
         template: "customPotion",
-        name: lower.includes("shrieker") ? "Billige Potion gegen Shrieker-Sporen" : parsed.name,
+        name: lower.includes("shrieker") ? "Billiger Trank gegen Shrieker-Sporen" : parsed.name,
         category: lower.includes("scroll") ? "scroll" : "potion",
         effect: lower.includes("shrieker") ? "Gegen Shrieker-Sporen" : "Eigener Itemeffekt",
         healingFormula: "",
@@ -11501,7 +11325,7 @@ function createInventoryDataFromLegacyText(text) {
             for (let index = 0; index < parsed.count; index = index + 1) {
                 cards.push(createInventoryCardFromTemplate("healing"));
             }
-        } else if (lower.includes("potion") && (lower.includes("shrieker") || lower.includes("sporen") || lower.includes("custom"))) {
+        } else if ((lower.includes("potion") || lower.includes("trank")) && (lower.includes("shrieker") || lower.includes("sporen") || lower.includes("custom"))) {
             const customCard = createCustomConsumableCardFromEntry(entry, cards.length);
             for (let index = 0; index < customCard.count; index = index + 1) {
                 cards.push(createInventoryCard({ ...customCard.item, id: "" }, cards.length));
@@ -11524,9 +11348,9 @@ function createInventoryDataFromLegacyText(text) {
     };
 }
 
-function getSafeInventoryCards(value, legacyText = "") {
+function getSafeInventoryCards(value) {
     if (Array.isArray(value) === false) {
-        return createInventoryDataFromLegacyText(legacyText).cards;
+        return [];
     }
 
     return value
@@ -11535,9 +11359,9 @@ function getSafeInventoryCards(value, legacyText = "") {
         .filter(function(item) { return item.name.trim() !== ""; });
 }
 
-function getSafeInventoryList(value, legacyText = "") {
+function getSafeInventoryList(value) {
     if (Array.isArray(value) === false) {
-        return createInventoryDataFromLegacyText(legacyText).list;
+        return [];
     }
 
     return value
@@ -11579,9 +11403,9 @@ function getInventoryData(creature) {
     }
 
     return {
-        currency: getSafeCurrency(creature.currency, creature.inventoryText),
-        cards: sortInventoryCardsForDisplay(getSafeInventoryCards(creature.inventoryCards, creature.inventoryText)),
-        list: sortInventoryListByName(getSafeInventoryList(creature.inventoryList, creature.inventoryText))
+        currency: getSafeCurrency(creature.currency),
+        cards: sortInventoryCardsForDisplay(getSafeInventoryCards(creature.inventoryCards)),
+        list: sortInventoryListByName(getSafeInventoryList(creature.inventoryList))
     };
 }
 
@@ -11589,34 +11413,11 @@ function getInventoryCards(creature) {
     return getInventoryData(creature).cards;
 }
 
-function createInventoryTextFromStructuredInventory(inventoryData) {
-    const safeData = inventoryData || createEmptyInventoryData();
-    const entries = [];
-
-    for (const card of getSafeInventoryCards(safeData.cards, "")) {
-        entries.push(card.name);
-    }
-
-    for (const item of getSafeInventoryList(safeData.list, "")) {
-        entries.push(item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name);
-    }
-
-    const currency = getSafeCurrency(safeData.currency, "");
-    const currencyParts = [];
-    if (currency.gp > 0) { currencyParts.push(`${currency.gp} GP`); }
-    if (currency.sp > 0) { currencyParts.push(`${currency.sp} SP`); }
-    if (currency.cp > 0) { currencyParts.push(`${currency.cp} CP`); }
-    if (currencyParts.length > 0) { entries.push(`coins: ${currencyParts.join(", ")}`); }
-
-    return entries.join("; ");
-}
-
-function syncCreatureInventoryText(creature) {
+function syncCreatureInventoryData(creature) {
     const inventoryData = getInventoryData(creature);
     creature.currency = inventoryData.currency;
     creature.inventoryCards = inventoryData.cards;
     creature.inventoryList = inventoryData.list;
-    creature.inventoryText = createInventoryTextFromStructuredInventory(inventoryData);
 }
 
 function createActionFromInventoryItem(item) {
@@ -11657,9 +11458,9 @@ function rollDiceFormula(formula) {
 }
 
 function removeInventoryCardById(creature, itemId) {
-    const cards = getSafeInventoryCards(creature.inventoryCards, creature.inventoryText);
+    const cards = getSafeInventoryCards(creature.inventoryCards);
     creature.inventoryCards = cards.filter(function(item) { return item.id !== itemId; });
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
 }
 
 function useInventoryCard(creatureId, itemId, mode) {
@@ -11703,7 +11504,7 @@ function addInventoryTemplateToCreature(creatureId, templateName) {
     const cards = getInventoryCards(creature);
     cards.push(createInventoryCardFromTemplate(templateName));
     creature.inventoryCards = cards;
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
     addCombatLogMessage(`${creature.publicName || creature.name}: ${inventoryCardTemplates[templateName]?.name || "Item"} ins Inventar gelegt.`);
     saveAndBroadcastAppState();
     renderCards();
@@ -11713,7 +11514,7 @@ function updateInventoryCurrency(creatureId) {
     const creature = findCreatureById(creatureId);
     if (creature === null) { return; }
 
-    const previousCurrency = getSafeCurrency(creature.currency, creature.inventoryText);
+    const previousCurrency = getSafeCurrency(creature.currency);
     const nextCurrency = {
         gp: getSafeNonNegativeInteger(document.querySelector(`#inventory-gp-${creatureId}`)?.value, 0),
         sp: getSafeNonNegativeInteger(document.querySelector(`#inventory-sp-${creatureId}`)?.value, 0),
@@ -11721,7 +11522,7 @@ function updateInventoryCurrency(creatureId) {
     };
 
     creature.currency = nextCurrency;
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
 
     const currencyChanges = [];
     if (previousCurrency.gp !== nextCurrency.gp) { currencyChanges.push(`Gold ${previousCurrency.gp} → ${nextCurrency.gp}`); }
@@ -11788,7 +11589,7 @@ function saveDetailInventoryCardEditor(creatureId, openForgeAfterSave = false) {
     }
 
     creature.inventoryCards = cards;
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
     activeDetailInventoryCardEditor = null;
     saveAndBroadcastAppState();
 
@@ -11858,7 +11659,7 @@ function saveDetailInventoryListEditor(creatureId) {
     }
 
     creature.inventoryList = list;
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
     renderCards();
@@ -11869,7 +11670,7 @@ function removeInventoryListItem(creatureId, itemId) {
     if (creature === null) { return; }
 
     creature.inventoryList = getInventoryData(creature).list.filter(function(item) { return item.id !== itemId; });
-    syncCreatureInventoryText(creature);
+    syncCreatureInventoryData(creature);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
     renderCards();
@@ -12127,26 +11928,18 @@ function createInventoryTabHtml(creature) {
 function getForgeInventoryDraft(prefix) {
     const cardsElement = document.querySelector(`#${prefix}-inventory-cards`);
     const listElement = document.querySelector(`#${prefix}-inventory-list`);
-    const legacyElement = document.querySelector(`#${prefix}-inventory-text`);
-    const legacyText = legacyElement !== null ? legacyElement.value.trim() : "";
-    const fallback = createInventoryDataFromLegacyText(legacyText);
-
-    let cards = fallback.cards;
-    let list = fallback.list;
-
-    if (cardsElement !== null && cardsElement.value.trim() !== "") {
-        cards = getSafeInventoryCards(parseJsonValue(cardsElement.value, fallback.cards), "");
-    }
-
-    if (listElement !== null && listElement.value.trim() !== "") {
-        list = getSafeInventoryList(parseJsonValue(listElement.value, fallback.list), "");
-    }
+    const cards = cardsElement !== null && cardsElement.value.trim() !== ""
+        ? getSafeInventoryCards(parseJsonValue(cardsElement.value, []), "")
+        : [];
+    const list = listElement !== null && listElement.value.trim() !== ""
+        ? getSafeInventoryList(parseJsonValue(listElement.value, []), "")
+        : [];
 
     return {
         currency: {
-            gp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-gp`)?.value, fallback.currency.gp),
-            sp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-sp`)?.value, fallback.currency.sp),
-            cp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-cp`)?.value, fallback.currency.cp)
+            gp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-gp`)?.value, 0),
+            sp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-sp`)?.value, 0),
+            cp: getSafeNonNegativeInteger(document.querySelector(`#${prefix}-currency-cp`)?.value, 0)
         },
         cards: cards,
         list: list
@@ -12157,31 +11950,23 @@ function setForgeInventory(prefix, inventoryData) {
     const data = inventoryData || createEmptyInventoryData();
     const cardsElement = document.querySelector(`#${prefix}-inventory-cards`);
     const listElement = document.querySelector(`#${prefix}-inventory-list`);
-    if (cardsElement !== null) { cardsElement.value = JSON.stringify(getSafeInventoryCards(data.cards, "")); }
-    if (listElement !== null) { listElement.value = JSON.stringify(getSafeInventoryList(data.list, "")); }
+    if (cardsElement !== null) { cardsElement.value = JSON.stringify(getSafeInventoryCards(data.cards)); }
+    if (listElement !== null) { listElement.value = JSON.stringify(getSafeInventoryList(data.list)); }
     setInputValue(`${prefix}-currency-gp`, getSafeCurrency(data.currency).gp);
     setInputValue(`${prefix}-currency-sp`, getSafeCurrency(data.currency).sp);
     setInputValue(`${prefix}-currency-cp`, getSafeCurrency(data.currency).cp);
-    setInputValue(`${prefix}-inventory-text`, createInventoryTextFromStructuredInventory(data));
 }
 
-function readInventoryFromForge(prefix, legacyText) {
-    const draft = getForgeInventoryDraft(prefix);
-    const fallback = createInventoryDataFromLegacyText(legacyText);
-    return {
-        currency: draft.currency,
-        cards: draft.cards.length > 0 ? draft.cards : fallback.cards,
-        list: draft.list.length > 0 ? draft.list : fallback.list
-    };
+function readInventoryFromForge(prefix) {
+    return getForgeInventoryDraft(prefix);
 }
 
-function createInventoryFieldsFromForge(prefix, legacyText) {
-    const inventory = readInventoryFromForge(prefix, legacyText);
+function createInventoryFieldsFromForge(prefix) {
+    const inventory = readInventoryFromForge(prefix);
     return {
         currency: inventory.currency,
         inventoryCards: inventory.cards,
         inventoryList: inventory.list,
-        inventoryText: createInventoryTextFromStructuredInventory(inventory)
     };
 }
 
@@ -12197,7 +11982,6 @@ function commitForgeInventoryIfEditing(prefix) {
     creature.currency = inventory.currency;
     creature.inventoryCards = inventory.cards;
     creature.inventoryList = inventory.list;
-    creature.inventoryText = createInventoryTextFromStructuredInventory(inventory);
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
