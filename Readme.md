@@ -1,24 +1,35 @@
 # Miriel’s Deck of Encounters
 
-v0.7.0 by kuro**
+v0.8.8 by kuro
 
-Miriel’s Deck of Encounters is a local, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It is designed as a personal game master tool for preparing encounter cards, running initiative, tracking HP and conditions, and presenting selected public information on a separate tabletop display.
+Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
-This is an unofficial, non-commercial, private personal project. It is not affiliated with, endorsed, sponsored, or approved by any tabletop roleplaying game publisher, platform, brand, or rights holder.
+The current release is a free, ad-free, non-commercial hobby project. It has no accounts, no backend, no project-operated uploads, and no server-side storage of card content.
 
-## Current Status
+## Public pages
 
-The project is currently a static browser-only web app built with:
+- `index.html` – application
+- `legal.html` – licenses and project information
+- `privacy.html` – privacy information for GitHub Pages
+- `imprint.html` – provider and contact information
+- `ASSET_PROVENANCE.md` – provenance of bundled illustrations
+- `LICENSE.md` – proprietary project notice and SRD exception
 
-- HTML
-- CSS
-- JavaScript
+## Licensing summary
 
-There is no backend, no database, no account system, and no server-side save system.
+Original project code, interface elements, editorial text, characters, and project-created assets are proprietary unless expressly stated otherwise. All rights are reserved. A public GitHub repository permits viewing and forking through GitHub as required by GitHub’s Terms of Service, but does not grant a broader open-source license.
 
-The app runs locally by opening `index.html` in a browser. It uses browser-local storage and local tab synchronization so that the game master view and the tabletop display can stay in sync on the same device or browser environment.
+The project includes material from the **System Reference Document 5.1** by Wizards of the Coast LLC under the **Creative Commons Attribution 4.0 International License**. The complete attribution and modification notice are maintained in `legal.html`.
 
-The current app is intended for private local use only.
+The project does not use the Wizards Fan Content Policy. It is independent and is not supported, reviewed, or published by Wizards of the Coast.
+
+## Current status
+
+The project is a static browser application built with HTML, CSS, and JavaScript. It may be opened locally or deployed through GitHub Pages.
+
+Cards, settings, and imported images are stored locally in the browser. GitHub may process technical connection data when the hosted website is visited; see `privacy.html`.
+
+There is currently no backend, database, account system, server-side save system, analytics service, advertising, or project-operated tracking.
 
 ## Main Views
 
@@ -364,6 +375,16 @@ Hidden information is hidden in the interface, but the full state can still exis
 
 A future server-backed version should send only public data to player clients. Secret values should not merely be hidden with CSS or client-side rendering logic.
 
+## Content Audit Notes
+
+The bundled demo cards have been revised to reduce reliance on names associated with non-SRD publications. Several species, class features, spells, backgrounds, magic items, and healing-potion templates now use project-created names. The long backstories for Miriel, Suica, and Liora were removed from the bundled demo data.
+
+Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, **Fluch der Schattenklinge**, **Gunst des Schicksals**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
+
+Die mitgelieferten Demo-Inhalte wurden für Version 0.8.8 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+
+The project’s AI-generated and project-created images were not compared against every official artwork or third-party source. Asset provenance should be documented separately, and any image that reproduces a protected character, logo, trade dress, or recognizable official artwork should be replaced.
+
 ## Known Limitations
 
 - No backend.
@@ -425,48 +446,21 @@ The exact asset list may change during development.
 
 ## AI-Generated and Project-Created Assets
 
-Some images used in this project were generated or edited with AI image tools and then selected, adapted, or organized for this private project.
+All bundled card images, header art, backgrounds, and item images were generated with ChatGPT/OpenAI for this project. According to the project owner, no third-party source images were used and no specific official D&D character or official artwork was requested as a model. File-by-file provenance is documented in `ASSET_PROVENANCE.md`.
 
-They are intended as original project/demo/test assets for Miriel’s Deck of Encounters. They are not intended to copy or reproduce official tabletop RPG artwork, third-party character art, copyrighted franchise characters, logos, or protected brands.
+## Legal Summary
 
-Do not use any image, background, character illustration, icon, item image, or other asset from this project in another project without explicit written permission from the author.
+The public, controlling legal notice is `legal.html`. In summary:
 
-## Copyright, License, and Usage
+- Miriel’s Deck of Encounters is an independent project and is not supported, reviewed, or published by Wizards of the Coast.
+- The project uses and adapts material from the **System Reference Document 5.1** under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+- SRD-derived material may have been translated, shortened, renamed, or editorially rewritten.
+- Original source code, UI, original characters, original editorial text, and project-created assets remain proprietary unless a separate license says otherwise.
+- User-entered and imported content is not reviewed or licensed by the project. Users are responsible for having the necessary rights.
+- The current version is local-only, does not provide accounts, and does not automatically upload content to an operator.
 
-Copyright (c) 2026 kuro.
+See [`legal.html`](legal.html) for the complete notice and official source links.
 
-All rights reserved.
+## Copyright
 
-This project is currently private and not offered for public use.
-
-No open-source license has been chosen. No license is granted.
-
-You may not copy, fork, reuse, modify, redistribute, publish, mirror, reupload, sublicense, train on, sell, package, or incorporate this project, its source code, its text, its UI design, or its assets into another project without explicit written permission from the author.
-
-If this repository, a ZIP archive, a screenshot, or any part of the project becomes visible or accessible to someone else, that does not grant permission to use it.
-
-### Source Code
-
-The source code is proprietary and private unless the author explicitly states otherwise in writing.
-
-No permission is granted to copy, modify, reuse, redistribute, publish, mirror, reupload, sublicense, or incorporate the source code into any other project.
-
-### Image and Asset Usage
-
-All images and assets in `Images/`, `assets/`, and any related project folders are reserved for this project only.
-
-They are not licensed for reuse, redistribution, modification, publication, training datasets, commercial use, non-commercial use, fan projects, templates, asset packs, or use in other software or media projects.
-
-Do not copy, extract, edit, redistribute, republish, mirror, reupload, or use these assets without explicit written permission from the author.
-
-### Third-Party Rights
-
-This project should not include third-party copyrighted material unless the author has permission to use it.
-
-If any third-party material is accidentally included, it should be removed or replaced. This project does not claim ownership of third-party rights, brands, systems, trademarks, or copyrighted works.
-
-## Personal Use Notice
-
-Miriel’s Deck of Encounters is currently maintained as a private personal tool and learning project by kuro.
-
-It is not currently released as a public product, open-source project, template, asset pack, or reusable software library.
+Copyright © 2026 kuro. All rights reserved for original project material, subject to the separate CC BY 4.0 license and third-party rights described in `legal.html`.

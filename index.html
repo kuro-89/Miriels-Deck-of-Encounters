@@ -6,7 +6,7 @@
   <title>
    Miriel's Deck of Encounters
   </title>
-  <link href="style.css?v=0.7.7" rel="stylesheet"/>
+  <link href="style.css?v=0.8.8" rel="stylesheet"/>
  </head>
  <body>
   <main class="app">
@@ -24,6 +24,10 @@
         </h1>
         <p class="app-tagline">
          Ein spielkartenbasierter Encounter-Manager f&uuml;r Pen-and-Paper-Rollenspiele
+        </p>
+        <p class="tablet-experimental-notice" role="note" aria-label="Hinweis zum experimentellen Tablet-Modus">
+         <strong>Experimenteller Tablet-Modus</strong>
+         <span>Optimiert f&uuml;r gr&ouml;&szlig;ere Bildschirme ab etwa 13 Zoll.</span>
         </p>
         <div aria-label="Ansicht wechseln" class="app-view-actions">
          <button id="open-dm-view-button" onclick="openAppView('dm')" type="button">
@@ -255,13 +259,19 @@
          <div class="round-control-actions" id="turn-actions">
          </div>
         </section>
-        <section aria-label="Spielleiter-Atelier" class="active-hand-panel dm-command-panel">
+        <section aria-label="Encounter-Steuerung" class="active-hand-panel dm-command-panel">
          <p class="section-eyebrow">
-          Spielleiter-Atelier
+          Encounter-Steuerung
          </p>
-         <button class="dm-actions-open-button" onclick="openDmActionDrawer()" type="button">
-          Atelier &ouml;ffnen
-         </button>
+         <div class="tablet-command-actions">
+          <button class="dm-actions-open-button" onclick="openDmActionDrawer()" type="button">
+           Atelier &ouml;ffnen
+          </button>
+          <button class="tablet-console-open-button" id="tablet-console-open-button" onclick="openTabletConsole()" type="button" aria-controls="tablet-dm-console" aria-expanded="false">
+           <span>Konsole</span>
+           <span class="tablet-chat-unread-badge" id="tablet-chat-unread-badge" hidden>0</span>
+          </button>
+         </div>
         </section>
         <section aria-label="Fokuskarte" class="active-hand-panel focus-stage-panel-shell">
          <p class="section-eyebrow">
@@ -286,11 +296,12 @@
         </section>
         <section aria-label="Kartendetails" class="active-hand-details-panel" id="card-detail-panel">
         </section>
-        <aside aria-label="Spielleiter-Konsole" class="dm-console-panel">
+        <aside aria-label="Spielleiter-Konsole" class="dm-console-panel" id="tablet-dm-console">
          <div class="dm-console-panel-header">
           <p class="section-eyebrow">
            Spielleiter-Konsole
           </p>
+          <button class="tablet-console-close-button" onclick="closeTabletConsole()" type="button" aria-label="Spielleiter-Konsole schließen" title="Schließen">&times;</button>
          </div>
          <div aria-label="Encounter Chronik" class="dm-console-zone dm-console-log-section">
           <div class="dm-console-section-title-row">
@@ -848,6 +859,7 @@
            </div>
           </section>
          </div>
+         <p class="archive-legal-note">Importiere nur Texte und Bilder, die du verwenden darfst. Wichtige Daten regelmäßig exportieren; Browserdaten sind kein dauerhaftes Backup.</p>
          <input accept=".json,application/json" id="encounter-import-file" onchange="handleEncounterImportFileChange(event)" style="display: none;" type="file"/>
          <div aria-labelledby="deck-import-preview-title" aria-modal="true" class="deck-import-preview deck-import-preview-hidden" id="deck-import-preview" role="dialog">
           <div class="deck-import-preview-card">
@@ -1162,7 +1174,7 @@
               <label for="edit-creature-image-path">
                Bildpfad oder gespeicherte Bilddaten
               </label>
-              <input id="edit-creature-image-path" placeholder="Images/beispiel.png" type="text"/>
+              <input id="edit-creature-image-path" placeholder="Images/mein_bild.png" type="text"/>
              </div>
              <div class="form-field form-field-wide-four">
               <label for="edit-creature-image">
@@ -2085,68 +2097,23 @@
    <footer class="app-footer">
     <div class="app-footer-summary">
      <div>
-      <strong>
-       Miriel&rsquo;s Deck of Encounters
-      </strong>
-      <span>
-       v0.7.1 build 2026-07-08-11-45 by kuro
-      </span>
+      <strong>Miriel&rsquo;s Deck of Encounters</strong>
+      <span>Version 0.8.8 &middot; Statisch gehostete Browser-Version</span>
      </div>
-     <p>
-      Nicht-kommerzielles, unabhängiges Fanprojekt für private Pen-and-Paper-Runden.
-     </p>
+     <p>Unabhängige, SRD-5.1-kompatible Begleitapp für Charaktere, Begegnungen und den digitalen Spieltisch.</p>
     </div>
-    <details class="project-notice">
-     <summary>
-      Projekt- und Nutzungshinweise
-     </summary>
-     <div class="project-notice-content">
-      <section>
-       <h2>
-        Fanprojekt
-       </h2>
-       <p>
-        Miriel&rsquo;s Deck of Encounters ist ein nicht-kommerzielles, unabhängiges Fanprojekt zur Unterstützung privater Pen-and-Paper-Runden.
-       </p>
-       <p>
-        Dieses Projekt ist nicht offiziell, nicht gesponsert und nicht mit einem Rollenspielverlag oder einer Rollenspielmarke verbunden.
-       </p>
-      </section>
-      <section>
-       <h2>
-        Marken und Spielinhalte
-       </h2>
-       <p>
-        Einige Demo-Karten können Begriffe aus bekannten Pen-and-Paper-Regelsystemen enthalten. Diese Begriffe und Marken gehören ihren jeweiligen Rechteinhabern. Die Nennung dient nur der Beschreibung privater Spielinhalte und stellt keine offizielle Verbindung oder Empfehlung dar.
-       </p>
-       <p>
-        Soweit Inhalte auf Material von Wizards of the Coast beruhen: Diese Inhalte sind inoffizieller Fan Content. Nicht genehmigt oder unterstützt von Wizards. Teile der verwendeten Begriffe können Eigentum von Wizards of the Coast LLC sein.
-       </p>
-      </section>
-      <section>
-       <h2>
-        Eigene Inhalte und Bilder
-       </h2>
-       <p>
-        Die App enthält keine offiziellen Regelbücher, Logos oder offiziellen Artworks von Rollenspielverlagen. Bitte verwende nur Texte, Bilder und Spieldaten, für die du die nötigen Rechte oder eine passende Nutzungserlaubnis hast.
-       </p>
-       <p>
-        Bildhinweis: Die Demo- und Headerbilder wurden vom Projektinhaber mithilfe generativer KI erstellt und sind keine offiziellen Artworks von Rollenspielverlagen.
-       </p>
-      </section>
-      <section>
-       <h2>
-        Lokaler Speicher
-       </h2>
-       <p>
-        Die App speichert Daten lokal im Browser dieses Geräts. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Encounter exportieren“.
-       </p>
-      </section>
-     </div>
-    </details>
+    <nav class="app-footer-links" aria-label="Rechtliche Hinweise">
+     <a href="legal.html">Rechtliches &amp; Lizenzen</a>
+     <span aria-hidden="true">&middot;</span>
+     <a href="privacy.html">Datenschutz</a>
+     <span aria-hidden="true">&middot;</span>
+     <a href="imprint.html">Projektkontakt</a>
+     <span aria-hidden="true">&middot;</span>
+     <span>App-Inhalte werden lokal im Browser gespeichert.</span>
+    </nav>
    </footer>
   </main>
-  <script src="app.js?v=0.7.7">
+  <script src="app.js?v=0.8.8">
   </script>
  </body>
 </html>

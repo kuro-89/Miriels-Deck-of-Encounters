@@ -3,6 +3,8 @@
 // ============================================================
 
 const useDemoData = true;
+const appVersion = "0.8.8";
+const appOperatingMode = "Statisch gehostete Browser-Version";
 
 const appStorageKey = "miriels-deck-encounter-state-v18";
 const appChannelName = "miriels-deck-encounter-channel";
@@ -56,41 +58,41 @@ const inventoryCategoryLabels = {
 
 const inventoryCardTemplates = {
     healing: {
-        name: "Potion of Healing",
+        name: "Heiltrank",
         category: "potion",
         effect: "2d4 + 2 HP",
         healingFormula: "2d4+2",
-        description: "Regain 2d4 + 2 hit points.",
+        description: "Stellt 2W4 + 2 Trefferpunkte wieder her.",
         image: "assets/items/potion_healing.jpg",
         showAsAction: true,
         actionType: "action"
     },
     greaterHealing: {
-        name: "Potion of Greater Healing",
+        name: "Starker Heiltrank",
         category: "potion",
         effect: "4d4 + 4 HP",
         healingFormula: "4d4+4",
-        description: "Regain 4d4 + 4 hit points.",
+        description: "Stellt 4W4 + 4 Trefferpunkte wieder her.",
         image: "assets/items/potion_greater_healing.jpg",
         showAsAction: true,
         actionType: "action"
     },
     superiorHealing: {
-        name: "Potion of Superior Healing",
+        name: "Großer Heiltrank",
         category: "potion",
         effect: "8d4 + 8 HP",
         healingFormula: "8d4+8",
-        description: "Regain 8d4 + 8 hit points.",
+        description: "Stellt 8W4 + 8 Trefferpunkte wieder her.",
         image: "assets/items/potion_superior_healing.jpg",
         showAsAction: true,
         actionType: "action"
     },
     supremeHealing: {
-        name: "Potion of Supreme Healing",
+        name: "Meisterlicher Heiltrank",
         category: "potion",
         effect: "10d4 + 20 HP",
         healingFormula: "10d4+20",
-        description: "Regain 10d4 + 20 hit points.",
+        description: "Stellt 10W4 + 20 Trefferpunkte wieder her.",
         image: "assets/items/potion_supreme_healing.jpg",
         showAsAction: true,
         actionType: "action"
@@ -100,7 +102,7 @@ const inventoryCardTemplates = {
         category: "potion",
         effect: "Eigener Trankeffekt",
         healingFormula: "",
-        description: "Beschreibe hier den Effekt des Tranks.",
+        description: "",
         image: "assets/items/potion_custom.jpg",
         showAsAction: true,
         actionType: "action"
@@ -110,7 +112,7 @@ const inventoryCardTemplates = {
         category: "scroll",
         effect: "Eigener Zaubereffekt",
         healingFormula: "",
-        description: "Beschreibe hier den Zauber oder Schriftrolleneffekt.",
+        description: "",
         image: "assets/items/scroll_custom.jpg",
         showAsAction: true,
         actionType: "action"
@@ -154,10 +156,10 @@ function createDemoCreatures() {
             vulnerabilities: "—",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 13 · Spell Attack +5",
-            specialResources: "Sneak Attack 4d6 · Cunning Action · Uncanny Dodge · Evasion · Arcane Trickster Slots 1st: 4, 2nd: 2",
-            notes: "Charakterbogen: Rogue 7 · Fairy · Charlatan · Chaotic Neutral.\n\nPersönlichkeit: \"Die Welt ist meine Bühne und das Chaos ist meine Show.\" Dunkelschön/Miriel ist fasziniert von der Welt der Sterblichen und möchte sie neugierig, verspielt und oft ohne echtes Gespür für Gefahr erkunden.\n\nIdeal: Freiheit. Nichts ist wichtiger als die Freiheit, das eigene Leben so zu leben, wie es einem gefällt. Einschränkungen und Regeln der sterblichen Welt sind für sie Hindernisse, die es zu überwinden gilt.\n\nBindung: Dunkelschön hat sich geschworen, den Namen Miriel zu ehren und ihre Träume zu verwirklichen.\n\nMakel: Naiv im Umgang mit der Realität. Trotz all ihrer magischen Fähigkeiten hat Dunkelschön Schwierigkeiten, die Gefahren der sterblichen Welt zu erkennen, was sie oft in Schwierigkeiten bringt. Sie ist innerlich zerrissen zwischen ihrer eigenen chaotischen Natur und den Erwartungen, die sie als Miriel erfüllen möchte. Sobald sie sich ein Ziel gesetzt hat, kann sie stur und kompromisslos sein, selbst wenn das Ziel nicht in ihrem besten Interesse liegt.\n\nVerbündete: Befreundet mit Leander Moral, der sie nach der Flucht vor ihrer alten Crew in seiner Hütte bei Neverwinter versteckte. Befreundet mit der Bardin Mel; Miriel und Mel reisten als Performerinnen durch verschiedene Orte und nutzten Musik, Tanz und Ablenkung, um Zuschauer auszurauben.\n\nBackstory: Dunkelschön war einst ein freigeistiger Bewohner des Feywild, eines Ortes, wo die Grenzen zwischen Realität und Fantasie verschwimmen. Sie war mehr als nur eine Fee – sie war ein Ausdruck des Chaos selbst, eine Dienerin des Schabernacks. Ihre Existenz war geprägt von Freiheit, Launenhaftigkeit und der ständigen Suche nach Neuem. In den schillernden Wäldern des Feywild war sie eine Meisterin der Illusionen, Scherze und Spielereien, angetrieben von reiner Neugierde. Eines Tages wurde diese Neugier zu stark. Der Reiz des Unbekannten zog sie hinaus aus ihrer Heimat und in die echte Welt. Diese neue Welt, so starr und voller Regeln, war für Dunkelschön zugleich faszinierend und erschreckend. Keine ewige Dämmerung, kein flimmerndes Lichtspiel der Natur, sondern klare Linien, feste Strukturen und starre Realität. Einzig in einer Taverne fand sie das Chaos wieder. Kurz nach ihrer Ankunft traf Dunkelschön auf eine Halbelfen-Schurkin namens Miriel. Die beiden wurden schnell unzertrennliche Freundinnen. Miriel zeigte Dunkelschön die Feinheiten des Schurkenhandwerks und half ihr, sich in dieser ungewohnten Welt zurechtzufinden. Für Dunkelschön war Miriel ein Anker in einem Meer von Unbekanntem. Doch in einem Hinterhalt rivalisierender Diebesbanden wurde Miriel tödlich verwundet. In ihren letzten Momenten bat sie Dunkelschön, ihren Namen und ihren Traum anzunehmen – nicht nur, um ihr Andenken zu bewahren, sondern um all das zu erleben, was sie selbst nicht mehr erleben konnte.",
-            demoSpellSeed: "Cantrips: Minor Illusion; Mage Hand; Booming Blade; Druidcraft.\n1st Level: Disguise Self; Silent Image; Find Familiar; Silvery Barbs; Faerie Fire.\n2nd Level: Mirror Image; Enlarge/Reduce.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
-            demoInventorySeed: "Cloak of Displacement; Goggles of Night; Studded Leather; Absurd großer Hexenhut; Dagger x2; Rapier; Shortbow; Arrows x20; Thieves' Tools; Disguise Kit; Forgery Kit; Backpack; Crowbar; Potion of Healing x2; Potion of Superior Healing; Potion of Supreme Healing; Bedroll; Candles x5; Costume Clothes x2; Rations; Waterskin; Rope; Pitons; Hammer; Tinderbox; Torches; Blue Mushrooms; Brass Bowl; Powdered Iron; Pieces of Fleece; coins: 355 GP, 78 SP.",
+            specialResources: "Hinterhältiger Angriff 4W6 · Listige Aktion · Unheimliches Ausweichen · Entrinnen · Arkane Kartenmeisterin: 4 Zauberplätze 1. Grades, 2 Zauberplätze 2. Grades",
+            notes: "Charakterbogen: Rogue 7 · Chaosfee · Gauklerin · Chaotic Neutral.\n\nPersönlichkeit: \"Die Welt ist meine Bühne und das Chaos ist meine Show.\" Dunkelschön/Miriel ist fasziniert von der Welt der Sterblichen und möchte sie neugierig, verspielt und oft ohne echtes Gespür für Gefahr erkunden.\n\nIdeal: Freiheit. Nichts ist wichtiger als die Freiheit, das eigene Leben so zu leben, wie es einem gefällt. Einschränkungen und Regeln der sterblichen Welt sind für sie Hindernisse, die es zu überwinden gilt.\n\nBindung: Dunkelschön hat sich geschworen, den Namen Miriel zu ehren und ihre Träume zu verwirklichen.\n\nMakel: Naiv im Umgang mit der Realität. Trotz all ihrer magischen Fähigkeiten hat Dunkelschön Schwierigkeiten, Gefahren richtig einzuschätzen. Sobald sie sich ein Ziel gesetzt hat, kann sie stur und kompromisslos sein, selbst wenn das Ziel nicht in ihrem besten Interesse liegt.",
+            demoSpellSeed: "Cantrips: Minor Illusion; Mage Hand; Resonanzschnitt; Druidcraft.\n1st Level: Disguise Selbst; Silent Image; Find Familiar; Chaossplitter; Faerie Fire.\n2nd Level: Mirror Image; Enlarge/Reduce.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
+            demoInventorySeed: "Trugbildmantel; Nachtsichtgläser; Studded Leather; Absurd großer Hexenhut; Dagger x2; Rapier; Shortbow; Arrows x20; Thieves' Tools; Disguise Kit; Forgery Kit; Backpack; Crowbar; Heiltrank x2; Großer Heiltrank; Meisterlicher Heiltrank; Bedroll; Candles x5; Costume Clothes x2; Rations; Waterskin; Rope; Pitons; Hammer; Tinderbox; Torches; Blue Mushrooms; Brass Bowl; Powdered Iron; Pieces of Fleece; coins: 355 GP, 78 SP.",
             hpVisibility: "full",
             imageData: "Images/miriel_img.png",
             conditions: [],
@@ -196,9 +198,9 @@ function createDemoCreatures() {
             vulnerabilities: "—",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 13 · Spell Attack +5",
-            specialResources: "Arcane Recovery 1/LR · Wizardly Quill · Awakened Spellbook · Serpentine Spellcasting",
-            notes: "Charakterbogen: Wizard 3 · Yuan-ti · Urban Bounty Hunter · Chaotic Neutral.\n\nPersönlichkeit: Suica betrachtet Menschen wie Forschungsobjekte, aber nicht grausam – nur neugierig.\n\nIdeal: Magie ist die höchste Form von Wahrheit. Jede neue Formel ist ein Sieg über das Unbekannte.\n\nBindung: Ein ehemaliger Mentor glaubt, sie sei zu verspielt, um echte arkane Größe zu erreichen; Suica will das Gegenteil beweisen.\n\nMakel: Sie sammelt Wissen, auch wenn es gefährlich oder moralisch fragwürdig ist.\n\nBackstory: Suica wuchs in einer kleinen Yuan-Ti-Gemeinschaft auf, in der Magie nicht verehrt, sondern katalogisiert wurde. Zauber galten dort als Werkzeuge – und wer sie verstand, hatte Kontrolle über die Welt. Während andere Schüler diszipliniert und emotionslos studierten, zeigte Suica eine ungewöhnliche Neugier und einen trockenen, verspielten Humor, was ihr Mentor stets als Zeichen mangelnder Ernsthaftigkeit betrachtete. Um ihr praktisches Talent zu testen, wurde sie in eine menschliche Stadt geschickt, wo sie als Urban Bounty Hunter magische Verbrecher, verschwundene Magier und verbotene Artefakte verfolgte. Sie fand Gefallen an der Arbeit: Jeder Auftrag brachte neue Zauber, neue Theorien, neue Formeln, die sie in ihr wachsendes Zauberbuch eintrug. Heute betrachtet sie Menschen und ihre Taten mit akademischer Distanz. Mordfälle, Intrigen und Verschwörungen sind für sie weniger moralische Tragödien als komplexe Studienfälle – Gelegenheiten, die Grenzen der Magie zu erforschen und ihren Mentor eines Tages zu widerlegen.",
-            demoSpellSeed: "Cantrips: Mage Hand; Mind Sliver; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Self; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
+            specialResources: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie",
+            notes: "Charakterbogen: Wizard 3 · Schlangenblütige · Arkane Kopfgeldjägerin · Chaotic Neutral.\n\nPersönlichkeit: Suica betrachtet Menschen wie Forschungsobjekte, aber nicht grausam – nur neugierig.\n\nIdeal: Magie ist die höchste Form von Wahrheit. Jede neue Formel ist ein Sieg über das Unbekannte.\n\nBindung: Ein ehemaliger Mentor glaubt, sie sei zu verspielt, um echte arkane Größe zu erreichen; Suica will das Gegenteil beweisen.\n\nMakel: Sie sammelt Wissen, auch wenn es gefährlich oder moralisch fragwürdig ist.",
+            demoSpellSeed: "Cantrips: Mage Hand; Gedankensplitter; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Selbst; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
             demoInventorySeed: "Dagger x2; Quarterstaff; Spellbook; Backpack; Robe; Book x2; Ink; Ink Pen x2; Parchment; Little Bag of Sand; Small Knife; Oil x10; Tinderbox; Lamp; Flute; Thieves' Tools; coins: 5 GP.",
             hpVisibility: "full",
             imageData: "Images/suica_img.png",
@@ -322,7 +324,7 @@ function createDemoCreatures() {
             vulnerabilities: "Thunder",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 14",
-            specialResources: "Mirror Feather 2/Encounter · Steal Spark Recharge 6 · Thought Thief",
+            specialResources: "Spiegelfeder 2/Begegnung · Funkenraub Aufladung 6 · Gedankenraub",
             notes: "Aktuelle Demo-Handkarte. Schneller arkaner Störer: zuerst Reaktionen brechen, dann aus der Reichweite fliegen. Ideal, um die neue Details-Navigation mit Actions, Traits und Spells zu demonstrieren.",
             demoSpellSeed: "Mirror Feather. A defensive shimmer of broken reflections.\nSteal Spark. Psychic theft shaped like violet lightning.\nFlash Caw. A harsh arcane cry that leaves afterimages.\nGlint Trail. A visible trail of tiny star-like motes marks the crow's movement until initiative count 0.",
             demoInventorySeed: "Iridescent feather\nStolen copper ring\nCracked mirror bead\nTiny thought-splinter that whispers half a name",
@@ -364,10 +366,10 @@ function createDemoCreatures() {
             vulnerabilities: "—",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 15 · Spell Attack +7",
-            specialResources: "Sorcery Points 5 · Metamagic: Empowered, Quickened · Hexblade's Curse 1/SR · Favored by the Gods 1/SR · Healing Hands 1/LR · Radiant Consumption 1/LR",
-            notes: "Charakterbogen: Sorcerer 5 / Warlock 3 · Aasimar · Hofbeamte · Chaotic Neutral.\n\nPersönlichkeit: Liora folgt eher ihrem Bauchgefühl als klugen Argumenten – oft bringt sie das in Schwierigkeiten, manchmal aber auch zu verborgenen Wahrheiten.\n\nIdeal: Freiheit. Niemand soll sie je wieder kontrollieren – nicht der Hof, nicht ihr Erbe, nicht einmal ihr Patron.\n\nBindung: Die Stimme ihres Patrons verfolgt sie; sie fürchtet sie und kann doch nicht von ihr loslassen.\n\nMakel: Sie gibt oft vor, mehr zu verstehen, als sie wirklich tut, und gerät dadurch in Gefahren, die sie nicht einschätzen kann.\n\nAussehen: Liora wirkt auf den ersten Blick wie eine junge, schöne Frau, doch bei genauerem Hinsehen verrät ihr Aussehen ihre aasimarische Herkunft und die Schatten, die an ihr nagen. Ihr Gesicht ist fein geschnitten, mit hohen Wangenknochen und vollen Lippen. Dunkle Schatten und verfärbte Stellen ziehen sich über ihre linke Gesichtshälfte und den Hals, wie eine brennende Spur von himmlischer Macht, die in Finsternis übergeht. Ihre Augen leuchten in goldenem Schimmer; ihr tiefviolettes Haar fällt in weichen Wellen über die Schultern. An manchen Stellen schimmert ihre Haut wie mit Sternenstaub überzogen, während andere Bereiche dunkel verfärbt wirken, als hätte sie eine Korrumpierung berührt.\n\nBackstory: Liora Veith war Hofübersetzerin, berühmt für ihre schillernde Erscheinung und ihre Gabe, Sprachen mit Leichtigkeit zu durchdringen. Ihr aasimarisches Erbe galt als Segen, ein lebendiges Symbol himmlischer Gunst. Doch unter der glänzenden Oberfläche nagten Zweifel: Ihr Licht war unruhig, ihre Aura unkontrolliert. In Momenten der Schwäche hörte sie eine Stimme, die ihr Trost versprach – der Flüsterton eines Patrons, verborgen in den Schatten der Welt. Er bot ihr Klarheit und Macht im Austausch für ihre Treue. Liora willigte ein, und ein Pakt wurde besiegelt: Eine Klinge aus Finsternis erschien in ihren Händen, so sicher wie das Versprechen der Stimme. Zunächst schien alles besser. Sie konnte ihr göttliches Erbe endlich lenken und ihre Aura bändigen. Doch der Preis kam bald. Ihr Patron zwang sie, ein geheimes Dokument zu übersetzen, das nur den Herrschern vorbehalten war. Sie gehorchte, doch die Stimme flüsterte weiter: „Gib es weiter.“ Liora tat, wie ihr geheißen. Die Intrige, die dadurch entfesselt wurde, endete im Mord an einem Würdenträger. Als man die Spur zurückverfolgte, fiel der Verdacht auf sie. Ihre regenbogenhafte Haut begann dunkle Male zu tragen – sichtbare Zeichen des Paktes. Vor aller Augen war sie nicht länger ein Himmelskind, sondern eine Verräterin, die ihr Erbe verkauft hatte. Der Hof verstieß sie, und ihre frühere Stellung wurde ausgelöscht. Nun wandert Liora zwischen zwei Welten: dem Licht, das sie nie ganz verlassen hat, und der Dunkelheit, die untrennbar in ihr brennt. Ihre Schuld lastet schwer, doch die Stimme ihres Patrons schweigt nie.",
-            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Booming Blade; Eldritch Blast; Toll the Dead; Light.\n1st Level: Absorb Elements; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Gift of Alacrity; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Tasha's Mind Whip; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
-            demoInventorySeed: "Cloak of Protection; Ring of Protection; Potion of Greater Healing; Scale Mail; Shield; Billiger Trank gegen Shrieker-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
+            specialResources: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR",
+            notes: "Charakterbogen: Sorcerer 5 / Warlock 3 · Sternengeborene · Hofübersetzerin · Chaotic Neutral.\n\nPersönlichkeit: Liora folgt eher ihrem Bauchgefühl als klugen Argumenten – oft bringt sie das in Schwierigkeiten, manchmal aber auch zu verborgenen Wahrheiten.\n\nIdeal: Freiheit. Niemand soll sie je wieder kontrollieren – nicht der Hof, nicht ihr Erbe, nicht einmal ihr Patron.\n\nBindung: Die Stimme ihres Patrons verfolgt sie; sie fürchtet sie und kann doch nicht von ihr loslassen.\n\nMakel: Sie gibt oft vor, mehr zu verstehen, als sie wirklich tut, und gerät dadurch in Gefahren, die sie nicht einschätzen kann.\n\nAussehen: Liora wirkt auf den ersten Blick wie eine junge, schöne Frau, doch bei genauerem Hinsehen verrät ihr Aussehen ihre sternengeborene Herkunft und die Schatten, die an ihr nagen. Ihr Gesicht ist fein geschnitten, mit hohen Wangenknochen und vollen Lippen. Dunkle Schatten und verfärbte Stellen ziehen sich über ihre linke Gesichtshälfte und den Hals, wie eine brennende Spur von himmlischer Macht, die in Finsternis übergeht. Ihre Augen leuchten in goldenem Schimmer; ihr tiefviolettes Haar fällt in weichen Wellen über die Schultern. An manchen Stellen schimmert ihre Haut wie mit Sternenstaub überzogen, während andere Bereiche dunkel verfärbt wirken, als hätte sie eine Korrumpierung berührt.",
+            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Resonanzschnitt; Eldritch Blast; Grabesklang; Light.\n1st Level: Elementarschild; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Schicksalstempo; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Gedankenhieb; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
+            demoInventorySeed: "Cloak of Protection; Ring of Protection; Starker Heiltrank; Scale Mail; Shield; Billiger Trank gegen Shrieker-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
             hpVisibility: "full",
             imageData: "Images/liora_img.png",
             conditions: [],
@@ -406,7 +408,7 @@ function createDemoCreatures() {
             vulnerabilities: "Fire",
             senses: "Tremorsense 60 ft.",
             spellSaveDc: "DC 15",
-            specialResources: "Grave Moss Regrowth 10 HP · Crushing Root Recharge 5–6 · Grave Pull 1/Encounter",
+            specialResources: "Grabmoos-Regeneration 10 TP · Zermalmende Wurzel Aufladung 5–6 · Grabsog 1/Begegnung",
             notes: "Boss- oder Elite-Demo-Karte. Der Koloss funktioniert als langsamer Raumkontrolleur: zieht Ziele in gefährliche Zonen, überlebt lange und zwingt die Gruppe zu Feuer- oder Mobilitätslösungen.",
             demoSpellSeed: "Root Wall. Roots and grave soil rise as half cover until initiative count 0.\nGrave Pull. Necrotic roots drag creatures through mud and loose stones.\nMoss Regrowth. Green corpse-light knits cracked stone back together.",
             demoInventorySeed: "Moss-covered stone heart\nAncient coin fragments\nGrave-root fiber\nA cracked nameplate from an unknown tomb",
@@ -493,7 +495,7 @@ function createDemoCreatures() {
             specialResources: "Dead Drop 2/day · Vanish in Rain 1/Encounter · Blackmail Thread 3",
             notes: "NPC-Demo-Karte für soziale Encounters, Verfolgungen und geheime Übergaben. Veyra ist keine Frontkämpferin; sie kontrolliert Informationen, Fluchtwege und kleine taktische Fenster.",
             demoSpellSeed: "Coded Whisper. A nearly silent phrase carries meaning only to the intended listener.\nRain Veil. Street rain and fog distort her outline for a few seconds.\nMoonfaden Mark. A tiny silver thread marks a door, pocket or package until dawn.\nFalse Trail. Footprints and drips appear to lead down the wrong alley.",
-            demoInventorySeed: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nThree coded street tokens\nBlack ribbon with a silver thread",
+            demoInventorySeed: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nDrei codierte Straßenmarken\nSchwarzes Band mit silbernem Faden",
             hpVisibility: "descriptive",
             imageData: "Images/veyra.png",
             conditions: [],
@@ -546,127 +548,126 @@ function isKnownDemoCreatureData(rawCreature) {
 function getDemoActionsForCreature(creatureId) {
     const demoActions = {
         1: [
-            createCreatureAction({ name: "Rapier", type: "action", attack: "+8 to hit", range: "Reach 5 ft.", damage: "1d8+5 piercing", description: "Melee weapon attack with a finesse weapon." }),
-            createCreatureAction({ name: "Dagger", type: "action", attack: "+8 to hit", range: "Reach 5 ft. or range 20/60 ft.", damage: "1d4+5 piercing", description: "Finesse, light, thrown." }),
-            createCreatureAction({ name: "Shortbow", type: "action", attack: "+8 to hit", range: "Range 80/320 ft.", damage: "1d6+5 piercing", description: "Ranged weapon attack." }),
-            createCreatureAction({ name: "Two-Weapon Fighting", type: "action", description: "Standard combat option when weapon and action economy conditions fit." })
+            createCreatureAction({ name: "Rapier", type: "action", attack: "+8 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W8+5 Stich", description: "Nahkampfangriff mit einer Finessewaffe." }),
+            createCreatureAction({ name: "Dolch", type: "action", attack: "+8 auf Treffer", range: "5 Fuß oder 20/60 Fuß", damage: "1W4+5 Stich", description: "Finesse, leicht und geworfen." }),
+            createCreatureAction({ name: "Kurzbogen", type: "action", attack: "+8 auf Treffer", range: "80/320 Fuß", damage: "1W6+5 Stich", description: "Fernkampfangriff mit einer Waffe." }),
+            createCreatureAction({ name: "Kampf mit zwei Waffen", type: "action", description: "Allgemeine Kampfoption, sobald Waffenwahl und Aktionsökonomie die Nebenhand erlauben." })
         ],
         2: [
-            createCreatureAction({ name: "Dagger", type: "action", attack: "+4 to hit", range: "Reach 5 ft. or range 20/60 ft.", damage: "1d4+2 piercing", description: "Simple, finesse, light, thrown." }),
-            createCreatureAction({ name: "Quarterstaff", type: "action", attack: "+1 to hit", range: "Reach 5 ft.", damage: "1d6-1 bludgeoning", description: "Simple, versatile." })
+            createCreatureAction({ name: "Dolch", type: "action", attack: "+4 auf Treffer", range: "5 Fuß oder 20/60 Fuß", damage: "1W4+2 Stich", description: "Einfach, Finesse, leicht und geworfen." }),
+            createCreatureAction({ name: "Kampfstab", type: "action", attack: "+1 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6-1 Wucht", description: "Einfache, vielseitige Waffe." })
         ],
         3: [
-            createCreatureAction({ name: "Annoying Sweep", type: "action", usageMax: 1, usageReset: "manual", usage: "Recharge 5–6", attack: "+4 to hit", range: "Reach 5 ft.", damage: "1d6+2 bludgeoning", save: "DC 12 STR", description: "On a failed save, the target falls prone." }),
-            createCreatureAction({ name: "Dust Burst", type: "action", usage: "1 / Encounter", range: "10 ft. cone", save: "DC 12 CON", description: "Creatures in the cone are blinded until the end of their next turn on a failed save." }),
-            createCreatureAction({ name: "Startling Rattle", type: "action", range: "30 ft.", save: "DC 12 WIS", description: "One creature that can hear Borstibald loses its reaction until the start of Borstibald's next turn on a failed save." })
+            createCreatureAction({ name: "Lästiger Feger", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", attack: "+4 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6+2 Wucht", save: "SG 12 ST", description: "Bei einem misslungenen Rettungswurf stürzt das Ziel zu Boden." }),
+            createCreatureAction({ name: "Staubstoß", type: "action", usage: "1 / Begegnung", range: "Kegel 10 Fuß", save: "SG 12 KO", description: "Betroffene Kreaturen sind bei einem misslungenen Rettungswurf bis zum Ende ihres nächsten Zuges blind." }),
+            createCreatureAction({ name: "Erschreckendes Klappern", type: "action", range: "30 Fuß", save: "SG 12 WE", description: "Eine hörende Kreatur verliert bei einem misslungenen Rettungswurf ihre Reaktion bis zu Borstibalds nächstem Zug." })
         ],
         4: [
-            createCreatureAction({ name: "Root Bite", type: "action", attack: "+5 to hit", range: "Reach 5 ft.", damage: "2d6+3 piercing plus 1d6 poison" }),
-            createCreatureAction({ name: "Fog Sap", type: "action", usageMax: 3, usageReset: "longRest", usage: "3 / Long Rest", attack: "+5 to hit", range: "30 ft.", damage: "2d6 poison", description: "The target's speed is reduced by 10 ft. until the end of its next turn." }),
-            createCreatureAction({ name: "Shriek Bloom", type: "action", usage: "1 / Encounter", range: "15 ft.", save: "DC 13 WIS", description: "Creatures in range are frightened until the end of their next turn on a failed save." }),
-            createCreatureAction({ name: "Root Snare", type: "action", usageMax: 1, usageReset: "manual", usage: "Recharge 5–6", range: "20 ft.", save: "DC 13 STR", description: "One grounded creature is restrained until the end of Nebelzahn's next turn on a failed save." })
+            createCreatureAction({ name: "Wurzelbiss", type: "action", attack: "+5 auf Treffer", range: "Reichweite 5 Fuß", damage: "2W6+3 Stich plus 1W6 Gift" }),
+            createCreatureAction({ name: "Nebelsaft", type: "action", usageMax: 3, usageReset: "longRest", usage: "3 / Lange Rast", attack: "+5 auf Treffer", range: "30 Fuß", damage: "2W6 Gift", description: "Die Bewegungsrate des Ziels sinkt bis zum Ende seines nächsten Zuges um 10 Fuß." }),
+            createCreatureAction({ name: "Kreischblüte", type: "action", usage: "1 / Begegnung", range: "15 Fuß", save: "SG 13 WE", description: "Betroffene Kreaturen sind bei einem misslungenen Rettungswurf bis zum Ende ihres nächsten Zuges verängstigt." }),
+            createCreatureAction({ name: "Wurzelschlinge", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", range: "20 Fuß", save: "SG 13 ST", description: "Eine Kreatur am Boden ist bei einem misslungenen Rettungswurf bis zum Ende von Nebelzahns nächstem Zug festgesetzt." })
         ],
         5: [
-            createCreatureAction({ name: "Beak of Sparks", type: "action", attack: "+6 to hit", range: "Reach 5 ft.", damage: "1d4+4 piercing plus 1d6 lightning" }),
-            createCreatureAction({ name: "Steal Spark", type: "action", usageMax: 1, usageReset: "manual", usage: "Recharge 6", attack: "+6 to hit", range: "60 ft.", damage: "2d6 psychic", description: "The target cannot take reactions until the start of its next turn." }),
-            createCreatureAction({ name: "Mirror Caw", type: "action", range: "30 ft.", save: "DC 14 WIS", description: "On a failed save, the target has disadvantage on the next attack roll it makes before the end of its next turn." }),
-            createCreatureAction({ name: "Flash Away", type: "bonus", description: "The Glimmerkrähe flies up to half its speed. This movement does not provoke opportunity attacks from a creature affected by Mirror Caw or Steal Spark." })
+            createCreatureAction({ name: "Funken-Schnabel", type: "action", attack: "+6 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W4+4 Stich plus 1W6 Blitz" }),
+            createCreatureAction({ name: "Funkenraub", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 6", attack: "+6 auf Treffer", range: "60 Fuß", damage: "2W6 psychisch", description: "Das Ziel kann bis zum Beginn seines nächsten Zuges keine Reaktionen einsetzen." }),
+            createCreatureAction({ name: "Spiegelkrächzen", type: "action", range: "30 Fuß", save: "SG 14 WE", description: "Bei einem misslungenen Rettungswurf hat das Ziel Nachteil auf seinen nächsten Angriff vor Ende seines nächsten Zuges." }),
+            createCreatureAction({ name: "Lichtflucht", type: "bonus", description: "Die Glimmerkrähe fliegt bis zur Hälfte ihrer Bewegungsrate. Von Spiegelkrächzen oder Funkenraub betroffene Kreaturen erhalten dabei keinen Gelegenheitsangriff." })
         ],
         6: [
-            createCreatureAction({ name: "Eldritch Blast", type: "action", attack: "+7 to hit", range: "120 ft.", damage: "Two beams, each 1d10+4 force" }),
-            createCreatureAction({ name: "Unarmed Strike", type: "action", attack: "+2 to hit", range: "Reach 5 ft.", damage: "0 bludgeoning" })
+            createCreatureAction({ name: "Eldritch Blast", type: "action", attack: "+7 auf Treffer", range: "120 Fuß", damage: "Zwei Strahlen mit je 1W10+4 Kraft" }),
+            createCreatureAction({ name: "Unbewaffneter Schlag", type: "action", attack: "+2 auf Treffer", range: "Reichweite 5 Fuß", damage: "0 Wucht" })
         ],
         7: [
-            createCreatureAction({ name: "Crushing Root", type: "action", usageMax: 1, usageReset: "manual", usage: "Recharge 5–6", attack: "+7 to hit", range: "Reach 10 ft.", damage: "2d10+5 bludgeoning", description: "The target is grappled." }),
-            createCreatureAction({ name: "Grave Pull", type: "action", usage: "1 / Encounter", range: "15 ft. line", save: "DC 15 STR", description: "Creatures in the line are pulled 10 ft. toward the koloss and knocked prone on a failed save." }),
-            createCreatureAction({ name: "Tombstone Slam", type: "action", attack: "+7 to hit", range: "Reach 5 ft.", damage: "2d8+5 bludgeoning plus 1d8 necrotic" }),
-            createCreatureAction({ name: "Moss-Covered Roar", type: "action", range: "30 ft.", damage: "1d6 psychic", description: "Each frightened or prone creature in range takes the damage as grave-moss whispers through the soil." })
+            createCreatureAction({ name: "Zermalmende Wurzel", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", attack: "+7 auf Treffer", range: "Reichweite 10 Fuß", damage: "2W10+5 Wucht", description: "Das Ziel wird gepackt." }),
+            createCreatureAction({ name: "Grabsog", type: "action", usage: "1 / Begegnung", range: "Linie 15 Fuß", save: "SG 15 ST", description: "Betroffene Kreaturen werden bei einem misslungenen Rettungswurf 10 Fuß zum Koloss gezogen und stürzen zu Boden." }),
+            createCreatureAction({ name: "Grabsteinschlag", type: "action", attack: "+7 auf Treffer", range: "Reichweite 5 Fuß", damage: "2W8+5 Wucht plus 1W8 nekrotisch" }),
+            createCreatureAction({ name: "Moosbedecktes Brüllen", type: "action", range: "30 Fuß", damage: "1W6 psychisch", description: "Jede verängstigte oder am Boden liegende Kreatur in Reichweite erleidet den Schaden." })
         ],
         8: [
-            createCreatureAction({ name: "Glass Bite", type: "action", attack: "+5 to hit", range: "Reach 5 ft.", damage: "1d6+3 piercing plus 1d6 psychic" }),
-            createCreatureAction({ name: "False Step", type: "action", usageMax: 1, usageReset: "manual", usage: "Recharge 5–6", range: "30 ft.", save: "DC 14 INT", description: "One target moves 10 ft. in a direction of the molch's choice on a failed save." }),
-            createCreatureAction({ name: "Shimmer Spit", type: "action", attack: "+5 to hit", range: "30 ft.", damage: "2d6 psychic", description: "The target cannot benefit from invisibility until the end of its next turn." }),
-            createCreatureAction({ name: "Ripple Swap", type: "bonus", range: "30 ft.", description: "The molch swaps places with its duplicate or reflection." })
+            createCreatureAction({ name: "Glasbiss", type: "action", attack: "+5 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6+3 Stich plus 1W6 psychisch" }),
+            createCreatureAction({ name: "Falscher Schritt", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", range: "30 Fuß", save: "SG 14 IN", description: "Bei einem misslungenen Rettungswurf bewegt sich das Ziel 10 Fuß in eine vom Molch gewählte Richtung." }),
+            createCreatureAction({ name: "Schimmerspucke", type: "action", attack: "+5 auf Treffer", range: "30 Fuß", damage: "2W6 psychisch", description: "Das Ziel kann bis zum Ende seines nächsten Zuges nicht von Unsichtbarkeit profitieren." }),
+            createCreatureAction({ name: "Wellentausch", type: "bonus", range: "30 Fuß", description: "Der Molch tauscht den Platz mit seinem Doppelbild oder einer Spiegelung." })
         ],
         9: [
-            createCreatureAction({ name: "Hidden Dagger", type: "action", attack: "+6 to hit", range: "Reach 5 ft.", damage: "1d4+4 piercing", description: "Deals an extra 1d6 poison if Veyra had advantage." }),
-            createCreatureAction({ name: "Blackmail Thread", type: "action", usageMax: 3, usageReset: "charges", usage: "3 Charges", range: "30 ft.", save: "DC 13 WIS", description: "On a failed save, the target has disadvantage on the next attack roll it makes against Veyra or one of her allies before the end of its next turn." }),
-            createCreatureAction({ name: "Vanish in Rain", type: "bonus", usage: "1 / Encounter", description: "Veyra moves up to her speed and attempts to Hide, even if only lightly obscured by rain, fog, or street shadows." }),
-            createCreatureAction({ name: "Coded Warning", type: "reaction", range: "60 ft.", trigger: "An ally who can hear or see Veyra is about to reposition.", description: "That ally may immediately move up to 10 ft. without provoking opportunity attacks." })
+            createCreatureAction({ name: "Verborgener Dolch", type: "action", attack: "+6 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W4+4 Stich", description: "Verursacht zusätzlich 1W6 Giftschaden, wenn Veyra Vorteil hatte." }),
+            createCreatureAction({ name: "Erpressungsfaden", type: "action", usageMax: 3, usageReset: "charges", usage: "3 Ladungen", range: "30 Fuß", save: "SG 13 WE", description: "Bei einem misslungenen Rettungswurf hat das Ziel Nachteil auf seinen nächsten Angriff gegen Veyra oder einen ihrer Verbündeten." }),
+            createCreatureAction({ name: "Im Regen verschwinden", type: "bonus", usage: "1 / Begegnung", description: "Veyra bewegt sich bis zu ihrer Bewegungsrate und versucht sich zu verstecken, selbst bei leichter Verdeckung durch Regen, Nebel oder Straßenschatten." }),
+            createCreatureAction({ name: "Codierte Warnung", type: "reaction", range: "60 Fuß", trigger: "Ein sicht- oder hörbarer Verbündeter will seine Position wechseln.", description: "Der Verbündete darf sich sofort bis zu 10 Fuß bewegen, ohne Gelegenheitsangriffe auszulösen." })
         ]
     };
 
     return demoActions[creatureId] || [];
 }
 
-
 function getDemoTraitsForCreature(creatureId) {
     const demoTraits = {
         1: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Sneak Attack 4d6 · Cunning Action · Uncanny Dodge · Evasion · Arcane Trickster Slots 1st: 4, 2nd: 2" }),
-            createCreatureTrait({ name: "Sneak Attack", category: "classFeature", usageMax: 1, usageReset: "turn", usage: "1 / Turn", showAsAction: true, actionType: "special", actionSummary: "Once per turn, deal +4d6 damage with a finesse or ranged weapon when the conditions are met.", description: "Once per turn, deal +4d6 damage with a finesse or ranged weapon when you have advantage or an enemy of the target is within 5 ft. of it and you do not have disadvantage." }),
-            createCreatureTrait({ name: "Cunning Action", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Take Dash, Disengage, or Hide as a bonus action.", description: "Take the Dash, Disengage, or Hide action as a bonus action on each of your turns." }),
-            createCreatureTrait({ name: "Uncanny Dodge", category: "classFeature", showAsAction: true, actionType: "reaction", trigger: "A visible attacker hits Miriel with an attack.", actionSummary: "Halve the attack's damage.", description: "When an attacker that Miriel can see hits her with an attack, she can use her reaction to halve the attack's damage." }),
-            createCreatureTrait({ name: "Mage Hand Legerdemain", category: "classFeature", description: "Mage Hand can be invisible, manipulate objects or thieves' tools at range, and can be controlled with Cunning Action." }),
-            createCreatureTrait({ name: "Evasion", category: "passive", description: "On Dexterity saves for half damage, take no damage on a success and half damage on a failure." }),
-            createCreatureTrait({ name: "Fairy Flight", category: "species", description: "Flying speed equals walking speed." }),
-            createCreatureTrait({ name: "Fairy Magic", category: "species", description: "Knows Druidcraft; Faerie Fire and Enlarge/Reduce are tracked as spells with limited uses." })
+            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Hinterhältiger Angriff 4W6 · Listige Aktion · Unheimliches Ausweichen · Entrinnen · Arkane Kartenmeisterin: 4 Zauberplätze 1. Grades, 2 Zauberplätze 2. Grades" }),
+            createCreatureTrait({ name: "Hinterhältiger Angriff", category: "classFeature", usageMax: 1, usageReset: "turn", usage: "1 / Zug", showAsAction: true, actionType: "special", actionSummary: "Einmal pro Zug zusätzlich 4W6 Schaden verursachen, wenn die Voraussetzungen erfüllt sind.", description: "Einmal pro Zug verursacht Miriel mit einer Finesse- oder Fernkampfwaffe 4W6 zusätzlichen Schaden, wenn sie Vorteil hat oder ein Gegner des Ziels nahe bei ihm steht und Miriel keinen Nachteil hat." }),
+            createCreatureTrait({ name: "Listige Aktion", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Sprinten, Rückzug oder Verstecken als Bonusaktion einsetzen.", description: "Miriel kann in jedem ihrer Züge Sprinten, Rückzug oder Verstecken als Bonusaktion einsetzen." }),
+            createCreatureTrait({ name: "Unheimliches Ausweichen", category: "classFeature", showAsAction: true, actionType: "reaction", trigger: "Ein sichtbarer Angreifer trifft Miriel.", actionSummary: "Den Schaden des Angriffs halbieren.", description: "Trifft ein sichtbarer Angreifer Miriel, kann sie ihre Reaktion einsetzen, um den Schaden dieses Angriffs zu halbieren." }),
+            createCreatureTrait({ name: "Arkane Fingerfertigkeit", category: "classFeature", description: "Miriel kann ihre magische Hand unsichtbar wirken lassen und damit auf Distanz kleine Gegenstände, Schlösser und Diebeswerkzeug besonders geschickt bedienen." }),
+            createCreatureTrait({ name: "Entrinnen", category: "passive", description: "Bei Geschicklichkeitsrettungswürfen gegen halben Schaden erleidet Miriel bei Erfolg keinen und bei Misserfolg nur halben Schaden." }),
+            createCreatureTrait({ name: "Chaosfeen-Flug", category: "species", description: "Die Flugbewegungsrate entspricht der Laufbewegungsrate." }),
+            createCreatureTrait({ name: "Chaosfeen-Magie", category: "species", description: "Miriels angeborene Feenmagie wird über ihre Zauberliste verwaltet; begrenzte Anwendungen werden dort gesondert erfasst." })
         ],
         2: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Arcane Recovery 1/LR · Wizardly Quill · Awakened Spellbook · Serpentine Spellcasting" }),
-            createCreatureTrait({ name: "Wizardly Quill", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Create a Tiny magical quill in Suica's free hand.", description: "As a bonus action, create a magical quill that writes without ink, speeds spell transcription, and can erase its own writing within 5 ft." }),
-            createCreatureTrait({ name: "Arcane Recovery", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "special", actionSummary: "After a short rest, recover spell slots with a combined level of up to 2.", description: "After a short rest, recover expended spell slots with a combined level of up to 2." }),
-            createCreatureTrait({ name: "Awakened Spellbook: Ritual Casting", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "special", actionSummary: "Cast a ritual spell using its normal casting time.", description: "While holding the Awakened Spellbook, Suica can cast a ritual spell using the spell's normal casting time once per long rest." }),
-            createCreatureTrait({ name: "Magic Resistance", category: "species", description: "Advantage on saving throws against spells." }),
-            createCreatureTrait({ name: "Poison Resilience", category: "species", description: "Resistance to poison damage and advantage on saves to avoid or end the poisoned condition." }),
-            createCreatureTrait({ name: "Scholar", category: "classFeature", description: "One proficient Wizard skill gains Expertise; Investigation is the key demo expertise skill." }),
-            createCreatureTrait({ name: "Serpentine Spellcasting", category: "species", description: "Poison Spray, Animal Friendship on snakes, and Suggestion are tracked in the spell list where relevant." })
+            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie" }),
+            createCreatureTrait({ name: "Arkane Schreibfeder", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Eine magische Schreibfeder in Suicas freier Hand erscheinen lassen.", description: "Suica ruft mit einer Bonusaktion eine tintenlose Feder hervor. Sie erleichtert das Übertragen arkaner Formeln und kann eigene Schriftzeichen in kurzer Entfernung wieder auslöschen." }),
+            createCreatureTrait({ name: "Arkane Erholung", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Nach einer kurzen Rast verbrauchte Zauberplätze mit insgesamt bis zu zwei Zaubergraden zurückgewinnen.", description: "Einmal pro langer Rast kann Suica nach einer kurzen Rast verbrauchte Zauberplätze zurückgewinnen, deren addierte Grade höchstens zwei betragen." }),
+            createCreatureTrait({ name: "Erwachtes Zauberbuch: Ritualfokus", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein vorbereitetes Ritual ohne zusätzliche Ritualzeit wirken.", description: "Solange Suica ihr Erwachtes Zauberbuch hält, kann sie einmal pro langer Rast ein vorbereitetes Ritual in dessen normaler Wirkzeit vollenden." }),
+            createCreatureTrait({ name: "Magieresistenz", category: "species", description: "Vorteil auf Rettungswürfe gegen Zauber." }),
+            createCreatureTrait({ name: "Giftresistenz", category: "species", description: "Resistenz gegen Giftschaden sowie Vorteil auf Rettungswürfe, um Vergiftung zu vermeiden oder zu beenden." }),
+            createCreatureTrait({ name: "Gelehrte", category: "classFeature", description: "Suica verdoppelt ihren Übungsbonus bei einer beherrschten Wissensfertigkeit; in der Demo gilt dies für Nachforschungen." }),
+            createCreatureTrait({ name: "Schlangenmagie", category: "species", description: "Suicas angeborene Magie wird über ihre Zauberliste verwaltet und umfasst giftige, tierbezogene und beeinflussende Effekte." })
         ],
         3: [
-            createCreatureTrait({ name: "False Object", category: "monsterTrait", description: "While motionless, Borstibald is indistinguishable from an ordinary broom until it moves or attacks." }),
-            createCreatureTrait({ name: "Dusty Temper", category: "monsterTrait", usageMax: 1, usageReset: "encounter", usage: "1 / Encounter", showAsAction: true, actionType: "special", trigger: "The first time Borstibald takes damage in an encounter.", actionSummary: "Creatures within 10 ft. have disadvantage on their next Perception check before the end of the round.", description: "The first time Borstibald takes damage in an encounter, each creature within 10 ft. has disadvantage on its next Perception check before the end of the round." }),
-            createCreatureTrait({ name: "Hovering Household Menace", category: "passive", description: "Borstibald ignores difficult terrain caused by clutter, furniture, spilled liquids, or loose debris." })
+            createCreatureTrait({ name: "Täuschend echter Gegenstand", category: "monsterTrait", description: "Solange Borstibald reglos bleibt, ist er nicht von einem gewöhnlichen Besen zu unterscheiden, bis er sich bewegt oder angreift." }),
+            createCreatureTrait({ name: "Staubiger Zorn", category: "monsterTrait", usageMax: 1, usageReset: "encounter", usage: "1 / Begegnung", showAsAction: true, actionType: "special", trigger: "Borstibald erleidet in einer Begegnung zum ersten Mal Schaden.", actionSummary: "Kreaturen im Umkreis von 10 Fuß haben bis zum Rundenende Nachteil auf ihre nächste Wahrnehmungsprobe.", description: "Wenn Borstibald in einer Begegnung erstmals Schaden erleidet, wirbelt er eine Staubwolke auf. Jede Kreatur im Umkreis von 10 Fuß hat bis zum Ende der Runde Nachteil auf ihre nächste Wahrnehmungsprobe." }),
+            createCreatureTrait({ name: "Schwebender Hausplagegeist", category: "passive", description: "Borstibald ignoriert schwieriges Gelände, das durch Gerümpel, Möbel, verschüttete Flüssigkeiten oder lose Trümmer entsteht." })
         ],
         4: [
-            createCreatureTrait({ name: "Rooted Ambusher", category: "monsterTrait", description: "Advantage on Stealth checks while partially buried in soil, fog, or leaf litter." }),
-            createCreatureTrait({ name: "Mist-Fed Hide", category: "monsterTrait", description: "While standing in fog, dim light, or heavy plant cover, Nebelzahn gains +2 AC against ranged attacks." }),
-            createCreatureTrait({ name: "Scent of Warm Blood", category: "monsterTrait", description: "Nebelzahn knows the direction of any bloodied creature within 30 ft. that is touching the ground." })
+            createCreatureTrait({ name: "Verwurzelter Lauerjäger", category: "monsterTrait", description: "Nebelzahn hat Vorteil auf Heimlichkeitsproben, solange er teilweise in Erde, Nebel oder Laub verborgen ist." }),
+            createCreatureTrait({ name: "Nebelgenährte Haut", category: "monsterTrait", description: "In Nebel, dämmrigem Licht oder dichter Vegetation erhält Nebelzahn +2 Rüstungsklasse gegen Fernkampfangriffe." }),
+            createCreatureTrait({ name: "Witterung warmen Blutes", category: "monsterTrait", description: "Nebelzahn kennt die Richtung jeder verletzten Kreatur im Umkreis von 30 Fuß, die den Boden berührt." })
         ],
         5: [
-            createCreatureTrait({ name: "Mirror Feather", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Encounter", showAsAction: true, actionType: "reaction", trigger: "A creature misses the Glimmerkrähe with an attack.", actionSummary: "Flash a false reflection and move 10 ft. without provoking opportunity attacks.", description: "Twice per encounter, when a creature misses the Glimmerkrähe with an attack, the crow flashes a false reflection and moves 10 ft. without provoking opportunity attacks." }),
-            createCreatureTrait({ name: "Thought Thief", category: "monsterTrait", description: "A creature hit by Steal Spark cannot take reactions until the start of its next turn." }),
-            createCreatureTrait({ name: "Shiny Omen", category: "monsterTrait", description: "Advantage on checks to notice magic items, reflective surfaces, and hidden jewelry." })
+            createCreatureTrait({ name: "Spiegelfeder", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Begegnung", showAsAction: true, actionType: "reaction", trigger: "Eine Kreatur verfehlt die Glimmerkrähe mit einem Angriff.", actionSummary: "Eine falsche Spiegelung aufblitzen lassen und sich 10 Fuß ohne Gelegenheitsangriffe bewegen.", description: "Bis zu zweimal pro Begegnung kann die Glimmerkrähe nach einem verfehlten Angriff eine falsche Spiegelung aufblitzen lassen und sich 10 Fuß bewegen, ohne Gelegenheitsangriffe auszulösen." }),
+            createCreatureTrait({ name: "Gedankenraub", category: "monsterTrait", description: "Eine von Funkenraub getroffene Kreatur kann bis zum Beginn ihres nächsten Zuges keine Reaktionen einsetzen." }),
+            createCreatureTrait({ name: "Glänzendes Omen", category: "monsterTrait", description: "Die Glimmerkrähe hat Vorteil auf Proben, um magische Gegenstände, spiegelnde Flächen und verborgenen Schmuck zu entdecken." })
         ],
         6: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Sorcery Points 5 · Metamagic: Empowered, Quickened · Hexblade's Curse 1/SR · Favored by the Gods 1/SR · Healing Hands 1/LR · Radiant Consumption 1/LR" }),
-            createCreatureTrait({ name: "Healing Hands", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "action", actionSummary: "Touch a creature and heal a number of d4s equal to Liora's proficiency bonus.", description: "As an action, touch a creature and heal a number of d4s equal to Liora's proficiency bonus." }),
-            createCreatureTrait({ name: "Hexblade's Curse", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Short Rest", showAsAction: true, actionType: "bonus", range: "30 ft.", actionSummary: "Curse a visible creature for 1 minute.", description: "As a bonus action, curse a visible creature within 30 ft. for 1 minute. Against the cursed target, gain +3 damage, crit on 19–20, and regain 7 HP if it dies." }),
-            createCreatureTrait({ name: "Font of Magic: Create Spell Slot", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Spend Sorcery Points to create a spell slot.", description: "As a bonus action, spend 2/3/5 Sorcery Points to create a 1st/2nd/3rd-level spell slot." }),
-            createCreatureTrait({ name: "Quickened Spell", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Spend 2 Sorcery Points to cast an action spell as a bonus action.", description: "Spend 2 Sorcery Points to change the casting time of an eligible action spell to a bonus action for this casting." }),
-            createCreatureTrait({ name: "Favored by the Gods", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Short Rest", showAsAction: true, actionType: "special", trigger: "Liora fails a saving throw or misses with an attack roll.", actionSummary: "Roll 2d4 and add it to the total, potentially changing the outcome.", description: "Once per short rest, if Liora fails a saving throw or misses with an attack roll, she can roll 2d4 and add it to the total, potentially changing the outcome." }),
-            createCreatureTrait({ name: "Celestial Revelation: Radiant Consumption", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "bonus", actionSummary: "Activate radiant transformation for 1 minute.", description: "As a bonus action once per long rest, activate radiant transformation for 1 minute." }),
-            createCreatureTrait({ name: "Magical Cunning", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "special", actionSummary: "Perform a 1-minute rite to regain up to 1 Pact Magic slot.", description: "Once per long rest, perform a 1-minute rite to regain up to 1 expended Pact Magic spell slot." }),
-            createCreatureTrait({ name: "Celestial Resistance", category: "species", description: "Resistance to necrotic and radiant damage." }),
-            createCreatureTrait({ name: "Eldritch Mind", category: "classFeature", description: "Advantage on Constitution saving throws made to maintain concentration." }),
-            createCreatureTrait({ name: "War Caster", category: "feat", description: "Advantage on CON saves to maintain concentration, can perform somatic components with weapons or shield, and can use eligible spells for opportunity attacks." }),
-            createCreatureTrait({ name: "Hex Warrior", category: "classFeature", description: "Uses CHA for an eligible weapon after long rest; proficient with medium armor, shields and martial weapons." }),
-            createCreatureTrait({ name: "Agonizing Blast", category: "classFeature", description: "Adds CHA modifier to Eldritch Blast damage." }),
-            createCreatureTrait({ name: "Repelling Blast", category: "classFeature", description: "Eldritch Blast can push a Large or smaller creature up to 10 ft. away." })
+            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR" }),
+            createCreatureTrait({ name: "Heilende Berührung", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "action", actionSummary: "Eine berührte Kreatur mit Sternenlicht heilen.", description: "Liora kanalisiert mit einer Aktion sanftes Sternenlicht durch ihre Hände. Die berührte Kreatur erhält eine Anzahl W4 Heilung in Höhe von Lioras Übungsbonus." }),
+            createCreatureTrait({ name: "Fluch der Schattenklinge", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "bonus", range: "30 Fuß", actionSummary: "Eine sichtbare Kreatur eine Minute lang mit dem Mal der Schattenklinge belegen.", description: "Liora markiert mit einer Bonusaktion eine sichtbare Kreatur in 30 Fuß Reichweite. Gegen das markierte Ziel verursacht sie 3 zusätzlichen Schaden, erzielt bereits bei 19–20 einen kritischen Treffer und gewinnt 7 HP zurück, falls das Ziel fällt." }),
+            createCreatureTrait({ name: "Quelle der Magie: Zauberplatz erschaffen", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zaubereipunkte ausgeben, um einen Zauberplatz zu erschaffen.", description: "Liora kann als Bonusaktion 2, 3 oder 5 Zaubereipunkte ausgeben, um einen Zauberplatz des 1., 2. oder 3. Grades zu erschaffen." }),
+            createCreatureTrait({ name: "Beschleunigter Zauber", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zwei Zaubereipunkte ausgeben, um einen geeigneten Zauber als Bonusaktion zu wirken.", description: "Liora gibt zwei Zaubereipunkte aus und ändert die Wirkzeit eines geeigneten Zaubers für diesen Einsatz von einer Aktion zu einer Bonusaktion." }),
+            createCreatureTrait({ name: "Gunst des Schicksals", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "special", trigger: "Liora verfehlt einen Angriff oder misslingt bei einem Rettungswurf.", actionSummary: "2W4 auf das Ergebnis addieren und das Schicksal möglicherweise wenden.", description: "Einmal pro kurzer Rast kann Liora nach einem verfehlten Angriff oder misslungenen Rettungswurf 2W4 auf das Ergebnis addieren." }),
+            createCreatureTrait({ name: "Sternenbrand", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "bonus", actionSummary: "Für eine Minute eine brennende Sternenaura entfesseln.", description: "Einmal pro langer Rast entfesselt Liora mit einer Bonusaktion für eine Minute ihre instabile Sternenkraft." }),
+            createCreatureTrait({ name: "Arkane Reserve", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein einminütiges Ritual stellt einen verbrauchten Pakt-Zauberplatz wieder her.", description: "Einmal pro langer Rast kann Liora ein einminütiges Ritual vollziehen und dadurch bis zu einen verbrauchten Pakt-Zauberplatz zurückgewinnen." }),
+            createCreatureTrait({ name: "Sternenblut-Resistenz", category: "species", description: "Liora besitzt Resistenz gegen nekrotischen und gleißenden Schaden." }),
+            createCreatureTrait({ name: "Unbeugsame Konzentration", category: "classFeature", description: "Liora hat Vorteil auf Konstitutionsrettungswürfe, mit denen sie ihre Konzentration aufrechterhält." }),
+            createCreatureTrait({ name: "Gefechtsmagierin", category: "feat", description: "Liora kann Zauber auch mit Waffe oder Schild sicher wirken und geeignete Zauber für Gelegenheitsangriffe einsetzen." }),
+            createCreatureTrait({ name: "Schattenklingen-Bindung", category: "classFeature", description: "Nach einer langen Rast bindet Liora eine geeignete Waffe an ihren Pakt und verwendet für Angriffe mit ihr ihr Charisma. Außerdem beherrscht sie mittelschwere Rüstungen, Schilde und Kriegswaffen." }),
+            createCreatureTrait({ name: "Qualvoller Strahl", category: "classFeature", description: "Liora addiert ihren Charismamodifikator zum Schaden ihres unheimlichen Strahls." }),
+            createCreatureTrait({ name: "Zurückstoßender Strahl", category: "classFeature", description: "Trifft Lioras unheimlicher Strahl eine große oder kleinere Kreatur, kann er sie bis zu 10 Fuß von ihr wegstoßen." })
         ],
         7: [
-            createCreatureTrait({ name: "Grave Moss Regrowth", category: "monsterTrait", showAsAction: true, actionType: "special", actionSummary: "At the start of its turn, regain 10 HP unless it took fire damage since its last turn.", description: "At the start of its turn, if the koloss is standing on soil or stone, it regains 10 HP unless it took fire damage since its last turn." }),
-            createCreatureTrait({ name: "Heavy Frame", category: "monsterTrait", description: "Advantage on saving throws against being moved, knocked prone, or grappled by creatures smaller than Huge." }),
-            createCreatureTrait({ name: "Burial Ground Anchor", category: "monsterTrait", description: "Difficult terrain made of roots, rubble, or graves does not cost the koloss extra movement." })
+            createCreatureTrait({ name: "Grabmoos-Regeneration", category: "monsterTrait", showAsAction: true, actionType: "special", actionSummary: "Zu Beginn seines Zuges 10 Trefferpunkte zurückgewinnen, sofern seit dem letzten Zug kein Feuerschaden erlitten wurde.", description: "Steht der Koloss auf Erde oder Stein, gewinnt er zu Beginn seines Zuges 10 Trefferpunkte zurück, sofern er seit seinem letzten Zug keinen Feuerschaden erlitten hat." }),
+            createCreatureTrait({ name: "Massiger Körper", category: "monsterTrait", description: "Der Koloss hat Vorteil auf Rettungswürfe dagegen, bewegt, zu Boden geworfen oder von Kreaturen unterhalb der Größenkategorie riesig gepackt zu werden." }),
+            createCreatureTrait({ name: "Anker des Gräberfelds", category: "monsterTrait", description: "Schwieriges Gelände aus Wurzeln, Geröll oder Gräbern kostet den Koloss keine zusätzliche Bewegung." })
         ],
         8: [
-            createCreatureTrait({ name: "Reflective Skin", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Encounter", showAsAction: true, actionType: "reaction", trigger: "A spell attack misses the molch.", actionSummary: "Redirect a harmless shimmer toward another creature within 10 ft.; it has disadvantage on its next Perception check.", description: "Twice per encounter, when a spell attack misses the molch, it can redirect a harmless shimmer toward another creature within 10 ft.; that creature has disadvantage on its next Perception check." }),
-            createCreatureTrait({ name: "Duplicate Flicker", category: "monsterTrait", usageMax: 1, usageReset: "longRest", usage: "1 / Long Rest", showAsAction: true, actionType: "special", actionSummary: "Create an illusory duplicate that lasts until hit by an attack.", description: "Once per day, the molch creates an illusory duplicate that lasts until it is hit by an attack." }),
-            createCreatureTrait({ name: "Mirror-Sense", category: "monsterTrait", description: "The molch knows the location of creatures reflected in still water, polished metal, or glass within 30 ft." })
+            createCreatureTrait({ name: "Spiegelnde Haut", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Begegnung", showAsAction: true, actionType: "reaction", trigger: "Ein Zauberangriff verfehlt den Molch.", actionSummary: "Einen harmlosen Schimmer auf eine Kreatur im Umkreis von 10 Fuß umlenken; sie hat Nachteil auf ihre nächste Wahrnehmungsprobe.", description: "Bis zu zweimal pro Begegnung kann der Molch nach einem verfehlten Zauberangriff einen harmlosen Schimmer auf eine andere Kreatur im Umkreis von 10 Fuß lenken. Diese hat Nachteil auf ihre nächste Wahrnehmungsprobe." }),
+            createCreatureTrait({ name: "Flackerndes Doppelbild", category: "monsterTrait", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein Trugbild erschaffen, das bis zu seinem ersten Treffer bestehen bleibt.", description: "Einmal pro langer Rast erschafft der Molch ein Trugbild seiner selbst. Es verschwindet, sobald es von einem Angriff getroffen wird." }),
+            createCreatureTrait({ name: "Spiegelsinn", category: "monsterTrait", description: "Der Molch kennt den Standort von Kreaturen im Umkreis von 30 Fuß, die sich in stillem Wasser, poliertem Metall oder Glas spiegeln." })
         ],
         9: [
-            createCreatureTrait({ name: "Dead Drop Network", category: "npc", usageMax: 2, usageReset: "longRest", usage: "2 / Long Rest", showAsAction: true, actionType: "special", actionSummary: "Know where a message, key, or minor contraband item has been hidden nearby.", description: "Twice per day, Veyra can plausibly know where a message, key, or minor contraband item has been hidden nearby." }),
-            createCreatureTrait({ name: "Crowd Ghost", category: "npc", description: "Veyra can attempt to Hide while lightly obscured by rain, fog, crowds, or hanging laundry." }),
-            createCreatureTrait({ name: "Informant's Instinct", category: "npc", description: "Advantage on Insight checks to determine whether a creature is lying about names, routes, or allegiances." })
+            createCreatureTrait({ name: "Netz geheimer Ablagen", category: "npc", usageMax: 2, usageReset: "longRest", usage: "2 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Den wahrscheinlichen Ablageort einer Nachricht, eines Schlüssels oder kleiner Schmuggelware in der Nähe kennen.", description: "Zweimal pro langer Rast kann Veyra glaubhaft den Ort kennen, an dem in der Nähe eine Nachricht, ein Schlüssel oder ein kleiner Schmuggelgegenstand verborgen wurde." }),
+            createCreatureTrait({ name: "Geist der Menge", category: "npc", description: "Veyra kann versuchen, sich zu verstecken, wenn Regen, Nebel, Menschenmengen oder aufgehängte Wäsche sie leicht verdecken." }),
+            createCreatureTrait({ name: "Instinkt der Informantin", category: "npc", description: "Veyra hat Vorteil auf Motiv-erkennen-Proben, um Lügen über Namen, Wege oder Zugehörigkeiten zu durchschauen." })
         ]
     };
 
@@ -688,23 +689,23 @@ function getDemoSpellcastingForCreature(creature) {
     applyLegacySlotHints(spellcasting, { spellsText: creature.demoSpellSeed, spellSaveDc: creature.spellSaveDc });
 
     if (creature.id === 1) {
-        applySpellOverride(spellcasting, "Silvery Barbs", { castingTime: "1 Reaction", range: "60 ft.", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Faerie Fire", { castingTime: "1 Action", range: "60 ft.", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
-        applySpellOverride(spellcasting, "Enlarge/Reduce", { castingTime: "1 Action", range: "30 ft.", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
+        applySpellOverride(spellcasting, "Chaossplitter", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
+        applySpellOverride(spellcasting, "Faerie Fire", { castingTime: "1 Aktion", range: "60 ft.", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
+        applySpellOverride(spellcasting, "Enlarge/Reduce", { castingTime: "1 Aktion", range: "30 Fuß", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
     }
 
     if (creature.id === 2) {
-        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaction", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Suggestion", { castingTime: "1 Action", range: "30 ft.", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
+        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
+        applySpellOverride(spellcasting, "Suggestion", { castingTime: "1 Aktion", range: "30 Fuß", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
     }
 
     if (creature.id === 6) {
-        applySpellOverride(spellcasting, "Absorb Elements", { castingTime: "1 Reaction", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaction", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Healing Word", { castingTime: "1 Bonus Action", range: "60 ft.", showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Hex", { castingTime: "1 Bonus Action", range: "90 ft.", concentration: true, showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Misty Step", { castingTime: "1 Bonus Action", range: "Self", showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Counterspell", { castingTime: "1 Reaction", range: "60 ft.", showAsAction: true, actionType: "reaction" });
+        applySpellOverride(spellcasting, "Elementarschild", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
+        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
+        applySpellOverride(spellcasting, "Healing Word", { castingTime: "1 Bonusaktion", range: "60 ft.", showAsAction: true, actionType: "bonus" });
+        applySpellOverride(spellcasting, "Hex", { castingTime: "1 Bonusaktion", range: "90 ft.", concentration: true, showAsAction: true, actionType: "bonus" });
+        applySpellOverride(spellcasting, "Misty Step", { castingTime: "1 Bonusaktion", range: "Selbst", showAsAction: true, actionType: "bonus" });
+        applySpellOverride(spellcasting, "Counterspell", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
     }
 
     return spellcasting;
@@ -1290,6 +1291,43 @@ function getTypeSortValue(type) {
     return 4;
 }
 
+function isCreatureInTurnOrder(creature) {
+    return creature !== null
+        && creature !== undefined
+        && creature.isInCombat === true
+        && creature.isInitiativeActive !== false;
+}
+
+function getInitiativeCards(handCards = getHandCards()) {
+    return handCards.filter(function(creature) {
+        return isCreatureInTurnOrder(creature);
+    });
+}
+
+function isCreatureOutOfAction(creature) {
+    return creature !== null
+        && creature !== undefined
+        && (getSafeNonNegativeInteger(creature.hp, 0) === 0 || creature.isInitiativeActive === false);
+}
+
+function createOutOfActionStampHtml(entity) {
+    if (entity === null || entity === undefined || entity.isOutOfAction === false) {
+        return "";
+    }
+
+    const isOutOfAction = entity.isOutOfAction === true || isCreatureOutOfAction(entity);
+
+    if (isOutOfAction !== true) {
+        return "";
+    }
+
+    return `
+        <span class="out-of-action-stamp" aria-label="Außer Gefecht">
+            <span>Außer Gefecht</span>
+        </span>
+    `;
+}
+
 function getHandCards() {
     const handCards = creatures.filter(function(creature) {
         return creature.isInCombat === true;
@@ -1466,6 +1504,9 @@ function getViewportScrollSnapshot() {
         document.querySelector(".card-forge-panel"),
         document.querySelector(".forge-tab-grid"),
         document.querySelector(".ah-drawer-panel"),
+        document.querySelector("#card-detail-panel .active-hand-detail-scroll"),
+        document.querySelector(".dm-action-drawer-content"),
+        document.querySelector(".card-forge-scroll"),
         document.querySelector("#deck-card-list")
     ].filter(function(element, index, list) {
         return element !== null && list.indexOf(element) === index;
@@ -1936,6 +1977,44 @@ function clearManualPublicSelection() {
     manuallySelectedPublicCardId = null;
 }
 
+function toggleCreatureTurnOrder(creatureId) {
+    const creature = findCreatureById(creatureId);
+
+    if (creature === null || creature.isInCombat !== true) {
+        return;
+    }
+
+    const wasInTurnOrder = creature.isInitiativeActive !== false;
+    const activeCardBeforeChange = getActiveCard(getHandCards());
+    const activeCardIdBeforeChange = activeCardBeforeChange !== null ? activeCardBeforeChange.id : null;
+
+    creature.isInitiativeActive = wasInTurnOrder !== true;
+
+    if (creature.isInitiativeActive === false) {
+        creature.isSelected = false;
+        addCombatLogMessage(`${creature.name} wurde aus der Zugfolge genommen.`);
+    } else {
+        addCombatLogMessage(`${creature.name} wurde wieder in die Zugfolge aufgenommen.`);
+    }
+
+    const initiativeCards = getInitiativeCards();
+
+    if (initiativeCards.length === 0) {
+        currentTurnIndex = 0;
+    } else if (activeCardIdBeforeChange !== null && activeCardIdBeforeChange !== creature.id) {
+        const retainedActiveIndex = initiativeCards.findIndex(function(card) {
+            return card.id === activeCardIdBeforeChange;
+        });
+        currentTurnIndex = retainedActiveIndex >= 0 ? retainedActiveIndex : Math.min(currentTurnIndex, initiativeCards.length - 1);
+    } else {
+        currentTurnIndex = Math.min(currentTurnIndex, initiativeCards.length - 1);
+    }
+
+    clearManualPublicSelection();
+    saveAndBroadcastAppState();
+    renderCardsPreservingViewport();
+}
+
 // ============================================================
 // 3b. DM-Zielauswahl für spätere AOE-Aktionen
 // ============================================================
@@ -2089,9 +2168,10 @@ function updateDeckSelectionStatus() {
 // ============================================================
 
 function ensureCurrentTurnIndexIsValid(handCards) {
-    if (handCards.length === 0) {
+    const initiativeCards = getInitiativeCards(handCards);
+
+    if (initiativeCards.length === 0) {
         currentTurnIndex = 0;
-        roundNumber = 1;
         clearManualPublicSelection();
         return;
     }
@@ -2100,19 +2180,20 @@ function ensureCurrentTurnIndexIsValid(handCards) {
         currentTurnIndex = 0;
     }
 
-    if (currentTurnIndex >= handCards.length) {
-        currentTurnIndex = handCards.length - 1;
+    if (currentTurnIndex >= initiativeCards.length) {
+        currentTurnIndex = initiativeCards.length - 1;
     }
 }
 
 function getActiveCard(handCards) {
+    const initiativeCards = getInitiativeCards(handCards);
     ensureCurrentTurnIndexIsValid(handCards);
 
-    if (handCards.length === 0) {
+    if (initiativeCards.length === 0) {
         return null;
     }
 
-    return handCards[currentTurnIndex];
+    return initiativeCards[currentTurnIndex];
 }
 
 function triggerMirielBoardForEncounterStart() {
@@ -2130,9 +2211,15 @@ function triggerMirielBoardForEncounterStart() {
 
 function startEncounter() {
     const handCards = getHandCards();
+    const initiativeCards = getInitiativeCards(handCards);
 
     if (handCards.length === 0) {
         alert("Lege zuerst Karten auf die Hand, bevor du den Encounter startest.");
+        return;
+    }
+
+    if (initiativeCards.length === 0) {
+        alert("Nimm mindestens eine Karte wieder in die Zugfolge auf, bevor du den Encounter startest.");
         return;
     }
 
@@ -2159,20 +2246,21 @@ function startEncounter() {
 
 function nextTurn() {
     const handCards = getHandCards();
+    const initiativeCards = getInitiativeCards(handCards);
 
-    if (isEncounterStarted !== true || handCards.length === 0) {
+    if (isEncounterStarted !== true || initiativeCards.length === 0) {
         return;
     }
 
     currentTurnIndex = currentTurnIndex + 1;
     clearManualPublicSelection();
 
-    if (currentTurnIndex >= handCards.length) {
+    if (currentTurnIndex >= initiativeCards.length) {
         currentTurnIndex = 0;
         roundNumber = roundNumber + 1;
     }
 
-    const newActiveCard = getActiveCard(getHandCards());
+    const newActiveCard = getActiveCard(handCards);
 
     if (newActiveCard !== null) {
         prepareDmFocusTransition(newActiveCard.id, "next");
@@ -2192,8 +2280,9 @@ function nextTurn() {
 
 function previousTurn() {
     const handCards = getHandCards();
+    const initiativeCards = getInitiativeCards(handCards);
 
-    if (isEncounterStarted !== true || handCards.length === 0) {
+    if (isEncounterStarted !== true || initiativeCards.length === 0) {
         return;
     }
 
@@ -2201,7 +2290,7 @@ function previousTurn() {
     clearManualPublicSelection();
 
     if (currentTurnIndex < 0) {
-        currentTurnIndex = handCards.length - 1;
+        currentTurnIndex = initiativeCards.length - 1;
 
         if (roundNumber > 1) {
             roundNumber = roundNumber - 1;
@@ -2990,13 +3079,14 @@ function rememberActiveCardId() {
 
 function restoreActiveTurnAfterInitiativeChange(activeCardId) {
     const handCards = getHandCards();
+    const initiativeCards = getInitiativeCards(handCards);
 
     if (activeCardId === null) {
         ensureCurrentTurnIndexIsValid(handCards);
         return;
     }
 
-    const newActiveIndex = handCards.findIndex(function(creature) {
+    const newActiveIndex = initiativeCards.findIndex(function(creature) {
         return creature.id === activeCardId;
     });
 
@@ -4091,6 +4181,12 @@ function createEncounterExportData() {
         formatName: "Miriel\'s Deck of Encounters Encounter",
         formatVersion: 2,
         exportedAt: new Date().toISOString(),
+        metadata: {
+            appVersion: appVersion,
+            operatingMode: appOperatingMode,
+            licenseNotice: "Enthält bearbeitetes Material aus dem SRD 5.1 unter CC BY 4.0.",
+            legalDocument: "legal.html"
+        },
         encounter: {
             encounterName: encounterName,
             roundNumber: roundNumber,
@@ -4203,6 +4299,12 @@ function exportEncounter() {
 }
 
 function triggerEncounterImport() {
+    const mayImport = confirm("Importiere nur Inhalte, die du rechtmäßig verwenden darfst. Importierte Texte und Bilder werden vom Projekt nicht geprüft oder lizenziert. Fortfahren?");
+
+    if (mayImport !== true) {
+        return;
+    }
+
     const fileInputElement = document.querySelector("#encounter-import-file");
 
     if (fileInputElement === null) {
@@ -4490,6 +4592,7 @@ function createImportedCreature(rawCreature, usedIds) {
         conditions: getSafeConditions(rawCreature.conditions),
         isDemoCard: rawCreature.isDemoCard === true || isKnownDemoCreatureData(rawCreature) === true,
         isInCombat: rawCreature.isInCombat === true,
+        isInitiativeActive: rawCreature.isInitiativeActive !== false,
         isSelected: rawCreature.isSelected === true
     };
 }
@@ -5350,6 +5453,18 @@ function restoreDetailScrollAfterRender(scrollTop, spellKeyToReveal = "") {
     });
 }
 
+function renderCardDetailPanelPreservingScroll(focusedCard) {
+    const detailScrollTop = captureActiveDetailScrollTop();
+    renderCardDetailPanel(focusedCard);
+    restoreDetailScrollAfterRender(detailScrollTop);
+}
+
+function renderCardsPreservingDetailScroll() {
+    const detailScrollTop = captureActiveDetailScrollTop();
+    renderCardsPreservingViewport();
+    restoreDetailScrollAfterRender(detailScrollTop);
+}
+
 function toggleSpellSlot(creatureId, spellLevel, slotIndex) {
     const detailScrollTop = captureActiveDetailScrollTop();
     const creature = findCreatureById(creatureId);
@@ -5963,9 +6078,9 @@ function saveForgeSpell(prefix, spellId) {
             : {};
     const castingTimeValue = castingTimeElement !== null ? castingTimeElement.value.trim() : "";
     const finalCastingTime = reactionElement !== null && reactionElement.checked === true && castingTimeValue === ""
-        ? "1 Reaction"
+        ? "1 Reaktion"
         : bonusElement !== null && bonusElement.checked === true && castingTimeValue === ""
-            ? "1 Bonus Action"
+            ? "1 Bonusaktion"
             : castingTimeValue;
     const nextSpell = createSpellObject({
         id: previousSpell.id || spellId,
@@ -7827,7 +7942,9 @@ function createPublicCardData(creature, isActive, isFocused) {
         hp: createPublicHpData(creature),
         conditions: conditionList.slice(),
         isActive: isActive,
-        isFocused: isFocused
+        isFocused: isFocused,
+        isInTurnOrder: creature.isInitiativeActive !== false,
+        isOutOfAction: isCreatureOutOfAction(creature)
     };
 }
 
@@ -8007,7 +8124,8 @@ function createDmHpBarHtml(creature) {
                 class="dm-resource-meter-fill dm-hp-meter-fill"
                 style="width: ${hpPercent}%;"
             ></div>
-            <span class="dm-resource-meter-label">HP ${creature.hp} / ${creature.maxHp}</span>
+            <span class="dm-resource-meter-label">${creature.hp <= 0 ? "0 HP · Initiative prüfen" : `HP ${creature.hp} / ${creature.maxHp}`}</span>
+            ${creature.hp <= 0 ? '<span class="dm-zero-hp-overlay" aria-hidden="true"></span>' : ""}
         </div>
     `;
 }
@@ -8530,12 +8648,13 @@ function createPublicStageCardHtml(publicCard, slotName) {
             </p>
 
             <article
-                class="public-stage-card ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode}"
+                class="public-stage-card ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
                 data-creature-id="${publicCard.id}"
                 data-public-stage-card-id="${publicCard.id}"
                 onclick="focusPublicCard(${publicCard.id})"
                 title="Diese Karte groß anzeigen"
             >
+                ${createOutOfActionStampHtml(publicCard)}
                 <div class="public-stage-card-inner">
                     <h3 class="public-stage-title">
                         ${publicCard.publicName}
@@ -8616,13 +8735,14 @@ function createPublicRibbonCardHtml(publicCard) {
 
     return `
         <article
-            class="public-ribbon-card ${activeTurnClass} ${selectedCardClass} ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode}"
+            class="public-ribbon-card ${activeTurnClass} ${selectedCardClass} ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
             data-creature-id="${publicCard.id}"
             data-public-ribbon-card-id="${publicCard.id}"
             onclick="focusPublicCard(${publicCard.id})"
             title="Diese Karte groß anzeigen"
             style="${publicCard.hp.health.style} --ribbon-index: ${ribbonIndex};"
         >
+            ${createOutOfActionStampHtml(publicCard)}
             <div class="public-ribbon-marker"></div>
 
             <div class="public-ribbon-image-crop">
@@ -8666,7 +8786,8 @@ function getPublicRibbonCardsForRender(publicCards, activeCard) {
 
 function createPublicTurnStatusHtml(handCards, activeCard) {
     const activeName = activeCard !== null ? activeCard.publicName || activeCard.name : "Niemand";
-    const turnText = activeCard !== null ? `${currentTurnIndex + 1} / ${handCards.length}` : "—";
+    const initiativeCards = getInitiativeCards(handCards);
+    const turnText = activeCard !== null ? `${currentTurnIndex + 1} / ${initiativeCards.length}` : "—";
     const roundText = activeCard !== null ? `${roundNumber}` : "—";
 
     return `
@@ -8707,8 +8828,17 @@ function createCardMenuHtml(creature) {
                     In den Fokus nehmen
                 </button>
         `;
+    const turnOrderButtonHtml = isOnHand
+        ? `
+                <button type="button" onclick="toggleCreatureTurnOrder(${creature.id})">
+                    ${creature.isInitiativeActive === false ? "Wieder in die Zugfolge aufnehmen" : "Aus der Zugfolge nehmen"}
+                </button>
+        `
+        : "";
     const movementButtonHtml = isOnHand
         ? `
+                ${turnOrderButtonHtml}
+
                 <button type="button" onclick="moveCardToDeck(${creature.id})">
                     Karte ins Deck verschieben
                 </button>
@@ -8918,6 +9048,7 @@ function openCardForgeDrawer() {
 
     closeFloatingDetailsExcept(null);
     drawerElement.classList.add("card-forge-drawer-open");
+    lockTabletPageScroll();
 }
 
 function closeCardForgeDrawer() {
@@ -8936,7 +9067,93 @@ function closeCardForgeDrawer() {
     activeForgeTraitEditor = null;
     activeForgeInventoryEditor = null;
     drawerElement.classList.remove("card-forge-drawer-open");
+    scheduleTabletPageScrollLockSync();
     return true;
+}
+
+let tabletConsoleUnreadCount = 0;
+let tabletOverlayScrollLockY = 0;
+let tabletOverlayScrollSyncFrame = 0;
+
+function hasOpenTabletOverlay() {
+    if (isExperimentalTabletLayout() === false) return false;
+
+    const actionDrawerElement = getDmActionDrawerElement();
+    const forgeDrawerElement = getCardForgeDrawerElement();
+
+    return document.body.classList.contains("tablet-console-open")
+        || (actionDrawerElement !== null && actionDrawerElement.classList.contains("dm-action-drawer-open"))
+        || (forgeDrawerElement !== null && forgeDrawerElement.classList.contains("card-forge-drawer-open"));
+}
+
+function lockTabletPageScroll() {
+    if (isExperimentalTabletLayout() === false || document.body.classList.contains("tablet-scroll-locked")) return;
+
+    tabletOverlayScrollLockY = window.scrollY;
+    document.body.classList.add("tablet-scroll-locked");
+    document.body.style.top = `-${tabletOverlayScrollLockY}px`;
+}
+
+function syncTabletPageScrollLock() {
+    tabletOverlayScrollSyncFrame = 0;
+
+    if (hasOpenTabletOverlay()) {
+        lockTabletPageScroll();
+        return;
+    }
+
+    if (document.body.classList.contains("tablet-scroll-locked") === false) return;
+
+    document.body.classList.remove("tablet-scroll-locked");
+    document.body.style.top = "";
+    window.scrollTo(0, tabletOverlayScrollLockY);
+}
+
+function scheduleTabletPageScrollLockSync() {
+    if (tabletOverlayScrollSyncFrame !== 0) cancelAnimationFrame(tabletOverlayScrollSyncFrame);
+    tabletOverlayScrollSyncFrame = requestAnimationFrame(syncTabletPageScrollLock);
+}
+
+function isExperimentalTabletLayout() {
+    return window.matchMedia("(min-width: 761px) and (max-width: 1112px) and (min-height: 600px) and (orientation: landscape)").matches;
+}
+
+function updateTabletConsoleUnreadBadge() {
+    const badgeElement = document.querySelector("#tablet-chat-unread-badge");
+    if (badgeElement === null) return;
+    badgeElement.textContent = String(tabletConsoleUnreadCount);
+    badgeElement.hidden = tabletConsoleUnreadCount < 1;
+}
+
+function setTabletConsoleUnreadCount(count) {
+    tabletConsoleUnreadCount = Math.max(0, Number.isFinite(Number(count)) ? Math.floor(Number(count)) : 0);
+    updateTabletConsoleUnreadBadge();
+}
+
+function incrementTabletConsoleUnreadCount(amount = 1) {
+    if (document.body.classList.contains("tablet-console-open")) return;
+    setTabletConsoleUnreadCount(tabletConsoleUnreadCount + Math.max(1, Number(amount) || 1));
+}
+
+function openTabletConsole() {
+    if (isExperimentalTabletLayout() === false) return;
+    closeFloatingDetailsExcept(null);
+    closeDmActionDrawer();
+    closeCardForgeDrawer();
+    document.body.classList.add("tablet-console-open");
+    lockTabletPageScroll();
+    const buttonElement = document.querySelector("#tablet-console-open-button");
+    if (buttonElement !== null) buttonElement.setAttribute("aria-expanded", "true");
+    setTabletConsoleUnreadCount(0);
+    scrollDmChatToLatest();
+}
+
+function closeTabletConsole() {
+    const wasOpen = document.body.classList.contains("tablet-console-open");
+    document.body.classList.remove("tablet-console-open");
+    const buttonElement = document.querySelector("#tablet-console-open-button");
+    if (buttonElement !== null) buttonElement.setAttribute("aria-expanded", "false");
+    if (wasOpen) scheduleTabletPageScrollLockSync();
 }
 
 function getDmActionDrawerElement() {
@@ -8953,6 +9170,7 @@ function openDmActionDrawer(panelName = "toolbox") {
     setAtelierPanel(panelName);
     closeAtelierHelp();
     drawerElement.classList.add("dm-action-drawer-open");
+    lockTabletPageScroll();
 }
 
 function closeDmActionDrawer() {
@@ -8963,6 +9181,7 @@ function closeDmActionDrawer() {
     }
 
     drawerElement.classList.remove("dm-action-drawer-open");
+    scheduleTabletPageScrollLockSync();
 }
 
 function setAtelierPanel(panelName) {
@@ -9023,7 +9242,8 @@ function updateToolkitHeaderStatus() {
     const selectedTargets = getSelectedHandCards();
     const activeText = activeCard !== null ? `${activeCard.publicName || activeCard.name} aktiv` : "Keine Handkarte aktiv";
     const targetText = selectedTargets.length === 1 ? "1 Ziel" : `${selectedTargets.length} Ziele`;
-    const turnText = handCards.length > 0 ? `Turn ${currentTurnIndex + 1} von ${handCards.length}` : "kein Encounter";
+    const initiativeCards = getInitiativeCards(handCards);
+    const turnText = initiativeCards.length > 0 ? `Turn ${currentTurnIndex + 1} von ${initiativeCards.length}` : "keine aktive Zugfolge";
 
     statusElement.textContent = `${activeText} · ${targetText} · ${turnText}`;
 }
@@ -9858,9 +10078,9 @@ function createTurnActionButtonsHtml() {
         : `<button class="round-control-button start-encounter-button" onclick="startEncounter()"${handCards.length > 0 ? "" : " disabled"} title="Encounter starten und den öffentlichen Spieltisch freigeben" type="button">Starten</button>`;
 
     return `
-        <button class="round-control-button" onclick="previousTurn()"${turnDisabledAttribute} type="button">Vorheriger Zug</button>
-        <button class="round-control-button" onclick="nextTurn()"${turnDisabledAttribute} type="button">Nächster Zug</button>
-        <button class="round-control-button" onclick="resetCombatTurnCounter()" type="button">Zähler reset</button>
+        <button class="round-control-button" onclick="previousTurn()"${turnDisabledAttribute} type="button" aria-label="Vorheriger Zug"><span class="round-control-label-long">Vorheriger Zug</span><span class="round-control-label-tablet" aria-hidden="true">‹ Zug</span></button>
+        <button class="round-control-button" onclick="nextTurn()"${turnDisabledAttribute} type="button" aria-label="Nächster Zug"><span class="round-control-label-long">Nächster Zug</span><span class="round-control-label-tablet" aria-hidden="true">Zug ›</span></button>
+        <button class="round-control-button" onclick="resetCombatTurnCounter()" type="button"><span class="round-control-label-long">Zähler reset</span><span class="round-control-label-tablet" aria-hidden="true">Reset</span></button>
         ${stateActionButtonHtml}
     `;
 }
@@ -9905,7 +10125,7 @@ function renderTurnInfo(handCards) {
     turnInfoElement.innerHTML = `
         <div class="active-round-summary-card">
             <strong>Runde ${roundNumber}</strong>
-            <span>Turn ${currentTurnIndex + 1} von ${handCards.length}</span>
+            <span>Turn ${currentTurnIndex + 1} von ${getInitiativeCards(handCards).length}</span>
         </div>
 
         <button
@@ -10480,7 +10700,8 @@ function createFocusedCreatureCardHtml(creature, activeCard) {
         : "";
 
     return `
-        <article class="active-hand-focus-card ${isActive ? "active" : ""} ${creature.isSelected ? "selected-target-card" : ""}">
+        <article class="active-hand-focus-card ${isActive ? "active" : ""} ${creature.isSelected ? "selected-target-card" : ""} ${isCreatureOutOfAction(creature) ? "is-out-of-action" : ""}">
+            ${createOutOfActionStampHtml(creature)}
             <div class="active-hand-focus-card-inner">
                 <header class="active-hand-focus-header">
                     <div class="active-hand-focus-title">
@@ -10524,7 +10745,7 @@ function createFocusedCreatureCardHtml(creature, activeCard) {
                     </div>
                 </div>
 
-                <div class="active-hand-focus-section">
+                <div class="active-hand-focus-section active-hand-focus-passive-section">
                     <h4 class="active-hand-focus-section-title">Passive Werte</h4>
                     <div class="active-hand-focus-stat-grid active-hand-focus-stat-grid-three">
                         <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Perception</span><strong class="active-hand-focus-stat-value">${creature.passivePerception}</strong></p>
@@ -11126,17 +11347,18 @@ function normalizeInventoryImagePath(value, category = "potion") {
         return category === "scroll" ? "assets/items/scroll_custom.jpg" : "assets/items/potion_custom.jpg";
     }
 
-    const svgToJpgMap = {
-        "assets/items/potion_healing.svg": "assets/items/potion_healing.jpg",
-        "assets/items/potion_greater_healing.svg": "assets/items/potion_greater_healing.jpg",
-        "assets/items/potion_superior_healing.svg": "assets/items/potion_superior_healing.jpg",
-        "assets/items/potion_supreme_healing.svg": "assets/items/potion_supreme_healing.jpg",
-        "assets/items/potion_custom.svg": "assets/items/potion_custom.jpg",
-        "assets/items/scroll_custom.svg": "assets/items/scroll_custom.jpg",
-        "assets/items/coin_purse.svg": "assets/items/coin_purse.jpg"
-    };
+    const normalizedSource = source.replace(/\.(?:svg|png|jpeg)$/i, ".jpg");
+    const knownLegacyItemPaths = new Set([
+        "assets/items/potion_healing.jpg",
+        "assets/items/potion_greater_healing.jpg",
+        "assets/items/potion_superior_healing.jpg",
+        "assets/items/potion_supreme_healing.jpg",
+        "assets/items/potion_custom.jpg",
+        "assets/items/scroll_custom.jpg",
+        "assets/items/coin_purse.jpg"
+    ]);
 
-    return svgToJpgMap[source] || source;
+    return knownLegacyItemPaths.has(normalizedSource) ? normalizedSource : source;
 }
 
 function createInventoryCardFromTemplate(templateName) {
@@ -11186,8 +11408,8 @@ function getInventoryItemSuggestion(name) {
         { test: /rapier/, category: "weapon", description: "Finesse-Nahkampfwaffe. 1d8 piercing; ideal für Sneak Attack und DEX-basierte Angriffe." },
         { test: /dagger/, category: "weapon", description: "Leichte Finesse-Waffe. 1d4 piercing, thrown 20/60 ft." },
         { test: /shortbow/, category: "weapon", description: "Fernkampfwaffe. 1d6 piercing, range 80/320 ft.; nutzt DEX." },
-        { test: /longsword/, category: "weapon", description: "Martial melee weapon. 1d8 slashing, versatile 1d10; bei Liora über Hex Warrior relevant." },
-        { test: /quarterstaff/, category: "weapon", description: "Simple melee weapon. 1d6 bludgeoning, versatile 1d8; kann als arkaner Stab beschrieben werden." },
+        { test: /longsword/, category: "weapon", description: "Kriegsnahkampfwaffe: 1W8 Hiebschaden, vielseitig 1W10; bei Liora für die Schattenklingen-Bindung relevant." },
+        { test: /quarterstaff/, category: "weapon", description: "Einfache Nahkampfwaffe: 1W6 Wuchtschaden, vielseitig 1W8; kann als arkaner Stab beschrieben werden." },
         { test: /arrows?/, category: "ammunition", description: "Munition für den Shortbow." },
         { test: /caltrops/, category: "consumable", description: "Ausstreubare Metallspitzen. Können Boden gefährlich machen und Bewegung verlangsamen." },
         { test: /^oil$/, category: "consumable", description: "Ölflasche. Kann als Brennstoff, Brandbeschleuniger oder improvisierter Verbrauchsgegenstand genutzt werden." },
@@ -11196,7 +11418,7 @@ function getInventoryItemSuggestion(name) {
         { test: /disguise kit/, category: "tool", description: "Verkleidungsset für Maskierungen, Bühnenrollen und Täuschungsmanöver." },
         { test: /forgery kit/, category: "tool", description: "Fälscherwerkzeug für Dokumente, Siegel und Schriftproben." },
         { test: /flute/, category: "tool", description: "Musikinstrument; kann auch als sozialer oder atmosphärischer Gegenstand genutzt werden." },
-        { test: /spellbook/, category: "magicItem", description: "Zauberbuch. Enthält Suicas bekannte Wizard-Spells und ist zentral für Vorbereitung, Ritual Casting und Awakened Spellbook." },
+        { test: /spellbook/, category: "magicItem", description: "Zauberbuch. Enthält Suicas bekannte Wizard-Spells und ist zentral für Vorbereitung, Ritual Casting und Erwachtes Zauberbuch." },
         { test: /crystal/, category: "equipment", description: "Arkaner Fokus oder wertvoller Kristall, je nach Szene nutzbar." },
         { test: /ink|parchment|book|pen/, category: "equipment", description: "Schreib- und Studienmaterial für Notizen, Forschung, Zauberformeln oder Dokumente." },
         { test: /rope/, category: "equipment", description: "Hempen rope, 50 ft.; Standardausrüstung für Klettern, Sichern und Improvisation." },
@@ -11309,19 +11531,19 @@ function createInventoryDataFromLegacyText(text) {
         const lower = entry.toLowerCase();
         const parsed = getInventoryEntryCountAndName(entry);
 
-        if (lower.includes("potion of supreme healing") || (lower.includes("potion of healing") && lower.includes("supreme"))) {
+        if (lower.includes("meisterlicher heiltrank") || lower.includes("potion of supreme healing") || (lower.includes("potion of healing") && lower.includes("supreme"))) {
             for (let index = 0; index < parsed.count; index = index + 1) {
                 cards.push(createInventoryCardFromTemplate("supremeHealing"));
             }
-        } else if (lower.includes("potion of superior healing") || (lower.includes("potion of healing") && lower.includes("superior"))) {
+        } else if (lower.includes("großer heiltrank") || lower.includes("grosser heiltrank") || lower.includes("potion of superior healing") || (lower.includes("potion of healing") && lower.includes("superior"))) {
             for (let index = 0; index < parsed.count; index = index + 1) {
                 cards.push(createInventoryCardFromTemplate("superiorHealing"));
             }
-        } else if (lower.includes("potion of greater healing") || (lower.includes("potion of healing") && lower.includes("greater"))) {
+        } else if (lower.includes("starker heiltrank") || lower.includes("potion of greater healing") || (lower.includes("potion of healing") && lower.includes("greater"))) {
             for (let index = 0; index < parsed.count; index = index + 1) {
                 cards.push(createInventoryCardFromTemplate("greaterHealing"));
             }
-        } else if (lower.includes("potion of healing")) {
+        } else if (lower.includes("heiltrank") || lower.includes("potion of healing")) {
             for (let index = 0; index < parsed.count; index = index + 1) {
                 cards.push(createInventoryCardFromTemplate("healing"));
             }
@@ -11425,7 +11647,7 @@ function createActionFromInventoryItem(item) {
         id: `item-${item.id}`,
         name: item.name,
         type: item.actionType,
-        range: item.category === "potion" ? "Touch / Self" : "",
+        range: item.category === "potion" ? "Touch / Selbst" : "",
         damage: item.effect,
         description: item.description,
         sourceType: "item",
@@ -11507,7 +11729,7 @@ function addInventoryTemplateToCreature(creatureId, templateName) {
     syncCreatureInventoryData(creature);
     addCombatLogMessage(`${creature.publicName || creature.name}: ${inventoryCardTemplates[templateName]?.name || "Item"} ins Inventar gelegt.`);
     saveAndBroadcastAppState();
-    renderCards();
+    renderCardsPreservingDetailScroll();
 }
 
 function updateInventoryCurrency(creatureId) {
@@ -11533,7 +11755,7 @@ function updateInventoryCurrency(creatureId) {
     }
 
     saveAndBroadcastAppState();
-    renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
+    renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
 function openDetailInventoryCardEditor(creatureId, itemId = "", templateName = "customPotion") {
@@ -11541,13 +11763,13 @@ function openDetailInventoryCardEditor(creatureId, itemId = "", templateName = "
     if (creature === null) { return; }
     activeDetailInventoryListEditor = null;
     activeDetailInventoryCardEditor = { creatureId: creatureId, itemId: itemId, templateName: templateName };
-    renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
+    renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
 function cancelDetailInventoryEditor() {
     activeDetailInventoryCardEditor = null;
     activeDetailInventoryListEditor = null;
-    renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
+    renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
 function getDetailCardEditorItem(creature, editor) {
@@ -11598,7 +11820,7 @@ function saveDetailInventoryCardEditor(creatureId, openForgeAfterSave = false) {
         return;
     }
 
-    renderCards();
+    renderCardsPreservingDetailScroll();
 }
 
 function removeInventoryCardFromDetails(creatureId, itemId, shouldLog = false) {
@@ -11611,7 +11833,7 @@ function removeInventoryCardFromDetails(creatureId, itemId, shouldLog = false) {
         addCombatLogMessage(`${creature.publicName || creature.name}: ${item.name} aus dem Inventar entfernt.`);
     }
     saveAndBroadcastAppState();
-    renderCards();
+    renderCardsPreservingDetailScroll();
 }
 
 function openInventoryCardInForge(creatureId, itemId) {
@@ -11626,7 +11848,7 @@ function openDetailInventoryListEditor(creatureId, itemId = "") {
     if (creature === null) { return; }
     activeDetailInventoryCardEditor = null;
     activeDetailInventoryListEditor = { creatureId: creatureId, itemId: itemId };
-    renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
+    renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
 function getDetailListEditorItem(creature, editor) {
@@ -11634,7 +11856,7 @@ function getDetailListEditorItem(creature, editor) {
     if (editor.itemId !== "") {
         return getInventoryData(creature).list.find(function(item) { return item.id === editor.itemId; }) || null;
     }
-    return createInventoryListItem({ name: "Neuer Gegenstand", category: "equipment", quantity: 1, description: "" });
+    return createInventoryListItem({ name: "", category: "equipment", quantity: 1, description: "" });
 }
 
 function saveDetailInventoryListEditor(creatureId) {
@@ -11662,7 +11884,7 @@ function saveDetailInventoryListEditor(creatureId) {
     syncCreatureInventoryData(creature);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
-    renderCards();
+    renderCardsPreservingDetailScroll();
 }
 
 function removeInventoryListItem(creatureId, itemId) {
@@ -11673,7 +11895,7 @@ function removeInventoryListItem(creatureId, itemId) {
     syncCreatureInventoryData(creature);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
-    renderCards();
+    renderCardsPreservingDetailScroll();
 }
 
 function createInventoryAddMenuHtml(creatureId, context = "details", prefix = "") {
@@ -11685,10 +11907,10 @@ function createInventoryAddMenuHtml(creatureId, context = "details", prefix = ""
         <details class="section-menu inventory-add-menu">
             <summary class="section-menu-summary">Itemkarte hinzufügen</summary>
             <div class="section-menu-panel inventory-add-menu-panel">
-                <button type="button" onclick="${actionPrefix} 'healing')">Potion of Healing</button>
-                <button type="button" onclick="${actionPrefix} 'greaterHealing')">Potion of Greater Healing</button>
-                <button type="button" onclick="${actionPrefix} 'superiorHealing')">Potion of Superior Healing</button>
-                <button type="button" onclick="${actionPrefix} 'supremeHealing')">Potion of Supreme Healing</button>
+                <button type="button" onclick="${actionPrefix} 'healing')">Heiltrank</button>
+                <button type="button" onclick="${actionPrefix} 'greaterHealing')">Starker Heiltrank</button>
+                <button type="button" onclick="${actionPrefix} 'superiorHealing')">Großer Heiltrank</button>
+                <button type="button" onclick="${actionPrefix} 'supremeHealing')">Meisterlicher Heiltrank</button>
                 <button type="button" onclick="${customPotionAction}">Eigene Potion …</button>
                 <button type="button" onclick="${customScrollAction}">Eigene Scroll …</button>
             </div>
@@ -11753,11 +11975,11 @@ function createDetailInventoryCardEditorHtml(creature) {
                 <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-item-name-${creature.id}" type="text" value="${escapeHtml(item.name)}"></label>
                 <label class="form-field"><span>Kategorie</span><select id="detail-item-category-${creature.id}">${categoryOptions}</select></label>
                 <label class="form-field"><span>Aktionstyp</span><select id="detail-item-action-type-${creature.id}">${typeOptions}</select></label>
-                <label class="form-field"><span>Effekt/Kurztext</span><input id="detail-item-effect-${creature.id}" type="text" value="${escapeHtml(item.effect)}"></label>
+                <label class="form-field"><span>Effekt/Kurztext</span><input id="detail-item-effect-${creature.id}" type="text" placeholder="Kurzer Effekt oder Nutzen" value="${escapeHtml(item.effect)}"></label>
                 <label class="form-field"><span>Heilformel</span><input id="detail-item-healing-${creature.id}" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
                 <label class="form-field forge-spell-editor-wide"><span>Bildpfad</span><input id="detail-item-image-${creature.id}" type="text" value="${escapeHtml(item.image)}"></label>
                 <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="detail-item-show-action-${creature.id}" type="checkbox" ${item.showAsAction === true ? "checked" : ""}><span>Im Aktionen-Tab anzeigen</span></label>
-                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${creature.id}" rows="4">${escapeHtml(item.description)}</textarea></label>
+                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${creature.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
                 <button type="button" onclick="saveDetailInventoryCardEditor(${creature.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
@@ -11813,10 +12035,10 @@ function createDetailInventoryListEditorHtml(creature) {
         <section class="inventory-inline-editor inventory-list-inline-editor">
             <div class="forge-spell-editor-header"><h5>${isNew ? "Gegenstand hinzufügen" : "Gegenstand bearbeiten"}</h5><span>${escapeHtml(item.name)}</span></div>
             <div class="forge-spell-editor-grid">
-                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-list-name-${creature.id}" type="text" value="${escapeHtml(item.name)}"></label>
+                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-list-name-${creature.id}" type="text" placeholder="Name des Gegenstands" value="${escapeHtml(item.name)}"></label>
                 <label class="form-field"><span>Kategorie</span><select id="detail-list-category-${creature.id}">${categoryOptions}</select></label>
                 <label class="form-field"><span>Menge</span><input id="detail-list-quantity-${creature.id}" type="number" min="1" value="${item.quantity}"></label>
-                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${creature.id}" rows="4">${escapeHtml(item.description)}</textarea></label>
+                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${creature.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
                 <button type="button" onclick="saveDetailInventoryListEditor(${creature.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
@@ -11828,7 +12050,7 @@ function createDetailInventoryListEditorHtml(creature) {
 }
 
 
-function getInventoryStageStartIndex(creatureId, cardCount, visibleCount = 3) {
+function getInventoryStageStartIndex(creatureId, cardCount, visibleCount = 2) {
     const maxStart = Math.max(0, cardCount - visibleCount);
     const currentStart = Number(inventoryStageStartIndexes[creatureId] || 0);
     const nextStart = Math.max(0, Math.min(maxStart, currentStart));
@@ -11840,7 +12062,7 @@ function shiftInventoryStage(creatureId, direction) {
     const creature = findCreatureById(creatureId);
     if (creature === null) { return; }
     const cards = getInventoryData(creature).cards;
-    const visibleCount = 3;
+    const visibleCount = 2;
     const currentStart = getInventoryStageStartIndex(creatureId, cards.length, visibleCount);
     const maxStart = Math.max(0, cards.length - visibleCount);
     inventoryStageStartIndexes[creatureId] = Math.max(0, Math.min(maxStart, currentStart + direction));
@@ -11860,7 +12082,7 @@ function createInventoryGhostCardHtml(item, side) {
 
 function createInventoryTabHtml(creature) {
     const inventory = getInventoryData(creature);
-    const visibleInventoryCardCount = 3;
+    const visibleInventoryCardCount = 2;
     const stageStartIndex = getInventoryStageStartIndex(creature.id, inventory.cards.length, visibleInventoryCardCount);
     const visibleCards = inventory.cards.slice(stageStartIndex, stageStartIndex + visibleInventoryCardCount);
     const leftGhostItem = inventory.cards[stageStartIndex - 1] || (inventory.cards.length > visibleInventoryCardCount ? inventory.cards[stageStartIndex] : null);
@@ -12110,11 +12332,11 @@ function createForgeInventoryCardRowHtml(prefix, item) {
                     <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="${prefix}-forge-item-name" type="text" value="${escapeHtml(item.name)}"></label>
                     <label class="form-field"><span>Kategorie</span><select id="${prefix}-forge-item-category">${categoryOptions}</select></label>
                     <label class="form-field"><span>Aktionstyp</span><select id="${prefix}-forge-item-action-type">${typeOptions}</select></label>
-                    <label class="form-field"><span>Effekt/Kurztext</span><input id="${prefix}-forge-item-effect" type="text" value="${escapeHtml(item.effect)}"></label>
+                    <label class="form-field"><span>Effekt/Kurztext</span><input id="${prefix}-forge-item-effect" type="text" placeholder="Kurzer Effekt oder Nutzen" value="${escapeHtml(item.effect)}"></label>
                     <label class="form-field"><span>Heilformel</span><input id="${prefix}-forge-item-healing" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
                     <label class="form-field forge-spell-editor-wide"><span>Bildpfad</span><input id="${prefix}-forge-item-image" type="text" value="${escapeHtml(item.image)}"></label>
                     <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="${prefix}-forge-item-show-action" type="checkbox" ${item.showAsAction === true ? "checked" : ""}><span>Im Aktionen-Tab anzeigen</span></label>
-                    <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-item-description" rows="4">${escapeHtml(item.description)}</textarea></label>
+                    <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-item-description" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
                 </div>
                 <div class="forge-spell-editor-actions forge-inventory-editor-actions">
                     <button type="button" onclick="saveForgeInventoryCard('${prefix}', '${item.id}')">Speichern</button>
@@ -12270,6 +12492,9 @@ function createDetailTabContentHtml(creature) {
                     <div class="active-hand-stat-grid card-profile-stat-grid card-profile-stat-grid-two">
                         ${createDetailStatCardHtml("Bewegung", creature.speed, "active-hand-stat-card card-profile-stat-card")}
                         ${createDetailStatCardHtml("Sinne", creature.senses, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Passive Perception", creature.passivePerception, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
+                        ${createDetailStatCardHtml("Passive Insight", creature.passiveInsight, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
+                        ${createDetailStatCardHtml("Passive Investigation", creature.passiveInvestigation, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
                     </div>
                 </section>
 
@@ -12327,9 +12552,10 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
 
     return `
         <article
-            class="active-hand-mini-card ${isActive ? "active-turn-card" : ""} ${isFocused ? "focused-hand-card" : ""} ${isSelected ? "selected-target-card" : ""}"
+            class="active-hand-mini-card ${isActive ? "active-turn-card" : ""} ${isFocused ? "focused-hand-card" : ""} ${isSelected ? "selected-target-card" : ""} ${isCreatureOutOfAction(card) ? "is-out-of-action" : ""}"
             title="Handkarte"
         >
+            ${createOutOfActionStampHtml(card)}
             <button
                 class="active-hand-mini-main"
                 onclick="setFocusedCreature(${card.id})"
@@ -13004,6 +13230,72 @@ function setupArcaneSelects() {
     }
 }
 
+
+// ============================================================
+// Komfort für leere Texteingaben
+// ============================================================
+
+const instructionalTextFieldDefaults = new Map([
+    ["Kurze Beschreibung nach Bedarf ergänzen.", "Kurze Beschreibung nach Bedarf ergänzen"],
+    ["Kurze Beschreibung nach Bedarf ergänzen", "Kurze Beschreibung nach Bedarf ergänzen"],
+    ["Name des Gegenstands", "Name des Gegenstands"],
+    ["Neuer Gegenstand", "Name des Gegenstands"],
+    ["Neue Itemkarte", "Name der Itemkarte"],
+    ["Eigene Itemkarte", "Name der Itemkarte"],
+    ["Neuer Spell", "Name des Spells"],
+    ["Neue Aktion", "Name der Aktion"],
+    ["Neuer Trait", "Name des Traits"],
+    ["Eigene Potion", "Name des Tranks"],
+    ["Eigene Scroll", "Name der Schriftrolle"],
+    ["Eigener Itemeffekt", "Kurzer Effekt oder Nutzen"],
+    ["Eigener Trankeffekt", "Kurzer Effekt oder Nutzen"],
+    ["Eigener Zaubereffekt", "Kurzer Effekt oder Nutzen"],
+    ["Beschreibe hier den Effekt des Tranks.", "Beschreibung des Tranks"],
+    ["Beschreibe hier den Zauber oder Schriftrolleneffekt.", "Beschreibung der Schriftrolle"],
+    ["Eigene Itemkarte. Effekt im Spiel festlegen oder in der Kartenschmiede verfeinern.", "Beschreibung nach Bedarf ergänzen"]
+]);
+
+function isEditableTextControl(element) {
+    if (!(element instanceof HTMLInputElement) && !(element instanceof HTMLTextAreaElement)) {
+        return false;
+    }
+
+    if (element.disabled === true || element.readOnly === true) {
+        return false;
+    }
+
+    if (element instanceof HTMLTextAreaElement) {
+        return true;
+    }
+
+    return ["text", "search", "url", "email", "tel"].includes(element.type);
+}
+
+function clearInstructionalTextOnFocus(event) {
+    const element = event.target;
+
+    if (isEditableTextControl(element) === false) {
+        return;
+    }
+
+    const currentValue = element.value.trim();
+    const placeholder = instructionalTextFieldDefaults.get(currentValue);
+
+    if (placeholder === undefined) {
+        return;
+    }
+
+    if (element.placeholder.trim() === "") {
+        element.placeholder = placeholder;
+    }
+
+    element.value = "";
+}
+
+function setupInstructionalTextFieldComfort() {
+    document.addEventListener("focusin", clearInstructionalTextOnFocus);
+}
+
 // ============================================================
 // 17. Start der App
 // ============================================================
@@ -13031,6 +13323,27 @@ setupPlayerViewPolling();
 setupPublicPreviewNavigation();
 setupClickAwayBehavior();
 setupArcaneSelects();
+setupInstructionalTextFieldComfort();
 renderCards();
 enhanceArcaneSelects();
 
+
+
+// Experimenteller Tablet-Modus: sichere Rückkehr aus Drawern und Erhalt der Seitenposition.
+window.addEventListener("resize", function() {
+    if (isExperimentalTabletLayout() === false) closeTabletConsole();
+});
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && document.body.classList.contains("tablet-console-open")) {
+        closeTabletConsole();
+    }
+});
+
+document.addEventListener("click", function(event) {
+    if (document.body.classList.contains("tablet-console-open") === false) return;
+    const consoleElement = document.querySelector("#tablet-dm-console");
+    if (consoleElement !== null && event.target instanceof Element && event.target.matches(".dm-console-panel::before") === false) return;
+});
+
+updateTabletConsoleUnreadBadge();
