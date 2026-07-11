@@ -1,6 +1,6 @@
 # Miriel’s Deck of Encounters
 
-v0.23.5 by kuro
+v0.24.3 by kuro
 
 Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
@@ -19,9 +19,9 @@ The current release is a free, ad-free, non-commercial hobby project. It has no 
 
 Original project code, interface elements, editorial text, characters, and project-created assets are proprietary unless expressly stated otherwise. All rights are reserved. A public GitHub repository permits viewing and forking through GitHub as required by GitHub’s Terms of Service, but does not grant a broader open-source license.
 
-The project includes material from the **System Reference Document 5.1** by Wizards of the Coast LLC under the **Creative Commons Attribution 4.0 International License**. The complete attribution and modification notice are maintained centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`; the interface does not repeat the notice beside every spell.
+The project includes CC-BY-4.0 material from SRD 5.1 and SRD 5.2.1. The complete attribution and modification notices are maintained centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`.
 
-The project does not use the Wizards Fan Content Policy. It is independent and is not supported, reviewed, or published by Wizards of the Coast.
+The project is independent and not official.
 
 ## Current status
 
@@ -390,9 +390,9 @@ A future server-backed version should send only public data to player clients. S
 
 The bundled demo cards have been revised to reduce reliance on names associated with non-SRD publications. Several species, class features, spells, backgrounds, magic items, and healing-potion templates now use project-created names. The long backstories for Miriel, Suica, and Liora were removed from the bundled demo data.
 
-Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, **Fluch der Schattenklinge**, **Gunst des Schicksals**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
+Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.23.5 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.24.3 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
 The bundled AI-generated and project-created images are documented file by file in `ASSET_PROVENANCE.md`. According to the documented project review, they use no third-party source images, official logos, or intentionally reproduced official artwork.
 
@@ -463,7 +463,7 @@ All bundled card images, header art, backgrounds, and item images were generated
 
 The public, controlling legal notice is `legal.html`. In summary:
 
-- Miriel’s Deck of Encounters is an independent project and is not supported, reviewed, or published by Wizards of the Coast.
+- Miriel’s Deck of Encounters is an independent and unofficial project.
 - The project uses and adapts material from the **System Reference Document 5.1** under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
 - SRD-derived material may have been translated, shortened, renamed, or editorially rewritten.
 - Original source code, UI, original characters, original editorial text, and project-created assets remain proprietary unless a separate license says otherwise.
@@ -479,6 +479,37 @@ Copyright © 2026 kuro. All rights reserved for original project material, subje
 
 ## SRD demo detail policy
 
-Version 0.23.5 adds compact German card details for demo spells that were matched to the German SRD 5.1. Existing unmatched or project-created entries were not removed. Items that still need classification are listed in `CONTENT_REVIEW_SRD_5.1.md`.
+Version 0.24.3 includes separate, curated German libraries for SRD 5.1 and SRD 5.2.1. Existing unmatched or project-created entries were not removed. Unmatched or project-created entries remain unassigned to an SRD version unless they are explicitly audited.
 
 The legally required SRD attribution is provided centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`. It is intentionally not repeated next to every spell in the application.
+
+
+## SRD-5.1 spell library
+
+Version 0.24.3 adds a curated SRD-5.1 spell picker to both the new-card and edit-card sections of the Kartenschmiede.
+
+- DMs can search and filter the library by spell level.
+- Selecting a spell copies its structured fields into the current card.
+- The copied spell remains fully editable.
+- The existing manual spell editor remains available through “Eigener Spell”.
+- The library is intentionally limited to the project’s currently audited SRD subset and is not presented as a complete official spell database.
+- Attribution remains centralized in `legal.html` and `THIRD_PARTY_NOTICES.md`.
+
+
+## Neutraler Umgang mit offenen Inhaltsprüfungen
+
+Projektinterne Prüflisten dokumentieren ausschließlich offene Klassifizierungsfragen. Sie erklären keine gebündelten Platzhalter, Namen oder Entwürfe zu einem Rechts- oder Lizenzverstoß. Leere oder nur knapp beschriebene eigene Einträge bleiben Projektentwürfe, bis sie weiter ausgearbeitet oder klassifiziert werden.
+
+
+
+
+## Dual SRD libraries
+
+The Kartenschmiede offers two separate source selections:
+
+- **SRD 5.1 · 2014 rules**
+- **SRD 5.2.1 · 2024 rules**
+
+The selected source is used only as a template library. Copied spells remain editable. The app does not automatically convert a card or encounter from one rules version to the other.
+
+Version 0.24.3 moves Verwünschung/Hex to the SRD 5.2.1 library and restores the verified SRD 5.2.1 traits **Pakt der Klinge** and **Zurückdrängender Strahl** in the demo. Other previously removed entries were not restored because they were not verified as matching the current demo level and SRD 5.2.1 wording.

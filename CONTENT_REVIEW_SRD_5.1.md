@@ -1,10 +1,10 @@
 # Inhaltsprüfung – SRD 5.1
 
-Stand: 11. Juli 2026 · App-Version 0.23.5
+Stand: 11. Juli 2026 · App-Version 0.24.2
 
-Diese Liste ist eine redaktionelle Prüfhilfe und keine rechtliche Freigabe. In Version 0.23.5 wurde kein bestehender Demo-Inhalt entfernt.
+Diese Liste ist eine redaktionelle Prüfhilfe und keine rechtliche Freigabe. In Version 0.24.2 wurde kein bestehender Demo-Inhalt entfernt.
 
-## In 0.23.5 automatisch mit SRD-basierten Kartendetails ergänzt
+## In 0.24.2 automatisch mit SRD-basierten Kartendetails ergänzt
 
 - Minor Illusion
 - Mage Hand
@@ -43,7 +43,7 @@ Diese Liste ist eine redaktionelle Prüfhilfe und keine rechtliche Freigabe. In 
 
 Die Beschreibungstexte sind kompakte redaktionelle Zusammenfassungen auf Grundlage des deutschen SRD 5.1. Die Quellenangabe erfolgt zentral und wird nicht pro Eintrag in der Oberfläche angezeigt.
 
-## In 0.23.5 zusätzlich mit SRD-basierten Details ergänzt
+## In 0.24.2 zusätzlich mit SRD-basierten Details ergänzt
 
 ### Aktionen
 - Rapier
@@ -106,19 +106,14 @@ Besonders zu prüfen sind Inhalte, deren Funktion stark an bekannte nicht-SRD-Kl
 
 - Arkane Kartenmeisterin
 - Arkane Schreibfeder
-- Erwachtes Zauberbuch
 - Schlangenmagie
-- Fluch der Schattenklinge
-- Gunst des Schicksals
 - Sternenbrand
 - Arkane Reserve
-- Schattenklingen-Bindung
-- Zurückstoßender Strahl
 - Trugbildmantel
 - Nachtsichtgläser
-- Billiger Trank gegen Shrieker-Sporen
+- Trank gegen Kreischer-Sporen
 
-Auch hier wurde in 0.23.5 nichts entfernt. Diese Einträge sollten einzeln als SRD-basiert, vollständig original oder noch zu überarbeiten klassifiziert werden.
+Auch hier wurde in 0.24.2 nichts entfernt. Diese Einträge sollten einzeln als SRD-basiert, vollständig original oder noch zu überarbeiten klassifiziert werden.
 
 ## Redaktionshinweise
 
@@ -134,17 +129,41 @@ Die folgenden Einträge bleiben unverändert, weil sie projektgeschrieben, umben
 
 - Arkane Fingerfertigkeit
 - Arkane Schreibfeder
-- Erwachtes Zauberbuch: Ritualfokus
 - Gelehrte
 - Heilende Berührung
-- Fluch der Schattenklinge
-- Gunst des Schicksals
 - Sternenbrand
 - Arkane Reserve
 - Unbeugsame Konzentration
 - Gefechtsmagierin
-- Schattenklingen-Bindung
-- Zurückstoßender Strahl
 - sämtliche individuellen Monster- und NPC-Aktionen der Demo
 
 Diese Inhalte wurden nicht entfernt. Vor einer Veröffentlichung sollten sie als vollständig original, SRD-basiert mit abweichender Benennung oder noch zu überarbeiten dokumentiert werden.
+
+
+## Bibliotheksumfang in Version 0.24.2
+
+Die Kartenschmiede enthält zunächst eine kuratierte Auswahl der bereits geprüften SRD-Zauber. Sie ist noch keine vollständige Übernahme sämtlicher Zauber des SRD 5.1. Neue Einträge sollen erst nach Abgleich von Name, Grad, Schule und Regeltext ergänzt werden.
+
+
+## Einordnung leerer oder nur benannter Demo-Einträge
+
+Einzelne eigene Demozauber bestehen derzeit nur aus einem Namen oder wenigen allgemeinen Regelparametern, ohne ausgearbeitete Wirkungsbeschreibung. Diese Einträge werden hier nicht als Rechtsverstoß oder Lizenzverletzung eingeordnet.
+
+Sie gelten bis zu einer späteren redaktionellen Ausarbeitung als projektinterne Platzhalter beziehungsweise eigene Entwürfe. Erst bei einer konkreten Beschreibung oder vollständigen Mechanik ist zu prüfen, ob eine SRD-Zuordnung, eine vollständig eigene Ausgestaltung oder eine Überarbeitung sinnvoll ist.
+
+## Formulierungsgrundsatz dieser Prüfliste
+
+Diese Datei dokumentiert ausschließlich offene redaktionelle und lizenzbezogene Prüfpunkte. Sie enthält keine Feststellung, dass ein bestimmter Inhalt rechtswidrig ist oder gegen das SRD 5.1 verstößt.
+
+
+## In Version 0.24.2 aus der Demo entfernt
+
+Zur vorsichtigen redaktionellen Bereinigung wurden folgende vollständig ausgearbeitete Demo-Merkmale entfernt:
+
+- Erwachtes Zauberbuch: Ritualfokus
+- Fluch der Schattenklinge
+- Gunst des Schicksals
+- Schattenklingen-Bindung
+- Zurückstoßender Strahl
+
+Die Entfernung ist eine freiwillige Projektentscheidung zur klareren Trennung zwischen SRD-basierten, eigenen und noch nicht klassifizierten Inhalten. Sie ist keine Feststellung eines Rechtsverstoßes.

@@ -23,7 +23,7 @@ function createUniqueId() {
     const hex = Array.from(randomBytes, value => value.toString(16).padStart(2, "0")).join("");
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
-const appVersion = "0.23.5";
+const appVersion = "0.24.3";
 
 const cardKinds = Object.freeze({
     character: "character",
@@ -459,6 +459,11 @@ let editingCardId = null;
 let pendingDmFocusTransition = null;
 let activeDmFocusTransitionCleanup = null;
 let activeForgeSpellEditor = null;
+let activeForgeSrdLibraryPrefix = null;
+const forgeSrdLibraryFilters = {
+    "edit-card": { search: "", level: "all", source: "srd51-de" },
+    "new-card": { search: "", level: "all", source: "srd51-de" }
+};
 let activeForgeActionEditor = null;
 let activeForgeTraitEditor = null;
 let suppressCardForgeClickAwayOnce = false;
@@ -2873,7 +2878,8 @@ function moveSelectedDeckCardsToHand() {
     const selectedNamesText = createTargetNamesText(selectedDeckCards);
 
     for (const card of selectedDeckCards) {
-        card.isInCombat = true;
+        setCardLocation(card, cardLocations.hand);
+        setEncounterStatus(card, encounterStatuses.active);
         card.isSelected = false;
     }
 
@@ -2888,8 +2894,9 @@ function moveSelectedDeckCardsToHand() {
 
 function moveHandCardsOfTypeToDeck(type) {
     for (const card of gameState.cards) {
-        if (card.isInCombat === true && card.type === type) {
-            card.isInCombat = false;
+        if (getCardLocation(card) === cardLocations.hand && card.type === type) {
+            setCardLocation(card, cardLocations.deck);
+            card.encounterStatus = null;
             card.isSelected = false;
         }
     }
@@ -2899,13 +2906,21 @@ function moveHandCardsOfTypeToDeck(type) {
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
 
+    if (handCards.length === 0) {
+        resetEncounterStartGateState({ resetTurn: true });
+        uiState.focusedCardId = null;
+    } else if (uiState.focusedCardId !== null && findCardById(uiState.focusedCardId) !== null && getCardLocation(findCardById(uiState.focusedCardId)) !== cardLocations.hand) {
+        uiState.focusedCardId = null;
+    }
+
     renderCards();
 }
 
 function moveDeckCardsOfTypeToHand(type) {
     for (const card of gameState.cards) {
-        if (card.isInCombat === false && card.type === type) {
-            card.isInCombat = true;
+        if (getCardLocation(card) === cardLocations.deck && card.type === type) {
+            setCardLocation(card, cardLocations.hand);
+            setEncounterStatus(card, encounterStatuses.active);
             card.isSelected = false;
         }
     }
@@ -4730,7 +4745,7 @@ function getConditionLabel(conditionName) {
         "frightened": "Frightened",
         "grappled": "Grappled",
         "hasted": "Hasted",
-        "hexed": "Hexed",
+        "hexed": "Verwünscht",
         "hunters-mark": "Hunter's Mark",
         "incapacitated": "Incapacitated",
         "invisible": "Invisible",
@@ -5097,7 +5112,7 @@ function createGameStateExportData() {
         metadata: {
             appVersion: appVersion,
             operatingMode: appOperatingMode,
-            licenseNotice: "Enthält bearbeitetes Material aus dem SRD 5.1 unter CC BY 4.0.",
+            licenseNotice: "Enthält bearbeitetes Material aus SRD 5.1 und SRD 5.2.1 unter CC BY 4.0.",
             legalDocument: "legal.html"
         },
         gameState: createCurrentGameState()
@@ -6899,6 +6914,204 @@ function openForgeSpellEditor(prefix, spellId) {
     scrollActiveForgeSpellEditorIntoView(prefix);
 }
 
+
+function openForgeSrdSpellLibrary(prefix) {
+    keepCardForgeOpenForInternalAction();
+    activeForgeSrdLibraryPrefix = prefix;
+    activeForgeSpellEditor = null;
+    renderForgeSpellManager(prefix);
+
+    window.setTimeout(function() {
+        const searchElement = document.querySelector(`#${prefix}-srd-spell-search`);
+
+        if (searchElement !== null) {
+            searchElement.focus({ preventScroll: true });
+        }
+    }, 0);
+}
+
+function closeForgeSrdSpellLibrary(prefix) {
+    keepCardForgeOpenForInternalAction();
+    activeForgeSrdLibraryPrefix = null;
+    renderForgeSpellManager(prefix);
+}
+
+function updateForgeSrdSpellLibrary(prefix) {
+    const searchElement = document.querySelector(`#${prefix}-srd-spell-search`);
+    const levelElement = document.querySelector(`#${prefix}-srd-spell-level`);
+    const sourceElement = document.querySelector(`#${prefix}-srd-spell-source`);
+
+    forgeSrdLibraryFilters[prefix] = {
+        search: searchElement !== null ? searchElement.value : "",
+        level: levelElement !== null ? levelElement.value : "all",
+        source: sourceElement !== null ? sourceElement.value : "srd51-de"
+    };
+
+    renderForgeSpellManager(prefix);
+
+    window.setTimeout(function() {
+        const nextSearchElement = document.querySelector(`#${prefix}-srd-spell-search`);
+
+        if (nextSearchElement !== null) {
+            nextSearchElement.focus({ preventScroll: true });
+            nextSearchElement.setSelectionRange(nextSearchElement.value.length, nextSearchElement.value.length);
+        }
+    }, 0);
+}
+
+function getForgeSrdLibrary(sourceKey) {
+    if (sourceKey === srd521SpellLibraryMeta.key) {
+        return {
+            meta: srd521SpellLibraryMeta,
+            spells: srd521SpellLibrary
+        };
+    }
+
+    return {
+        meta: srd51SpellLibraryMeta,
+        spells: srd51SpellLibrary
+    };
+}
+
+function getFilteredForgeSrdSpells(prefix) {
+    const filters = forgeSrdLibraryFilters[prefix] || { search: "", level: "all", source: "srd51-de" };
+    const normalizedSearch = filters.search.trim().toLowerCase();
+    const library = getForgeSrdLibrary(filters.source);
+
+    return library.spells.filter(function(spell) {
+        if (filters.level !== "all" && String(spell.level) !== filters.level) {
+            return false;
+        }
+
+        if (normalizedSearch === "") {
+            return true;
+        }
+
+        return [
+            spell.name,
+            spell.school,
+            spell.description,
+            ...(Array.isArray(spell.aliases) ? spell.aliases : [])
+        ].join(" ").toLowerCase().includes(normalizedSearch);
+    });
+}
+
+function addForgeSrdSpell(prefix, librarySpellId) {
+    keepCardForgeOpenForInternalAction();
+    const filters = forgeSrdLibraryFilters[prefix] || { source: "srd51-de" };
+    const library = getForgeSrdLibrary(filters.source);
+    const librarySpell = library.spells.find(function(spell) {
+        return spell.id === librarySpellId;
+    });
+
+    if (librarySpell === undefined) {
+        return;
+    }
+
+    const draft = getForgeSpellcastingDraft(prefix);
+    const alreadyExists = draft.spells.some(function(spell) {
+        const normalizedName = spell.name.trim().toLowerCase();
+        return normalizedName === librarySpell.name.toLowerCase()
+            || (Array.isArray(librarySpell.aliases) && librarySpell.aliases.some(function(alias) {
+                return normalizedName === alias.toLowerCase();
+            }));
+    });
+
+    if (alreadyExists === true && window.confirm(`„${librarySpell.name}“ ist bereits eingetragen. Trotzdem noch einmal hinzufügen?`) === false) {
+        return;
+    }
+
+    draft.spells.push(createSpellObject({
+        name: librarySpell.name,
+        level: librarySpell.level,
+        prepared: true,
+        ritual: librarySpell.ritual === true,
+        concentration: librarySpell.concentration === true,
+        castingTime: librarySpell.castingTime,
+        range: librarySpell.range,
+        components: librarySpell.components,
+        duration: librarySpell.duration,
+        saveOrAttack: librarySpell.saveOrAttack,
+        description: librarySpell.description
+    }, draft.spells.length));
+
+    setForgeSpellList(prefix, draft.spells);
+    renderForgeSpellManager(prefix);
+    renderForgeTraitManager(prefix);
+    commitForgeSpellcastingIfEditing(prefix);
+}
+
+function createForgeSrdSpellLibraryHtml(prefix) {
+    if (activeForgeSrdLibraryPrefix !== prefix) {
+        return "";
+    }
+
+    const filters = forgeSrdLibraryFilters[prefix] || { search: "", level: "all", source: "srd51-de" };
+    const activeLibrary = getForgeSrdLibrary(filters.source);
+    const filteredSpells = getFilteredForgeSrdSpells(prefix);
+    const levelOptions = [
+        `<option value="all"${filters.level === "all" ? " selected" : ""}>Alle Grade</option>`,
+        ...Object.keys(spellLevelLabels).map(function(level) {
+            return `<option value="${level}"${filters.level === String(level) ? " selected" : ""}>${spellLevelLabels[level]}</option>`;
+        })
+    ].join("");
+
+    const resultHtml = filteredSpells.map(function(spell) {
+        const flags = [
+            spell.school,
+            spell.ritual === true ? "Ritual" : "",
+            spell.concentration === true ? "Konzentration" : ""
+        ].filter(Boolean).join(" · ");
+
+        return `
+            <article class="forge-srd-spell-result">
+                <div class="forge-srd-spell-result-copy">
+                    <strong>${escapeHtml(spell.name)}</strong>
+                    <span>${escapeHtml(spellLevelLabels[spell.level])}${flags !== "" ? ` · ${escapeHtml(flags)}` : ""}</span>
+                    <p>${escapeHtml(spell.description)}</p>
+                </div>
+                <button type="button" onclick="addForgeSrdSpell('${prefix}', '${spell.id}')">Hinzufügen</button>
+            </article>
+        `;
+    }).join("");
+
+    return `
+        <section class="forge-srd-library" aria-label="${escapeHtml(activeLibrary.meta.label)}">
+            <div class="forge-srd-library-header">
+                <div>
+                    <p class="section-eyebrow">Regelbibliothek</p>
+                    <h5>${escapeHtml(activeLibrary.meta.label)} auswählen</h5>
+                </div>
+                <button type="button" class="forge-srd-library-close" onclick="closeForgeSrdSpellLibrary('${prefix}')" aria-label="Bibliothek schließen">×</button>
+            </div>
+            <div class="forge-srd-library-filters">
+                <label class="form-field">
+                    <span>Regelstand</span>
+                    <select id="${prefix}-srd-spell-source" onchange="updateForgeSrdSpellLibrary('${prefix}')">
+                        <option value="${srd51SpellLibraryMeta.key}"${filters.source === srd51SpellLibraryMeta.key ? " selected" : ""}>${escapeHtml(srd51SpellLibraryMeta.label)}</option>
+                        <option value="${srd521SpellLibraryMeta.key}"${filters.source === srd521SpellLibraryMeta.key ? " selected" : ""}>${escapeHtml(srd521SpellLibraryMeta.label)}</option>
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span>Suche</span>
+                    <input id="${prefix}-srd-spell-search" type="search" value="${escapeHtml(filters.search)}" placeholder="Name, Schule oder Wirkung" oninput="updateForgeSrdSpellLibrary('${prefix}')">
+                </label>
+                <label class="form-field">
+                    <span>Grad</span>
+                    <select id="${prefix}-srd-spell-level" onchange="updateForgeSrdSpellLibrary('${prefix}')">${levelOptions}</select>
+                </label>
+            </div>
+            <div class="forge-srd-library-results">
+                ${resultHtml !== "" ? resultHtml : `<p class="detail-placeholder-text">Keine passenden SRD-Zauber gefunden.</p>`}
+            </div>
+            <p class="forge-srd-library-notice">
+                Kuratierte ${escapeHtml(activeLibrary.meta.shortLabel)}-Auswahl · CC BY 4.0 ·
+                <a href="${activeLibrary.meta.noticeHref}" target="_blank" rel="noopener noreferrer">Lizenzhinweis</a>
+            </p>
+        </section>
+    `;
+}
+
 function addForgeSpell(prefix) {
     keepCardForgeOpenForInternalAction();
     const spell = createSpellObject({
@@ -7182,8 +7395,12 @@ function renderForgeSpellManager(prefix) {
                 <p class="section-eyebrow">Zauberliste</p>
 
             </div>
-            <button type="button" class="forge-spell-add-button forge-add-button" onclick="addForgeSpell('${prefix}')">Spell hinzufügen</button>
+            <div class="forge-spell-manager-actions">
+                <button type="button" class="forge-spell-library-button" onclick="openForgeSrdSpellLibrary('${prefix}')">Aus SRD-Bibliothek</button>
+                <button type="button" class="forge-spell-add-button forge-add-button" onclick="addForgeSpell('${prefix}')">Eigener Spell</button>
+            </div>
         </div>
+        ${createForgeSrdSpellLibraryHtml(prefix)}
         <div class="forge-spell-list">
             ${createForgeSpellDraftGroupHtml(prefix, newDraftSpell)}
             ${levelGroups.length > 0 ? levelGroups.join("") : `<p class="detail-placeholder-text">Noch keine strukturierten Spells eingetragen.</p>`}
@@ -12370,7 +12587,7 @@ function getInventoryItemSuggestion(name) {
         { test: /rapier/, category: "weapon", description: "Finesse-Nahkampfwaffe. 1d8 piercing; ideal für Sneak Attack und DEX-basierte Angriffe." },
         { test: /dagger/, category: "weapon", description: "Leichte Finesse-Waffe. 1d4 piercing, thrown 20/60 ft." },
         { test: /shortbow/, category: "weapon", description: "Fernkampfwaffe. 1d6 piercing, range 80/320 ft.; nutzt DEX." },
-        { test: /longsword/, category: "weapon", description: "Kriegsnahkampfwaffe: 1W8 Hiebschaden, vielseitig 1W10; bei Liora für die Schattenklingen-Bindung relevant." },
+        { test: /longsword/, category: "weapon", description: "Kriegsnahkampfwaffe: 1W8 Hiebschaden, vielseitig 1W10." },
         { test: /quarterstaff/, category: "weapon", description: "Einfache Nahkampfwaffe: 1W6 Wuchtschaden, vielseitig 1W8; kann als arkaner Stab beschrieben werden." },
         { test: /arrows?/, category: "ammunition", description: "Munition für den Shortbow." },
         { test: /caltrops/, category: "consumable", description: "Ausstreubare Metallspitzen. Können Boden gefährlich machen und Bewegung verlangsamen." },
@@ -12380,7 +12597,7 @@ function getInventoryItemSuggestion(name) {
         { test: /disguise kit/, category: "tool", description: "Verkleidungsset für Maskierungen, Bühnenrollen und Täuschungsmanöver." },
         { test: /forgery kit/, category: "tool", description: "Fälscherwerkzeug für Dokumente, Siegel und Schriftproben." },
         { test: /flute/, category: "tool", description: "Musikinstrument; kann auch als sozialer oder atmosphärischer Gegenstand genutzt werden." },
-        { test: /spellbook/, category: "magicItem", description: "Zauberbuch. Enthält Suicas bekannte Wizard-Spells und ist zentral für Vorbereitung, Ritual Casting und Erwachtes Zauberbuch." },
+        { test: /spellbook/, category: "magicItem", description: "Zauberbuch. Enthält Suicas bekannte Zauber und unterstützt Vorbereitung und Ritualwirken." },
         { test: /crystal/, category: "equipment", description: "Arkaner Fokus oder wertvoller Kristall, je nach Szene nutzbar." },
         { test: /ink|parchment|book|pen/, category: "equipment", description: "Schreib- und Studienmaterial für Notizen, Forschung, Zauberformeln oder Dokumente." },
         { test: /rope/, category: "equipment", description: "Hempen rope, 50 ft.; Standardausrüstung für Klettern, Sichern und Improvisation." },
@@ -12472,12 +12689,12 @@ function createCustomConsumableCardFromEntry(entry, fallbackIndex) {
     const item = createInventoryCard({
         id: `legacy-card-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
         template: "customPotion",
-        name: lower.includes("shrieker") ? "Billiger Trank gegen Shrieker-Sporen" : parsed.name,
+        name: lower.includes("kreischer") ? "Trank gegen Kreischer-Sporen" : parsed.name,
         category: lower.includes("scroll") ? "scroll" : "potion",
-        effect: lower.includes("shrieker") ? "Gegen Shrieker-Sporen" : "Eigener Itemeffekt",
+        effect: lower.includes("kreischer") ? "Gegen Kreischer-Sporen" : "Eigener Itemeffekt",
         healingFormula: "",
-        description: lower.includes("shrieker")
-            ? "Billiger Spezialtrank gegen Shrieker-Sporen. Genaue Wirkung je nach Szene vom DM festlegen."
+        description: lower.includes("kreischer")
+            ? "Billiger Spezialtrank gegen Kreischer-Sporen. Genaue Wirkung je nach Szene vom DM festlegen."
             : "Eigene Itemkarte. Effekt im Spiel festlegen oder in der Kartenschmiede verfeinern.",
         image: lower.includes("scroll") ? "assets/items/scroll_custom.jpg" : "assets/items/potion_custom.jpg",
         showAsAction: true,
@@ -12519,7 +12736,7 @@ function createInventoryDataFromLegacyText(text) {
                 id: "",
                 quantity: parsed.count
             }, cards.length));
-        } else if ((lower.includes("potion") || lower.includes("trank")) && (lower.includes("shrieker") || lower.includes("sporen") || lower.includes("custom"))) {
+        } else if ((lower.includes("potion") || lower.includes("trank")) && (lower.includes("kreischer") || lower.includes("sporen") || lower.includes("custom"))) {
             const customCard = createCustomConsumableCardFromEntry(entry, cards.length);
             cards.push(createInventoryCard({
                 ...customCard.item,

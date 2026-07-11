@@ -17,8 +17,8 @@
  * README.md und THIRD_PARTY_NOTICES.md. Sie wird bewusst nicht in jeder
  * einzelnen Zauberzeile der Benutzeroberfläche wiederholt.
  *
- * Nicht in dieser Bibliothek enthaltene Demozauber bleiben unverändert und
- * werden in CONTENT_REVIEW_SRD_5.1.md zur späteren Prüfung aufgeführt.
+ * Nicht zugeordnete Demozauber bleiben unverändert und werden nicht automatisch
+ * einer SRD-Version zugerechnet.
  */
 const demoSrd51SpellDetails = Object.freeze({
     "minor illusion": {
@@ -230,14 +230,6 @@ const demoSrd51SpellDetails = Object.freeze({
         duration: "Unmittelbar",
         description: "Eine sichtbare Kreatur erhält 1W4 plus deinen Zauberwirken-Modifikator Trefferpunkte zurück. Untote und Konstrukte werden nicht geheilt; höhere Zauberplätze erhöhen die Heilung um jeweils 1W4."
     },
-    "hex": {
-        castingTime: "1 Bonusaktion",
-        range: "90 Fuß",
-        components: "V, S, M (versteinertes Molchauge)",
-        duration: "Konzentration, bis zu 1 Stunde",
-        concentration: true,
-        description: "Du belegst eine Kreatur mit einem Fluch. Deine Treffer verursachen zusätzlich 1W6 nekrotischen Schaden, und das Ziel hat Nachteil auf Proben eines gewählten Attributs. Fällt es, kannst du den Fluch später auf ein neues Ziel übertragen."
-    },
     "armor of agathys": {
         castingTime: "1 Aktion",
         range: "Selbst",
@@ -293,6 +285,40 @@ const demoSrd51SpellDetails = Object.freeze({
         description: "Du versuchst, den Zauber einer sichtbaren Kreatur während des Wirkens zu unterbrechen. Zauber bis zum 3. Grad scheitern automatisch; bei höheren Graden ist eine Probe mit deinem Zauberwirken-Attribut nötig, sofern du keinen ausreichend hohen Zauberplatz verwendest."
     }
 });
+
+
+const demoSrd521SpellDetails = Object.freeze({
+    "hex": {
+        name: "Verwünschung",
+        castingTime: "1 Bonusaktion",
+        range: "27 m",
+        components: "V, G, M (versteinertes Auge eines Molchs)",
+        duration: "Konzentration, bis zu 1 Stunde",
+        concentration: true,
+        description: "Du verfluchst eine sichtbare Kreatur in Reichweite. Treffer mit Angriffswürfen verursachen zusätzlich 1W6 nekrotischen Schaden, und das Ziel hat Nachteil auf Attributswürfe eines gewählten Attributs. Fällt es auf 0 Trefferpunkte, kann der Fluch mit einer Bonusaktion auf ein neues Ziel übertragen werden."
+    },
+    "verwünschung": {
+        name: "Verwünschung",
+        castingTime: "1 Bonusaktion",
+        range: "27 m",
+        components: "V, G, M (versteinertes Auge eines Molchs)",
+        duration: "Konzentration, bis zu 1 Stunde",
+        concentration: true,
+        description: "Du verfluchst eine sichtbare Kreatur in Reichweite. Treffer mit Angriffswürfen verursachen zusätzlich 1W6 nekrotischen Schaden, und das Ziel hat Nachteil auf Attributswürfe eines gewählten Attributs. Fällt es auf 0 Trefferpunkte, kann der Fluch mit einer Bonusaktion auf ein neues Ziel übertragen werden."
+    }
+});
+
+function applyDemoSrd521SpellDetails(spellcasting) {
+    for (const spell of spellcasting.spells) {
+        const details = demoSrd521SpellDetails[spell.name.trim().toLowerCase()];
+
+        if (details !== undefined) {
+            Object.assign(spell, details);
+        }
+    }
+
+    return spellcasting;
+}
 
 function applyDemoSrd51SpellDetails(spellcasting) {
     for (const spell of spellcasting.spells) {
@@ -384,7 +410,7 @@ function createDemoCards() {
             vulnerabilities: "—",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 13 · Spell Attack +5",
-            specialResources: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie",
+            specialResources: "Arkane Erholung 1/LR · Arkane Schreibfeder · Schlangenmagie",
             notes: "Charakterbogen: Wizard 3 · Schlangenblütige · Arkane Kopfgeldjägerin · Chaotic Neutral.\n\nPersönlichkeit: Suica betrachtet Menschen wie Forschungsobjekte, aber nicht grausam – nur neugierig.\n\nIdeal: Magie ist die höchste Form von Wahrheit. Jede neue Formel ist ein Sieg über das Unbekannte.\n\nBindung: Ein ehemaliger Mentor glaubt, sie sei zu verspielt, um echte arkane Größe zu erreichen; Suica will das Gegenteil beweisen.\n\nMakel: Sie sammelt Wissen, auch wenn es gefährlich oder moralisch fragwürdig ist.",
             demoSpellSeed: "Cantrips: Mage Hand; Gedankensplitter; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Selbst; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
             demoInventorySeed: "Dagger x2; Quarterstaff; Spellbook; Backpack; Robe; Book x2; Ink; Ink Pen x2; Parchment; Little Bag of Sand; Small Knife; Oil x10; Tinderbox; Lamp; Flute; Thieves' Tools; coins: 5 GP.",
@@ -552,10 +578,10 @@ function createDemoCards() {
             vulnerabilities: "—",
             senses: "Darkvision 60 ft.",
             spellSaveDc: "DC 15 · Spell Attack +7",
-            specialResources: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR",
+            specialResources: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Heilende Berührung 1/LR · Sternenbrand 1/LR",
             notes: "Charakterbogen: Sorcerer 5 / Warlock 3 · Sternengeborene · Hofübersetzerin · Chaotic Neutral.\n\nPersönlichkeit: Liora folgt eher ihrem Bauchgefühl als klugen Argumenten – oft bringt sie das in Schwierigkeiten, manchmal aber auch zu verborgenen Wahrheiten.\n\nIdeal: Freiheit. Niemand soll sie je wieder kontrollieren – nicht der Hof, nicht ihr Erbe, nicht einmal ihr Patron.\n\nBindung: Die Stimme ihres Patrons verfolgt sie; sie fürchtet sie und kann doch nicht von ihr loslassen.\n\nMakel: Sie gibt oft vor, mehr zu verstehen, als sie wirklich tut, und gerät dadurch in Gefahren, die sie nicht einschätzen kann.\n\nAussehen: Liora wirkt auf den ersten Blick wie eine junge, schöne Frau, doch bei genauerem Hinsehen verrät ihr Aussehen ihre sternengeborene Herkunft und die Schatten, die an ihr nagen. Ihr Gesicht ist fein geschnitten, mit hohen Wangenknochen und vollen Lippen. Dunkle Schatten und verfärbte Stellen ziehen sich über ihre linke Gesichtshälfte und den Hals, wie eine brennende Spur von himmlischer Macht, die in Finsternis übergeht. Ihre Augen leuchten in goldenem Schimmer; ihr tiefviolettes Haar fällt in weichen Wellen über die Schultern. An manchen Stellen schimmert ihre Haut wie mit Sternenstaub überzogen, während andere Bereiche dunkel verfärbt wirken, als hätte sie eine Korrumpierung berührt.",
-            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Resonanzschnitt; Eldritch Blast; Grabesklang; Light.\n1st Level: Elementarschild; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Schicksalstempo; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Gedankenhieb; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
-            demoInventorySeed: "Cloak of Protection; Ring of Protection; Starker Heiltrank; Scale Mail; Shield; Billiger Trank gegen Shrieker-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
+            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Resonanzschnitt; Eldritch Blast; Grabesklang; Light.\n1st Level: Elementarschild; Shield; Healing Word; Verwünschung; Comprehend Languages; Armor of Agathys; Schicksalstempo; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Gedankenhieb; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
+            demoInventorySeed: "Cloak of Protection; Ring of Protection; Starker Heiltrank; Scale Mail; Shield; Trank gegen Kreischer-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
             hpVisibility: "full",
             imageData: "Images/liora_img.png",
             conditions: [],
@@ -878,10 +904,9 @@ function getDemoTraitsForCard(cardId) {
             createCardTrait({ name: "Chaosfeen-Magie", category: "species", description: "Miriels angeborene Feenmagie wird über ihre Zauberliste verwaltet; begrenzte Anwendungen werden dort gesondert erfasst." })
         ],
         2: [
-            createCardTrait({ name: "Ressourcen", category: "resource", description: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie" }),
+            createCardTrait({ name: "Ressourcen", category: "resource", description: "Arkane Erholung 1/LR · Arkane Schreibfeder · Schlangenmagie" }),
             createCardTrait({ name: "Arkane Schreibfeder", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Eine magische Schreibfeder in Suicas freier Hand erscheinen lassen.", description: "Suica ruft mit einer Bonusaktion eine tintenlose Feder hervor. Sie erleichtert das Übertragen arkaner Formeln und kann eigene Schriftzeichen in kurzer Entfernung wieder auslöschen." }),
             createCardTrait({ name: "Arkane Erholung", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Nach einer kurzen Rast verbrauchte Zauberplätze mit insgesamt bis zu zwei Zaubergraden zurückgewinnen.", description: "Einmal pro langer Rast kann Suica nach einer kurzen Rast verbrauchte Zauberplätze zurückgewinnen, deren addierte Grade höchstens zwei betragen." }),
-            createCardTrait({ name: "Erwachtes Zauberbuch: Ritualfokus", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein vorbereitetes Ritual ohne zusätzliche Ritualzeit wirken.", description: "Solange Suica ihr Erwachtes Zauberbuch hält, kann sie einmal pro langer Rast ein vorbereitetes Ritual in dessen normaler Wirkzeit vollenden." }),
             createCardTrait({ name: "Magieresistenz", category: "species", description: "Vorteil auf Rettungswürfe gegen Zauber." }),
             createCardTrait({ name: "Giftresistenz", category: "species", description: "Resistenz gegen Giftschaden sowie Vorteil auf Rettungswürfe, um Vergiftung zu vermeiden oder zu beenden." }),
             createCardTrait({ name: "Gelehrte", category: "classFeature", description: "Suica verdoppelt ihren Übungsbonus bei einer beherrschten Wissensfertigkeit; in der Demo gilt dies für Nachforschungen." }),
@@ -903,20 +928,18 @@ function getDemoTraitsForCard(cardId) {
             createCardTrait({ name: "Glänzendes Omen", category: "monsterTrait", description: "Die Glimmerkrähe hat Vorteil auf Proben, um magische Gegenstände, spiegelnde Flächen und verborgenen Schmuck zu entdecken." })
         ],
         6: [
-            createCardTrait({ name: "Ressourcen", category: "resource", description: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR" }),
+            createCardTrait({ name: "Ressourcen", category: "resource", description: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Heilende Berührung 1/LR · Sternenbrand 1/LR" }),
             createCardTrait({ name: "Heilende Berührung", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "action", actionSummary: "Eine berührte Kreatur mit Sternenlicht heilen.", description: "Liora kanalisiert mit einer Aktion sanftes Sternenlicht durch ihre Hände. Die berührte Kreatur erhält eine Anzahl W4 Heilung in Höhe von Lioras Übungsbonus." }),
-            createCardTrait({ name: "Fluch der Schattenklinge", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "bonus", range: "30 Fuß", actionSummary: "Eine sichtbare Kreatur eine Minute lang mit dem Mal der Schattenklinge belegen.", description: "Liora markiert mit einer Bonusaktion eine sichtbare Kreatur in 30 Fuß Reichweite. Gegen das markierte Ziel verursacht sie 3 zusätzlichen Schaden, erzielt bereits bei 19–20 einen kritischen Treffer und gewinnt 7 HP zurück, falls das Ziel fällt." }),
             createCardTrait({ name: "Quelle der Magie: Zauberplatz erschaffen", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zaubereipunkte ausgeben, um einen Zauberplatz zu erschaffen.", description: "Liora kann als Bonusaktion 2, 3 oder 5 Zaubereipunkte ausgeben, um einen Zauberplatz des 1., 2. oder 3. Grades zu erschaffen." }),
             createCardTrait({ name: "Beschleunigter Zauber", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zwei Zaubereipunkte ausgeben, um einen geeigneten Zauber als Bonusaktion zu wirken.", description: "Liora gibt zwei Zaubereipunkte aus und ändert die Wirkzeit eines geeigneten Zaubers für diesen Einsatz von einer Aktion zu einer Bonusaktion." }),
-            createCardTrait({ name: "Gunst des Schicksals", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "special", trigger: "Liora verfehlt einen Angriff oder misslingt bei einem Rettungswurf.", actionSummary: "2W4 auf das Ergebnis addieren und das Schicksal möglicherweise wenden.", description: "Einmal pro kurzer Rast kann Liora nach einem verfehlten Angriff oder misslungenen Rettungswurf 2W4 auf das Ergebnis addieren." }),
             createCardTrait({ name: "Sternenbrand", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "bonus", actionSummary: "Für eine Minute eine brennende Sternenaura entfesseln.", description: "Einmal pro langer Rast entfesselt Liora mit einer Bonusaktion für eine Minute ihre instabile Sternenkraft." }),
             createCardTrait({ name: "Arkane Reserve", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein einminütiges Ritual stellt einen verbrauchten Pakt-Zauberplatz wieder her.", description: "Einmal pro langer Rast kann Liora ein einminütiges Ritual vollziehen und dadurch bis zu einen verbrauchten Pakt-Zauberplatz zurückgewinnen." }),
             createCardTrait({ name: "Sternenblut-Resistenz", category: "species", description: "Liora besitzt Resistenz gegen nekrotischen und gleißenden Schaden." }),
             createCardTrait({ name: "Unbeugsame Konzentration", category: "classFeature", description: "Liora hat Vorteil auf Konstitutionsrettungswürfe, mit denen sie ihre Konzentration aufrechterhält." }),
             createCardTrait({ name: "Gefechtsmagierin", category: "feat", description: "Liora kann Zauber auch mit Waffe oder Schild sicher wirken und geeignete Zauber für Gelegenheitsangriffe einsetzen." }),
-            createCardTrait({ name: "Schattenklingen-Bindung", category: "classFeature", description: "Nach einer langen Rast bindet Liora eine geeignete Waffe an ihren Pakt und verwendet für Angriffe mit ihr ihr Charisma. Außerdem beherrscht sie mittelschwere Rüstungen, Schilde und Kriegswaffen." }),
             createCardTrait({ name: "Qualvoller Strahl", category: "classFeature", description: "Liora addiert ihren Charismamodifikator zum Schaden ihres unheimlichen Strahls." }),
-            createCardTrait({ name: "Zurückstoßender Strahl", category: "classFeature", description: "Trifft Lioras unheimlicher Strahl eine große oder kleinere Kreatur, kann er sie bis zu 10 Fuß von ihr wegstoßen." })
+            createCardTrait({ name: "Pakt der Klinge", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Eine Paktwaffe beschwören oder eine Bindung mit einer geeigneten magischen Waffe herstellen.", description: "Als Bonusaktion kann Liora eine einfache Nahkampfwaffe oder Nahkampf-Kriegswaffe als Paktwaffe beschwören oder eine geeignete magische Waffe binden. Sie ist im Umgang damit geübt, kann sie als Zauberfokus verwenden und bei Angriff und Schaden Charisma statt Stärke oder Geschicklichkeit einsetzen." }),
+            createCardTrait({ name: "Zurückdrängender Strahl", category: "classFeature", description: "Wenn Liora eine Kreatur von höchstens großer Größe mit einem Hexenmeisterzaubertrick trifft, der einen Angriffswurf erfordert, kann sie das Ziel bis zu 3 Meter in gerader Linie von sich wegstoßen." }),
         ],
         7: [
             createCardTrait({ name: "Grabmoos-Regeneration", category: "monsterTrait", showAsAction: true, actionType: "special", actionSummary: "Zu Beginn seines Zuges 10 Trefferpunkte zurückgewinnen, sofern seit dem letzten Zug kein Feuerschaden erlitten wurde.", description: "Steht der Koloss auf Erde oder Stein, gewinnt er zu Beginn seines Zuges 10 Trefferpunkte zurück, sofern er seit seinem letzten Zug keinen Feuerschaden erlitten hat." }),
@@ -952,6 +975,7 @@ function getDemoSpellcastingForCard(card) {
     spellcasting.spells = parseLegacySpellsText(card.demoSpellSeed);
     applyLegacySlotHints(spellcasting, { spellsText: card.demoSpellSeed, spellSaveDc: card.spellSaveDc });
     applyDemoSrd51SpellDetails(spellcasting);
+    applyDemoSrd521SpellDetails(spellcasting);
 
     if (card.id === 1) {
         applySpellOverride(spellcasting, "Chaossplitter", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
@@ -968,7 +992,7 @@ function getDemoSpellcastingForCard(card) {
         applySpellOverride(spellcasting, "Elementarschild", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
         applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
         applySpellOverride(spellcasting, "Healing Word", { castingTime: "1 Bonusaktion", range: "60 ft.", showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Hex", { castingTime: "1 Bonusaktion", range: "90 ft.", concentration: true, showAsAction: true, actionType: "bonus" });
+        applySpellOverride(spellcasting, "Verwünschung", { castingTime: "1 Bonusaktion", range: "27 m", concentration: true, showAsAction: true, actionType: "bonus" });
         applySpellOverride(spellcasting, "Misty Step", { castingTime: "1 Bonusaktion", range: "Selbst", showAsAction: true, actionType: "bonus" });
         applySpellOverride(spellcasting, "Counterspell", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
     }

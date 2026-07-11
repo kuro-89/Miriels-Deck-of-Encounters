@@ -1,6 +1,6 @@
 # Asset Provenance
 
-Stand: 11. Juli 2026 · Version 0.23.5
+Stand: 11. Juli 2026 · Version 0.24.3
 
 Diese Datei dokumentiert die Herkunft der mitgelieferten Bilddateien. Alle unten aufgeführten Illustrationen und Bild-Assets wurden vom Projektinhaber mit ChatGPT/OpenAI erzeugt. Es wurden keine fremden Ausgangsbilder verwendet und keine konkrete offizielle D&D-Figur, kein offizielles Artwork, kein Buchcover und kein Logo als Vorlage angefordert.
 
