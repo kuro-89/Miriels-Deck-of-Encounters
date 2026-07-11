@@ -6,7 +6,7 @@
   <title>
    Miriel's Deck of Encounters
   </title>
-  <link href="style.css?v=0.20.1" rel="stylesheet"/>
+  <link href="style.css?v=0.23.2" rel="stylesheet"/>
  </head>
  <body>
   <main class="app">
@@ -597,6 +597,62 @@
             </button>
            </div>
           </section>
+          <section aria-label="Eigener Effekt" class="toolkit-section toolkit-section-effect">
+           <details class="custom-effect-details">
+            <summary class="custom-effect-summary">
+             <span>
+              <strong>Eigener Effekt</strong>
+              <small>Optional · Name, Dauer, Farbe und Sichtbarkeit</small>
+             </span>
+             <span class="custom-effect-summary-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="custom-effect-panel">
+             <div class="custom-effect-grid">
+            <label class="custom-effect-field custom-effect-name-field"><span>Name</span><input id="custom-effect-name" maxlength="80" placeholder="z. B. Brennt" type="text"/></label>
+            <label class="custom-effect-field custom-effect-duration-field"><span>Dauer</span><select id="custom-effect-duration" onchange="updateCustomEffectDurationFields()">
+             <option value="manual">Manuell entfernen</option>
+             <option value="rounds">X Runden</option>
+             <option value="turn_start">Bis Beginn des aktuellen Zuges</option>
+             <option value="turn_end">Bis Ende des aktuellen Zuges</option>
+             <option value="encounter_end">Bis Encounter-Ende</option>
+             <option value="free_text">Freie Endbedingung</option>
+            </select></label>
+            <label class="custom-effect-field custom-effect-rounds-field" id="custom-effect-rounds-field" hidden><span>Runden</span><input id="custom-effect-rounds" min="1" type="number" value="1"/></label>
+            <label class="custom-effect-field custom-effect-end-condition-field" id="custom-effect-end-condition-field" hidden><span>Endbedingung</span><input id="custom-effect-end-condition" maxlength="240" placeholder="z. B. bis Rettungswurf gelingt" type="text"/></label>
+            <label class="custom-effect-field custom-effect-color-field"><span>Farbe</span><select id="custom-effect-color" aria-label="Farbe des eigenen Effekts">
+             <option value="magical-effect">Stahlblau</option>
+             <option value="blessed">Blau</option>
+             <option value="blinded">Anthrazit</option>
+             <option value="charmed">Violett</option>
+             <option value="concentrating">Dunkelblau</option>
+             <option value="cursed">Magenta</option>
+             <option value="deafened">Orange</option>
+             <option value="enlarged">Türkis</option>
+             <option value="exhausted">Dunkelrot</option>
+             <option value="frightened">Dunkelviolett</option>
+             <option value="grappled">Beige</option>
+             <option value="hasted">Grün</option>
+             <option value="hexed">Rosa</option>
+             <option value="hunters-mark">Helltürkis</option>
+             <option value="incapacitated">Oliv</option>
+             <option value="invisible">Gold</option>
+             <option value="paralyzed">Silber</option>
+             <option value="petrified">Steingrau</option>
+             <option value="physical-effect">Korallenrot</option>
+             <option value="poisoned">Giftgrün</option>
+             <option value="prone">Schieferblau</option>
+             <option value="raging">Himbeerrot</option>
+             <option value="restrained">Mauve</option>
+             <option value="stunned">Lavendelblau</option>
+             <option value="unconscious">Grau</option>
+            </select></label>
+            <label class="custom-effect-field custom-effect-visibility-field"><span>Sichtbarkeit</span><select id="custom-effect-visibility"><option value="public">Öffentlich</option><option value="controller">Nur Controller</option><option value="dm">Nur DM</option></select></label>
+            <label class="custom-effect-field custom-effect-note-field"><span>Notiz</span><input id="custom-effect-note" maxlength="500" placeholder="Optional" type="text"/></label>
+           </div>
+           <button class="custom-effect-add-button" onclick="addCustomEffectToSelectedCards()" type="button">Effekt hinzufügen</button>
+            </div>
+           </details>
+          </section>
           <section aria-label="Initiative" class="toolkit-section toolkit-section-initiative">
            <div class="toolkit-section-heading">
             <div>
@@ -1127,6 +1183,16 @@
                </option>
               </select>
              </div>
+             <div class="form-field">
+              <label for="edit-card-public-profile">
+               Freigabeprofil
+              </label>
+              <select id="edit-card-public-profile">
+               <option value="standard">Standard</option>
+               <option value="minimal">Minimal</option>
+               <option value="full">Erweitert</option>
+              </select>
+             </div>
              <div class="form-field form-field-wide-four">
               <label for="edit-card-image-path">
                Bildpfad oder gespeicherte Bilddaten
@@ -1648,6 +1714,16 @@
                 </option>
                </select>
               </div>
+              <div class="form-field">
+               <label for="new-card-public-profile">
+                Freigabeprofil
+               </label>
+               <select id="new-card-public-profile">
+                <option selected="" value="standard">Standard</option>
+                <option value="minimal">Minimal</option>
+                <option value="full">Erweitert</option>
+               </select>
+              </div>
               <label class="checkbox-field" for="new-card-is-in-combat">
                <input id="new-card-is-in-combat" type="checkbox"/>
                <span>
@@ -2055,7 +2131,7 @@
     <div class="app-footer-summary">
      <div>
       <strong>Miriel&rsquo;s Deck of Encounters</strong>
-      <span>Version 0.20.1 &middot; Statisch gehostete Browser-Version</span>
+      <span>Version 0.23.2 &middot; Statisch gehostete Browser-Version</span>
      </div>
      <p>Unabhängige, SRD-5.1-kompatible Begleitapp für Charaktere, Begegnungen und den digitalen Spieltisch.</p>
     </div>
@@ -2070,8 +2146,8 @@
     </nav>
    </footer>
   </main>
-  <script src="js/demo-data.js?v=0.20.1"></script>
-  <script src="js/game-state-schema.js?v=0.20.1"></script>
-  <script src="js/app.js?v=0.20.1"></script>
+  <script src="js/demo-data.js?v=0.23.2"></script>
+  <script src="js/game-state-schema.js?v=0.23.2"></script>
+  <script src="js/app.js?v=0.23.2"></script>
  </body>
 </html>

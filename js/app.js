@@ -3,7 +3,27 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.20.1";
+
+function createUniqueId() {
+    if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
+        return globalThis.crypto.randomUUID();
+    }
+
+    const randomBytes = new Uint8Array(16);
+    if (globalThis.crypto && typeof globalThis.crypto.getRandomValues === "function") {
+        globalThis.crypto.getRandomValues(randomBytes);
+    } else {
+        for (let index = 0; index < randomBytes.length; index += 1) {
+            randomBytes[index] = Math.floor(Math.random() * 256);
+        }
+    }
+
+    randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
+    randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
+    const hex = Array.from(randomBytes, value => value.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+const appVersion = "0.23.2";
 
 const cardKinds = Object.freeze({
     character: "character",
@@ -28,6 +48,206 @@ const encounterStatuses = Object.freeze({
     eliminated: "eliminated"
 });
 
+const effectDurationModes = Object.freeze({
+    manual: "manual",
+    rounds: "rounds",
+    turnStart: "turn_start",
+    turnEnd: "turn_end",
+    encounterEnd: "encounter_end",
+    freeText: "free_text"
+});
+
+const effectVisibilityModes = Object.freeze({
+    public: "public",
+    controller: "controller",
+    dm: "dm"
+});
+
+const accessRoles = Object.freeze({
+    dm: "dm",
+    controller: "controller",
+    viewer: "viewer",
+    publicDisplay: "public_display"
+});
+
+const cardPublicProfiles = Object.freeze({
+    standard: "standard",
+    minimal: "minimal",
+    full: "full"
+});
+
+const cardFieldVisibility = Object.freeze({
+    publicName: "public_name",
+    image: "image",
+    initiative: "initiative",
+    hp: "hp",
+    conditions: "conditions",
+    effects: "effects",
+    combatStats: "combat_stats",
+    notes: "notes",
+    inventory: "inventory",
+    actions: "actions",
+    traits: "traits",
+    spells: "spells"
+});
+
+const gameActionPermissions = Object.freeze({
+    damage: "damage",
+    healing: "healing",
+    temporaryHp: "temporary_hp",
+    condition: "condition",
+    effect: "effect",
+    itemUse: "item_use",
+    itemTransfer: "item_transfer",
+    editCard: "edit_card",
+    moveCard: "move_card",
+    manageEncounter: "manage_encounter"
+});
+
+function createAccessContext(role = accessRoles.dm, participantId = null, controlledCardIds = []) {
+    return {
+        role: Object.values(accessRoles).includes(role) ? role : accessRoles.viewer,
+        participantId,
+        controlledCardIds: Array.isArray(controlledCardIds) ? controlledCardIds.slice() : []
+    };
+}
+
+function getSafeCardAccessPolicy(rawPolicy) {
+    const policy = rawPolicy !== null && typeof rawPolicy === "object" ? rawPolicy : {};
+    const publicProfile = Object.values(cardPublicProfiles).includes(policy.publicProfile)
+        ? policy.publicProfile
+        : cardPublicProfiles.standard;
+
+    return {
+        publicProfile,
+        controllerCanEdit: policy.controllerCanEdit === true,
+        controllerCanUseItems: policy.controllerCanUseItems !== false,
+        controllerCanTransferItems: policy.controllerCanTransferItems === true,
+        publicOverrides: policy.publicOverrides !== null && typeof policy.publicOverrides === "object"
+            ? { ...policy.publicOverrides }
+            : {}
+    };
+}
+
+function isCardControlledByContext(card, context) {
+    return context.role === accessRoles.controller
+        && context.controlledCardIds.includes(card.id);
+}
+
+function canViewCardField(card, fieldName, context = createAccessContext(accessRoles.dm)) {
+    if (context.role === accessRoles.dm) {
+        return true;
+    }
+
+    if (isCardControlledByContext(card, context)) {
+        if ([cardFieldVisibility.notes, cardFieldVisibility.inventory, cardFieldVisibility.actions, cardFieldVisibility.traits, cardFieldVisibility.spells].includes(fieldName)) {
+            return true;
+        }
+    }
+
+    const policy = getSafeCardAccessPolicy(card.accessPolicy);
+    if (typeof policy.publicOverrides[fieldName] === "boolean") {
+        return policy.publicOverrides[fieldName];
+    }
+
+    if (fieldName === cardFieldVisibility.publicName || fieldName === cardFieldVisibility.image) {
+        return true;
+    }
+
+    if (policy.publicProfile === cardPublicProfiles.minimal) {
+        return false;
+    }
+
+    if ([cardFieldVisibility.initiative, cardFieldVisibility.hp, cardFieldVisibility.conditions, cardFieldVisibility.effects].includes(fieldName)) {
+        return true;
+    }
+
+    return policy.publicProfile === cardPublicProfiles.full
+        && [cardFieldVisibility.combatStats, cardFieldVisibility.actions, cardFieldVisibility.traits, cardFieldVisibility.spells].includes(fieldName);
+}
+
+function canEditCardField(card, fieldName, context = createAccessContext(accessRoles.dm)) {
+    if (context.role === accessRoles.dm) {
+        return true;
+    }
+
+    const policy = getSafeCardAccessPolicy(card.accessPolicy);
+    return isCardControlledByContext(card, context) && policy.controllerCanEdit === true;
+}
+
+function canPerformAction(actionName, context = createAccessContext(accessRoles.dm), sourceCard = null, targetCard = null) {
+    if (context.role === accessRoles.dm) {
+        return true;
+    }
+
+    if (context.role !== accessRoles.controller || sourceCard === null || isCardControlledByContext(sourceCard, context) === false) {
+        return false;
+    }
+
+    if ([gameActionPermissions.damage, gameActionPermissions.healing, gameActionPermissions.temporaryHp, gameActionPermissions.condition, gameActionPermissions.effect].includes(actionName)) {
+        return targetCard !== null;
+    }
+
+    if (actionName === gameActionPermissions.itemUse) {
+        return getSafeCardAccessPolicy(sourceCard.accessPolicy).controllerCanUseItems;
+    }
+
+    if (actionName === gameActionPermissions.itemTransfer) {
+        return getSafeCardAccessPolicy(sourceCard.accessPolicy).controllerCanTransferItems;
+    }
+
+    return false;
+}
+
+const dmAccessContext = createAccessContext(accessRoles.dm);
+const publicDisplayAccessContext = createAccessContext(accessRoles.publicDisplay);
+
+const itemExecutableEffectTypes = Object.freeze({
+    none: "none",
+    healing: "healing",
+    damage: "damage",
+    temporaryHp: "temporary_hp",
+    condition: "condition",
+    customEffect: "custom_effect"
+});
+
+const itemExecutableEffectLabels = Object.freeze({
+    none: "Nur Beschreibung",
+    healing: "Heilung",
+    damage: "Schaden",
+    temporary_hp: "Temporäre HP",
+    condition: "Condition",
+    custom_effect: "Eigener Effekt"
+});
+
+const availableConditions = [
+    "blessed",
+    "blinded",
+    "charmed",
+    "concentrating",
+    "cursed",
+    "deafened",
+    "enlarged",
+    "exhausted",
+    "frightened",
+    "grappled",
+    "hasted",
+    "hexed",
+    "hunters-mark",
+    "incapacitated",
+    "invisible",
+    "magical-effect",
+    "paralyzed",
+    "petrified",
+    "physical-effect",
+    "poisoned",
+    "prone",
+    "raging",
+    "restrained",
+    "stunned",
+    "unconscious"
+];
+
 const importSecurityLimits = Object.freeze({
     maxFileBytesWithoutEmbeddedImages: 20 * 1024 * 1024,
     maxFileBytesWithEmbeddedImages: 100 * 1024 * 1024,
@@ -43,7 +263,7 @@ const importSecurityLimits = Object.freeze({
 });
 const appOperatingMode = "Statisch gehostete Browser-Version";
 
-const appStorageKey = "miriels-deck-game-state-v4";
+const appStorageKey = "miriels-deck-game-state-v7";
 const appChannelName = "miriels-deck-game-state-channel-v2";
 const demoCardsAutoloadStorageKey = `${appStorageKey}-demo-autoload-enabled`;
 const demoEncounterName = "Miriels Demo-Spielstand";
@@ -58,6 +278,7 @@ let activeForgeInventoryEditor = null;
 let inventoryStageStartIndexes = {};
 let activeDetailInventoryCardEditor = null;
 let activeDetailInventoryListEditor = null;
+let suppressDetailInventoryClickAwayOnce = false;
 let pendingDeckImportData = null;
 let pendingDeckImportFileName = "";
 let demoCardsAutoloadEnabled = getDemoCardsAutoloadEnabled();
@@ -158,7 +379,7 @@ const inventoryCardTemplates = {
 // direkt auf gameState beziehungsweise uiState zu. Es gibt keine globalen
 // Kompatibilitätsvariablen mehr.
 const gameState = {
-    id: crypto.randomUUID(),
+    id: createUniqueId(),
     name: useDemoData ? demoEncounterName : "Unbenannter Spielstand",
     cards: (useDemoData ? createDemoCards() : []).map(normalizeCardModel),
     encounter: {
@@ -224,33 +445,7 @@ function setCurrentTurnIndex(value) {
     gameState.encounter.currentTurnCardId = initiativeCards[safeIndex].id;
 }
 
-const availableConditions = [
-    "blessed",
-    "blinded",
-    "charmed",
-    "concentrating",
-    "cursed",
-    "deafened",
-    "enlarged",
-    "exhausted",
-    "frightened",
-    "grappled",
-    "hasted",
-    "hexed",
-    "hunters-mark",
-    "incapacitated",
-    "invisible",
-    "magical-effect",
-    "paralyzed",
-    "petrified",
-    "physical-effect",
-    "poisoned",
-    "prone",
-    "raging",
-    "restrained",
-    "stunned",
-    "unconscious"
-];
+
 
 
 
@@ -546,7 +741,7 @@ function applyGameStateData(gameStateData) {
     const presentationState = getSafeObject(gameStateData.presentation);
     const mirielBoardState = getSafeObject(presentationState.mirielBoard);
 
-    gameState.id = getSafeOptionalString(gameStateData.id) || crypto.randomUUID();
+    gameState.id = getSafeOptionalString(gameStateData.id) || createUniqueId();
     gameState.name = getSafeEncounterName(gameStateData.name);
     gameState.cards = createImportedCards(gameStateData.cards);
     gameState.encounter.roundNumber = getSafePositiveInteger(encounterState.roundNumber, 1);
@@ -864,6 +1059,12 @@ function normalizeCardModel(rawCard) {
     card.deletedAt = location === cardLocations.trash
         ? getSafeOptionalString(card.deletedAt) || now
         : null;
+    card.conditions = getSafeConditions(card.conditions);
+    card.effects = getSafeEffects(card.effects);
+    card.inventoryCards = isDemoCard(card)
+        ? mergeStackableInventoryCards(getSafeInventoryCards(card.inventoryCards))
+        : getSafeInventoryCards(card.inventoryCards);
+    card.inventoryList = getSafeInventoryList(card.inventoryList);
 
     return card;
 }
@@ -1806,7 +2007,7 @@ function getActiveCard(handCards) {
 
 function createEncounterRunId() {
     return typeof crypto?.randomUUID === "function"
-        ? crypto.randomUUID()
+        ? createUniqueId()
         : `encounter-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
@@ -2030,6 +2231,8 @@ function nextTurn() {
     }
 
     const activeTurnIndex = getCurrentTurnIndex();
+    const previousActiveCardId = gameState.encounter.currentTurnCardId;
+    expireEffectsForTrigger("turn_end", previousActiveCardId);
     const nextTurnIndex = activeTurnIndex + 1;
     const startsNewRound = nextTurnIndex >= initiativeCards.length;
     setCurrentTurnIndex(startsNewRound ? 0 : nextTurnIndex);
@@ -2037,11 +2240,13 @@ function nextTurn() {
 
     if (startsNewRound) {
         gameState.encounter.roundNumber = gameState.encounter.roundNumber + 1;
+        expireEffectsForTrigger("round");
     }
 
     const newActiveCard = getActiveCard(handCards);
 
     if (newActiveCard !== null) {
+        expireEffectsForTrigger("turn_start", newActiveCard.id);
         prepareDmFocusTransition(newActiveCard.id, "next");
         uiState.focusedCardId = newActiveCard.id;
         resetUsageCountersForCard(newActiveCard, ["turn"]);
@@ -2366,6 +2571,17 @@ function setupClickAwayBehavior() {
             closeCombatLogInlinePanelsExcept(activeCombatLogEntry);
         }
 
+        if (activeDetailInventoryCardEditor !== null || activeDetailInventoryListEditor !== null) {
+            const clickedInsideDetailEditor = targetElement.closest(".inventory-inline-editor") !== null;
+            const clickedDetailEditorTrigger = targetElement.closest(".inventory-add-menu, .inventory-item-menu, .inventory-list-add-button, .inventory-list-row-actions") !== null;
+
+            if (suppressDetailInventoryClickAwayOnce === true) {
+                suppressDetailInventoryClickAwayOnce = false;
+            } else if (clickedInsideDetailEditor === false && clickedDetailEditorTrigger === false) {
+                cancelDetailInventoryEditor();
+            }
+        }
+
         const clickPath = typeof event.composedPath === "function" ? event.composedPath() : [];
         const drawerElement = getCardForgeDrawerElement();
 
@@ -2410,6 +2626,9 @@ function setupClickAwayBehavior() {
         }
 
         closeFloatingDetailsExcept(null);
+        if (activeDetailInventoryCardEditor !== null || activeDetailInventoryListEditor !== null) {
+            cancelDetailInventoryEditor();
+        }
         closeCardForgeDrawer();
         closeDmActionDrawer();
     });
@@ -3225,7 +3444,9 @@ const undoConfiguration = Object.freeze({
         "healing",
         "temporary_hp",
         "condition_added",
-        "condition_removed"
+        "condition_removed",
+        "item_used",
+        "item_transferred"
     ])
 });
 
@@ -3235,7 +3456,7 @@ let recentUndoCountdownId = null;
 
 function createGameEventId() {
     return typeof crypto?.randomUUID === "function"
-        ? crypto.randomUUID()
+        ? createUniqueId()
         : `event-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
@@ -3317,6 +3538,15 @@ function getEventStateFields(event) {
     if (event.type === "condition_added" || event.type === "condition_removed") {
         return ["conditions"];
     }
+    if (event.type === "effect_added" || event.type === "effect_removed" || event.type === "effect_expired") {
+        return ["effects"];
+    }
+    if (event.type === "item_used") {
+        return ["inventoryCards", "inventoryList", "hp", "tempHp", "conditions", "effects"];
+    }
+    if (event.type === "item_transferred") {
+        return ["inventoryCards"];
+    }
     return [];
 }
 
@@ -3332,6 +3562,9 @@ function isGameEventUndoable(event) {
 function getSnapshotValue(card, fieldName) {
     if (fieldName === "conditions") {
         return Array.isArray(card.conditions) ? [...card.conditions] : [];
+    }
+    if (fieldName === "effects") {
+        return structuredClone(Array.isArray(card.effects) ? card.effects : []);
     }
     return card[fieldName];
 }
@@ -3376,8 +3609,8 @@ function restoreEventBeforeState(event) {
             if (Object.prototype.hasOwnProperty.call(beforeSnapshot, fieldName) === false) {
                 continue;
             }
-            card[fieldName] = fieldName === "conditions"
-                ? [...beforeSnapshot[fieldName]]
+            card[fieldName] = ["conditions", "effects", "inventoryCards", "inventoryList"].includes(fieldName)
+                ? structuredClone(beforeSnapshot[fieldName])
                 : beforeSnapshot[fieldName];
         }
         card.version = Number.isInteger(card.version) ? card.version + 1 : 1;
@@ -3484,12 +3717,16 @@ function getGameEventTypeLabel(eventType) {
         temporary_hp: "Temporäre Trefferpunkte",
         condition_added: "Condition hinzugefügt",
         condition_removed: "Condition entfernt",
+        effect_added: "Effekt hinzugefügt",
+        effect_removed: "Effekt entfernt",
+        effect_expired: "Effekt abgelaufen",
         encounter_started: "Encounter gestartet",
         encounter_ended: "Encounter beendet",
         turn_changed: "Zug gewechselt",
         round_changed: "Runde gewechselt",
         card_moved: "Karte verschoben",
         item_used: "Item verwendet",
+        item_transferred: "Item übertragen",
         undo: "Rückgängig",
         system: "Systemmeldung"
     };
@@ -4298,9 +4535,187 @@ function getPublicVisibilitySummary(card) {
     return `${getHpVisibilityLabel(card)} · ${getHealthStateLabel(healthPresentation.state)}`;
 }
 
+
 // ============================================================
-// 8. Conditions
+// 8. Conditions und benutzerdefinierte Effekte
 // ============================================================
+
+function createEffectId() {
+    return createUniqueId();
+}
+
+function getEffectDurationLabel(effect) {
+    if (effect.durationMode === effectDurationModes.rounds) {
+        return `${getSafePositiveInteger(effect.remainingRounds, 1)} Runde(n)`;
+    }
+    if (effect.durationMode === effectDurationModes.turnStart) {
+        return "bis zum Beginn des festgelegten Zuges";
+    }
+    if (effect.durationMode === effectDurationModes.turnEnd) {
+        return "bis zum Ende des festgelegten Zuges";
+    }
+    if (effect.durationMode === effectDurationModes.encounterEnd) {
+        return "bis Encounter-Ende";
+    }
+    if (effect.durationMode === effectDurationModes.freeText) {
+        return getSafeOptionalString(effect.endCondition) || "freie Endbedingung";
+    }
+    return "manuell";
+}
+
+function getSafeEffectDurationMode(value) {
+    return Object.values(effectDurationModes).includes(value) ? value : effectDurationModes.manual;
+}
+
+function getSafeEffectVisibility(value) {
+    return Object.values(effectVisibilityModes).includes(value) ? value : effectVisibilityModes.public;
+}
+
+function getSafeEffectColorKey(value) {
+    return availableConditions.includes(value) ? value : "magical-effect";
+}
+
+function getSafeEffects(value) {
+    if (Array.isArray(value) === false) return [];
+    const safeEffects = [];
+    for (const rawEffect of value) {
+        if (rawEffect === null || typeof rawEffect !== "object") continue;
+        const name = getSafeOptionalString(rawEffect.name).trim();
+        if (name === "") continue;
+        const durationMode = getSafeEffectDurationMode(rawEffect.durationMode);
+        safeEffects.push({
+            id: getSafeOptionalString(rawEffect.id) || createEffectId(),
+            kind: "custom",
+            name: name.slice(0, 80),
+            sourceCardId: rawEffect.sourceCardId ?? null,
+            durationMode,
+            remainingRounds: durationMode === effectDurationModes.rounds ? getSafePositiveInteger(rawEffect.remainingRounds, 1) : null,
+            triggerCardId: rawEffect.triggerCardId ?? null,
+            endCondition: getSafeOptionalString(rawEffect.endCondition).slice(0, 240),
+            visibility: getSafeEffectVisibility(rawEffect.visibility),
+            colorKey: getSafeEffectColorKey(rawEffect.colorKey),
+            value: getSafeOptionalString(rawEffect.value).slice(0, 80),
+            note: getSafeOptionalString(rawEffect.note).slice(0, 500),
+            createdAt: getSafeOptionalString(rawEffect.createdAt) || new Date().toISOString()
+        });
+    }
+    return safeEffects;
+}
+
+function createEffectChipHtml(effect, cardId, isPublic = false) {
+    const duration = getEffectDurationLabel(effect);
+    const colorClassName = getConditionClassName(getSafeEffectColorKey(effect.colorKey));
+    const removeButton = isPublic ? "" : `<button class="effect-chip-remove" type="button" title="Effekt entfernen" aria-label="${escapeHtml(effect.name)} entfernen" onclick="event.stopPropagation(); removeCustomEffectFromCard(${JSON.stringify(cardId)}, '${escapeHtml(effect.id)}')">×</button>`;
+    const tooltipParts = [duration, effect.note].filter(Boolean);
+    return `<span class="condition-chip custom-effect-chip ${colorClassName}" title="${escapeHtml(tooltipParts.join(" · "))}"><span class="condition-chip-name">${escapeHtml(effect.name)}</span>${removeButton}</span>`;
+}
+
+function createEffectChipsHtml(card, isPublic = false) {
+    const effects = Array.isArray(card.effects) ? card.effects : [];
+    const visibleEffects = isPublic
+        ? effects.filter(function(effect) {
+            return getSafeEffectVisibility(effect.visibility) === effectVisibilityModes.public;
+        })
+        : effects;
+    return visibleEffects.map(effect => createEffectChipHtml(effect, card.id, isPublic)).join("");
+}
+
+function getSelectedCustomEffectDurationMode() {
+    return document.querySelector("#custom-effect-duration")?.value || effectDurationModes.manual;
+}
+
+function updateCustomEffectDurationFields() {
+    const mode = getSelectedCustomEffectDurationMode();
+    const rounds = document.querySelector("#custom-effect-rounds-field");
+    const freeText = document.querySelector("#custom-effect-end-condition-field");
+    if (rounds) rounds.hidden = mode !== effectDurationModes.rounds;
+    if (freeText) freeText.hidden = mode !== effectDurationModes.freeText;
+}
+
+function addCustomEffectToSelectedCards() {
+    const targets = getSelectedTargetsOrWarn();
+    if (targets.length === 0) return;
+    const nameInput = document.querySelector("#custom-effect-name");
+    const name = nameInput?.value.trim() || "";
+    if (name === "") { alert("Bitte gib einen Namen für den Effekt ein."); return; }
+    const durationMode = getSelectedCustomEffectDurationMode();
+    const currentTurnCardId = gameState.encounter.currentTurnCardId;
+    const rounds = getSafePositiveInteger(document.querySelector("#custom-effect-rounds")?.value, 1);
+    const endCondition = document.querySelector("#custom-effect-end-condition")?.value.trim() || "";
+    const visibility = getSafeEffectVisibility(document.querySelector("#custom-effect-visibility")?.value);
+    const colorKey = getSafeEffectColorKey(document.querySelector("#custom-effect-color")?.value);
+    const note = document.querySelector("#custom-effect-note")?.value.trim() || "";
+    const before = targets.map(card => ({ cardId: card.id, effects: structuredClone(card.effects || []) }));
+    for (const card of targets) {
+        card.effects ??= [];
+        card.effects.push({
+            id: createEffectId(), kind: "custom", name,
+            sourceCardId: uiState.focusedCardId,
+            durationMode,
+            remainingRounds: durationMode === effectDurationModes.rounds ? rounds : null,
+            triggerCardId: (durationMode === effectDurationModes.turnStart || durationMode === effectDurationModes.turnEnd) ? currentTurnCardId : null,
+            endCondition: durationMode === effectDurationModes.freeText ? endCondition : "",
+            visibility, colorKey, value: "", note,
+            createdAt: new Date().toISOString()
+        });
+        card.updatedAt = new Date().toISOString();
+    }
+    recordGameEvent({
+        type: "effect_added",
+        targetCardIds: targets.map(card => card.id),
+        before,
+        after: targets.map(card => ({ cardId: card.id, effects: structuredClone(card.effects) })),
+        metadata: { effectName: name, durationMode, colorKey },
+        message: `Effekt „${name}“ auf ${targets.length} Ziel(e) angewendet: ${createTargetNamesText(targets)}.`
+    });
+    if (nameInput) nameInput.value = "";
+    saveAndBroadcastAppState();
+    renderCardsPreservingViewport();
+}
+
+function removeCustomEffectFromCard(cardId, effectId, reason = "manual") {
+    const card = findCardById(cardId);
+    if (!card || !Array.isArray(card.effects)) return;
+    const effect = card.effects.find(item => item.id === effectId);
+    if (!effect) return;
+    const before = [{ cardId: card.id, effects: structuredClone(card.effects) }];
+    card.effects = card.effects.filter(item => item.id !== effectId);
+    card.updatedAt = new Date().toISOString();
+    recordGameEvent({
+        type: reason === "expired" ? "effect_expired" : "effect_removed",
+        targetCardId: card.id,
+        before,
+        after: [{ cardId: card.id, effects: structuredClone(card.effects) }],
+        metadata: { effectName: effect.name, reason },
+        message: reason === "expired" ? `Effekt „${effect.name}“ auf ${card.name} ist abgelaufen.` : `Effekt „${effect.name}“ von ${card.name} entfernt.`
+    });
+    if (reason !== "batch") renderCardsPreservingViewport();
+}
+
+function expireEffectsForTrigger(trigger, triggerCardId = null) {
+    const expired = [];
+    for (const card of getHandCards()) {
+        for (const effect of [...(card.effects || [])]) {
+            let shouldExpire = false;
+            if (trigger === "round") {
+                if (effect.durationMode === effectDurationModes.rounds) {
+                    effect.remainingRounds = getSafePositiveInteger(effect.remainingRounds, 1) - 1;
+                    shouldExpire = effect.remainingRounds <= 0;
+                }
+            } else if (trigger === "turn_start") {
+                shouldExpire = effect.durationMode === effectDurationModes.turnStart && effect.triggerCardId === triggerCardId;
+            } else if (trigger === "turn_end") {
+                shouldExpire = effect.durationMode === effectDurationModes.turnEnd && effect.triggerCardId === triggerCardId;
+            } else if (trigger === "encounter_end") {
+                shouldExpire = effect.durationMode === effectDurationModes.encounterEnd;
+            }
+            if (shouldExpire) expired.push({ cardId: card.id, effectId: effect.id });
+        }
+    }
+    for (const item of expired) removeCustomEffectFromCard(item.cardId, item.effectId, "expired");
+}
+
+
 
 function getConditionLabel(conditionName) {
     const conditionLabels = {
@@ -5053,8 +5468,13 @@ function createImportedCard(rawCard, usedIds) {
         inventoryCards: getSafeInventoryCards(rawCard.inventoryCards),
         inventoryList: getSafeInventoryList(rawCard.inventoryList),
         hpVisibility: getSafeHpVisibility(rawCard.hpVisibility),
+        accessPolicy: getSafeCardAccessPolicy(rawCard.accessPolicy || {
+            publicProfile: rawCard.publicProfile
+        }),
+        controllerParticipantId: getSafeOptionalString(rawCard.controllerParticipantId) || null,
         imageData: getSafeImageSource(rawCard.imageData),
         conditions: getSafeConditions(rawCard.conditions),
+        effects: getSafeEffects(rawCard.effects),
         isDemoCard: rawCard.isDemoCard === true || isKnownDemoCardData(rawCard) === true,
         location: Object.values(cardLocations).includes(rawCard.location)
             ? rawCard.location
@@ -8454,21 +8874,38 @@ function createPublicHpData(card) {
 }
 
 function createPublicCardData(card, isActive, isFocused) {
-    const publicName = getSafeOptionalString(card.publicName) || getSafeOptionalString(card.name) || "Unbenannte Karte";
-    const conditionList = Array.isArray(card.conditions) ? card.conditions : [];
+    const context = publicDisplayAccessContext;
+    const mayShowName = canViewCardField(card, cardFieldVisibility.publicName, context);
+    const mayShowImage = canViewCardField(card, cardFieldVisibility.image, context);
+    const mayShowInitiative = canViewCardField(card, cardFieldVisibility.initiative, context);
+    const mayShowHp = canViewCardField(card, cardFieldVisibility.hp, context);
+    const mayShowConditions = canViewCardField(card, cardFieldVisibility.conditions, context);
+    const mayShowEffects = canViewCardField(card, cardFieldVisibility.effects, context);
+    const publicName = mayShowName
+        ? (getSafeOptionalString(card.publicName) || getSafeOptionalString(card.name) || "Unbenannte Karte")
+        : "Unbekannte Karte";
 
     return {
         id: card.id,
-        publicName: publicName,
+        publicName,
         type: getSafeCardType(card.type),
-        initiative: getSafeInteger(card.initiative, 0),
-        imageData: getSafeOptionalString(card.imageData),
-        hp: createPublicHpData(card),
-        conditions: conditionList.slice(),
-        isActive: isActive,
-        isFocused: isFocused,
+        initiative: mayShowInitiative ? getSafeInteger(card.initiative, 0) : null,
+        imageData: mayShowImage ? getSafeOptionalString(card.imageData) : "",
+        hp: mayShowHp ? createPublicHpData(card) : {
+            mode: "hidden",
+            health: getHealthPresentation(card, false)
+        },
+        conditions: mayShowConditions && Array.isArray(card.conditions) ? card.conditions.slice() : [],
+        effects: mayShowEffects
+            ? getSafeEffects(card.effects).filter(function(effect) {
+                return effect.visibility === effectVisibilityModes.public;
+            })
+            : [],
+        isActive,
+        isFocused,
         isInTurnOrder: card.isInitiativeActive !== false,
-        isOutOfAction: isCardOutOfAction(card)
+        isOutOfAction: isCardOutOfAction(card),
+        accessProfile: getSafeCardAccessPolicy(card.accessPolicy).publicProfile
     };
 }
 
@@ -8774,51 +9211,21 @@ function getPublicHpPreviewHtml(publicCard) {
 }
 
 function createConditionChipsHtml(card) {
-    if (card.conditions.length === 0) {
-        return `
-            <p class="condition-empty">
-                Keine Conditions.
-            </p>
-        `;
-    }
-
     let html = "";
-
-    for (const condition of card.conditions) {
-        html += `
-            <span class="condition-chip ${getConditionClassName(condition)}">
-                <span class="condition-chip-name">
-                    ${getConditionLabel(condition)}
-                </span>
-            </span>
-        `;
+    for (const condition of (card.conditions || [])) {
+        html += `<span class="condition-chip ${getConditionClassName(condition)}"><span class="condition-chip-name">${getConditionLabel(condition)}</span></span>`;
     }
-
-    return html;
+    html += createEffectChipsHtml(card, false);
+    return html || `<p class="condition-empty">Keine Conditions oder Effekte.</p>`;
 }
 
 function createPublicConditionChipsHtml(publicCard) {
-    if (publicCard.conditions.length === 0) {
-        return `
-            <p class="condition-empty">
-                Keine Conditions sichtbar.
-            </p>
-        `;
-    }
-
     let html = "";
-
-    for (const condition of publicCard.conditions) {
-        html += `
-            <span class="condition-chip ${getConditionClassName(condition)}">
-                <span class="condition-chip-name">
-                    ${getConditionLabel(condition)}
-                </span>
-            </span>
-        `;
+    for (const condition of (publicCard.conditions || [])) {
+        html += `<span class="condition-chip ${getConditionClassName(condition)}"><span class="condition-chip-name">${getConditionLabel(condition)}</span></span>`;
     }
-
-    return html;
+    html += createEffectChipsHtml(publicCard, true);
+    return html || `<p class="condition-empty">Keine Conditions oder Effekte sichtbar.</p>`;
 }
 
 
@@ -9166,10 +9573,17 @@ function createPublicStageCardHtml(publicCard, slotName) {
     const isGhostSlot = slotName === "ghost-previous" || slotName === "ghost-next";
     const sideClass = isFocusedSlot ? "focused" : isGhostSlot ? "ghost" : "side";
     const focusColorClass = getPublicStageFocusClass(slotName);
-    const shouldShowConditionBlock = isGhostSlot !== true && (isFocusedSlot === true || publicCard.conditions.length > 0);
+    const mayShowEmptyConditionBlock = publicCard.accessProfile !== cardPublicProfiles.minimal;
+    const shouldShowConditionBlock = isGhostSlot !== true && (
+        (isFocusedSlot === true && mayShowEmptyConditionBlock)
+        || publicCard.conditions.length > 0
+        || (publicCard.effects || []).some(function(effect) {
+            return effect.visibility === effectVisibilityModes.public;
+        })
+    );
     const conditionBlock = shouldShowConditionBlock ? `
         <div class="player-side-section-box public-condition-box">
-            <h4>Conditions</h4>
+            <h4>Conditions &amp; Effekte</h4>
 
             <div class="condition-chip-list">
                 ${createPublicConditionChipsHtml(publicCard)}
@@ -9419,7 +9833,7 @@ function createCardHtml(card, isActive) {
     const conditionsSectionHtml = card.isInCombat === true
         ? `
             <div class="card-section">
-                <h4>Conditions</h4>
+                <h4>Conditions &amp; Effekte</h4>
 
                 <div class="condition-chip-list">
                     ${createConditionChipsHtml(card)}
@@ -9928,6 +10342,7 @@ function openEditCardForm(cardId) {
     writeInventoryToForge("edit-card", card);
     renderForgeInventoryManager("edit-card");
     setInputValue("edit-card-hp-visibility", card.hpVisibility);
+    setInputValue("edit-card-public-profile", getSafeCardAccessPolicy(card.accessPolicy).publicProfile);
     setCheckboxValue("edit-card-is-in-combat", card.isInCombat === true);
 
     renderEditConditionCheckboxes();
@@ -10025,6 +10440,7 @@ async function handleEditCardSaveButtonClick() {
     const specialResourcesInputElement = document.querySelector("#edit-card-special-resources");
     const notesInputElement = document.querySelector("#edit-card-notes");
     const hpVisibilitySelectElement = document.querySelector("#edit-card-hp-visibility");
+    const publicProfileSelectElement = document.querySelector("#edit-card-public-profile");
     const isInCombatInputElement = document.querySelector("#edit-card-is-in-combat");
     const conditionListElement = document.querySelector("#edit-card-condition-list");
 
@@ -10064,6 +10480,7 @@ async function handleEditCardSaveButtonClick() {
         specialResourcesInputElement === null ||
         notesInputElement === null ||
         hpVisibilitySelectElement === null ||
+        publicProfileSelectElement === null ||
         isInCombatInputElement === null ||
         conditionListElement === null
     ) {
@@ -10212,6 +10629,10 @@ async function handleEditCardSaveButtonClick() {
     card.inventoryCards = nextInventory.cards;
     card.inventoryList = nextInventory.list;
     card.hpVisibility = hpVisibilitySelectElement.value;
+    card.accessPolicy = getSafeCardAccessPolicy({
+        ...card.accessPolicy,
+        publicProfile: publicProfileSelectElement.value
+    });
     card.imageData = imageData;
     card.conditions = getEditConditionValues();
     setCardLocation(card, isInCombatInputElement.checked ? cardLocations.hand : cardLocations.deck);
@@ -10270,6 +10691,7 @@ async function handleAddCardButtonClick() {
     const maxHpInputElement = document.querySelector("#new-card-max-hp");
     const tempHpInputElement = document.querySelector("#new-card-temp-hp");
     const hpVisibilitySelectElement = document.querySelector("#new-card-hp-visibility");
+    const publicProfileSelectElement = document.querySelector("#new-card-public-profile");
     const acInputElement = document.querySelector("#new-card-ac");
     const passivePerceptionInputElement = document.querySelector("#new-card-passive-perception");
     const passiveInsightInputElement = document.querySelector("#new-card-passive-insight");
@@ -10309,6 +10731,7 @@ async function handleAddCardButtonClick() {
         maxHpInputElement === null ||
         tempHpInputElement === null ||
         hpVisibilitySelectElement === null ||
+        publicProfileSelectElement === null ||
         acInputElement === null ||
         passivePerceptionInputElement === null ||
         passiveInsightInputElement === null ||
@@ -10491,6 +10914,8 @@ async function handleAddCardButtonClick() {
             spellcasting: readSpellcastingFromForge("new-card"),
             ...createInventoryFieldsFromForge("new-card"),
             hpVisibility: hpVisibilitySelectElement.value,
+            accessPolicy: getSafeCardAccessPolicy({ publicProfile: publicProfileSelectElement.value }),
+            controllerParticipantId: null,
             imageData: imageData,
             conditions: startConditions.slice(),
             isDemoCard: false,
@@ -11895,18 +12320,38 @@ function getSafeInventoryCategory(value) {
 
 function createInventoryCard(rawItem = {}, fallbackIndex = 0) {
     const category = getSafeInventoryCategory(rawItem.category);
+    const quantity = getSafeNonNegativeInteger(rawItem.quantity, 1);
+    const legacyHealingFormula = getSafeOptionalString(rawItem.healingFormula);
+    const rawEffectType = getSafeOptionalString(rawItem.executableEffect?.type || rawItem.executableEffectType);
+    const executableEffectType = Object.values(itemExecutableEffectTypes).includes(rawEffectType)
+        ? rawEffectType
+        : (legacyHealingFormula !== "" ? itemExecutableEffectTypes.healing : itemExecutableEffectTypes.none);
+    const executableEffectValue = getSafeOptionalString(
+        rawItem.executableEffect?.value
+        || rawItem.executableEffectValue
+        || (executableEffectType === itemExecutableEffectTypes.healing ? legacyHealingFormula : "")
+    );
+
     return {
-        id: getSafeOptionalString(rawItem.id) || `item-${Date.now()}-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
+        id: getSafeOptionalString(rawItem.id) || createUniqueId(),
         template: getSafeOptionalString(rawItem.template),
         name: getSafeOptionalString(rawItem.name) || "Neue Itemkarte",
         category: category,
         effect: getSafeOptionalString(rawItem.effect),
         description: getSafeOptionalString(rawItem.description),
-        healingFormula: getSafeOptionalString(rawItem.healingFormula),
+        healingFormula: legacyHealingFormula,
         image: normalizeInventoryImagePath(rawItem.image, category),
         showAsAction: rawItem.showAsAction === true,
         actionType: getSafeCardActionType(rawItem.actionType),
-        used: 0
+        quantity: quantity,
+        status: quantity > 0 ? "available" : "consumed",
+        executableEffect: {
+            type: executableEffectType,
+            value: executableEffectValue,
+            visibility: getSafeEffectVisibility(rawItem.executableEffect?.visibility || effectVisibilityModes.public)
+        },
+        controllerCanTransfer: rawItem.controllerCanTransfer === true,
+        used: getSafeNonNegativeInteger(rawItem.used, 0)
     };
 }
 
@@ -11974,9 +12419,11 @@ function createInventoryListItem(rawItem = {}, fallbackIndex = 0) {
         id: getSafeOptionalString(rawItem.id) || `list-${Date.now()}-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
         name: name,
         category: getSafeInventoryCategory(rawItem.category || suggestion.category),
-        quantity: getSafePositiveInteger(rawItem.quantity, 1),
+        quantity: getSafeNonNegativeInteger(rawItem.quantity, 1),
+        consumable: rawItem.consumable === true,
         description: getSafeOptionalString(rawItem.description) || getSafeOptionalString(rawItem.notes) || suggestion.description,
-        notes: getSafeOptionalString(rawItem.notes)
+        notes: getSafeOptionalString(rawItem.notes),
+        status: getSafeNonNegativeInteger(rawItem.quantity, 1) > 0 ? "available" : "consumed"
     };
 }
 
@@ -12049,26 +12496,36 @@ function createInventoryDataFromLegacyText(text) {
         const parsed = getInventoryEntryCountAndName(entry);
 
         if (lower.includes("meisterlicher heiltrank") || lower.includes("potion of supreme healing") || (lower.includes("potion of healing") && lower.includes("supreme"))) {
-            for (let index = 0; index < parsed.count; index = index + 1) {
-                cards.push(createInventoryCardFromTemplate("supremeHealing"));
-            }
+            cards.push(createInventoryCard({
+                ...createInventoryCardFromTemplate("supremeHealing"),
+                id: "",
+                quantity: parsed.count
+            }, cards.length));
         } else if (lower.includes("großer heiltrank") || lower.includes("grosser heiltrank") || lower.includes("potion of superior healing") || (lower.includes("potion of healing") && lower.includes("superior"))) {
-            for (let index = 0; index < parsed.count; index = index + 1) {
-                cards.push(createInventoryCardFromTemplate("superiorHealing"));
-            }
+            cards.push(createInventoryCard({
+                ...createInventoryCardFromTemplate("superiorHealing"),
+                id: "",
+                quantity: parsed.count
+            }, cards.length));
         } else if (lower.includes("starker heiltrank") || lower.includes("potion of greater healing") || (lower.includes("potion of healing") && lower.includes("greater"))) {
-            for (let index = 0; index < parsed.count; index = index + 1) {
-                cards.push(createInventoryCardFromTemplate("greaterHealing"));
-            }
+            cards.push(createInventoryCard({
+                ...createInventoryCardFromTemplate("greaterHealing"),
+                id: "",
+                quantity: parsed.count
+            }, cards.length));
         } else if (lower.includes("heiltrank") || lower.includes("potion of healing")) {
-            for (let index = 0; index < parsed.count; index = index + 1) {
-                cards.push(createInventoryCardFromTemplate("healing"));
-            }
+            cards.push(createInventoryCard({
+                ...createInventoryCardFromTemplate("healing"),
+                id: "",
+                quantity: parsed.count
+            }, cards.length));
         } else if ((lower.includes("potion") || lower.includes("trank")) && (lower.includes("shrieker") || lower.includes("sporen") || lower.includes("custom"))) {
             const customCard = createCustomConsumableCardFromEntry(entry, cards.length);
-            for (let index = 0; index < customCard.count; index = index + 1) {
-                cards.push(createInventoryCard({ ...customCard.item, id: "" }, cards.length));
-            }
+            cards.push(createInventoryCard({
+                ...customCard.item,
+                id: "",
+                quantity: customCard.count
+            }, cards.length));
         } else {
             const suggestion = getInventoryItemSuggestion(parsed.name);
             list.push(createInventoryListItem({
@@ -12085,6 +12542,48 @@ function createInventoryDataFromLegacyText(text) {
         cards: cards,
         list: list
     };
+}
+
+function getInventoryStackKey(item) {
+    return JSON.stringify({
+        template: item.template,
+        name: item.name,
+        category: item.category,
+        effect: item.effect,
+        description: item.description,
+        healingFormula: item.healingFormula,
+        image: item.image,
+        showAsAction: item.showAsAction,
+        actionType: item.actionType,
+        executableEffect: item.executableEffect,
+        controllerCanTransfer: item.controllerCanTransfer
+    });
+}
+
+function mergeStackableInventoryCards(cards) {
+    const mergedCards = [];
+    const stackIndexes = new Map();
+
+    for (const rawItem of cards) {
+        const item = createInventoryCard(rawItem, mergedCards.length);
+        const stackKey = getInventoryStackKey(item);
+        const existingIndex = stackIndexes.get(stackKey);
+
+        if (existingIndex === undefined) {
+            stackIndexes.set(stackKey, mergedCards.length);
+            mergedCards.push(item);
+            continue;
+        }
+
+        const existingItem = mergedCards[existingIndex];
+        existingItem.quantity = getSafeNonNegativeInteger(existingItem.quantity, 0)
+            + getSafeNonNegativeInteger(item.quantity, 0);
+        existingItem.used = getSafeNonNegativeInteger(existingItem.used, 0)
+            + getSafeNonNegativeInteger(item.used, 0);
+        existingItem.status = existingItem.quantity > 0 ? "available" : "consumed";
+    }
+
+    return mergedCards;
 }
 
 function getSafeInventoryCards(value) {
@@ -12204,38 +12703,233 @@ function removeInventoryCardById(card, itemId) {
     syncCardInventoryData(card);
 }
 
+function getInventoryStateSnapshot(card) {
+    return {
+        cardId: card.id,
+        inventoryCards: structuredClone(getSafeInventoryCards(card.inventoryCards)),
+        inventoryList: structuredClone(getSafeInventoryList(card.inventoryList)),
+        hp: card.hp,
+        tempHp: card.tempHp,
+        conditions: structuredClone(Array.isArray(card.conditions) ? card.conditions : []),
+        effects: structuredClone(Array.isArray(card.effects) ? card.effects : [])
+    };
+}
+
+function resolveItemEffectAmount(value) {
+    const source = getSafeOptionalString(value);
+    if (/^\d+d\d+(?:[+-]\d+)?$/i.test(source.replace(/\s+/g, ""))) {
+        return rollDiceFormula(source);
+    }
+    const numericValue = Math.max(0, Number(source) || 0);
+    return { total: numericValue, rolls: [], formula: source || String(numericValue) };
+}
+
+function applyExecutableItemEffect(item, target) {
+    const effectType = item.executableEffect?.type || itemExecutableEffectTypes.none;
+    const effectValue = getSafeOptionalString(item.executableEffect?.value);
+    const result = resolveItemEffectAmount(effectValue);
+    let summary = "";
+
+    if (effectType === itemExecutableEffectTypes.healing) {
+        applyHealing(target, result.total);
+        summary = `${result.total} HP Heilung`;
+    } else if (effectType === itemExecutableEffectTypes.damage) {
+        applyDamage(target, result.total);
+        summary = `${result.total} Schaden`;
+    } else if (effectType === itemExecutableEffectTypes.temporaryHp) {
+        applyTempHp(target, result.total);
+        summary = `${result.total} temporäre HP`;
+    } else if (effectType === itemExecutableEffectTypes.condition) {
+        const conditionKey = effectValue.trim();
+        if (conditionKey !== "" && target.conditions.includes(conditionKey) === false) {
+            target.conditions.push(conditionKey);
+        }
+        summary = conditionKey !== "" ? `Condition ${conditionKey}` : "Condition";
+    } else if (effectType === itemExecutableEffectTypes.customEffect) {
+        const effectName = effectValue.trim() || item.name;
+        target.effects = getSafeEffects([
+            ...(Array.isArray(target.effects) ? target.effects : []),
+            {
+                id: createEffectId(),
+                kind: "custom",
+                name: effectName,
+                colorKey: "violet",
+                durationMode: effectDurationModes.manual,
+                visibility: item.executableEffect?.visibility || effectVisibilityModes.public,
+                sourceCardId: null,
+                createdAt: new Date().toISOString()
+            }
+        ]);
+        summary = `Effekt „${effectName}“`;
+    }
+
+    return summary;
+}
+
 function useInventoryCard(cardId, itemId, mode) {
     const card = findCardById(cardId);
     if (card === null) { return; }
 
-    const item = getInventoryCards(card).find(function(candidate) { return candidate.id === itemId; });
-    if (item === undefined) { return; }
+    const cards = getSafeInventoryCards(card.inventoryCards);
+    const itemIndex = cards.findIndex(function(candidate) { return candidate.id === itemId; });
+    if (itemIndex < 0) { return; }
+    const item = cards[itemIndex];
 
-    let logText = `${card.publicName || card.name} verwendet ${item.name}.`;
-
-    if (item.healingFormula !== "") {
-        const result = rollDiceFormula(item.healingFormula);
-        let target = card;
-        let targetLabel = "sich selbst";
-
-        if (mode === "target") {
-            const selectedTargets = getSelectedHandCards();
-            if (selectedTargets.length === 0) {
-                alert("Bitte wähle zuerst eine Zielkarte auf der Hand aus.");
-                return;
-            }
-            target = selectedTargets[0];
-            targetLabel = target.publicName || target.name;
-        }
-
-        applyHealing(target, result.total);
-        logText = `${card.publicName || card.name} verwendet ${item.name} auf ${targetLabel}: ${result.total} HP Heilung (${result.formula}: ${result.rolls.join("+")}).`;
+    if (item.quantity <= 0) {
+        alert("Diese Itemkarte ist aufgebraucht.");
+        return;
     }
 
-    removeInventoryCardById(card, itemId);
-    addCombatLogMessage(logText);
+    let target = card;
+    if (mode === "target") {
+        const selectedTargets = getSelectedHandCards();
+        if (selectedTargets.length === 0) {
+            alert("Bitte wähle zuerst eine Zielkarte auf der Hand aus.");
+            return;
+        }
+        target = selectedTargets[0];
+    }
+
+    const affectedCards = target.id === card.id ? [card] : [card, target];
+    const before = affectedCards.map(getInventoryStateSnapshot);
+    const effectSummary = applyExecutableItemEffect(item, target);
+
+    item.quantity = Math.max(0, item.quantity - 1);
+    item.status = item.quantity > 0 ? "available" : "consumed";
+    item.used = getSafeNonNegativeInteger(item.used, 0) + 1;
+    cards[itemIndex] = createInventoryCard(item, itemIndex);
+    card.inventoryCards = cards;
+    syncCardInventoryData(card);
+
+    const after = affectedCards.map(getInventoryStateSnapshot);
+    const targetName = target.publicName || target.name;
+    const message = `${card.publicName || card.name} verwendet ${item.name}${target.id !== card.id ? ` auf ${targetName}` : ""}${effectSummary !== "" ? `: ${effectSummary}` : ""}. Menge ${item.quantity}.`;
+
+    recordGameEvent({
+        type: "item_used",
+        sourceCardId: card.id,
+        targetCardId: target.id,
+        targetCardIds: affectedCards.map(function(entry) { return entry.id; }),
+        before,
+        after,
+        metadata: {
+            itemId: item.id,
+            itemName: item.name,
+            quantityAfter: item.quantity,
+            effectType: item.executableEffect?.type || itemExecutableEffectTypes.none
+        },
+        message
+    });
+
     saveAndBroadcastAppState();
-    renderCards();
+    renderCardsPreservingViewport();
+}
+
+function transferInventoryCard(cardId, itemId) {
+    const sourceCard = findCardById(cardId);
+    if (sourceCard === null) { return; }
+    const sourceCards = getSafeInventoryCards(sourceCard.inventoryCards);
+    const sourceIndex = sourceCards.findIndex(function(item) { return item.id === itemId; });
+    if (sourceIndex < 0) { return; }
+    const item = sourceCards[sourceIndex];
+    if (item.quantity <= 0) {
+        alert("Aufgebrauchte Itemkarten können nicht übertragen werden.");
+        return;
+    }
+
+    const targets = gameState.cards.filter(function(card) {
+        return card.id !== sourceCard.id && card.location !== cardLocations.trash && card.cardKind === cardKinds.character;
+    });
+    if (targets.length === 0) {
+        alert("Es ist keine andere Charakterkarte als Empfänger verfügbar.");
+        return;
+    }
+
+    const targetList = targets.map(function(card, index) {
+        return `${index + 1}: ${card.publicName || card.name}`;
+    }).join("\n");
+    const targetChoice = Number(prompt(`An welche Karte soll „${item.name}“ übertragen werden?\n\n${targetList}`, "1"));
+    if (!Number.isInteger(targetChoice) || targetChoice < 1 || targetChoice > targets.length) { return; }
+    const targetCard = targets[targetChoice - 1];
+
+    const quantity = Number(prompt(`Wie viele Exemplare übertragen? Verfügbar: ${item.quantity}`, String(item.quantity)));
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > item.quantity) {
+        alert("Bitte gib eine gültige Menge an.");
+        return;
+    }
+
+    const before = [getInventoryStateSnapshot(sourceCard), getInventoryStateSnapshot(targetCard)];
+
+    item.quantity -= quantity;
+    item.status = item.quantity > 0 ? "available" : "consumed";
+    sourceCards[sourceIndex] = createInventoryCard(item, sourceIndex);
+    sourceCard.inventoryCards = sourceCards;
+
+    const targetCards = getSafeInventoryCards(targetCard.inventoryCards);
+    const transferredItem = createInventoryCard({
+        ...structuredClone(item),
+        id: createUniqueId(),
+        quantity,
+        status: "available",
+        used: 0
+    }, targetCards.length);
+    targetCards.push(transferredItem);
+    targetCard.inventoryCards = targetCards;
+    syncCardInventoryData(sourceCard);
+    syncCardInventoryData(targetCard);
+
+    const after = [getInventoryStateSnapshot(sourceCard), getInventoryStateSnapshot(targetCard)];
+    recordGameEvent({
+        type: "item_transferred",
+        sourceCardId: sourceCard.id,
+        targetCardId: targetCard.id,
+        targetCardIds: [sourceCard.id, targetCard.id],
+        amount: quantity,
+        before,
+        after,
+        metadata: {
+            itemId: item.id,
+            newItemId: transferredItem.id,
+            itemName: item.name
+        },
+        message: `${quantity}× ${item.name} von ${sourceCard.publicName || sourceCard.name} an ${targetCard.publicName || targetCard.name} übertragen.`
+    });
+
+    saveAndBroadcastAppState();
+    renderCardsPreservingViewport();
+}
+
+function useInventoryListItem(cardId, itemId) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
+    const list = getSafeInventoryList(card.inventoryList);
+    const index = list.findIndex(function(item) { return item.id === itemId; });
+    if (index < 0 || list[index].consumable !== true) { return; }
+    if (list[index].quantity <= 0) {
+        alert("Dieser Gegenstand ist aufgebraucht.");
+        return;
+    }
+
+    const before = [getInventoryStateSnapshot(card)];
+    list[index].quantity -= 1;
+    list[index].status = list[index].quantity > 0 ? "available" : "consumed";
+    card.inventoryList = list;
+    syncCardInventoryData(card);
+    const after = [getInventoryStateSnapshot(card)];
+
+    recordGameEvent({
+        type: "item_used",
+        sourceCardId: card.id,
+        targetCardId: card.id,
+        targetCardIds: [card.id],
+        before,
+        after,
+        metadata: { inventoryListItemId: itemId, itemName: list[index].name },
+        message: `${card.publicName || card.name} verwendet ${list[index].name}. Menge ${list[index].quantity}.`
+    });
+
+    saveAndBroadcastAppState();
+    renderCardsPreservingViewport();
 }
 
 function addInventoryTemplateToCard(cardId, templateName) {
@@ -12280,6 +12974,7 @@ function updateInventoryCurrency(cardId) {
 function openDetailInventoryCardEditor(cardId, itemId = "", templateName = "customPotion") {
     const card = findCardById(cardId);
     if (card === null) { return; }
+    suppressDetailInventoryClickAwayOnce = true;
     activeDetailInventoryListEditor = null;
     activeDetailInventoryCardEditor = { cardId: cardId, itemId: itemId, templateName: templateName };
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -12307,6 +13002,13 @@ function readDetailInventoryCardEditor(cardId, existingId = "") {
         category: category,
         effect: document.querySelector(`#detail-item-effect-${cardId}`)?.value.trim() || "",
         healingFormula: document.querySelector(`#detail-item-healing-${cardId}`)?.value.trim() || "",
+        quantity: document.querySelector(`#detail-item-quantity-${cardId}`)?.value || 1,
+        executableEffect: {
+            type: document.querySelector(`#detail-item-executable-type-${cardId}`)?.value || itemExecutableEffectTypes.none,
+            value: document.querySelector(`#detail-item-executable-value-${cardId}`)?.value.trim() || "",
+            visibility: effectVisibilityModes.public
+        },
+        controllerCanTransfer: document.querySelector(`#detail-item-controller-transfer-${cardId}`)?.checked === true,
         description: document.querySelector(`#detail-item-description-${cardId}`)?.value.trim() || "",
         image: document.querySelector(`#detail-item-image-${cardId}`)?.value.trim() || (category === "scroll" ? "assets/items/scroll_custom.jpg" : "assets/items/potion_custom.jpg"),
         showAsAction: document.querySelector(`#detail-item-show-action-${cardId}`)?.checked === true,
@@ -12365,6 +13067,7 @@ function openInventoryCardInForge(cardId, itemId) {
 function openDetailInventoryListEditor(cardId, itemId = "") {
     const card = findCardById(cardId);
     if (card === null) { return; }
+    suppressDetailInventoryClickAwayOnce = true;
     activeDetailInventoryCardEditor = null;
     activeDetailInventoryListEditor = { cardId: cardId, itemId: itemId };
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -12390,6 +13093,7 @@ function saveDetailInventoryListEditor(cardId) {
         name: document.querySelector(`#detail-list-name-${cardId}`)?.value.trim() || "Neuer Gegenstand",
         category: document.querySelector(`#detail-list-category-${cardId}`)?.value || "equipment",
         quantity: document.querySelector(`#detail-list-quantity-${cardId}`)?.value || 1,
+        consumable: document.querySelector(`#detail-list-consumable-${cardId}`)?.checked === true,
         description: document.querySelector(`#detail-list-description-${cardId}`)?.value.trim() || ""
     }, list.length);
 
@@ -12440,24 +13144,25 @@ function createInventoryAddMenuHtml(cardId, context = "details", prefix = "") {
 function createInventoryCardHtml(cardId, item) {
     const safeImage = escapeHtml(normalizeInventoryImagePath(item.image, item.category));
     const metaText = inventoryCategoryLabels[item.category] || "Item";
-    const isHealingPotion = item.healingFormula !== "";
+    const isConsumed = item.quantity <= 0;
+    const hasExecutableEffect = item.executableEffect?.type !== itemExecutableEffectTypes.none || item.healingFormula !== "";
     const useLabel = item.category === "scroll" ? "Wirken" : "Verbrauchen";
     const descriptionText = item.description !== "" ? item.description : item.effect;
     const descriptionHtml = createInventoryDescriptionHtml(descriptionText);
 
     return `
-        <article class="inventory-item-card inventory-item-card-${escapeHtml(item.category)}">
+        <article class="inventory-item-card inventory-item-card-${escapeHtml(item.category)} ${isConsumed ? "inventory-item-consumed" : ""}">
             <div class="inventory-item-card-header">
                 <div class="inventory-item-title-block">
                     <h5>${createInventoryItemTitleHtml(item.name)}</h5>
-                    <p class="inventory-item-meta">${escapeHtml(metaText)}</p>
+                    <p class="inventory-item-meta">${escapeHtml(metaText)} · Menge ${item.quantity}${isConsumed ? " · Aufgebraucht" : ""}</p>
                 </div>
                 <details class="inventory-item-menu">
                     <summary class="inventory-item-menu-summary" aria-label="Aktionen für ${escapeHtml(item.name)}">☰</summary>
                     <div class="inventory-item-menu-panel">
-                        ${isHealingPotion ? `<button type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">Selbst trinken</button>` : ""}
-                        ${isHealingPotion ? `<button class="inventory-item-target-menu-button" type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
-                        ${isHealingPotion ? "" : `<button type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${useLabel}</button>`}
+                        ${hasExecutableEffect ? `<button type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${item.category === "potion" ? "Selbst verwenden" : useLabel}</button>` : `<button type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${useLabel}</button>`}
+                        ${hasExecutableEffect ? `<button class="inventory-item-target-menu-button" type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
+                        <button type="button" ${isConsumed ? "disabled" : ""} onclick="transferInventoryCard(${cardId}, '${item.id}')">Übertragen …</button>
                         <button type="button" onclick="openDetailInventoryCardEditor(${cardId}, '${item.id}')">Edit</button>
                         <button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${cardId}, '${item.id}', true)">Entfernen</button>
                     </div>
@@ -12495,7 +13200,13 @@ function createDetailInventoryCardEditorHtml(card) {
                 <label class="form-field"><span>Kategorie</span><select id="detail-item-category-${card.id}">${categoryOptions}</select></label>
                 <label class="form-field"><span>Aktionstyp</span><select id="detail-item-action-type-${card.id}">${typeOptions}</select></label>
                 <label class="form-field"><span>Effekt/Kurztext</span><input id="detail-item-effect-${card.id}" type="text" placeholder="Kurzer Effekt oder Nutzen" value="${escapeHtml(item.effect)}"></label>
-                <label class="form-field"><span>Heilformel</span><input id="detail-item-healing-${card.id}" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
+                <label class="form-field"><span>Heilformel (Legacy)</span><input id="detail-item-healing-${card.id}" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
+                <label class="form-field"><span>Menge</span><input id="detail-item-quantity-${card.id}" type="number" min="0" step="1" value="${item.quantity}"></label>
+                <label class="form-field"><span>Ausführbarer Effekt</span><select id="detail-item-executable-type-${card.id}">
+                    ${Object.entries(itemExecutableEffectLabels).map(function(entry) { return `<option value="${entry[0]}" ${item.executableEffect?.type === entry[0] ? "selected" : ""}>${entry[1]}</option>`; }).join("")}
+                </select></label>
+                <label class="form-field"><span>Effektwert</span><input id="detail-item-executable-value-${card.id}" type="text" placeholder="z. B. 2d4+2, poisoned oder Brennt" value="${escapeHtml(item.executableEffect?.value || "")}"></label>
+                <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="detail-item-controller-transfer-${card.id}" type="checkbox" ${item.controllerCanTransfer === true ? "checked" : ""}><span>Späteren Controller-Transfer erlauben</span></label>
                 <label class="form-field forge-spell-editor-wide"><span>Bildpfad</span><input id="detail-item-image-${card.id}" type="text" value="${escapeHtml(item.image)}"></label>
                 <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="detail-item-show-action-${card.id}" type="checkbox" ${item.showAsAction === true ? "checked" : ""}><span>Im Aktionen-Tab anzeigen</span></label>
                 <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
@@ -12530,6 +13241,7 @@ function createInventoryListHtml(cardId, list) {
                         <div class="inventory-list-row-body">
                             <p>${escapeHtml(item.description || "Keine Beschreibung eingetragen.")}</p>
                             <div class="inventory-list-row-actions">
+                                ${item.consumable === true ? `<button type="button" ${item.quantity <= 0 ? "disabled" : ""} onclick="useInventoryListItem(${cardId}, '${item.id}')">Verwenden</button>` : ""}
                                 <button type="button" onclick="openDetailInventoryListEditor(${cardId}, '${item.id}')">Edit</button>
                                 <button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${cardId}, '${item.id}')" title="Eintrag entfernen" aria-label="${escapeHtml(item.name)} entfernen">Löschen</button>
                             </div>
@@ -12556,7 +13268,8 @@ function createDetailInventoryListEditorHtml(card) {
             <div class="forge-spell-editor-grid">
                 <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-list-name-${card.id}" type="text" placeholder="Name des Gegenstands" value="${escapeHtml(item.name)}"></label>
                 <label class="form-field"><span>Kategorie</span><select id="detail-list-category-${card.id}">${categoryOptions}</select></label>
-                <label class="form-field"><span>Menge</span><input id="detail-list-quantity-${card.id}" type="number" min="1" value="${item.quantity}"></label>
+                <label class="form-field"><span>Menge</span><input id="detail-list-quantity-${card.id}" type="number" min="0" value="${item.quantity}"></label>
+                <label class="checkbox-field forge-checkbox-card"><input id="detail-list-consumable-${card.id}" type="checkbox" ${item.consumable === true ? "checked" : ""}><span>Verbrauchbar</span></label>
                 <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
@@ -12616,16 +13329,29 @@ function createInventoryTabHtml(card) {
         ? visibleCards.map(function(item) { return createInventoryCardHtml(card.id, item); }).join("")
         : `<p class="detail-placeholder-text inventory-empty-ribbon-message">Keine Itemkarten im Schnellzugriff.</p>`;
 
+    const detailCardEditorHtml = createDetailInventoryCardEditorHtml(card);
+    const isCardEditorOpen = detailCardEditorHtml !== "";
+
     return `
         <div class="active-hand-detail-content active-hand-detail-scroll active-hand-inventory-reference detail-tab-surface">
-            <section class="active-hand-detail-section inventory-card-section inventory-consumable-stage">
+            ${isCardEditorOpen ? `
+                <section class="active-hand-detail-section inventory-detail-editor-section">
+                    ${detailCardEditorHtml}
+                </section>
+            ` : ""}
+            <section class="active-hand-detail-section inventory-card-section inventory-consumable-stage ${isCardEditorOpen ? "inventory-stage-editor-open" : ""}">
                 <div class="active-hand-section-title-row inventory-stage-title-row">
                     <div>
                         <p class="section-eyebrow">Itemkarten</p>
                     </div>
                     ${createInventoryAddMenuHtml(card.id)}
                 </div>
-                ${createDetailInventoryCardEditorHtml(card)}
+                ${isCardEditorOpen ? `
+                    <div class="inventory-stage-paused-note">
+                        <strong>Itemkarte wird bearbeitet</strong>
+                        <span>Speichere oder schließe den Editor, um die Kartenübersicht wieder einzublenden.</span>
+                    </div>
+                ` : `
                 <div class="inventory-consumable-shell">
                     <div class="inventory-stage-rail inventory-stage-rail-left ${hasLeftGhost ? "has-ghost-card" : "is-empty"} ${canMoveLeft ? "can-scroll" : "at-edge"}">
                         ${leftGhostHtml}
@@ -12639,6 +13365,7 @@ function createInventoryTabHtml(card) {
                         <button class="inventory-ribbon-scroll inventory-ribbon-scroll-right" type="button" onclick="shiftInventoryStage(${card.id}, 1)" aria-label="Weitere Itemkarten anzeigen" ${canMoveRight ? "" : "disabled"}>›</button>
                     </div>
                 </div>
+                `}
             </section>
 
 
@@ -12921,22 +13648,53 @@ function renderForgeInventoryManager(prefix) {
     const inventory = getForgeInventoryDraft(prefix);
     const sortedCards = sortInventoryCardsForDisplay(inventory.cards);
     const sortedList = sortInventoryListByName(inventory.list);
-    const activeCard = activeForgeInventoryEditor !== null && activeForgeInventoryEditor.prefix === prefix && activeForgeInventoryEditor.itemType === "card"
+
+    const activeCard = activeForgeInventoryEditor !== null
+        && activeForgeInventoryEditor.prefix === prefix
+        && activeForgeInventoryEditor.itemType === "card"
         ? sortedCards.find(function(item) { return item.id === activeForgeInventoryEditor.itemId; })
         : null;
-    const activeListItem = activeForgeInventoryEditor !== null && activeForgeInventoryEditor.prefix === prefix && activeForgeInventoryEditor.itemType === "list"
+
+    const activeListItem = activeForgeInventoryEditor !== null
+        && activeForgeInventoryEditor.prefix === prefix
+        && activeForgeInventoryEditor.itemType === "list"
         ? sortedList.find(function(item) { return item.id === activeForgeInventoryEditor.itemId; })
         : null;
-    const cardDisplayItems = activeCard === null ? sortedCards : [activeCard, ...sortedCards.filter(function(item) { return item.id !== activeCard.id; })];
-    const listDisplayItems = activeListItem === null ? sortedList : [activeListItem, ...sortedList.filter(function(item) { return item.id !== activeListItem.id; })];
-    const cardRows = cardDisplayItems.length > 0
-        ? cardDisplayItems.map(function(item) { return createForgeInventoryCardRowHtml(prefix, item); }).join("")
+
+    const editorHtml = activeCard !== null
+        ? createForgeInventoryCardRowHtml(prefix, activeCard)
+        : activeListItem !== null
+            ? createForgeInventoryListRowHtml(prefix, activeListItem)
+            : "";
+
+    const cardRows = sortedCards.length > 0
+        ? sortedCards.map(function(item) {
+            const wasEditorOpen = activeForgeInventoryEditor;
+            if (activeCard !== null && item.id === activeCard.id) {
+                activeForgeInventoryEditor = null;
+                const rowHtml = createForgeInventoryCardRowHtml(prefix, item);
+                activeForgeInventoryEditor = wasEditorOpen;
+                return rowHtml;
+            }
+            return createForgeInventoryCardRowHtml(prefix, item);
+        }).join("")
         : `<p class="empty-list-message">Keine Itemkarten angelegt.</p>`;
-    const listRows = listDisplayItems.length > 0
-        ? listDisplayItems.map(function(item) { return createForgeInventoryListRowHtml(prefix, item); }).join("")
+
+    const listRows = sortedList.length > 0
+        ? sortedList.map(function(item) {
+            const wasEditorOpen = activeForgeInventoryEditor;
+            if (activeListItem !== null && item.id === activeListItem.id) {
+                activeForgeInventoryEditor = null;
+                const rowHtml = createForgeInventoryListRowHtml(prefix, item);
+                activeForgeInventoryEditor = wasEditorOpen;
+                return rowHtml;
+            }
+            return createForgeInventoryListRowHtml(prefix, item);
+        }).join("")
         : `<p class="empty-list-message">Keine Inventargegenstände angelegt.</p>`;
 
     managerElement.innerHTML = `
+        ${editorHtml !== "" ? `<div class="forge-inventory-editor-host">${editorHtml}</div>` : ""}
         <div class="forge-input-section inventory-forge-library-section">
             <div class="forge-spell-draft-header"><div><h4>Itemkarten</h4></div>${createInventoryAddMenuHtml(0, "forge", prefix)}</div>
             <div class="forge-spell-row-list forge-inventory-card-list">${cardRows}</div>
@@ -12946,8 +13704,14 @@ function renderForgeInventoryManager(prefix) {
             <div class="forge-spell-row-list forge-inventory-list">${listRows}</div>
         </div>
     `;
-}
 
+    const editorHost = managerElement.querySelector(".forge-inventory-editor-host");
+    if (editorHost instanceof HTMLElement) {
+        requestAnimationFrame(function() {
+            editorHost.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        });
+    }
+}
 
 function createDetailTabContentHtml(card) {
     if (card === null) {

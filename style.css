@@ -15547,3 +15547,635 @@ body:has(#deck-location-view option[value="trash"]:checked) .deck-workbench {
     overflow-wrap: anywhere;
     text-align: center;
 }
+
+
+/* 0.21.1 – Conditions und benutzerdefinierte Effekte */
+.toolkit-section-effect {
+    grid-column: 1 / -1;
+    min-width: 0;
+    overflow: visible;
+    padding: 0;
+}
+
+.custom-effect-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: end;
+    width: 100%;
+    min-width: 0;
+}
+
+.custom-effect-field {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+}
+
+.custom-effect-field > span {
+    color: var(--text-faint);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.custom-effect-grid input,
+.custom-effect-grid select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 40px;
+    min-height: 40px;
+    padding: 8px 10px;
+    margin: 0;
+    line-height: 1.2;
+    border-radius: 12px;
+}
+
+.custom-effect-grid select {
+    text-overflow: ellipsis;
+}
+
+.custom-effect-name-field,
+.custom-effect-duration-field,
+.custom-effect-note-field,
+.custom-effect-end-condition-field {
+    grid-column: 1 / -1;
+}
+
+.custom-effect-rounds-field {
+    grid-column: 1 / -1;
+}
+
+.custom-effect-color-field,
+.custom-effect-visibility-field {
+    grid-column: auto;
+}
+
+.custom-effect-add-button {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 10px;
+}
+
+.custom-effect-chip {
+    gap: 5px;
+    min-height: 0;
+    padding: 4px 6px 4px 8px;
+    border-style: dashed;
+    line-height: 1;
+}
+
+.effect-chip-remove {
+    flex: 0 0 auto;
+    min-width: 16px;
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: none;
+    background: rgba(0,0,0,.22);
+    color: var(--text-soft);
+    font-size: 11px;
+    line-height: 1;
+}
+.effect-chip-remove:hover { transform:none; background:rgba(255,123,138,.18); color:var(--danger-soft); }
+
+@media (max-width: 520px) {
+    .custom-effect-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .custom-effect-name-field,
+    .custom-effect-duration-field,
+    .custom-effect-rounds-field,
+    .custom-effect-end-condition-field,
+    .custom-effect-color-field,
+    .custom-effect-visibility-field,
+    .custom-effect-note-field {
+        grid-column: 1;
+    }
+}
+
+
+/* 0.21.5 – einheitliche Placeholder-Farbe */
+input::placeholder,
+textarea::placeholder {
+    color: rgba(198, 181, 255, .58);
+    opacity: 1;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+    color: rgba(198, 181, 255, .58);
+    opacity: 1;
+}
+
+
+/* 0.21.5 – eigener Effekt als einklappbarer Werkzeugbereich */
+.custom-effect-details {
+    position: relative;
+    min-width: 0;
+    overflow: visible;
+}
+
+.custom-effect-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    padding: 10px 12px;
+    list-style: none;
+    cursor: pointer;
+    border: 1px solid rgba(198,181,255,.16);
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(141,107,232,.08), transparent 42%),
+        rgba(8,7,12,.54);
+}
+
+.custom-effect-summary::-webkit-details-marker {
+    display: none;
+}
+
+.custom-effect-summary > span:first-child {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.custom-effect-summary strong {
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.custom-effect-summary small {
+    color: var(--text-faint);
+    font-size: 10.5px;
+    line-height: 1.3;
+}
+
+.custom-effect-summary-chevron {
+    flex: 0 0 auto;
+    color: var(--arcane-soft);
+    font-size: 18px;
+    transition: transform .18s ease;
+}
+
+.custom-effect-details[open] .custom-effect-summary-chevron {
+    transform: rotate(180deg);
+}
+
+.custom-effect-panel {
+    position: relative;
+    min-width: 0;
+    overflow: visible;
+    margin-top: 9px;
+    padding: 11px;
+    border: 1px solid rgba(198,181,255,.14);
+    border-radius: 14px;
+    background: rgba(7,6,11,.56);
+}
+
+.custom-effect-details[open],
+.custom-effect-panel,
+.custom-effect-grid,
+.custom-effect-field,
+.custom-effect-field.arcane-select-parent-open {
+    overflow: visible;
+}
+
+.custom-effect-field.arcane-select-parent-open {
+    position: relative;
+    z-index: 1200;
+}
+
+.custom-effect-field .arcane-select-wrapper.arcane-select-open {
+    z-index: 1220;
+}
+
+.custom-effect-field .arcane-select-menu {
+    z-index: 1240;
+}
+
+.custom-effect-panel .custom-effect-add-button {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* 0.21.6 – Inventar-Editor als eigener Inline-Bereich */
+.forge-inventory-editor-host {
+    position: relative;
+    z-index: 30;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0 0 12px;
+}
+
+.forge-inventory-editor-host .forge-inventory-editor {
+    position: relative;
+    z-index: 31;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 12px;
+    overflow: visible;
+    border: 1px solid rgba(127, 185, 255, .34);
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at 10% 0%, rgba(127,185,255,.09), transparent 36%),
+        linear-gradient(135deg, rgba(20,16,31,.98), rgba(8,7,12,.99));
+    box-shadow: 0 18px 34px rgba(0,0,0,.38);
+}
+
+.forge-inventory-editor-host .forge-spell-editor-grid {
+    width: 100%;
+    min-width: 0;
+}
+
+.forge-inventory-editor-host .forge-spell-editor-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.forge-inventory-editor-host .forge-spell-editor-actions button {
+    flex: 1 1 110px;
+    min-width: 0;
+}
+
+.inventory-forge-library-section,
+.inventory-forge-list-section {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* 0.21.7 – Detail-Itemeditor als eigenständige, stabile Fläche */
+.inventory-detail-editor-section {
+    position: relative;
+    z-index: 20;
+    min-width: 0;
+    overflow: visible;
+    padding: 12px;
+    border-color: rgba(127, 185, 255, .30);
+    background:
+        radial-gradient(circle at 12% 0%, rgba(127,185,255,.08), transparent 38%),
+        linear-gradient(135deg, rgba(18,14,29,.96), rgba(7,6,11,.98));
+    box-shadow:
+        0 16px 34px rgba(0,0,0,.28),
+        inset 0 0 0 1px rgba(255,255,255,.018);
+}
+
+.inventory-detail-editor-section .inventory-inline-editor {
+    position: relative;
+    z-index: 21;
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.inventory-detail-editor-section .forge-spell-editor-grid {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.inventory-detail-editor-section .form-field,
+.inventory-detail-editor-section input,
+.inventory-detail-editor-section select,
+.inventory-detail-editor-section textarea {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.inventory-detail-editor-section .inventory-inline-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.inventory-detail-editor-section .inventory-inline-editor-actions button {
+    flex: 1 1 145px;
+    min-width: 0;
+}
+
+.inventory-consumable-stage.inventory-stage-editor-open {
+    min-height: auto;
+    height: auto;
+    grid-template-rows: auto auto;
+    overflow: hidden;
+}
+
+.inventory-stage-paused-note {
+    display: grid;
+    gap: 4px;
+    min-height: 74px;
+    padding: 14px;
+    border: 1px dashed rgba(198,181,255,.18);
+    border-radius: 14px;
+    background: rgba(7,6,12,.40);
+}
+
+.inventory-stage-paused-note strong {
+    color: var(--text-soft);
+    font-size: 13px;
+}
+
+.inventory-stage-paused-note span {
+    color: var(--text-muted);
+    font-size: 11.5px;
+    line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+    .inventory-detail-editor-section .forge-spell-editor-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .inventory-detail-editor-section .forge-spell-editor-wide {
+        grid-column: 1;
+    }
+}
+
+
+/* 0.22.0 – Mengen- und Verbrauchsstatus für Inventar */
+.inventory-item-card.inventory-item-consumed {
+    opacity: .62;
+    filter: saturate(.55);
+}
+
+.inventory-item-card.inventory-item-consumed .inventory-item-art::after {
+    content: "Aufgebraucht";
+    position: absolute;
+    inset: auto 8px 8px;
+    display: grid;
+    place-items: center;
+    min-height: 24px;
+    border: 1px solid rgba(255,123,138,.42);
+    border-radius: 999px;
+    color: var(--danger-soft);
+    background: rgba(57,16,27,.86);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.inventory-item-art {
+    position: relative;
+}
+
+.inventory-item-menu-panel button:disabled,
+.inventory-list-row-actions button:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+}
+
+
+/* 0.22.1 – kompaktere Itemkarten und einheitlicher Inventar-Button */
+.inventory-card-ribbon,
+.inventory-card-ribbon-static {
+    grid-template-columns: repeat(2, minmax(168px, 188px));
+    gap: 14px;
+}
+
+.inventory-list-section .inventory-list-add-button {
+    width: auto;
+    max-width: 158px;
+    min-height: 30px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+    .inventory-card-ribbon,
+    .inventory-card-ribbon-static {
+        grid-template-columns: repeat(2, minmax(136px, 1fr));
+        gap: 10px;
+    }
+
+    .inventory-list-section .inventory-list-add-button {
+        max-width: 150px;
+        white-space: normal;
+    }
+}
+
+/* 0.23.0 – kompakter Inventar-Button und Freigabeprofil */
+.inventory-list-section .inventory-list-add-button,
+.inventory-list-section button.inventory-list-add-button {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 148px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    padding: 3px 9px !important;
+    font-size: 10.5px !important;
+    line-height: 1 !important;
+    align-self: center;
+}
+
+
+/* ============================================================
+   0.23.1 – kompaktere Bedienelemente in Atelier und Schmiede
+   ============================================================ */
+
+/* Gemeinsame Grundgröße innerhalb der beiden großen Werkzeug-Drawer */
+.card-forge-drawer input,
+.card-forge-drawer select,
+.ah-dm-action-drawer input,
+.ah-dm-action-drawer select {
+    min-height: 34px;
+    height: 34px;
+    padding: 5px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.15;
+}
+
+.card-forge-drawer textarea,
+.ah-dm-action-drawer textarea {
+    min-height: 70px;
+    padding: 7px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.card-forge-drawer button,
+.ah-dm-action-drawer button {
+    min-height: 30px;
+    padding: 5px 9px;
+    font-size: 11.5px;
+    line-height: 1.1;
+}
+
+/* Auswahlfelder mit eigener Darstellung sollen ebenfalls kompakt bleiben */
+.card-forge-drawer .arcane-select-trigger,
+.ah-dm-action-drawer .arcane-select-trigger {
+    min-height: 34px;
+    height: 34px;
+    padding: 5px 9px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+.card-forge-drawer .arcane-select-option,
+.ah-dm-action-drawer .arcane-select-option {
+    min-height: 31px;
+    padding: 6px 9px;
+    font-size: 11.5px;
+}
+
+/* Kompaktere Beschriftungen und weniger vertikaler Leerraum */
+.card-forge-drawer label,
+.ah-dm-action-drawer label {
+    font-size: 10.5px;
+}
+
+.card-forge-drawer .form-field,
+.ah-dm-action-drawer .form-field {
+    gap: 4px;
+}
+
+.card-forge-drawer .form-group,
+.ah-dm-action-drawer .control-group,
+.ah-dm-action-drawer .toolkit-section {
+    padding: 9px;
+    border-radius: 14px;
+}
+
+.card-forge-drawer .card-forge-form,
+.card-forge-drawer .forge-tab-grid,
+.ah-dm-action-drawer .ah-drawer-panel {
+    gap: 8px;
+}
+
+/* Checkboxen nicht künstlich auf Eingabefeldhöhe aufblasen */
+.card-forge-drawer input[type="checkbox"],
+.ah-dm-action-drawer input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    min-height: 15px;
+    padding: 0;
+}
+
+.card-forge-drawer .checkbox-field,
+.ah-dm-action-drawer .checkbox-field {
+    min-height: 28px;
+    padding: 5px 7px;
+}
+
+/* Kleine Aktionsbuttons bleiben bewusst noch kompakter */
+.card-forge-drawer .forge-tab-button,
+.card-forge-drawer .card-menu-summary,
+.ah-dm-action-drawer .card-menu-summary,
+.ah-dm-action-drawer .effect-chip-remove {
+    min-height: initial;
+}
+
+/* Auf sehr schmalen Ansichten etwas mehr Touch-Fläche behalten */
+@media (max-width: 680px) {
+    .card-forge-drawer input,
+    .card-forge-drawer select,
+    .ah-dm-action-drawer input,
+    .ah-dm-action-drawer select,
+    .card-forge-drawer .arcane-select-trigger,
+    .ah-dm-action-drawer .arcane-select-trigger {
+        min-height: 36px;
+        height: 36px;
+    }
+
+    .card-forge-drawer button,
+    .ah-dm-action-drawer button {
+        min-height: 32px;
+    }
+}
+
+
+/* ============================================================
+   0.23.2 – kompakte Arcane-Auswahlfelder in der Kartenschmiede
+   Die sichtbaren Selects verwenden .arcane-select-button.
+   ============================================================ */
+
+.card-forge-drawer .arcane-select-wrapper {
+    width: 100%;
+    min-width: 0;
+}
+
+.card-forge-drawer .arcane-select-button {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 4px 8px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+}
+
+.card-forge-drawer .arcane-select-current {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text-soft);
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-forge-drawer .arcane-select-chevron {
+    flex: 0 0 auto;
+    font-size: 12px !important;
+    line-height: 1 !important;
+}
+
+.card-forge-drawer .arcane-select-option {
+    min-height: 29px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    line-height: 1.15 !important;
+}
+
+/* Die nativen Selects bleiben verborgen, dürfen das Grid aber nicht verbreitern. */
+.card-forge-drawer .arcane-native-select {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Fokuskarte: diese drei Felder bewusst noch etwas kompakter. */
+.card-forge-drawer #edit-card-type + .arcane-select-wrapper .arcane-select-button,
+.card-forge-drawer #edit-card-hp-visibility + .arcane-select-wrapper .arcane-select-button,
+.card-forge-drawer #edit-card-public-profile + .arcane-select-wrapper .arcane-select-button {
+    height: 31px !important;
+    min-height: 31px !important;
+    padding-block: 3px !important;
+}
+
+@media (max-width: 680px) {
+    .card-forge-drawer .arcane-select-button {
+        height: 34px !important;
+        min-height: 34px !important;
+    }
+}

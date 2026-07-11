@@ -1,7 +1,7 @@
 "use strict";
 
 (function(globalScope) {
-    const supportedSchemaVersion = 7;
+    const supportedSchemaVersion = 10;
     const formatName = "Miriel's Deck of Encounters Game State";
 
     function isPlainObject(value) {
@@ -101,7 +101,7 @@
         const normalized = structuredClone(rawGameState);
         normalized.id = typeof normalized.id === "string" && normalized.id.trim() !== ""
             ? normalized.id.trim()
-            : crypto.randomUUID();
+            : createUniqueId();
         normalized.name = typeof normalized.name === "string" ? normalized.name : "Unbenannter Spielstand";
         normalized.cards = Array.isArray(normalized.cards) ? normalized.cards : [];
         normalized.encounter = isPlainObject(normalized.encounter) ? normalized.encounter : {};
@@ -119,7 +119,7 @@
                     ? rawEvent.message
                     : (typeof rawEvent.text === "string" ? rawEvent.text : "Ereignis protokolliert.");
                 return {
-                    id: typeof rawEvent.id === "string" && rawEvent.id !== "" ? rawEvent.id : crypto.randomUUID(),
+                    id: typeof rawEvent.id === "string" && rawEvent.id !== "" ? rawEvent.id : createUniqueId(),
                     type: typeof rawEvent.type === "string" && rawEvent.type !== "" ? rawEvent.type : "system",
                     actorParticipantId: rawEvent.actorParticipantId ?? null,
                     sourceCardId: rawEvent.sourceCardId ?? null,
