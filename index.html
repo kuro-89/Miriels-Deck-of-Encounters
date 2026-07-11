@@ -6,7 +6,7 @@
   <title>
    Miriel's Deck of Encounters
   </title>
-  <link href="style.css?v=0.10.1" rel="stylesheet"/>
+  <link href="style.css?v=0.16.0" rel="stylesheet"/>
  </head>
  <body>
   <main class="app">
@@ -279,7 +279,7 @@
          </p>
          <div class="focus-stage-shell">
           <div class="focus-stage-rail focus-stage-rail-left">
-           <button aria-label="Vorherige Fokuskarte" class="focus-stage-arrow focus-stage-arrow-left" onclick="focusAdjacentHandCreature('previous')" title="Vorherige Karte fokussieren">
+           <button aria-label="Vorherige Fokuskarte" class="focus-stage-arrow focus-stage-arrow-left" onclick="focusAdjacentHandCard('previous')" title="Vorherige Karte fokussieren">
             &lsaquo;
            </button>
           </div>
@@ -288,7 +288,7 @@
            </div>
           </div>
           <div class="focus-stage-rail focus-stage-rail-right">
-           <button aria-label="N&auml;chste Fokuskarte" class="focus-stage-arrow focus-stage-arrow-right" onclick="focusAdjacentHandCreature('next')" title="N&auml;chste Karte fokussieren">
+           <button aria-label="N&auml;chste Fokuskarte" class="focus-stage-arrow focus-stage-arrow-right" onclick="focusAdjacentHandCard('next')" title="N&auml;chste Karte fokussieren">
             &rsaquo;
            </button>
           </div>
@@ -930,113 +930,62 @@
           </button>
          </div>
         </div>
-        <div class="deck-command-grid">
-         <div aria-label="Deck-Filter" class="deck-control-panel">
-          <p class="section-eyebrow deck-panel-eyebrow">
-           Deck-Filter
-          </p>
-          <div class="deck-filter-row">
-           <label class="deck-search-field" for="deck-search-input">
-            <span>
-             Suche
-            </span>
-            <input autocomplete="off" id="deck-search-input" oninput="setDeckSearchQuery(this.value)" placeholder="Karten suchen &hellip;" type="search"/>
-           </label>
-           <label class="deck-filter-field" for="deck-type-filter">
-            <span>
-             Typ
-            </span>
-            <select id="deck-type-filter" onchange="setDeckTypeFilter(this.value)">
-             <option value="all">
-              Alle
-             </option>
-             <option value="player">
-              Player
-             </option>
-             <option value="npc">
-              NPC
-             </option>
-             <option value="monster">
-              Monster
-             </option>
-            </select>
-           </label>
-           <label class="deck-filter-field" for="deck-sort-mode">
-            <span>
-             Sortierung
-            </span>
-            <select id="deck-sort-mode" onchange="setDeckSortMode(this.value)">
-             <option value="name">
-              Name A&ndash;Z
-             </option>
-             <option value="type">
-              Typ
-             </option>
-             <option value="initiativeModifier">
-              Initiative-Modifikator
-             </option>
-             <option value="hp">
-              HP
-             </option>
-            </select>
-           </label>
-          </div>
+        <div aria-label="Kartendeck steuern" class="deck-command-grid deck-toolbar">
+         <div class="deck-toolbar-fields">
+          <label class="deck-filter-field deck-location-field" for="deck-location-view">
+           <span>Bereich</span>
+           <select id="deck-location-view" onchange="setDeckLocationView(this.value)">
+            <option value="deck">Kartendeck</option>
+            <option value="trash">Papierkorb</option>
+           </select>
+          </label>
+          <label class="deck-search-field" for="deck-search-input">
+           <span>Suche</span>
+           <input autocomplete="off" id="deck-search-input" oninput="setDeckSearchQuery(this.value)" placeholder="Karten suchen …" type="search"/>
+          </label>
+          <label class="deck-filter-field deck-type-field" for="deck-type-filter">
+           <span>Typ</span>
+           <select id="deck-type-filter" onchange="setDeckTypeFilter(this.value)">
+            <option value="all">Alle</option>
+            <option value="player">Player</option>
+            <option value="npc">NPC</option>
+            <option value="monster">Monster</option>
+           </select>
+          </label>
+          <label class="deck-filter-field deck-sort-field" for="deck-sort-mode">
+           <span>Sortierung</span>
+           <select id="deck-sort-mode" onchange="setDeckSortMode(this.value)">
+            <option value="name">Name A–Z</option>
+            <option value="type">Typ</option>
+            <option value="initiativeModifier">Initiative-Modifikator</option>
+            <option value="hp">HP</option>
+           </select>
+          </label>
          </div>
-         <div aria-label="Deck verwalten" class="deck-manage-panel">
-          <p class="section-eyebrow deck-panel-eyebrow">
-           Deck verwalten
-          </p>
-          <div class="deck-manage-actions deck-manage-actions-compact">
-           <button class="deck-to-hand-bulk-button" onclick="moveSelectedDeckCardsToHand()" type="button">
-            Auswahl auf die Hand
-           </button>
-           <button class="card-forge-open-button" onclick="openNewCardForge()" type="button">
-            Kartenschmiede &ouml;ffnen
-           </button>
-           <details class="section-menu deck-more-menu">
-            <summary class="section-menu-summary" role="button">
-             Weitere Funktionen
-            </summary>
-            <div class="section-menu-panel deck-more-menu-panel">
-             <div class="deck-more-menu-group">
-              <p>
-               Auswahl
-              </p>
-              <button onclick="selectVisibleDeckCards()" type="button">
-               Sichtbare w&auml;hlen
-              </button>
-              <button onclick="clearDeckSelection()" type="button">
-               Auswahl leeren
-              </button>
-             </div>
-             <div class="deck-more-menu-group">
-              <p>
-               Speichern &amp; Laden
-              </p>
-              <button onclick="exportGameState()" type="button">
-               Spielstand exportieren
-              </button>
-              <button onclick="triggerGameStateImport()" type="button">
-               Spielstand importieren
-              </button>
-             </div>
-             <div class="deck-more-menu-group">
-              <p>
-               Demo &amp; Reset
-              </p>
-              <button onclick="reloadDemoCards()" type="button">
-               Demo-Karten laden
-              </button>
-              <button onclick="removeDemoCards()" type="button">
-               Demo-Karten entfernen
-              </button>
-              <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
-               Spielstand leeren
-              </button>
-             </div>
+         <div class="deck-manage-actions deck-toolbar-actions">
+          <button class="deck-to-hand-bulk-button" onclick="moveSelectedDeckCardsToHand()" type="button">Auswahl auf die Hand</button>
+          <button class="card-forge-open-button" onclick="openNewCardForge()" type="button">Kartenschmiede</button>
+          <details class="section-menu deck-more-menu">
+           <summary class="section-menu-summary" role="button">Mehr</summary>
+           <div class="section-menu-panel deck-more-menu-panel">
+            <div class="deck-more-menu-group">
+             <p>Auswahl</p>
+             <button onclick="selectVisibleDeckCards()" type="button">Sichtbare wählen</button>
+             <button onclick="clearDeckSelection()" type="button">Auswahl leeren</button>
             </div>
-           </details>
-          </div>
+            <div class="deck-more-menu-group">
+             <p>Speichern &amp; Laden</p>
+             <button onclick="exportGameState()" type="button">Spielstand exportieren</button>
+             <button onclick="triggerGameStateImport()" type="button">Spielstand importieren</button>
+            </div>
+            <div class="deck-more-menu-group">
+             <p>Demo &amp; Reset</p>
+             <button onclick="reloadDemoCards()" type="button">Demo-Karten laden</button>
+             <button onclick="removeDemoCards()" type="button">Demo-Karten entfernen</button>
+             <button class="card-menu-danger" onclick="deleteAllCards()" type="button">Spielstand leeren</button>
+            </div>
+           </div>
+          </details>
          </div>
         </div>
         <div aria-label="Deck-Auswahl" class="deck-selection-panel deck-selection-compact">
@@ -1073,13 +1022,13 @@
          Schlie&szlig;en
         </button>
        </div>
-       <section class="edit-creature-section edit-creature-section-hidden card-forge-panel card-forge-panel-hidden" id="edit-creature-section">
+       <section class="edit-card-section edit-card-section-hidden card-forge-panel card-forge-panel-hidden" id="edit-card-section">
         <div class="card-forge-mode-row">
          <div>
           <p class="section-eyebrow">
            Karte bearbeiten
           </p>
-          <h2 id="edit-creature-title">
+          <h2 id="edit-card-title">
            Karte bearbeiten
           </h2>
          </div>
@@ -1087,9 +1036,9 @@
           Neue Karte
          </button>
         </div>
-        <p class="form-error" id="edit-creature-error">
+        <p class="form-error" id="edit-card-error">
         </p>
-        <div class="add-creature-form edit-creature-form card-forge-form">
+        <div class="add-card-form edit-card-form card-forge-form">
          <div aria-label="Bearbeitungsbereiche" class="forge-tab-bar" role="tablist">
           <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
            Fokuskarte
@@ -1124,22 +1073,22 @@
             </h4>
             <div class="form-grid form-grid-four">
              <div class="form-field">
-              <label for="edit-creature-name">
+              <label for="edit-card-name">
                Interner Name
               </label>
-              <input id="edit-creature-name" type="text"/>
+              <input id="edit-card-name" type="text"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-public-name">
+              <label for="edit-card-public-name">
                &Ouml;ffentlicher Name
               </label>
-              <input id="edit-creature-public-name" type="text"/>
+              <input id="edit-card-public-name" type="text"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-type">
+              <label for="edit-card-type">
                Typ
               </label>
-              <select id="edit-creature-type">
+              <select id="edit-card-type">
                <option value="player">
                 Player
                </option>
@@ -1152,10 +1101,10 @@
               </select>
              </div>
              <div class="form-field">
-              <label for="edit-creature-hp-visibility">
+              <label for="edit-card-hp-visibility">
                Spieler-HP-Anzeige
               </label>
-              <select id="edit-creature-hp-visibility">
+              <select id="edit-card-hp-visibility">
                <option value="full">
                 HP vollst&auml;ndig anzeigen
                </option>
@@ -1171,19 +1120,19 @@
               </select>
              </div>
              <div class="form-field form-field-wide-four">
-              <label for="edit-creature-image-path">
+              <label for="edit-card-image-path">
                Bildpfad oder gespeicherte Bilddaten
               </label>
-              <input id="edit-creature-image-path" placeholder="Images/mein_bild.png" type="text"/>
+              <input id="edit-card-image-path" placeholder="Images/mein_bild.png" type="text"/>
              </div>
              <div class="form-field form-field-wide-four">
-              <label for="edit-creature-image">
+              <label for="edit-card-image">
                Neues Bild ausw&auml;hlen
               </label>
-              <input accept="image/*" id="edit-creature-image" type="file"/>
+              <input accept="image/*" id="edit-card-image" type="file"/>
              </div>
-             <label class="checkbox-field form-field-wide-four" for="edit-creature-is-in-combat">
-              <input id="edit-creature-is-in-combat" type="checkbox"/>
+             <label class="checkbox-field form-field-wide-four" for="edit-card-is-in-combat">
+              <input id="edit-card-is-in-combat" type="checkbox"/>
               <span>
                Karte ist auf der Hand
               </span>
@@ -1196,40 +1145,40 @@
             </h4>
             <div class="form-grid form-grid-four">
              <div class="form-field">
-              <label for="edit-creature-hp">
+              <label for="edit-card-hp">
                Aktuelle HP
               </label>
-              <input id="edit-creature-hp" min="0" type="number"/>
+              <input id="edit-card-hp" min="0" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-max-hp">
+              <label for="edit-card-max-hp">
                Max HP
               </label>
-              <input id="edit-creature-max-hp" min="1" type="number"/>
+              <input id="edit-card-max-hp" min="1" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-temp-hp">
+              <label for="edit-card-temp-hp">
                Temp HP
               </label>
-              <input id="edit-creature-temp-hp" min="0" type="number"/>
+              <input id="edit-card-temp-hp" min="0" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-ac">
+              <label for="edit-card-ac">
                AC
               </label>
-              <input id="edit-creature-ac" min="0" type="number"/>
+              <input id="edit-card-ac" min="0" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-initiative">
+              <label for="edit-card-initiative">
                Feste Initiative optional
               </label>
-              <input id="edit-creature-initiative" type="number"/>
+              <input id="edit-card-initiative" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-initiative-modifier">
+              <label for="edit-card-initiative-modifier">
                Initiative-Mod
               </label>
-              <input id="edit-creature-initiative-modifier" placeholder="+3" type="text"/>
+              <input id="edit-card-initiative-modifier" placeholder="+3" type="text"/>
              </div>
             </div>
            </div>
@@ -1239,22 +1188,22 @@
             </h4>
             <div class="form-grid form-grid-three">
              <div class="form-field">
-              <label for="edit-creature-passive-perception">
+              <label for="edit-card-passive-perception">
                Passive Perception
               </label>
-              <input id="edit-creature-passive-perception" min="0" type="number"/>
+              <input id="edit-card-passive-perception" min="0" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-passive-insight">
+              <label for="edit-card-passive-insight">
                Passive Insight
               </label>
-              <input id="edit-creature-passive-insight" min="0" type="number"/>
+              <input id="edit-card-passive-insight" min="0" type="number"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-passive-investigation">
+              <label for="edit-card-passive-investigation">
                Passive Investigation
               </label>
-              <input id="edit-creature-passive-investigation" min="0" type="number"/>
+              <input id="edit-card-passive-investigation" min="0" type="number"/>
              </div>
             </div>
            </div>
@@ -1262,7 +1211,7 @@
             <h4>
              Start-Conditions
             </h4>
-            <div class="condition-checkbox-list" id="edit-creature-condition-list">
+            <div class="condition-checkbox-list" id="edit-card-condition-list">
             </div>
            </div>
           </fieldset>
@@ -1279,43 +1228,43 @@
               <strong>
                STR
               </strong>
-              <input aria-label="Strength Score" id="edit-creature-strength-score" type="number" value="10"/>
-              <input aria-label="Strength Modifier" id="edit-creature-strength-modifier" type="text" value="+0"/>
+              <input aria-label="Strength Score" id="edit-card-strength-score" type="number" value="10"/>
+              <input aria-label="Strength Modifier" id="edit-card-strength-modifier" type="text" value="+0"/>
              </div>
              <div class="forge-ability-editor-card">
               <strong>
                DEX
               </strong>
-              <input aria-label="Dexterity Score" id="edit-creature-dexterity-score" type="number" value="10"/>
-              <input aria-label="Dexterity Modifier" id="edit-creature-dexterity-modifier" type="text" value="+0"/>
+              <input aria-label="Dexterity Score" id="edit-card-dexterity-score" type="number" value="10"/>
+              <input aria-label="Dexterity Modifier" id="edit-card-dexterity-modifier" type="text" value="+0"/>
              </div>
              <div class="forge-ability-editor-card">
               <strong>
                CON
               </strong>
-              <input aria-label="Constitution Score" id="edit-creature-constitution-score" type="number" value="10"/>
-              <input aria-label="Constitution Modifier" id="edit-creature-constitution-modifier" type="text" value="+0"/>
+              <input aria-label="Constitution Score" id="edit-card-constitution-score" type="number" value="10"/>
+              <input aria-label="Constitution Modifier" id="edit-card-constitution-modifier" type="text" value="+0"/>
              </div>
              <div class="forge-ability-editor-card">
               <strong>
                INT
               </strong>
-              <input aria-label="Intelligence Score" id="edit-creature-intelligence-score" type="number" value="10"/>
-              <input aria-label="Intelligence Modifier" id="edit-creature-intelligence-modifier" type="text" value="+0"/>
+              <input aria-label="Intelligence Score" id="edit-card-intelligence-score" type="number" value="10"/>
+              <input aria-label="Intelligence Modifier" id="edit-card-intelligence-modifier" type="text" value="+0"/>
              </div>
              <div class="forge-ability-editor-card">
               <strong>
                WIS
               </strong>
-              <input aria-label="Wisdom Score" id="edit-creature-wisdom-score" type="number" value="10"/>
-              <input aria-label="Wisdom Modifier" id="edit-creature-wisdom-modifier" type="text" value="+0"/>
+              <input aria-label="Wisdom Score" id="edit-card-wisdom-score" type="number" value="10"/>
+              <input aria-label="Wisdom Modifier" id="edit-card-wisdom-modifier" type="text" value="+0"/>
              </div>
              <div class="forge-ability-editor-card">
               <strong>
                CHA
               </strong>
-              <input aria-label="Charisma Score" id="edit-creature-charisma-score" type="number" value="10"/>
-              <input aria-label="Charisma Modifier" id="edit-creature-charisma-modifier" type="text" value="+0"/>
+              <input aria-label="Charisma Score" id="edit-card-charisma-score" type="number" value="10"/>
+              <input aria-label="Charisma Modifier" id="edit-card-charisma-modifier" type="text" value="+0"/>
              </div>
             </div>
            </div>
@@ -1325,16 +1274,16 @@
             </h4>
             <div class="form-grid form-grid-two">
              <div class="form-field">
-              <label for="edit-creature-speed">
+              <label for="edit-card-speed">
                Speed
               </label>
-              <input id="edit-creature-speed" placeholder="30 ft." type="text"/>
+              <input id="edit-card-speed" placeholder="30 ft." type="text"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-senses">
+              <label for="edit-card-senses">
                Senses
               </label>
-              <input id="edit-creature-senses" type="text"/>
+              <input id="edit-card-senses" type="text"/>
              </div>
             </div>
            </div>
@@ -1344,28 +1293,28 @@
             </h4>
             <div class="form-grid form-grid-two">
              <div class="form-field form-field-wide-four">
-              <label for="edit-creature-saving-throws">
+              <label for="edit-card-saving-throws">
                Saving Throws
               </label>
-              <input id="edit-creature-saving-throws" type="text"/>
+              <input id="edit-card-saving-throws" type="text"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-resistances">
+              <label for="edit-card-resistances">
                Resistenzen
               </label>
-              <input id="edit-creature-resistances" type="text"/>
+              <input id="edit-card-resistances" type="text"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-immunities">
+              <label for="edit-card-immunities">
                Immunit&auml;ten
               </label>
-              <input id="edit-creature-immunities" type="text"/>
+              <input id="edit-card-immunities" type="text"/>
              </div>
              <div class="form-field form-field-wide-four">
-              <label for="edit-creature-vulnerabilities">
+              <label for="edit-card-vulnerabilities">
                Verwundbarkeiten
               </label>
-              <input id="edit-creature-vulnerabilities" type="text"/>
+              <input id="edit-card-vulnerabilities" type="text"/>
              </div>
             </div>
            </div>
@@ -1378,8 +1327,8 @@
             <h4>
              Aktionen verwalten
             </h4>
-            <textarea class="action-forge-hidden-textarea" hidden="" id="edit-creature-actions-text"></textarea>
-            <div class="forge-action-manager" id="edit-creature-action-manager">
+            <textarea class="action-forge-hidden-textarea" hidden="" id="edit-card-actions-text"></textarea>
+            <div class="forge-action-manager" id="edit-card-action-manager">
             </div>
            </div>
           </fieldset>
@@ -1392,18 +1341,18 @@
              Ressourcen
             </h4>
             <div class="form-field">
-             <label for="edit-creature-special-resources">
+             <label for="edit-card-special-resources">
               Ressourcen / Recharge / Uses
              </label>
-             <input id="edit-creature-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
+             <input id="edit-card-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
             </div>
            </div>
            <div class="forge-input-section">
             <h4>
              Traits verwalten
             </h4>
-            <textarea class="trait-forge-hidden-textarea" hidden="" id="edit-creature-traits-text"></textarea>
-            <div class="forge-trait-manager" id="edit-creature-trait-manager">
+            <textarea class="trait-forge-hidden-textarea" hidden="" id="edit-card-traits-text"></textarea>
+            <div class="forge-trait-manager" id="edit-card-trait-manager">
             </div>
            </div>
           </fieldset>
@@ -1418,12 +1367,12 @@
                Notizabschnitte
               </h4>
              </div>
-             <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('edit-creature')" type="button">
+             <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('edit-card')" type="button">
               Abschnitt hinzuf&uuml;gen
              </button>
             </div>
-            <textarea class="forge-notes-hidden-textarea" hidden="" id="edit-creature-notes"></textarea>
-            <div class="forge-note-manager" id="edit-creature-note-manager">
+            <textarea class="forge-notes-hidden-textarea" hidden="" id="edit-card-notes"></textarea>
+            <div class="forge-note-manager" id="edit-card-note-manager">
             </div>
            </div>
           </fieldset>
@@ -1437,10 +1386,10 @@
             </h4>
             <div class="form-grid form-grid-three">
              <div class="form-field">
-              <label for="edit-creature-spellcasting-ability">
+              <label for="edit-card-spellcasting-ability">
                Ability
               </label>
-              <select id="edit-creature-spellcasting-ability">
+              <select id="edit-card-spellcasting-ability">
                <option value="">
                 &mdash;
                </option>
@@ -1456,16 +1405,16 @@
               </select>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spellcasting-save-dc">
+              <label for="edit-card-spellcasting-save-dc">
                Save DC
               </label>
-              <input id="edit-creature-spellcasting-save-dc" min="0" type="number" value="0"/>
+              <input id="edit-card-spellcasting-save-dc" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spellcasting-attack">
+              <label for="edit-card-spellcasting-attack">
                Spell Attack
               </label>
-              <input id="edit-creature-spellcasting-attack" placeholder="+5" type="text"/>
+              <input id="edit-card-spellcasting-attack" placeholder="+5" type="text"/>
              </div>
             </div>
            </div>
@@ -1475,58 +1424,58 @@
             </h4>
             <div class="spell-slot-editor-grid">
              <div class="form-field">
-              <label for="edit-creature-spell-slots-1">
+              <label for="edit-card-spell-slots-1">
                1st
               </label>
-              <input id="edit-creature-spell-slots-1" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-1" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-2">
+              <label for="edit-card-spell-slots-2">
                2nd
               </label>
-              <input id="edit-creature-spell-slots-2" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-2" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-3">
+              <label for="edit-card-spell-slots-3">
                3rd
               </label>
-              <input id="edit-creature-spell-slots-3" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-3" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-4">
+              <label for="edit-card-spell-slots-4">
                4th
               </label>
-              <input id="edit-creature-spell-slots-4" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-4" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-5">
+              <label for="edit-card-spell-slots-5">
                5th
               </label>
-              <input id="edit-creature-spell-slots-5" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-5" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-6">
+              <label for="edit-card-spell-slots-6">
                6th
               </label>
-              <input id="edit-creature-spell-slots-6" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-6" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-7">
+              <label for="edit-card-spell-slots-7">
                7th
               </label>
-              <input id="edit-creature-spell-slots-7" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-7" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-8">
+              <label for="edit-card-spell-slots-8">
                8th
               </label>
-              <input id="edit-creature-spell-slots-8" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-8" max="9" min="0" type="number" value="0"/>
              </div>
              <div class="form-field">
-              <label for="edit-creature-spell-slots-9">
+              <label for="edit-card-spell-slots-9">
                9th
               </label>
-              <input id="edit-creature-spell-slots-9" max="9" min="0" type="number" value="0"/>
+              <input id="edit-card-spell-slots-9" max="9" min="0" type="number" value="0"/>
              </div>
             </div>
            </div>
@@ -1534,8 +1483,8 @@
             <h4>
              Zauber verwalten
             </h4>
-            <textarea class="spell-forge-hidden-textarea" hidden="" id="edit-creature-structured-spells"></textarea>
-            <div class="forge-spell-manager" id="edit-creature-spell-manager">
+            <textarea class="spell-forge-hidden-textarea" hidden="" id="edit-card-structured-spells"></textarea>
+            <div class="forge-spell-manager" id="edit-card-spell-manager">
             </div>
            </div>
           </fieldset>
@@ -1552,30 +1501,30 @@
               <span>
                Gold
               </span>
-              <input id="edit-creature-currency-gp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+              <input id="edit-card-currency-gp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
              <label class="form-field">
               <span>
                Silber
               </span>
-              <input id="edit-creature-currency-sp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+              <input id="edit-card-currency-sp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
              <label class="form-field">
               <span>
                Kupfer
               </span>
-              <input id="edit-creature-currency-cp" min="0" oninput="commitForgeInventoryIfEditing('edit-creature')" type="number" value="0"/>
+              <input id="edit-card-currency-cp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
             </div>
            </div>
-           <textarea hidden="" id="edit-creature-inventory-cards"></textarea>
-           <textarea hidden="" id="edit-creature-inventory-list"></textarea>
-           <div class="forge-inventory-manager" id="edit-creature-inventory-manager">
+           <textarea hidden="" id="edit-card-inventory-cards"></textarea>
+           <textarea hidden="" id="edit-card-inventory-list"></textarea>
+           <div class="forge-inventory-manager" id="edit-card-inventory-manager">
            </div>
           </fieldset>
          </div>
-         <div class="edit-creature-actions">
-          <button onclick="handleEditCreatureSaveButtonClick()" type="button">
+         <div class="edit-card-actions">
+          <button onclick="handleEditCardSaveButtonClick()" type="button">
            &Auml;nderungen speichern
           </button>
           <button onclick="closeCardForgeDrawer()" type="button">
@@ -1584,7 +1533,7 @@
          </div>
         </div>
        </section>
-       <section class="add-creature-section add-creature-details card-forge-panel">
+       <section class="add-card-section add-card-details card-forge-panel">
         <div class="card-forge-mode-row">
          <div>
           <p class="section-eyebrow">
@@ -1595,10 +1544,10 @@
           </h3>
          </div>
         </div>
-        <div class="add-creature-body">
-         <p class="form-error" id="add-creature-error">
+        <div class="add-card-body">
+         <p class="form-error" id="add-card-error">
          </p>
-         <div class="add-creature-form card-forge-form">
+         <div class="add-card-form card-forge-form">
           <div aria-label="Eingabebereiche" class="forge-tab-bar" role="tablist">
            <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
             Fokuskarte
@@ -1633,22 +1582,22 @@
              </h4>
              <div class="form-grid form-grid-four">
               <div class="form-field">
-               <label for="new-creature-name">
+               <label for="new-card-name">
                 Interner Name
                </label>
-               <input id="new-creature-name" type="text" value="Goblin"/>
+               <input id="new-card-name" type="text" value="Goblin"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-public-name">
+               <label for="new-card-public-name">
                 &Ouml;ffentlicher Name
                </label>
-               <input id="new-creature-public-name" type="text" value="Boblin der Goblin"/>
+               <input id="new-card-public-name" type="text" value="Boblin der Goblin"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-type">
+               <label for="new-card-type">
                 Typ
                </label>
-               <select id="new-creature-type">
+               <select id="new-card-type">
                 <option value="player">
                  Player
                 </option>
@@ -1661,22 +1610,22 @@
                </select>
               </div>
               <div class="form-field">
-               <label for="new-creature-quantity">
+               <label for="new-card-quantity">
                 Anzahl
                </label>
-               <input id="new-creature-quantity" max="20" min="1" type="number" value="1"/>
+               <input id="new-card-quantity" max="20" min="1" type="number" value="1"/>
               </div>
               <div class="form-field form-field-wide-four">
-               <label for="new-creature-image">
+               <label for="new-card-image">
                 Bild ausw&auml;hlen
                </label>
-               <input accept="image/*" id="new-creature-image" type="file"/>
+               <input accept="image/*" id="new-card-image" type="file"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-hp-visibility">
+               <label for="new-card-hp-visibility">
                 Spieler-HP-Anzeige
                </label>
-               <select id="new-creature-hp-visibility">
+               <select id="new-card-hp-visibility">
                 <option selected="" value="full">
                  HP vollst&auml;ndig anzeigen
                 </option>
@@ -1691,8 +1640,8 @@
                 </option>
                </select>
               </div>
-              <label class="checkbox-field" for="new-creature-is-in-combat">
-               <input id="new-creature-is-in-combat" type="checkbox"/>
+              <label class="checkbox-field" for="new-card-is-in-combat">
+               <input id="new-card-is-in-combat" type="checkbox"/>
                <span>
                 Direkt auf die Hand nehmen
                </span>
@@ -1705,40 +1654,40 @@
              </h4>
              <div class="form-grid form-grid-four">
               <div class="form-field">
-               <label for="new-creature-hp">
+               <label for="new-card-hp">
                 Aktuelle HP
                </label>
-               <input id="new-creature-hp" min="0" type="number" value="10"/>
+               <input id="new-card-hp" min="0" type="number" value="10"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-max-hp">
+               <label for="new-card-max-hp">
                 Max HP
                </label>
-               <input id="new-creature-max-hp" min="1" type="number" value="10"/>
+               <input id="new-card-max-hp" min="1" type="number" value="10"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-temp-hp">
+               <label for="new-card-temp-hp">
                 Temp HP
                </label>
-               <input id="new-creature-temp-hp" min="0" type="number" value="0"/>
+               <input id="new-card-temp-hp" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-ac">
+               <label for="new-card-ac">
                 AC
                </label>
-               <input id="new-creature-ac" min="0" type="number" value="10"/>
+               <input id="new-card-ac" min="0" type="number" value="10"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-initiative">
+               <label for="new-card-initiative">
                 Feste Initiative optional
                </label>
-               <input id="new-creature-initiative" placeholder="leer = vor Kampf w&uuml;rfeln" type="number"/>
+               <input id="new-card-initiative" placeholder="leer = vor Kampf w&uuml;rfeln" type="number"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-initiative-modifier">
+               <label for="new-card-initiative-modifier">
                 Initiative-Mod
                </label>
-               <input id="new-creature-initiative-modifier" placeholder="+3" type="text" value="+0"/>
+               <input id="new-card-initiative-modifier" placeholder="+3" type="text" value="+0"/>
               </div>
              </div>
             </div>
@@ -1748,22 +1697,22 @@
              </h4>
              <div class="form-grid form-grid-three">
               <div class="form-field">
-               <label for="new-creature-passive-perception">
+               <label for="new-card-passive-perception">
                 Passive Perception
                </label>
-               <input id="new-creature-passive-perception" min="0" type="number" value="10"/>
+               <input id="new-card-passive-perception" min="0" type="number" value="10"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-passive-insight">
+               <label for="new-card-passive-insight">
                 Passive Insight
                </label>
-               <input id="new-creature-passive-insight" min="0" type="number" value="10"/>
+               <input id="new-card-passive-insight" min="0" type="number" value="10"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-passive-investigation">
+               <label for="new-card-passive-investigation">
                 Passive Investigation
                </label>
-               <input id="new-creature-passive-investigation" min="0" type="number" value="10"/>
+               <input id="new-card-passive-investigation" min="0" type="number" value="10"/>
               </div>
              </div>
             </div>
@@ -1771,7 +1720,7 @@
              <h4>
               Start-Conditions
              </h4>
-             <div class="condition-checkbox-list" id="new-creature-condition-list">
+             <div class="condition-checkbox-list" id="new-card-condition-list">
              </div>
             </div>
            </fieldset>
@@ -1788,43 +1737,43 @@
                <strong>
                 STR
                </strong>
-               <input aria-label="Strength Score" id="new-creature-strength-score" type="number" value="10"/>
-               <input aria-label="Strength Modifier" id="new-creature-strength-modifier" type="text" value="+0"/>
+               <input aria-label="Strength Score" id="new-card-strength-score" type="number" value="10"/>
+               <input aria-label="Strength Modifier" id="new-card-strength-modifier" type="text" value="+0"/>
               </div>
               <div class="forge-ability-editor-card">
                <strong>
                 DEX
                </strong>
-               <input aria-label="Dexterity Score" id="new-creature-dexterity-score" type="number" value="10"/>
-               <input aria-label="Dexterity Modifier" id="new-creature-dexterity-modifier" type="text" value="+0"/>
+               <input aria-label="Dexterity Score" id="new-card-dexterity-score" type="number" value="10"/>
+               <input aria-label="Dexterity Modifier" id="new-card-dexterity-modifier" type="text" value="+0"/>
               </div>
               <div class="forge-ability-editor-card">
                <strong>
                 CON
                </strong>
-               <input aria-label="Constitution Score" id="new-creature-constitution-score" type="number" value="10"/>
-               <input aria-label="Constitution Modifier" id="new-creature-constitution-modifier" type="text" value="+0"/>
+               <input aria-label="Constitution Score" id="new-card-constitution-score" type="number" value="10"/>
+               <input aria-label="Constitution Modifier" id="new-card-constitution-modifier" type="text" value="+0"/>
               </div>
               <div class="forge-ability-editor-card">
                <strong>
                 INT
                </strong>
-               <input aria-label="Intelligence Score" id="new-creature-intelligence-score" type="number" value="10"/>
-               <input aria-label="Intelligence Modifier" id="new-creature-intelligence-modifier" type="text" value="+0"/>
+               <input aria-label="Intelligence Score" id="new-card-intelligence-score" type="number" value="10"/>
+               <input aria-label="Intelligence Modifier" id="new-card-intelligence-modifier" type="text" value="+0"/>
               </div>
               <div class="forge-ability-editor-card">
                <strong>
                 WIS
                </strong>
-               <input aria-label="Wisdom Score" id="new-creature-wisdom-score" type="number" value="10"/>
-               <input aria-label="Wisdom Modifier" id="new-creature-wisdom-modifier" type="text" value="+0"/>
+               <input aria-label="Wisdom Score" id="new-card-wisdom-score" type="number" value="10"/>
+               <input aria-label="Wisdom Modifier" id="new-card-wisdom-modifier" type="text" value="+0"/>
               </div>
               <div class="forge-ability-editor-card">
                <strong>
                 CHA
                </strong>
-               <input aria-label="Charisma Score" id="new-creature-charisma-score" type="number" value="10"/>
-               <input aria-label="Charisma Modifier" id="new-creature-charisma-modifier" type="text" value="+0"/>
+               <input aria-label="Charisma Score" id="new-card-charisma-score" type="number" value="10"/>
+               <input aria-label="Charisma Modifier" id="new-card-charisma-modifier" type="text" value="+0"/>
               </div>
              </div>
             </div>
@@ -1834,16 +1783,16 @@
              </h4>
              <div class="form-grid form-grid-two">
               <div class="form-field">
-               <label for="new-creature-speed">
+               <label for="new-card-speed">
                 Speed
                </label>
-               <input id="new-creature-speed" placeholder="30 ft." type="text"/>
+               <input id="new-card-speed" placeholder="30 ft." type="text"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-senses">
+               <label for="new-card-senses">
                 Senses
                </label>
-               <input id="new-creature-senses" type="text"/>
+               <input id="new-card-senses" type="text"/>
               </div>
              </div>
             </div>
@@ -1853,28 +1802,28 @@
              </h4>
              <div class="form-grid form-grid-two">
               <div class="form-field form-field-wide-four">
-               <label for="new-creature-saving-throws">
+               <label for="new-card-saving-throws">
                 Saving Throws
                </label>
-               <input id="new-creature-saving-throws" type="text"/>
+               <input id="new-card-saving-throws" type="text"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-resistances">
+               <label for="new-card-resistances">
                 Resistenzen
                </label>
-               <input id="new-creature-resistances" type="text"/>
+               <input id="new-card-resistances" type="text"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-immunities">
+               <label for="new-card-immunities">
                 Immunit&auml;ten
                </label>
-               <input id="new-creature-immunities" type="text"/>
+               <input id="new-card-immunities" type="text"/>
               </div>
               <div class="form-field form-field-wide-four">
-               <label for="new-creature-vulnerabilities">
+               <label for="new-card-vulnerabilities">
                 Verwundbarkeiten
                </label>
-               <input id="new-creature-vulnerabilities" type="text"/>
+               <input id="new-card-vulnerabilities" type="text"/>
               </div>
              </div>
             </div>
@@ -1887,8 +1836,8 @@
              <h4>
               Aktionen verwalten
              </h4>
-             <textarea class="action-forge-hidden-textarea" hidden="" id="new-creature-actions-text"></textarea>
-             <div class="forge-action-manager" id="new-creature-action-manager">
+             <textarea class="action-forge-hidden-textarea" hidden="" id="new-card-actions-text"></textarea>
+             <div class="forge-action-manager" id="new-card-action-manager">
              </div>
             </div>
            </fieldset>
@@ -1901,18 +1850,18 @@
               Ressourcen
              </h4>
              <div class="form-field">
-              <label for="new-creature-special-resources">
+              <label for="new-card-special-resources">
                Ressourcen / Recharge / Uses
               </label>
-              <input id="new-creature-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
+              <input id="new-card-special-resources" placeholder="Recharge 5&ndash;6, Ki, Rage, 3/day &hellip;" type="text"/>
              </div>
             </div>
             <div class="forge-input-section">
              <h4>
               Traits verwalten
              </h4>
-             <textarea class="trait-forge-hidden-textarea" hidden="" id="new-creature-traits-text"></textarea>
-             <div class="forge-trait-manager" id="new-creature-trait-manager">
+             <textarea class="trait-forge-hidden-textarea" hidden="" id="new-card-traits-text"></textarea>
+             <div class="forge-trait-manager" id="new-card-trait-manager">
              </div>
             </div>
            </fieldset>
@@ -1927,12 +1876,12 @@
                 Notizabschnitte
                </h4>
               </div>
-              <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('new-creature')" type="button">
+              <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('new-card')" type="button">
                Abschnitt hinzuf&uuml;gen
               </button>
              </div>
-             <textarea class="forge-notes-hidden-textarea" hidden="" id="new-creature-notes"></textarea>
-             <div class="forge-note-manager" id="new-creature-note-manager">
+             <textarea class="forge-notes-hidden-textarea" hidden="" id="new-card-notes"></textarea>
+             <div class="forge-note-manager" id="new-card-note-manager">
              </div>
             </div>
            </fieldset>
@@ -1946,10 +1895,10 @@
              </h4>
              <div class="form-grid form-grid-three">
               <div class="form-field">
-               <label for="new-creature-spellcasting-ability">
+               <label for="new-card-spellcasting-ability">
                 Ability
                </label>
-               <select id="new-creature-spellcasting-ability">
+               <select id="new-card-spellcasting-ability">
                 <option value="">
                  &mdash;
                 </option>
@@ -1965,16 +1914,16 @@
                </select>
               </div>
               <div class="form-field">
-               <label for="new-creature-spellcasting-save-dc">
+               <label for="new-card-spellcasting-save-dc">
                 Save DC
                </label>
-               <input id="new-creature-spellcasting-save-dc" min="0" type="number" value="0"/>
+               <input id="new-card-spellcasting-save-dc" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spellcasting-attack">
+               <label for="new-card-spellcasting-attack">
                 Spell Attack
                </label>
-               <input id="new-creature-spellcasting-attack" placeholder="+5" type="text"/>
+               <input id="new-card-spellcasting-attack" placeholder="+5" type="text"/>
               </div>
              </div>
             </div>
@@ -1984,58 +1933,58 @@
              </h4>
              <div class="spell-slot-editor-grid">
               <div class="form-field">
-               <label for="new-creature-spell-slots-1">
+               <label for="new-card-spell-slots-1">
                 1st
                </label>
-               <input id="new-creature-spell-slots-1" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-1" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-2">
+               <label for="new-card-spell-slots-2">
                 2nd
                </label>
-               <input id="new-creature-spell-slots-2" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-2" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-3">
+               <label for="new-card-spell-slots-3">
                 3rd
                </label>
-               <input id="new-creature-spell-slots-3" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-3" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-4">
+               <label for="new-card-spell-slots-4">
                 4th
                </label>
-               <input id="new-creature-spell-slots-4" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-4" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-5">
+               <label for="new-card-spell-slots-5">
                 5th
                </label>
-               <input id="new-creature-spell-slots-5" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-5" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-6">
+               <label for="new-card-spell-slots-6">
                 6th
                </label>
-               <input id="new-creature-spell-slots-6" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-6" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-7">
+               <label for="new-card-spell-slots-7">
                 7th
                </label>
-               <input id="new-creature-spell-slots-7" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-7" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-8">
+               <label for="new-card-spell-slots-8">
                 8th
                </label>
-               <input id="new-creature-spell-slots-8" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-8" max="9" min="0" type="number" value="0"/>
               </div>
               <div class="form-field">
-               <label for="new-creature-spell-slots-9">
+               <label for="new-card-spell-slots-9">
                 9th
                </label>
-               <input id="new-creature-spell-slots-9" max="9" min="0" type="number" value="0"/>
+               <input id="new-card-spell-slots-9" max="9" min="0" type="number" value="0"/>
               </div>
              </div>
             </div>
@@ -2043,8 +1992,8 @@
              <h4>
               Zauber verwalten
              </h4>
-             <textarea class="spell-forge-hidden-textarea" hidden="" id="new-creature-structured-spells"></textarea>
-             <div class="forge-spell-manager" id="new-creature-spell-manager">
+             <textarea class="spell-forge-hidden-textarea" hidden="" id="new-card-structured-spells"></textarea>
+             <div class="forge-spell-manager" id="new-card-spell-manager">
              </div>
             </div>
            </fieldset>
@@ -2061,29 +2010,29 @@
                <span>
                 Gold
                </span>
-               <input id="new-creature-currency-gp" min="0" type="number" value="0"/>
+               <input id="new-card-currency-gp" min="0" type="number" value="0"/>
               </label>
               <label class="form-field">
                <span>
                 Silber
                </span>
-               <input id="new-creature-currency-sp" min="0" type="number" value="0"/>
+               <input id="new-card-currency-sp" min="0" type="number" value="0"/>
               </label>
               <label class="form-field">
                <span>
                 Kupfer
                </span>
-               <input id="new-creature-currency-cp" min="0" type="number" value="0"/>
+               <input id="new-card-currency-cp" min="0" type="number" value="0"/>
               </label>
              </div>
             </div>
-            <textarea hidden="" id="new-creature-inventory-cards"></textarea>
-            <textarea hidden="" id="new-creature-inventory-list"></textarea>
-            <div class="forge-inventory-manager" id="new-creature-inventory-manager">
+            <textarea hidden="" id="new-card-inventory-cards"></textarea>
+            <textarea hidden="" id="new-card-inventory-list"></textarea>
+            <div class="forge-inventory-manager" id="new-card-inventory-manager">
             </div>
            </fieldset>
           </div>
-          <button class="add-creature-button" onclick="handleAddCreatureButtonClick()" type="button">
+          <button class="add-card-button" onclick="handleAddCardButtonClick()" type="button">
            Karte hinzuf&uuml;gen
           </button>
          </div>
@@ -2098,7 +2047,7 @@
     <div class="app-footer-summary">
      <div>
       <strong>Miriel&rsquo;s Deck of Encounters</strong>
-      <span>Version 0.10.1 &middot; Statisch gehostete Browser-Version</span>
+      <span>Version 0.16.0 &middot; Statisch gehostete Browser-Version</span>
      </div>
      <p>Unabhängige, SRD-5.1-kompatible Begleitapp für Charaktere, Begegnungen und den digitalen Spieltisch.</p>
     </div>
@@ -2113,7 +2062,8 @@
     </nav>
    </footer>
   </main>
-  <script src="app.js?v=0.10.1">
-  </script>
+  <script src="js/demo-data.js?v=0.16.0"></script>
+  <script src="js/game-state-schema.js?v=0.16.0"></script>
+  <script src="js/app.js?v=0.16.0"></script>
  </body>
 </html>

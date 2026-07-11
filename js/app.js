@@ -3,25 +3,48 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.10.1";
+const appVersion = "0.16.0";
+
+const cardKinds = Object.freeze({
+    character: "character",
+    item: "item",
+    custom: "custom"
+});
+
+const characterRoles = Object.freeze({
+    player: "player",
+    npc: "npc",
+    monster: "monster"
+});
+
+const cardLocations = Object.freeze({
+    deck: "deck",
+    hand: "hand",
+    trash: "trash"
+});
+
+const encounterStatuses = Object.freeze({
+    active: "active",
+    eliminated: "eliminated"
+});
 
 const importSecurityLimits = Object.freeze({
     maxFileBytesWithoutEmbeddedImages: 20 * 1024 * 1024,
     maxFileBytesWithEmbeddedImages: 100 * 1024 * 1024,
-    maxCreatures: 1000,
+    maxCards: 1000,
     maxShortTextLength: 160,
     maxMediumTextLength: 2000,
     maxLongTextLength: 20000,
-    maxTraitsPerCreature: 150,
-    maxActionsPerCreature: 150,
-    maxSpellsPerCreature: 500,
-    maxInventoryCardsPerCreature: 500,
-    maxInventoryListItemsPerCreature: 1000
+    maxTraitsPerCard: 150,
+    maxActionsPerCard: 150,
+    maxSpellsPerCard: 500,
+    maxInventoryCardsPerCard: 500,
+    maxInventoryListItemsPerCard: 1000
 });
 const appOperatingMode = "Statisch gehostete Browser-Version";
 
-const appStorageKey = "miriels-deck-game-state-v1";
-const appChannelName = "miriels-deck-game-state-channel";
+const appStorageKey = "miriels-deck-game-state-v4";
+const appChannelName = "miriels-deck-game-state-channel-v2";
 const demoCardsAutoloadStorageKey = `${appStorageKey}-demo-autoload-enabled`;
 const demoEncounterName = "Miriels Demo-Spielstand";
 const mirielBoardAutomationDefaultsVersion = 2;
@@ -35,15 +58,11 @@ let activeForgeInventoryEditor = null;
 let inventoryStageStartIndexes = {};
 let activeDetailInventoryCardEditor = null;
 let activeDetailInventoryListEditor = null;
-let deckSearchQuery = "";
-let deckTypeFilter = "all";
-let deckSortMode = "name";
 let pendingDeckImportData = null;
 let pendingDeckImportFileName = "";
-let encounterName = useDemoData ? demoEncounterName : "Unbenannter Encounter";
 let demoCardsAutoloadEnabled = getDemoCardsAutoloadEnabled();
 
-const demoCreatureNameSignatures = [
+const demoCardNameSignatures = [
     "miriel dunkelschön",
     "suica",
     "animierter besen",
@@ -134,596 +153,111 @@ const inventoryCardTemplates = {
 };
 
 
-let creatures = useDemoData ? createDemoCreatures() : [];
 
-function createDemoCreatures() {
-    const demoCreatures = [
-        {
-            id: 1,
-            name: "Miriel Dunkelschön",
-            publicName: "Miriel",
-            type: "player",
-            initiative: 24,
-            hp: 55,
-            maxHp: 55,
-            tempHp: 8,
-            armorClass: 17,
-            passivePerception: 16,
-            passiveInsight: 10,
-            passiveInvestigation: 18,
-            strengthScore: 8,
-            strengthModifier: "-1",
-            dexterityScore: 20,
-            dexterityModifier: "+5",
-            constitutionScore: 14,
-            constitutionModifier: "+2",
-            intelligenceScore: 14,
-            intelligenceModifier: "+2",
-            wisdomScore: 10,
-            wisdomModifier: "+0",
-            charismaScore: 10,
-            charismaModifier: "+0",
-            speed: "30 ft. Walking, 30 ft. Flying",
-            savingThrows: "DEX +8, INT +5",
-            resistances: "—",
-            immunities: "—",
-            vulnerabilities: "—",
-            senses: "Darkvision 60 ft.",
-            spellSaveDc: "DC 13 · Spell Attack +5",
-            specialResources: "Hinterhältiger Angriff 4W6 · Listige Aktion · Unheimliches Ausweichen · Entrinnen · Arkane Kartenmeisterin: 4 Zauberplätze 1. Grades, 2 Zauberplätze 2. Grades",
-            notes: "Charakterbogen: Rogue 7 · Chaosfee · Gauklerin · Chaotic Neutral.\n\nPersönlichkeit: \"Die Welt ist meine Bühne und das Chaos ist meine Show.\" Dunkelschön/Miriel ist fasziniert von der Welt der Sterblichen und möchte sie neugierig, verspielt und oft ohne echtes Gespür für Gefahr erkunden.\n\nIdeal: Freiheit. Nichts ist wichtiger als die Freiheit, das eigene Leben so zu leben, wie es einem gefällt. Einschränkungen und Regeln der sterblichen Welt sind für sie Hindernisse, die es zu überwinden gilt.\n\nBindung: Dunkelschön hat sich geschworen, den Namen Miriel zu ehren und ihre Träume zu verwirklichen.\n\nMakel: Naiv im Umgang mit der Realität. Trotz all ihrer magischen Fähigkeiten hat Dunkelschön Schwierigkeiten, Gefahren richtig einzuschätzen. Sobald sie sich ein Ziel gesetzt hat, kann sie stur und kompromisslos sein, selbst wenn das Ziel nicht in ihrem besten Interesse liegt.",
-            demoSpellSeed: "Cantrips: Minor Illusion; Mage Hand; Resonanzschnitt; Druidcraft.\n1st Level: Disguise Selbst; Silent Image; Find Familiar; Chaossplitter; Faerie Fire.\n2nd Level: Mirror Image; Enlarge/Reduce.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
-            demoInventorySeed: "Trugbildmantel; Nachtsichtgläser; Studded Leather; Absurd großer Hexenhut; Dagger x2; Rapier; Shortbow; Arrows x20; Thieves' Tools; Disguise Kit; Forgery Kit; Backpack; Crowbar; Heiltrank x2; Großer Heiltrank; Meisterlicher Heiltrank; Bedroll; Candles x5; Costume Clothes x2; Rations; Waterskin; Rope; Pitons; Hammer; Tinderbox; Torches; Blue Mushrooms; Brass Bowl; Powdered Iron; Pieces of Fleece; coins: 355 GP, 78 SP.",
-            hpVisibility: "full",
-            imageData: "Images/miriel_img.png",
-            conditions: [],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 2,
-            name: "Suica",
-            publicName: "Suica",
-            type: "player",
-            initiative: 12,
-            hp: 20,
-            maxHp: 20,
-            tempHp: 5,
-            armorClass: 12,
-            passivePerception: 11,
-            passiveInsight: 13,
-            passiveInvestigation: 17,
-            strengthScore: 8,
-            strengthModifier: "-1",
-            dexterityScore: 14,
-            dexterityModifier: "+2",
-            constitutionScore: 14,
-            constitutionModifier: "+2",
-            intelligenceScore: 17,
-            intelligenceModifier: "+3",
-            wisdomScore: 12,
-            wisdomModifier: "+1",
-            charismaScore: 10,
-            charismaModifier: "+0",
-            speed: "30 ft. Walking",
-            savingThrows: "INT +5, WIS +3",
-            resistances: "Poison",
-            immunities: "—",
-            vulnerabilities: "—",
-            senses: "Darkvision 60 ft.",
-            spellSaveDc: "DC 13 · Spell Attack +5",
-            specialResources: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie",
-            notes: "Charakterbogen: Wizard 3 · Schlangenblütige · Arkane Kopfgeldjägerin · Chaotic Neutral.\n\nPersönlichkeit: Suica betrachtet Menschen wie Forschungsobjekte, aber nicht grausam – nur neugierig.\n\nIdeal: Magie ist die höchste Form von Wahrheit. Jede neue Formel ist ein Sieg über das Unbekannte.\n\nBindung: Ein ehemaliger Mentor glaubt, sie sei zu verspielt, um echte arkane Größe zu erreichen; Suica will das Gegenteil beweisen.\n\nMakel: Sie sammelt Wissen, auch wenn es gefährlich oder moralisch fragwürdig ist.",
-            demoSpellSeed: "Cantrips: Mage Hand; Gedankensplitter; Minor Illusion; Poison Spray.\n1st Level: Detect Magic; Identify; Shield; Magic Missile; Find Familiar; Mage Armor; Comprehend Languages; Disguise Selbst; Animal Friendship.\n2nd Level: Detect Thoughts; Invisibility; Suggestion.\nSpellcasting Notes: INT spellcasting; Spell Save DC 13; Spell Attack +5.",
-            demoInventorySeed: "Dagger x2; Quarterstaff; Spellbook; Backpack; Robe; Book x2; Ink; Ink Pen x2; Parchment; Little Bag of Sand; Small Knife; Oil x10; Tinderbox; Lamp; Flute; Thieves' Tools; coins: 5 GP.",
-            hpVisibility: "full",
-            imageData: "Images/suica_img.png",
-            conditions: [],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 3,
-            name: "Animierter Besen",
-            publicName: "Borstibald der Aufmüpfige",
-            type: "monster",
-            initiative: 8,
-            hp: 1,
-            maxHp: 22,
-            tempHp: 0,
-            armorClass: 14,
-            passivePerception: 9,
-            passiveInsight: 6,
-            passiveInvestigation: 5,
-            strengthScore: 12,
-            strengthModifier: "+1",
-            dexterityScore: 18,
-            dexterityModifier: "+4",
-            constitutionScore: 14,
-            constitutionModifier: "+2",
-            intelligenceScore: 6,
-            intelligenceModifier: "-2",
-            wisdomScore: 8,
-            wisdomModifier: "-1",
-            charismaScore: 5,
-            charismaModifier: "-3",
-            speed: "0 ft., Fly 50 ft. (hover)",
-            savingThrows: "DEX +4, CON +2",
-            resistances: "Bludgeoning from nonmagical cleanup tools",
-            immunities: "Poison, Exhausted",
-            vulnerabilities: "Fire",
-            senses: "Blindsight 10 ft.",
-            spellSaveDc: "DC 12",
-            specialResources: "Dust Burst 1/Encounter · Annoying Sweep Recharge 5–6 · False Object",
-            notes: "Skurriles Objektmonster für chaotische Innenräume. Im Kampf soll Borstibald nerven, Sichtlinien stören und Ziele aus der Position bringen. Gute Demo-Karte für Conditions, Zielauswahl und kurze Aktionsblöcke.",
-            demoSpellSeed: "Dust Cloud. Magical dust briefly obscures a 10 ft. area.\nStartling Sweep. A rattling arcane shove interrupts enemy reactions.\nPetty Poltergeist Effect. Small unattended objects tremble, clatter or slide up to 5 ft.",
-            demoInventorySeed: "Lose verzauberte Borsten\nVerbogenes Silbernägelchen\nStaubflocken mit schwacher Illusionsaura\nEin beleidigtes Knarren, das nicht in einen Beutel passt",
-            hpVisibility: "bar",
-            imageData: "Images/borstibald_img.png",
-            conditions: ["prone", "frightened"],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 4,
-            name: "Nebelzahn-Mandrake",
-            publicName: "Nebelzahn",
-            type: "monster",
-            initiative: 14,
-            hp: 38,
-            maxHp: 38,
-            tempHp: 0,
-            armorClass: 15,
-            passivePerception: 13,
-            passiveInsight: 9,
-            passiveInvestigation: 8,
-            strengthScore: 16,
-            strengthModifier: "+3",
-            dexterityScore: 12,
-            dexterityModifier: "+1",
-            constitutionScore: 18,
-            constitutionModifier: "+4",
-            intelligenceScore: 5,
-            intelligenceModifier: "-3",
-            wisdomScore: 13,
-            wisdomModifier: "+1",
-            charismaScore: 8,
-            charismaModifier: "-1",
-            speed: "25 ft., burrow 10 ft.",
-            savingThrows: "CON +5, WIS +2",
-            resistances: "Poison, Necrotic mist",
-            immunities: "—",
-            vulnerabilities: "Radiant",
-            senses: "Tremorsense 30 ft.",
-            spellSaveDc: "DC 13",
-            specialResources: "Shriek Bloom 1/Encounter · Fog Sap 3/day · Root Snare Recharge 5–6",
-            notes: "Ambusher für Wald, Sumpf und verwilderte Gärten. Beginnt idealerweise verborgen, isoliert ein Ziel mit Root Snare und zwingt die Gruppe, Positionierung ernst zu nehmen.",
-            demoSpellSeed: "Fog Sap. Toxic mist condensed into a sticky projectile.\nRoot Snare. Living roots hook around ankles and wrists.\nShriek Bloom. A sudden mandrake scream that weaponizes fear.",
-            demoInventorySeed: "Mandrake root fang\nVial of grey sap\nCracked seed pod\nWet black leaves with faint necrotic veins",
-            hpVisibility: "descriptive",
-            imageData: "Images/nebelzahn_mandrake.png",
-            conditions: ["poisoned"],
-            isInCombat: false,
-            isSelected: false
-        },
-        {
-            id: 5,
-            name: "Glimmerkrähe",
-            publicName: "Die Glimmerkrähe",
-            type: "monster",
-            initiative: 18,
-            hp: 4,
-            maxHp: 19,
-            tempHp: 6,
-            armorClass: 16,
-            passivePerception: 15,
-            passiveInsight: 11,
-            passiveInvestigation: 12,
-            strengthScore: 6,
-            strengthModifier: "-2",
-            dexterityScore: 20,
-            dexterityModifier: "+5",
-            constitutionScore: 12,
-            constitutionModifier: "+1",
-            intelligenceScore: 14,
-            intelligenceModifier: "+2",
-            wisdomScore: 13,
-            wisdomModifier: "+1",
-            charismaScore: 16,
-            charismaModifier: "+3",
-            speed: "10 ft., Fly 60 ft.",
-            savingThrows: "DEX +6, CHA +3",
-            resistances: "Lightning, Psychic whispers",
-            immunities: "—",
-            vulnerabilities: "Thunder",
-            senses: "Darkvision 60 ft.",
-            spellSaveDc: "DC 14",
-            specialResources: "Spiegelfeder 2/Begegnung · Funkenraub Aufladung 6 · Gedankenraub",
-            notes: "Aktuelle Demo-Handkarte. Schneller arkaner Störer: zuerst Reaktionen brechen, dann aus der Reichweite fliegen. Ideal, um die neue Details-Navigation mit Actions, Traits und Spells zu demonstrieren.",
-            demoSpellSeed: "Mirror Feather. A defensive shimmer of broken reflections.\nSteal Spark. Psychic theft shaped like violet lightning.\nFlash Caw. A harsh arcane cry that leaves afterimages.\nGlint Trail. A visible trail of tiny star-like motes marks the crow's movement until initiative count 0.",
-            demoInventorySeed: "Iridescent feather\nStolen copper ring\nCracked mirror bead\nTiny thought-splinter that whispers half a name",
-            hpVisibility: "descriptive",
-            imageData: "Images/glimmerkraehe.png",
-            conditions: [],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 6,
-            name: "Liora Veyth",
-            publicName: "Liora",
-            type: "player",
-            initiative: 15,
-            hp: 42,
-            maxHp: 61,
-            tempHp: 4,
-            armorClass: 20,
-            passivePerception: 10,
-            passiveInsight: 13,
-            passiveInvestigation: 9,
-            strengthScore: 8,
-            strengthModifier: "-1",
-            dexterityScore: 14,
-            dexterityModifier: "+2",
-            constitutionScore: 16,
-            constitutionModifier: "+3",
-            intelligenceScore: 8,
-            intelligenceModifier: "-1",
-            wisdomScore: 10,
-            wisdomModifier: "+0",
-            charismaScore: 18,
-            charismaModifier: "+4",
-            speed: "30 ft. Walking",
-            savingThrows: "STR +1, DEX +4, CON +8, INT +1, WIS +2, CHA +9",
-            resistances: "Necrotic, Radiant",
-            immunities: "—",
-            vulnerabilities: "—",
-            senses: "Darkvision 60 ft.",
-            spellSaveDc: "DC 15 · Spell Attack +7",
-            specialResources: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR",
-            notes: "Charakterbogen: Sorcerer 5 / Warlock 3 · Sternengeborene · Hofübersetzerin · Chaotic Neutral.\n\nPersönlichkeit: Liora folgt eher ihrem Bauchgefühl als klugen Argumenten – oft bringt sie das in Schwierigkeiten, manchmal aber auch zu verborgenen Wahrheiten.\n\nIdeal: Freiheit. Niemand soll sie je wieder kontrollieren – nicht der Hof, nicht ihr Erbe, nicht einmal ihr Patron.\n\nBindung: Die Stimme ihres Patrons verfolgt sie; sie fürchtet sie und kann doch nicht von ihr loslassen.\n\nMakel: Sie gibt oft vor, mehr zu verstehen, als sie wirklich tut, und gerät dadurch in Gefahren, die sie nicht einschätzen kann.\n\nAussehen: Liora wirkt auf den ersten Blick wie eine junge, schöne Frau, doch bei genauerem Hinsehen verrät ihr Aussehen ihre sternengeborene Herkunft und die Schatten, die an ihr nagen. Ihr Gesicht ist fein geschnitten, mit hohen Wangenknochen und vollen Lippen. Dunkle Schatten und verfärbte Stellen ziehen sich über ihre linke Gesichtshälfte und den Hals, wie eine brennende Spur von himmlischer Macht, die in Finsternis übergeht. Ihre Augen leuchten in goldenem Schimmer; ihr tiefviolettes Haar fällt in weichen Wellen über die Schultern. An manchen Stellen schimmert ihre Haut wie mit Sternenstaub überzogen, während andere Bereiche dunkel verfärbt wirken, als hätte sie eine Korrumpierung berührt.",
-            demoSpellSeed: "Cantrips: Prestidigitation; Message; Sacred Flame; Minor Illusion; Resonanzschnitt; Eldritch Blast; Grabesklang; Light.\n1st Level: Elementarschild; Shield; Healing Word; Hex; Comprehend Languages; Armor of Agathys; Schicksalstempo; Protection from Evil and Good.\n2nd Level: Suggestion; Mirror Image; Gedankenhieb; Darkness; Misty Step.\n3rd Level: Fireball; Hypnotic Pattern; Counterspell.\nSpellcasting Notes: CHA spellcasting; Spell Save DC 15; Spell Attack +7; Sorcerer slots 1st: 4, 2nd: 3, 3rd: 2; Pact slots 2nd: 2.",
-            demoInventorySeed: "Cloak of Protection; Ring of Protection; Starker Heiltrank; Scale Mail; Shield; Billiger Trank gegen Shrieker-Sporen x2; Ink; Common Clothes; Fine Clothes; Pouch; Backpack; Crystal; Longsword; Oil x2; Rations x10; Rope; Tinderbox; Torches x10; Waterskin; Caltrops x20; Crowbar; coins: 95 GP.",
-            hpVisibility: "full",
-            imageData: "Images/liora_img.png",
-            conditions: [],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 7,
-            name: "Moosgruft-Koloss",
-            publicName: "Moosgruft-Koloss",
-            type: "monster",
-            initiative: 4,
-            hp: 35,
-            maxHp: 88,
-            tempHp: 0,
-            armorClass: 16,
-            passivePerception: 14,
-            passiveInsight: 7,
-            passiveInvestigation: 6,
-            strengthScore: 20,
-            strengthModifier: "+5",
-            dexterityScore: 8,
-            dexterityModifier: "-1",
-            constitutionScore: 18,
-            constitutionModifier: "+4",
-            intelligenceScore: 5,
-            intelligenceModifier: "-3",
-            wisdomScore: 12,
-            wisdomModifier: "+1",
-            charismaScore: 6,
-            charismaModifier: "-2",
-            speed: "25 ft.",
-            savingThrows: "STR +7, CON +6",
-            resistances: "Bludgeoning, Necrotic soil",
-            immunities: "Poisoned",
-            vulnerabilities: "Fire",
-            senses: "Tremorsense 60 ft.",
-            spellSaveDc: "DC 15",
-            specialResources: "Grabmoos-Regeneration 10 TP · Zermalmende Wurzel Aufladung 5–6 · Grabsog 1/Begegnung",
-            notes: "Boss- oder Elite-Demo-Karte. Der Koloss funktioniert als langsamer Raumkontrolleur: zieht Ziele in gefährliche Zonen, überlebt lange und zwingt die Gruppe zu Feuer- oder Mobilitätslösungen.",
-            demoSpellSeed: "Root Wall. Roots and grave soil rise as half cover until initiative count 0.\nGrave Pull. Necrotic roots drag creatures through mud and loose stones.\nMoss Regrowth. Green corpse-light knits cracked stone back together.",
-            demoInventorySeed: "Moss-covered stone heart\nAncient coin fragments\nGrave-root fiber\nA cracked nameplate from an unknown tomb",
-            hpVisibility: "descriptive",
-            imageData: "Images/moosgruft_koloss.png",
-            conditions: [],
-            isInCombat: true,
-            isSelected: false
-        },
-        {
-            id: 8,
-            name: "Spiegelmolch",
-            publicName: "Spiegelmolch",
-            type: "monster",
-            initiative: 16,
-            hp: 27,
-            maxHp: 27,
-            tempHp: 3,
-            armorClass: 15,
-            passivePerception: 12,
-            passiveInsight: 8,
-            passiveInvestigation: 15,
-            strengthScore: 8,
-            strengthModifier: "-1",
-            dexterityScore: 17,
-            dexterityModifier: "+3",
-            constitutionScore: 12,
-            constitutionModifier: "+1",
-            intelligenceScore: 16,
-            intelligenceModifier: "+3",
-            wisdomScore: 10,
-            wisdomModifier: "+0",
-            charismaScore: 14,
-            charismaModifier: "+2",
-            speed: "30 ft., swim 30 ft.",
-            savingThrows: "DEX +5, INT +4",
-            resistances: "Psychic, Illusion backlash",
-            immunities: "—",
-            vulnerabilities: "Thunder",
-            senses: "Darkvision 60 ft., mirror-sense 30 ft.",
-            spellSaveDc: "DC 14",
-            specialResources: "Reflective Skin 2/Encounter · Duplicate Flicker 1/day · False Step Recharge 5–6",
-            notes: "Illusions-Störer für Wasser, Spiegelhallen oder Mondlichtszenen. Nutzt falsche Positionen und kleine Zwangsbewegungen statt roher Gewalt.",
-            demoSpellSeed: "Duplicate Flicker. A second silhouette peels out of the reflection.\nGlass Ripple. A ring of mirror-light distorts distance and aim.\nFalse Step. The target follows a reflection that is not really there.\nRipple Swap. The molch trades places with a nearby reflection.",
-            demoInventorySeed: "Iridescent scale\nTiny mirror shard\nCold pond pearl\nWet glassy membrane that keeps reflecting the wrong sky",
-            hpVisibility: "bar",
-            imageData: "Images/spiegelmolch.png",
-            conditions: ["invisible"],
-            isInCombat: false,
-            isSelected: false
-        },
-        {
-            id: 9,
-            name: "Veyra Mondfaden",
-            publicName: "Veyra",
-            type: "npc",
-            initiative: 15,
-            hp: 31,
-            maxHp: 31,
-            tempHp: 0,
-            armorClass: 15,
-            passivePerception: 15,
-            passiveInsight: 17,
-            passiveInvestigation: 16,
-            strengthScore: 9,
-            strengthModifier: "-1",
-            dexterityScore: 18,
-            dexterityModifier: "+4",
-            constitutionScore: 12,
-            constitutionModifier: "+1",
-            intelligenceScore: 16,
-            intelligenceModifier: "+3",
-            wisdomScore: 17,
-            wisdomModifier: "+3",
-            charismaScore: 14,
-            charismaModifier: "+2",
-            speed: "30 ft.",
-            savingThrows: "DEX +6, INT +5, WIS +5",
-            resistances: "Psychic pressure from interrogation magic",
-            immunities: "—",
-            vulnerabilities: "Thunderous public attention",
-            senses: "Reads street patterns and tailing routes",
-            spellSaveDc: "DC 13 · Coded Whispers",
-            specialResources: "Dead Drop 2/day · Vanish in Rain 1/Encounter · Blackmail Thread 3",
-            notes: "NPC-Demo-Karte für soziale Encounters, Verfolgungen und geheime Übergaben. Veyra ist keine Frontkämpferin; sie kontrolliert Informationen, Fluchtwege und kleine taktische Fenster.",
-            demoSpellSeed: "Coded Whisper. A nearly silent phrase carries meaning only to the intended listener.\nRain Veil. Street rain and fog distort her outline for a few seconds.\nMoonfaden Mark. A tiny silver thread marks a door, pocket or package until dawn.\nFalse Trail. Footprints and drips appear to lead down the wrong alley.",
-            demoInventorySeed: "Versiegelte Nachricht\nVersteckter Dolch\nWetterfester Kapuzenmantel\nDrei codierte Straßenmarken\nSchwarzes Band mit silbernem Faden",
-            hpVisibility: "descriptive",
-            imageData: "Images/veyra.png",
-            conditions: [],
-            isInCombat: false,
-            isSelected: false
+// Zentrale Zustandsobjekte. Die bestehenden Funktionsnamen greifen über
+// Kompatibilitäts-Accessors direkt auf diese Objekte zu. Dadurch bleiben
+// Render- und Aktionslogik stabil, während gameState/uiState die einzige
+// Quelle für persistente Zustände sind.
+const gameState = {
+    id: crypto.randomUUID(),
+    name: useDemoData ? demoEncounterName : "Unbenannter Spielstand",
+    cards: (useDemoData ? createDemoCards() : []).map(normalizeCardModel),
+    encounter: {
+        roundNumber: 1,
+        currentTurnCardId: null,
+        isStarted: false,
+        startGateVersion: 2
+    },
+    eventLog: [],
+    presentation: {
+        manuallySelectedCardId: null,
+        mirielBoard: {
+            manualImageData: "",
+            manualImageName: "",
+            manualText: "",
+            manualTextSize: "normal",
+            manualTextPosition: "bottom",
+            persistentMode: "off",
+            autoTurnEnabled: false,
+            durationMode: "normal",
+            newRoundCallEnabled: true,
+            triggerId: "",
+            announcement: null
         }
+    },
+    settings: {
+        mirielBoardAutomationDefaultsVersion: mirielBoardAutomationDefaultsVersion
+    }
+};
 
-    ];
+const uiState = {
+    focusedCardId: null,
+    activeDetailTab: "values",
+    activeDmFeedTab: "log",
+    expandedSpellDetailKey: null,
+    deck: {
+        searchQuery: "",
+        typeFilter: "all",
+        sortMode: "name",
+        locationView: cardLocations.deck
+    }
+};
 
-    return demoCreatures.map(addDemoStructuredActions);
+function defineStateAlias(name, getter, setter) {
+    Object.defineProperty(globalThis, name, {
+        configurable: false,
+        enumerable: false,
+        get: getter,
+        set: setter
+    });
 }
 
-function addDemoStructuredActions(creature) {
-    const { demoSpellSeed = "", demoInventorySeed = "", ...baseCreature } = creature;
-    const demoActions = getDemoActionsForCreature(creature.id);
-    const demoTraits = getDemoTraitsForCreature(creature.id);
-    const demoSpellcasting = getDemoSpellcastingForCreature(creature);
-    const demoInventory = createInventoryDataFromLegacyText(demoInventorySeed);
-
-    if (creature.id === 1) {
-        demoInventory.cards.push(createInventoryCardFromTemplate("greaterHealing"));
+function getCurrentTurnIndexFromState() {
+    const initiativeCards = getInitiativeCards(getHandCards());
+    if (initiativeCards.length === 0 || gameState.encounter.currentTurnCardId === null) {
+        return 0;
     }
-
-    return {
-        ...baseCreature,
-        actions: demoActions,
-        traits: demoTraits,
-        spellcasting: demoSpellcasting,
-        currency: demoInventory.currency,
-        inventoryCards: demoInventory.cards,
-        inventoryList: demoInventory.list,
-        isDemoCard: true
-    };
+    const index = initiativeCards.findIndex(card => card.id === gameState.encounter.currentTurnCardId);
+    return index >= 0 ? index : 0;
 }
 
-function isKnownDemoCreatureData(rawCreature) {
-    if (rawCreature === null || typeof rawCreature !== "object") {
-        return false;
+function setCurrentTurnIndexInState(value) {
+    const initiativeCards = getInitiativeCards(getHandCards());
+    if (initiativeCards.length === 0) {
+        gameState.encounter.currentTurnCardId = null;
+        return;
     }
-
-    const rawName = typeof rawCreature.name === "string" ? rawCreature.name.trim().toLocaleLowerCase("de-DE") : "";
-
-    if (rawName === "") {
-        return false;
-    }
-
-    return demoCreatureNameSignatures.includes(rawName);
+    const numericIndex = Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : 0;
+    const safeIndex = Math.min(Math.max(numericIndex, 0), initiativeCards.length - 1);
+    gameState.encounter.currentTurnCardId = initiativeCards[safeIndex].id;
 }
 
-function getDemoActionsForCreature(creatureId) {
-    const demoActions = {
-        1: [
-            createCreatureAction({ name: "Rapier", type: "action", attack: "+8 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W8+5 Stich", description: "Nahkampfangriff mit einer Finessewaffe." }),
-            createCreatureAction({ name: "Dolch", type: "action", attack: "+8 auf Treffer", range: "5 Fuß oder 20/60 Fuß", damage: "1W4+5 Stich", description: "Finesse, leicht und geworfen." }),
-            createCreatureAction({ name: "Kurzbogen", type: "action", attack: "+8 auf Treffer", range: "80/320 Fuß", damage: "1W6+5 Stich", description: "Fernkampfangriff mit einer Waffe." }),
-            createCreatureAction({ name: "Kampf mit zwei Waffen", type: "action", description: "Allgemeine Kampfoption, sobald Waffenwahl und Aktionsökonomie die Nebenhand erlauben." })
-        ],
-        2: [
-            createCreatureAction({ name: "Dolch", type: "action", attack: "+4 auf Treffer", range: "5 Fuß oder 20/60 Fuß", damage: "1W4+2 Stich", description: "Einfach, Finesse, leicht und geworfen." }),
-            createCreatureAction({ name: "Kampfstab", type: "action", attack: "+1 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6-1 Wucht", description: "Einfache, vielseitige Waffe." })
-        ],
-        3: [
-            createCreatureAction({ name: "Lästiger Feger", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", attack: "+4 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6+2 Wucht", save: "SG 12 ST", description: "Bei einem misslungenen Rettungswurf stürzt das Ziel zu Boden." }),
-            createCreatureAction({ name: "Staubstoß", type: "action", usage: "1 / Begegnung", range: "Kegel 10 Fuß", save: "SG 12 KO", description: "Betroffene Kreaturen sind bei einem misslungenen Rettungswurf bis zum Ende ihres nächsten Zuges blind." }),
-            createCreatureAction({ name: "Erschreckendes Klappern", type: "action", range: "30 Fuß", save: "SG 12 WE", description: "Eine hörende Kreatur verliert bei einem misslungenen Rettungswurf ihre Reaktion bis zu Borstibalds nächstem Zug." })
-        ],
-        4: [
-            createCreatureAction({ name: "Wurzelbiss", type: "action", attack: "+5 auf Treffer", range: "Reichweite 5 Fuß", damage: "2W6+3 Stich plus 1W6 Gift" }),
-            createCreatureAction({ name: "Nebelsaft", type: "action", usageMax: 3, usageReset: "longRest", usage: "3 / Lange Rast", attack: "+5 auf Treffer", range: "30 Fuß", damage: "2W6 Gift", description: "Die Bewegungsrate des Ziels sinkt bis zum Ende seines nächsten Zuges um 10 Fuß." }),
-            createCreatureAction({ name: "Kreischblüte", type: "action", usage: "1 / Begegnung", range: "15 Fuß", save: "SG 13 WE", description: "Betroffene Kreaturen sind bei einem misslungenen Rettungswurf bis zum Ende ihres nächsten Zuges verängstigt." }),
-            createCreatureAction({ name: "Wurzelschlinge", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", range: "20 Fuß", save: "SG 13 ST", description: "Eine Kreatur am Boden ist bei einem misslungenen Rettungswurf bis zum Ende von Nebelzahns nächstem Zug festgesetzt." })
-        ],
-        5: [
-            createCreatureAction({ name: "Funken-Schnabel", type: "action", attack: "+6 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W4+4 Stich plus 1W6 Blitz" }),
-            createCreatureAction({ name: "Funkenraub", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 6", attack: "+6 auf Treffer", range: "60 Fuß", damage: "2W6 psychisch", description: "Das Ziel kann bis zum Beginn seines nächsten Zuges keine Reaktionen einsetzen." }),
-            createCreatureAction({ name: "Spiegelkrächzen", type: "action", range: "30 Fuß", save: "SG 14 WE", description: "Bei einem misslungenen Rettungswurf hat das Ziel Nachteil auf seinen nächsten Angriff vor Ende seines nächsten Zuges." }),
-            createCreatureAction({ name: "Lichtflucht", type: "bonus", description: "Die Glimmerkrähe fliegt bis zur Hälfte ihrer Bewegungsrate. Von Spiegelkrächzen oder Funkenraub betroffene Kreaturen erhalten dabei keinen Gelegenheitsangriff." })
-        ],
-        6: [
-            createCreatureAction({ name: "Eldritch Blast", type: "action", attack: "+7 auf Treffer", range: "120 Fuß", damage: "Zwei Strahlen mit je 1W10+4 Kraft" }),
-            createCreatureAction({ name: "Unbewaffneter Schlag", type: "action", attack: "+2 auf Treffer", range: "Reichweite 5 Fuß", damage: "0 Wucht" })
-        ],
-        7: [
-            createCreatureAction({ name: "Zermalmende Wurzel", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", attack: "+7 auf Treffer", range: "Reichweite 10 Fuß", damage: "2W10+5 Wucht", description: "Das Ziel wird gepackt." }),
-            createCreatureAction({ name: "Grabsog", type: "action", usage: "1 / Begegnung", range: "Linie 15 Fuß", save: "SG 15 ST", description: "Betroffene Kreaturen werden bei einem misslungenen Rettungswurf 10 Fuß zum Koloss gezogen und stürzen zu Boden." }),
-            createCreatureAction({ name: "Grabsteinschlag", type: "action", attack: "+7 auf Treffer", range: "Reichweite 5 Fuß", damage: "2W8+5 Wucht plus 1W8 nekrotisch" }),
-            createCreatureAction({ name: "Moosbedecktes Brüllen", type: "action", range: "30 Fuß", damage: "1W6 psychisch", description: "Jede verängstigte oder am Boden liegende Kreatur in Reichweite erleidet den Schaden." })
-        ],
-        8: [
-            createCreatureAction({ name: "Glasbiss", type: "action", attack: "+5 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W6+3 Stich plus 1W6 psychisch" }),
-            createCreatureAction({ name: "Falscher Schritt", type: "action", usageMax: 1, usageReset: "manual", usage: "Aufladung 5–6", range: "30 Fuß", save: "SG 14 IN", description: "Bei einem misslungenen Rettungswurf bewegt sich das Ziel 10 Fuß in eine vom Molch gewählte Richtung." }),
-            createCreatureAction({ name: "Schimmerspucke", type: "action", attack: "+5 auf Treffer", range: "30 Fuß", damage: "2W6 psychisch", description: "Das Ziel kann bis zum Ende seines nächsten Zuges nicht von Unsichtbarkeit profitieren." }),
-            createCreatureAction({ name: "Wellentausch", type: "bonus", range: "30 Fuß", description: "Der Molch tauscht den Platz mit seinem Doppelbild oder einer Spiegelung." })
-        ],
-        9: [
-            createCreatureAction({ name: "Verborgener Dolch", type: "action", attack: "+6 auf Treffer", range: "Reichweite 5 Fuß", damage: "1W4+4 Stich", description: "Verursacht zusätzlich 1W6 Giftschaden, wenn Veyra Vorteil hatte." }),
-            createCreatureAction({ name: "Erpressungsfaden", type: "action", usageMax: 3, usageReset: "charges", usage: "3 Ladungen", range: "30 Fuß", save: "SG 13 WE", description: "Bei einem misslungenen Rettungswurf hat das Ziel Nachteil auf seinen nächsten Angriff gegen Veyra oder einen ihrer Verbündeten." }),
-            createCreatureAction({ name: "Im Regen verschwinden", type: "bonus", usage: "1 / Begegnung", description: "Veyra bewegt sich bis zu ihrer Bewegungsrate und versucht sich zu verstecken, selbst bei leichter Verdeckung durch Regen, Nebel oder Straßenschatten." }),
-            createCreatureAction({ name: "Codierte Warnung", type: "reaction", range: "60 Fuß", trigger: "Ein sicht- oder hörbarer Verbündeter will seine Position wechseln.", description: "Der Verbündete darf sich sofort bis zu 10 Fuß bewegen, ohne Gelegenheitsangriffe auszulösen." })
-        ]
-    };
-
-    return demoActions[creatureId] || [];
-}
-
-function getDemoTraitsForCreature(creatureId) {
-    const demoTraits = {
-        1: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Hinterhältiger Angriff 4W6 · Listige Aktion · Unheimliches Ausweichen · Entrinnen · Arkane Kartenmeisterin: 4 Zauberplätze 1. Grades, 2 Zauberplätze 2. Grades" }),
-            createCreatureTrait({ name: "Hinterhältiger Angriff", category: "classFeature", usageMax: 1, usageReset: "turn", usage: "1 / Zug", showAsAction: true, actionType: "special", actionSummary: "Einmal pro Zug zusätzlich 4W6 Schaden verursachen, wenn die Voraussetzungen erfüllt sind.", description: "Einmal pro Zug verursacht Miriel mit einer Finesse- oder Fernkampfwaffe 4W6 zusätzlichen Schaden, wenn sie Vorteil hat oder ein Gegner des Ziels nahe bei ihm steht und Miriel keinen Nachteil hat." }),
-            createCreatureTrait({ name: "Listige Aktion", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Sprinten, Rückzug oder Verstecken als Bonusaktion einsetzen.", description: "Miriel kann in jedem ihrer Züge Sprinten, Rückzug oder Verstecken als Bonusaktion einsetzen." }),
-            createCreatureTrait({ name: "Unheimliches Ausweichen", category: "classFeature", showAsAction: true, actionType: "reaction", trigger: "Ein sichtbarer Angreifer trifft Miriel.", actionSummary: "Den Schaden des Angriffs halbieren.", description: "Trifft ein sichtbarer Angreifer Miriel, kann sie ihre Reaktion einsetzen, um den Schaden dieses Angriffs zu halbieren." }),
-            createCreatureTrait({ name: "Arkane Fingerfertigkeit", category: "classFeature", description: "Miriel kann ihre magische Hand unsichtbar wirken lassen und damit auf Distanz kleine Gegenstände, Schlösser und Diebeswerkzeug besonders geschickt bedienen." }),
-            createCreatureTrait({ name: "Entrinnen", category: "passive", description: "Bei Geschicklichkeitsrettungswürfen gegen halben Schaden erleidet Miriel bei Erfolg keinen und bei Misserfolg nur halben Schaden." }),
-            createCreatureTrait({ name: "Chaosfeen-Flug", category: "species", description: "Die Flugbewegungsrate entspricht der Laufbewegungsrate." }),
-            createCreatureTrait({ name: "Chaosfeen-Magie", category: "species", description: "Miriels angeborene Feenmagie wird über ihre Zauberliste verwaltet; begrenzte Anwendungen werden dort gesondert erfasst." })
-        ],
-        2: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Arkane Erholung 1/LR · Arkane Schreibfeder · Erwachtes Zauberbuch · Schlangenmagie" }),
-            createCreatureTrait({ name: "Arkane Schreibfeder", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Eine magische Schreibfeder in Suicas freier Hand erscheinen lassen.", description: "Suica ruft mit einer Bonusaktion eine tintenlose Feder hervor. Sie erleichtert das Übertragen arkaner Formeln und kann eigene Schriftzeichen in kurzer Entfernung wieder auslöschen." }),
-            createCreatureTrait({ name: "Arkane Erholung", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Nach einer kurzen Rast verbrauchte Zauberplätze mit insgesamt bis zu zwei Zaubergraden zurückgewinnen.", description: "Einmal pro langer Rast kann Suica nach einer kurzen Rast verbrauchte Zauberplätze zurückgewinnen, deren addierte Grade höchstens zwei betragen." }),
-            createCreatureTrait({ name: "Erwachtes Zauberbuch: Ritualfokus", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein vorbereitetes Ritual ohne zusätzliche Ritualzeit wirken.", description: "Solange Suica ihr Erwachtes Zauberbuch hält, kann sie einmal pro langer Rast ein vorbereitetes Ritual in dessen normaler Wirkzeit vollenden." }),
-            createCreatureTrait({ name: "Magieresistenz", category: "species", description: "Vorteil auf Rettungswürfe gegen Zauber." }),
-            createCreatureTrait({ name: "Giftresistenz", category: "species", description: "Resistenz gegen Giftschaden sowie Vorteil auf Rettungswürfe, um Vergiftung zu vermeiden oder zu beenden." }),
-            createCreatureTrait({ name: "Gelehrte", category: "classFeature", description: "Suica verdoppelt ihren Übungsbonus bei einer beherrschten Wissensfertigkeit; in der Demo gilt dies für Nachforschungen." }),
-            createCreatureTrait({ name: "Schlangenmagie", category: "species", description: "Suicas angeborene Magie wird über ihre Zauberliste verwaltet und umfasst giftige, tierbezogene und beeinflussende Effekte." })
-        ],
-        3: [
-            createCreatureTrait({ name: "Täuschend echter Gegenstand", category: "monsterTrait", description: "Solange Borstibald reglos bleibt, ist er nicht von einem gewöhnlichen Besen zu unterscheiden, bis er sich bewegt oder angreift." }),
-            createCreatureTrait({ name: "Staubiger Zorn", category: "monsterTrait", usageMax: 1, usageReset: "encounter", usage: "1 / Begegnung", showAsAction: true, actionType: "special", trigger: "Borstibald erleidet in einer Begegnung zum ersten Mal Schaden.", actionSummary: "Kreaturen im Umkreis von 10 Fuß haben bis zum Rundenende Nachteil auf ihre nächste Wahrnehmungsprobe.", description: "Wenn Borstibald in einer Begegnung erstmals Schaden erleidet, wirbelt er eine Staubwolke auf. Jede Kreatur im Umkreis von 10 Fuß hat bis zum Ende der Runde Nachteil auf ihre nächste Wahrnehmungsprobe." }),
-            createCreatureTrait({ name: "Schwebender Hausplagegeist", category: "passive", description: "Borstibald ignoriert schwieriges Gelände, das durch Gerümpel, Möbel, verschüttete Flüssigkeiten oder lose Trümmer entsteht." })
-        ],
-        4: [
-            createCreatureTrait({ name: "Verwurzelter Lauerjäger", category: "monsterTrait", description: "Nebelzahn hat Vorteil auf Heimlichkeitsproben, solange er teilweise in Erde, Nebel oder Laub verborgen ist." }),
-            createCreatureTrait({ name: "Nebelgenährte Haut", category: "monsterTrait", description: "In Nebel, dämmrigem Licht oder dichter Vegetation erhält Nebelzahn +2 Rüstungsklasse gegen Fernkampfangriffe." }),
-            createCreatureTrait({ name: "Witterung warmen Blutes", category: "monsterTrait", description: "Nebelzahn kennt die Richtung jeder verletzten Kreatur im Umkreis von 30 Fuß, die den Boden berührt." })
-        ],
-        5: [
-            createCreatureTrait({ name: "Spiegelfeder", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Begegnung", showAsAction: true, actionType: "reaction", trigger: "Eine Kreatur verfehlt die Glimmerkrähe mit einem Angriff.", actionSummary: "Eine falsche Spiegelung aufblitzen lassen und sich 10 Fuß ohne Gelegenheitsangriffe bewegen.", description: "Bis zu zweimal pro Begegnung kann die Glimmerkrähe nach einem verfehlten Angriff eine falsche Spiegelung aufblitzen lassen und sich 10 Fuß bewegen, ohne Gelegenheitsangriffe auszulösen." }),
-            createCreatureTrait({ name: "Gedankenraub", category: "monsterTrait", description: "Eine von Funkenraub getroffene Kreatur kann bis zum Beginn ihres nächsten Zuges keine Reaktionen einsetzen." }),
-            createCreatureTrait({ name: "Glänzendes Omen", category: "monsterTrait", description: "Die Glimmerkrähe hat Vorteil auf Proben, um magische Gegenstände, spiegelnde Flächen und verborgenen Schmuck zu entdecken." })
-        ],
-        6: [
-            createCreatureTrait({ name: "Ressourcen", category: "resource", description: "Zaubereipunkte 5 · Metamagie: Verstärkt, Beschleunigt · Fluch der Schattenklinge 1/SR · Gunst des Schicksals 1/SR · Heilende Berührung 1/LR · Sternenbrand 1/LR" }),
-            createCreatureTrait({ name: "Heilende Berührung", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "action", actionSummary: "Eine berührte Kreatur mit Sternenlicht heilen.", description: "Liora kanalisiert mit einer Aktion sanftes Sternenlicht durch ihre Hände. Die berührte Kreatur erhält eine Anzahl W4 Heilung in Höhe von Lioras Übungsbonus." }),
-            createCreatureTrait({ name: "Fluch der Schattenklinge", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "bonus", range: "30 Fuß", actionSummary: "Eine sichtbare Kreatur eine Minute lang mit dem Mal der Schattenklinge belegen.", description: "Liora markiert mit einer Bonusaktion eine sichtbare Kreatur in 30 Fuß Reichweite. Gegen das markierte Ziel verursacht sie 3 zusätzlichen Schaden, erzielt bereits bei 19–20 einen kritischen Treffer und gewinnt 7 HP zurück, falls das Ziel fällt." }),
-            createCreatureTrait({ name: "Quelle der Magie: Zauberplatz erschaffen", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zaubereipunkte ausgeben, um einen Zauberplatz zu erschaffen.", description: "Liora kann als Bonusaktion 2, 3 oder 5 Zaubereipunkte ausgeben, um einen Zauberplatz des 1., 2. oder 3. Grades zu erschaffen." }),
-            createCreatureTrait({ name: "Beschleunigter Zauber", category: "classFeature", showAsAction: true, actionType: "bonus", actionSummary: "Zwei Zaubereipunkte ausgeben, um einen geeigneten Zauber als Bonusaktion zu wirken.", description: "Liora gibt zwei Zaubereipunkte aus und ändert die Wirkzeit eines geeigneten Zaubers für diesen Einsatz von einer Aktion zu einer Bonusaktion." }),
-            createCreatureTrait({ name: "Gunst des Schicksals", category: "classFeature", usageMax: 1, usageReset: "shortRest", usage: "1 / Kurze Rast", showAsAction: true, actionType: "special", trigger: "Liora verfehlt einen Angriff oder misslingt bei einem Rettungswurf.", actionSummary: "2W4 auf das Ergebnis addieren und das Schicksal möglicherweise wenden.", description: "Einmal pro kurzer Rast kann Liora nach einem verfehlten Angriff oder misslungenen Rettungswurf 2W4 auf das Ergebnis addieren." }),
-            createCreatureTrait({ name: "Sternenbrand", category: "species", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "bonus", actionSummary: "Für eine Minute eine brennende Sternenaura entfesseln.", description: "Einmal pro langer Rast entfesselt Liora mit einer Bonusaktion für eine Minute ihre instabile Sternenkraft." }),
-            createCreatureTrait({ name: "Arkane Reserve", category: "classFeature", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein einminütiges Ritual stellt einen verbrauchten Pakt-Zauberplatz wieder her.", description: "Einmal pro langer Rast kann Liora ein einminütiges Ritual vollziehen und dadurch bis zu einen verbrauchten Pakt-Zauberplatz zurückgewinnen." }),
-            createCreatureTrait({ name: "Sternenblut-Resistenz", category: "species", description: "Liora besitzt Resistenz gegen nekrotischen und gleißenden Schaden." }),
-            createCreatureTrait({ name: "Unbeugsame Konzentration", category: "classFeature", description: "Liora hat Vorteil auf Konstitutionsrettungswürfe, mit denen sie ihre Konzentration aufrechterhält." }),
-            createCreatureTrait({ name: "Gefechtsmagierin", category: "feat", description: "Liora kann Zauber auch mit Waffe oder Schild sicher wirken und geeignete Zauber für Gelegenheitsangriffe einsetzen." }),
-            createCreatureTrait({ name: "Schattenklingen-Bindung", category: "classFeature", description: "Nach einer langen Rast bindet Liora eine geeignete Waffe an ihren Pakt und verwendet für Angriffe mit ihr ihr Charisma. Außerdem beherrscht sie mittelschwere Rüstungen, Schilde und Kriegswaffen." }),
-            createCreatureTrait({ name: "Qualvoller Strahl", category: "classFeature", description: "Liora addiert ihren Charismamodifikator zum Schaden ihres unheimlichen Strahls." }),
-            createCreatureTrait({ name: "Zurückstoßender Strahl", category: "classFeature", description: "Trifft Lioras unheimlicher Strahl eine große oder kleinere Kreatur, kann er sie bis zu 10 Fuß von ihr wegstoßen." })
-        ],
-        7: [
-            createCreatureTrait({ name: "Grabmoos-Regeneration", category: "monsterTrait", showAsAction: true, actionType: "special", actionSummary: "Zu Beginn seines Zuges 10 Trefferpunkte zurückgewinnen, sofern seit dem letzten Zug kein Feuerschaden erlitten wurde.", description: "Steht der Koloss auf Erde oder Stein, gewinnt er zu Beginn seines Zuges 10 Trefferpunkte zurück, sofern er seit seinem letzten Zug keinen Feuerschaden erlitten hat." }),
-            createCreatureTrait({ name: "Massiger Körper", category: "monsterTrait", description: "Der Koloss hat Vorteil auf Rettungswürfe dagegen, bewegt, zu Boden geworfen oder von Kreaturen unterhalb der Größenkategorie riesig gepackt zu werden." }),
-            createCreatureTrait({ name: "Anker des Gräberfelds", category: "monsterTrait", description: "Schwieriges Gelände aus Wurzeln, Geröll oder Gräbern kostet den Koloss keine zusätzliche Bewegung." })
-        ],
-        8: [
-            createCreatureTrait({ name: "Spiegelnde Haut", category: "monsterTrait", usageMax: 2, usageReset: "encounter", usage: "2 / Begegnung", showAsAction: true, actionType: "reaction", trigger: "Ein Zauberangriff verfehlt den Molch.", actionSummary: "Einen harmlosen Schimmer auf eine Kreatur im Umkreis von 10 Fuß umlenken; sie hat Nachteil auf ihre nächste Wahrnehmungsprobe.", description: "Bis zu zweimal pro Begegnung kann der Molch nach einem verfehlten Zauberangriff einen harmlosen Schimmer auf eine andere Kreatur im Umkreis von 10 Fuß lenken. Diese hat Nachteil auf ihre nächste Wahrnehmungsprobe." }),
-            createCreatureTrait({ name: "Flackerndes Doppelbild", category: "monsterTrait", usageMax: 1, usageReset: "longRest", usage: "1 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Ein Trugbild erschaffen, das bis zu seinem ersten Treffer bestehen bleibt.", description: "Einmal pro langer Rast erschafft der Molch ein Trugbild seiner selbst. Es verschwindet, sobald es von einem Angriff getroffen wird." }),
-            createCreatureTrait({ name: "Spiegelsinn", category: "monsterTrait", description: "Der Molch kennt den Standort von Kreaturen im Umkreis von 30 Fuß, die sich in stillem Wasser, poliertem Metall oder Glas spiegeln." })
-        ],
-        9: [
-            createCreatureTrait({ name: "Netz geheimer Ablagen", category: "npc", usageMax: 2, usageReset: "longRest", usage: "2 / Lange Rast", showAsAction: true, actionType: "special", actionSummary: "Den wahrscheinlichen Ablageort einer Nachricht, eines Schlüssels oder kleiner Schmuggelware in der Nähe kennen.", description: "Zweimal pro langer Rast kann Veyra glaubhaft den Ort kennen, an dem in der Nähe eine Nachricht, ein Schlüssel oder ein kleiner Schmuggelgegenstand verborgen wurde." }),
-            createCreatureTrait({ name: "Geist der Menge", category: "npc", description: "Veyra kann versuchen, sich zu verstecken, wenn Regen, Nebel, Menschenmengen oder aufgehängte Wäsche sie leicht verdecken." }),
-            createCreatureTrait({ name: "Instinkt der Informantin", category: "npc", description: "Veyra hat Vorteil auf Motiv-erkennen-Proben, um Lügen über Namen, Wege oder Zugehörigkeiten zu durchschauen." })
-        ]
-    };
-
-    return demoTraits[creatureId] || [];
-}
-
-function applySpellOverride(spellcasting, spellName, overrides) {
-    const lowerName = getSafeOptionalString(spellName).toLowerCase();
-    const spell = spellcasting.spells.find(function(item) { return item.name.toLowerCase() === lowerName; });
-
-    if (spell !== undefined) {
-        Object.assign(spell, overrides);
-    }
-}
-
-function getDemoSpellcastingForCreature(creature) {
-    const spellcasting = createDefaultSpellcasting(creature);
-    spellcasting.spells = parseLegacySpellsText(creature.demoSpellSeed);
-    applyLegacySlotHints(spellcasting, { spellsText: creature.demoSpellSeed, spellSaveDc: creature.spellSaveDc });
-
-    if (creature.id === 1) {
-        applySpellOverride(spellcasting, "Chaossplitter", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Faerie Fire", { castingTime: "1 Aktion", range: "60 ft.", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
-        applySpellOverride(spellcasting, "Enlarge/Reduce", { castingTime: "1 Aktion", range: "30 Fuß", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
-    }
-
-    if (creature.id === 2) {
-        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Suggestion", { castingTime: "1 Aktion", range: "30 Fuß", concentration: true, usageMax: 1, usageReset: "longRest", showAsAction: true, actionType: "action" });
-    }
-
-    if (creature.id === 6) {
-        applySpellOverride(spellcasting, "Elementarschild", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Shield", { castingTime: "1 Reaktion", showAsAction: true, actionType: "reaction" });
-        applySpellOverride(spellcasting, "Healing Word", { castingTime: "1 Bonusaktion", range: "60 ft.", showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Hex", { castingTime: "1 Bonusaktion", range: "90 ft.", concentration: true, showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Misty Step", { castingTime: "1 Bonusaktion", range: "Selbst", showAsAction: true, actionType: "bonus" });
-        applySpellOverride(spellcasting, "Counterspell", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });
-    }
-
-    return spellcasting;
-}
+defineStateAlias("cards", () => gameState.cards, value => { gameState.cards = Array.isArray(value) ? value : []; });
+defineStateAlias("encounterName", () => gameState.name, value => { gameState.name = getSafeEncounterName(value); });
+defineStateAlias("roundNumber", () => gameState.encounter.roundNumber, value => { gameState.encounter.roundNumber = value; });
+defineStateAlias("currentTurnIndex", getCurrentTurnIndexFromState, setCurrentTurnIndexInState);
+defineStateAlias("isEncounterStarted", () => gameState.encounter.isStarted, value => { gameState.encounter.isStarted = value === true; });
+defineStateAlias("combatLogMessages", () => gameState.eventLog, value => { gameState.eventLog = Array.isArray(value) ? value : []; });
+defineStateAlias("manuallySelectedPublicCardId", () => gameState.presentation.manuallySelectedCardId, value => { gameState.presentation.manuallySelectedCardId = value; });
+defineStateAlias("mirielBoardManualImageData", () => gameState.presentation.mirielBoard.manualImageData, value => { gameState.presentation.mirielBoard.manualImageData = value; });
+defineStateAlias("mirielBoardManualImageName", () => gameState.presentation.mirielBoard.manualImageName, value => { gameState.presentation.mirielBoard.manualImageName = value; });
+defineStateAlias("mirielBoardManualText", () => gameState.presentation.mirielBoard.manualText, value => { gameState.presentation.mirielBoard.manualText = value; });
+defineStateAlias("mirielBoardManualTextSize", () => gameState.presentation.mirielBoard.manualTextSize, value => { gameState.presentation.mirielBoard.manualTextSize = value; });
+defineStateAlias("mirielBoardManualTextPosition", () => gameState.presentation.mirielBoard.manualTextPosition, value => { gameState.presentation.mirielBoard.manualTextPosition = value; });
+defineStateAlias("mirielBoardPersistentMode", () => gameState.presentation.mirielBoard.persistentMode, value => { gameState.presentation.mirielBoard.persistentMode = value; });
+defineStateAlias("isMirielBoardAutoTurnEnabled", () => gameState.presentation.mirielBoard.autoTurnEnabled, value => { gameState.presentation.mirielBoard.autoTurnEnabled = value === true; });
+defineStateAlias("mirielBoardDurationMode", () => gameState.presentation.mirielBoard.durationMode, value => { gameState.presentation.mirielBoard.durationMode = value; });
+defineStateAlias("isMirielBoardNewRoundCallEnabled", () => gameState.presentation.mirielBoard.newRoundCallEnabled, value => { gameState.presentation.mirielBoard.newRoundCallEnabled = value !== false; });
+defineStateAlias("mirielBoardTriggerId", () => gameState.presentation.mirielBoard.triggerId, value => { gameState.presentation.mirielBoard.triggerId = value; });
+defineStateAlias("mirielBoardAnnouncement", () => gameState.presentation.mirielBoard.announcement, value => { gameState.presentation.mirielBoard.announcement = value; });
+defineStateAlias("focusedCardId", () => uiState.focusedCardId, value => { uiState.focusedCardId = value; });
+defineStateAlias("activeDetailTab", () => uiState.activeDetailTab, value => { uiState.activeDetailTab = value; });
+defineStateAlias("activeDmFeedTab", () => uiState.activeDmFeedTab, value => { uiState.activeDmFeedTab = value; });
+defineStateAlias("expandedSpellDetailKey", () => uiState.expandedSpellDetailKey, value => { uiState.expandedSpellDetailKey = value; });
+defineStateAlias("deckSearchQuery", () => uiState.deck.searchQuery, value => { uiState.deck.searchQuery = value; });
+defineStateAlias("deckTypeFilter", () => uiState.deck.typeFilter, value => { uiState.deck.typeFilter = value; });
+defineStateAlias("deckSortMode", () => uiState.deck.sortMode, value => { uiState.deck.sortMode = value; });
+defineStateAlias("deckLocationView", () => uiState.deck.locationView, value => { uiState.deck.locationView = value; });
 
 const availableConditions = [
     "blessed",
@@ -753,50 +287,30 @@ const availableConditions = [
     "unconscious"
 ];
 
-let currentTurnIndex = 0;
-let roundNumber = 1;
-let isEncounterStarted = false;
 
-let manuallySelectedPublicCardId = null;
 
 let playerSideTouchStartX = null;
 let playerSideTouchStartY = null;
 
 let playerSideWheelIsCoolingDown = false;
 
-let combatLogMessages = [];
 
-let editingCreatureId = null;
-let focusedCreatureId = null;
+let editingCardId = null;
 let pendingDmFocusTransition = null;
 let activeDmFocusTransitionCleanup = null;
-let activeDetailTab = "values";
-let activeDmFeedTab = "log";
-let expandedSpellDetailKey = null;
 let activeForgeSpellEditor = null;
 let activeForgeActionEditor = null;
 let activeForgeTraitEditor = null;
 let suppressCardForgeClickAwayOnce = false;
-let mirielBoardManualImageData = "";
-let mirielBoardManualImageName = "";
-let mirielBoardManualText = "";
-let mirielBoardManualTextSize = "normal";
-let mirielBoardManualTextPosition = "bottom";
-let mirielBoardPersistentMode = "off";
-let isMirielBoardAutoTurnEnabled = false;
-let mirielBoardDurationMode = "normal";
-let isMirielBoardNewRoundCallEnabled = true;
-let mirielBoardTriggerId = "";
-let mirielBoardAnnouncement = null;
 let lastRenderedMirielBoardTriggerId = "";
 let mirielBoardAutoHideTimer = null;
 let shouldAnimateMirielBoardOnNextRender = false;
 let lastRenderedMirielBoardPersistentMode = null;
 let publicStageAccentTimer = null;
 let publicStageSequenceTimer = null;
-let publicStagePresentedCreatureId = null;
-let publicStagePendingCreatureId = null;
-let publicRibbonPresentedFirstCreatureId = null;
+let publicStagePresentedCardId = null;
+let publicStagePendingCardId = null;
+let publicRibbonPresentedFirstCardId = null;
 
 // ============================================================
 // 2. Ansichtsmodus, Browser-Speicher und Tab-Synchronisation
@@ -937,39 +451,22 @@ function renderEncounterNameDisplay() {
     }
 }
 
+function createCurrentGameState() {
+    return structuredClone(gameState);
+}
+
+function createCurrentUiState() {
+    return structuredClone(uiState);
+}
+
 function createPersistentAppState() {
     return {
         formatName: "Miriel's Deck of Encounters Local State",
-        formatVersion: 2,
+        formatVersion: 5,
         savedAt: new Date().toISOString(),
         demoCardsAutoloadEnabled: demoCardsAutoloadEnabled,
-        gameState: {
-            name: encounterName,
-            encounterName: encounterName,
-            roundNumber: roundNumber,
-            currentTurnIndex: currentTurnIndex,
-            isEncounterStarted: isEncounterStarted,
-            encounterStartGateVersion: 2,
-            mirielBoardAutomationDefaultsVersion: mirielBoardAutomationDefaultsVersion,
-            manuallySelectedPublicCardId: manuallySelectedPublicCardId,
-            focusedCreatureId: focusedCreatureId,
-            activeDetailTab: activeDetailTab,
-            activeDmFeedTab: activeDmFeedTab,
-            expandedSpellDetailKey: expandedSpellDetailKey,
-            combatLogMessages: combatLogMessages,
-            mirielBoardManualImageData: mirielBoardManualImageData,
-            mirielBoardManualImageName: mirielBoardManualImageName,
-            mirielBoardManualText: mirielBoardManualText,
-            mirielBoardManualTextSize: mirielBoardManualTextSize,
-            mirielBoardManualTextPosition: mirielBoardManualTextPosition,
-            mirielBoardPersistentMode: mirielBoardPersistentMode,
-            isMirielBoardAutoTurnEnabled: isMirielBoardAutoTurnEnabled,
-            mirielBoardDurationMode: mirielBoardDurationMode,
-            isMirielBoardNewRoundCallEnabled: isMirielBoardNewRoundCallEnabled,
-            mirielBoardTriggerId: mirielBoardTriggerId,
-            mirielBoardAnnouncement: mirielBoardAnnouncement,
-            creatures: creatures
-        }
+        gameState: createCurrentGameState(),
+        uiState: createCurrentUiState()
     };
 }
 
@@ -999,7 +496,7 @@ function broadcastAppStateChange() {
     }
 
     appBroadcastChannel.postMessage({
-        type: "encounter-state-changed"
+        type: "game-state-changed"
     });
 }
 
@@ -1028,7 +525,7 @@ function loadAppStateFromBrowser() {
     try {
         const savedState = JSON.parse(savedStateText);
 
-        if (savedState.formatVersion !== 2) {
+        if (savedState.formatVersion !== 5) {
             updateStorageStatus("Browser-Speicher: veraltet – bitte zurücksetzen");
             return false;
         }
@@ -1037,12 +534,25 @@ function loadAppStateFromBrowser() {
             setDemoCardsAutoloadEnabled(savedState.demoCardsAutoloadEnabled);
         }
 
-        applyImportedEncounterState(savedState);
+        const savedGameState = savedState.gameState;
 
-        if (shouldAutoloadDemoCards() === true && creatures.length === 0) {
-            creatures = createDemoCreatures();
+        if (
+            savedGameState === null ||
+            typeof savedGameState !== "object" ||
+            Array.isArray(savedGameState) ||
+            Array.isArray(savedGameState.cards) === false
+        ) {
+            updateStorageStatus("Browser-Speicher: fehlerhaft");
+            return false;
+        }
+
+        applyGameStateData(savedGameState);
+        applyUiStateData(savedState.uiState);
+
+        if (shouldAutoloadDemoCards() === true && cards.length === 0) {
+            cards = createDemoCards().map(normalizeCardModel);
             encounterName = demoEncounterName;
-            focusedCreatureId = null;
+            focusedCardId = null;
             resetEncounterStartGateState({ clearLog: true });
             isMirielBoardAutoTurnEnabled = false;
             updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
@@ -1058,52 +568,74 @@ function loadAppStateFromBrowser() {
     }
 }
 
-function applyImportedEncounterState(importData) {
-    const encounterData = getGameStateDataFromImport(importData);
-
-    if (encounterData === null) {
-        return;
+function getSafeObject(value) {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+        return {};
     }
 
-    encounterName = getSafeEncounterName(encounterData.encounterName);
+    return value;
+}
 
-    const importedCreatures = createImportedCreatures(encounterData.creatures);
-    creatures = importedCreatures;
-    roundNumber = getSafePositiveInteger(encounterData.roundNumber, 1);
-    currentTurnIndex = getSafeNonNegativeInteger(encounterData.currentTurnIndex, 0);
-    isEncounterStarted = encounterData.isEncounterStarted === true;
+function applyGameStateData(gameStateData) {
+    const encounterState = getSafeObject(gameStateData.encounter);
+    const presentationState = getSafeObject(gameStateData.presentation);
+    const mirielBoardState = getSafeObject(presentationState.mirielBoard);
 
-    if (isImportedPublicSelectionValid(encounterData.manuallySelectedPublicCardId, creatures)) {
-        manuallySelectedPublicCardId = Number(encounterData.manuallySelectedPublicCardId);
+    gameState.id = getSafeOptionalString(gameStateData.id) || crypto.randomUUID();
+    encounterName = getSafeEncounterName(gameStateData.name);
+    cards = createImportedCards(gameStateData.cards);
+    roundNumber = getSafePositiveInteger(encounterState.roundNumber, 1);
+    isEncounterStarted = encounterState.isStarted === true;
+
+    const importedCurrentTurnCardId = Number(encounterState.currentTurnCardId);
+    if (Number.isFinite(importedCurrentTurnCardId) && cards.some(card => card.id === importedCurrentTurnCardId)) {
+        gameState.encounter.currentTurnCardId = importedCurrentTurnCardId;
+    } else {
+        currentTurnIndex = getSafeNonNegativeInteger(encounterState.currentTurnIndex, 0);
+    }
+
+    if (isImportedPublicSelectionValid(presentationState.manuallySelectedCardId, cards)) {
+        manuallySelectedPublicCardId = Number(presentationState.manuallySelectedCardId);
     } else {
         clearManualPublicSelection();
     }
 
-    if (isImportedPublicSelectionValid(encounterData.focusedCreatureId, creatures)) {
-        focusedCreatureId = Number(encounterData.focusedCreatureId);
-    } else {
-        focusedCreatureId = null;
-    }
-
-    activeDetailTab = getSafeDetailTab(encounterData.activeDetailTab);
-    activeDmFeedTab = getSafeDmFeedTab(encounterData.activeDmFeedTab);
-    expandedSpellDetailKey = getSafeOptionalString(encounterData.expandedSpellDetailKey);
-
-    combatLogMessages = getSafeCombatLogMessages(encounterData.combatLogMessages);
-    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, "");
-    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, "");
-    mirielBoardManualText = getSafeString(encounterData.mirielBoardManualText, "");
-    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(encounterData.mirielBoardManualTextSize);
-    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(encounterData.mirielBoardManualTextPosition);
-    mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(encounterData);
-    isMirielBoardAutoTurnEnabled = encounterData.isMirielBoardAutoTurnEnabled === true;
-    mirielBoardDurationMode = getSafeMirielBoardDurationMode(encounterData.mirielBoardDurationMode);
-    isMirielBoardNewRoundCallEnabled = encounterData.isMirielBoardNewRoundCallEnabled !== false;
-    mirielBoardTriggerId = getSafeOptionalString(encounterData.mirielBoardTriggerId);
-    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(encounterData.mirielBoardAnnouncement);
+    combatLogMessages = getSafeCombatLogMessages(gameStateData.eventLog);
+    mirielBoardManualImageData = getSafeString(mirielBoardState.manualImageData, "");
+    mirielBoardManualImageName = getSafeString(mirielBoardState.manualImageName, "");
+    mirielBoardManualText = getSafeString(mirielBoardState.manualText, "");
+    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(mirielBoardState.manualTextSize);
+    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(mirielBoardState.manualTextPosition);
+    mirielBoardPersistentMode = getSafeMirielBoardPersistentMode(mirielBoardState.persistentMode);
+    isMirielBoardAutoTurnEnabled = mirielBoardState.autoTurnEnabled === true;
+    mirielBoardDurationMode = getSafeMirielBoardDurationMode(mirielBoardState.durationMode);
+    isMirielBoardNewRoundCallEnabled = mirielBoardState.newRoundCallEnabled !== false;
+    mirielBoardTriggerId = getSafeOptionalString(mirielBoardState.triggerId);
+    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(mirielBoardState.announcement);
+    gameState.settings = { ...gameState.settings, ...getSafeObject(gameStateData.settings) };
 
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
+}
+
+function applyUiStateData(rawUiState) {
+    const uiState = getSafeObject(rawUiState);
+
+    if (isImportedPublicSelectionValid(uiState.focusedCardId, cards)) {
+        focusedCardId = Number(uiState.focusedCardId);
+    } else {
+        focusedCardId = null;
+    }
+
+    activeDetailTab = getSafeDetailTab(uiState.activeDetailTab);
+    activeDmFeedTab = getSafeDmFeedTab(uiState.activeDmFeedTab);
+    expandedSpellDetailKey = getSafeOptionalString(uiState.expandedSpellDetailKey);
+
+    const deckUiState = getSafeObject(uiState.deck);
+    deckSearchQuery = getSafeString(deckUiState.searchQuery, "");
+    deckTypeFilter = ["all", "player", "npc", "monster"].includes(deckUiState.typeFilter) ? deckUiState.typeFilter : "all";
+    deckSortMode = ["name", "initiative", "type"].includes(deckUiState.sortMode) ? deckUiState.sortMode : "name";
+    deckLocationView = deckUiState.locationView === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
 }
 
 function applyExternalAppStateAndRender() {
@@ -1135,7 +667,7 @@ function setupCrossTabSync() {
         appBroadcastChannel = new BroadcastChannel(appChannelName);
 
         appBroadcastChannel.addEventListener("message", function(event) {
-            if (event.data === null || event.data.type !== "encounter-state-changed") {
+            if (event.data === null || event.data.type !== "game-state-changed") {
                 return;
             }
 
@@ -1205,9 +737,9 @@ function reloadDemoCards() {
     }
 
     setDemoCardsAutoloadEnabled(true);
-    creatures = createDemoCreatures();
+    cards = createDemoCards().map(normalizeCardModel);
     encounterName = demoEncounterName;
-    focusedCreatureId = null;
+    focusedCardId = null;
     resetEncounterStartGateState({ clearLog: true });
     isMirielBoardAutoTurnEnabled = false;
     addCombatLogMessage("Demo-Karten geladen.");
@@ -1218,12 +750,12 @@ function reloadDemoCards() {
     alert("Die Demo-Karten wurden geladen.");
 }
 
-function isDemoCreature(creature) {
-    return creature !== null && typeof creature === "object" && (creature.isDemoCard === true || isKnownDemoCreatureData(creature) === true);
+function isDemoCard(card) {
+    return card !== null && typeof card === "object" && (card.isDemoCard === true || isKnownDemoCardData(card) === true);
 }
 
 function removeDemoCards() {
-    const demoCards = creatures.filter(isDemoCreature);
+    const demoCards = cards.filter(isDemoCard);
 
     if (demoCards.length === 0) {
         alert("Es sind keine Demo-Karten vorhanden.");
@@ -1238,17 +770,17 @@ function removeDemoCards() {
         return;
     }
 
-    const removedIds = demoCards.map(function(creature) {
-        return creature.id;
+    const removedIds = demoCards.map(function(card) {
+        return card.id;
     });
 
     setDemoCardsAutoloadEnabled(false);
-    creatures = creatures.filter(function(creature) {
-        return isDemoCreature(creature) === false;
+    cards = cards.filter(function(card) {
+        return isDemoCard(card) === false;
     });
 
-    if (focusedCreatureId !== null && removedIds.includes(focusedCreatureId) === true) {
-        focusedCreatureId = null;
+    if (focusedCardId !== null && removedIds.includes(focusedCardId) === true) {
+        focusedCardId = null;
     }
 
     if (manuallySelectedPublicCardId !== null && removedIds.includes(manuallySelectedPublicCardId) === true) {
@@ -1256,7 +788,7 @@ function removeDemoCards() {
     }
 
     resetEncounterStartGateState({ resetTurn: true });
-    focusedCreatureId = null;
+    focusedCardId = null;
     ensureCurrentTurnIndexIsValid(getHandCards());
     addCombatLogMessage(`${demoCards.length} Demo-Karte(n) entfernt.`);
 
@@ -1286,6 +818,91 @@ function clearSavedBrowserState() {
     alert("Lokale Browserdaten konnten nicht gelöscht werden, weil der Browser-Speicher nicht verfügbar ist.");
 }
 
+function getCardKind(card) {
+    if (cardKinds[card?.cardKind] !== undefined) {
+        return card.cardKind;
+    }
+
+    return cardKinds.character;
+}
+
+function getCharacterRole(card) {
+    const role = getSafeOptionalString(card?.characterRole || card?.type);
+    return Object.values(characterRoles).includes(role) ? role : characterRoles.npc;
+}
+
+function getCardLocation(card) {
+    const location = getSafeOptionalString(card?.location);
+
+    if (Object.values(cardLocations).includes(location)) {
+        return location;
+    }
+
+    return card?.isInCombat === true ? cardLocations.hand : cardLocations.deck;
+}
+
+function setCardLocation(card, location) {
+    if (card === null || card === undefined || Object.values(cardLocations).includes(location) === false) {
+        return;
+    }
+
+    card.location = location;
+    card.isInCombat = location === cardLocations.hand;
+    card.isSelected = false;
+    card.updatedAt = new Date().toISOString();
+    card.version = getSafePositiveInteger(card.version, 1) + 1;
+}
+
+function getEncounterStatus(card) {
+    if (getCardLocation(card) !== cardLocations.hand) {
+        return null;
+    }
+
+    if (card?.encounterStatus === encounterStatuses.eliminated || card?.isInitiativeActive === false) {
+        return encounterStatuses.eliminated;
+    }
+
+    return encounterStatuses.active;
+}
+
+function setEncounterStatus(card, status) {
+    if (card === null || card === undefined || getCardLocation(card) !== cardLocations.hand) {
+        return;
+    }
+
+    card.encounterStatus = status === encounterStatuses.eliminated
+        ? encounterStatuses.eliminated
+        : encounterStatuses.active;
+    card.isInitiativeActive = card.encounterStatus === encounterStatuses.active;
+    card.updatedAt = new Date().toISOString();
+    card.version = getSafePositiveInteger(card.version, 1) + 1;
+}
+
+function normalizeCardModel(rawCard) {
+    const card = rawCard ?? {};
+    const now = new Date().toISOString();
+    const location = getCardLocation(card);
+    const role = getCharacterRole(card);
+
+    card.cardKind = getCardKind(card);
+    card.characterRole = role;
+    card.type = role;
+    card.location = location;
+    card.isInCombat = location === cardLocations.hand;
+    card.encounterStatus = location === cardLocations.hand
+        ? getEncounterStatus(card)
+        : null;
+    card.isInitiativeActive = card.encounterStatus !== encounterStatuses.eliminated;
+    card.version = getSafePositiveInteger(card.version, 1);
+    card.createdAt = getSafeOptionalString(card.createdAt) || now;
+    card.updatedAt = getSafeOptionalString(card.updatedAt) || card.createdAt;
+    card.deletedAt = location === cardLocations.trash
+        ? getSafeOptionalString(card.deletedAt) || now
+        : null;
+
+    return card;
+}
+
 // ============================================================
 // 2. Grundlegende Karten-Abfragen und Sortierung
 // ============================================================
@@ -1306,23 +923,23 @@ function getTypeSortValue(type) {
     return 4;
 }
 
-function isCreatureInTurnOrder(creature) {
-    return creature !== null
-        && creature !== undefined
-        && creature.isInCombat === true
-        && creature.isInitiativeActive !== false;
+function isCardInTurnOrder(card) {
+    return card !== null
+        && card !== undefined
+        && getCardLocation(card) === cardLocations.hand
+        && getEncounterStatus(card) !== encounterStatuses.eliminated;
 }
 
 function getInitiativeCards(handCards = getHandCards()) {
-    return handCards.filter(function(creature) {
-        return isCreatureInTurnOrder(creature);
+    return handCards.filter(function(card) {
+        return isCardInTurnOrder(card);
     });
 }
 
-function isCreatureOutOfAction(creature) {
-    return creature !== null
-        && creature !== undefined
-        && (getSafeNonNegativeInteger(creature.hp, 0) === 0 || creature.isInitiativeActive === false);
+function isCardOutOfAction(card) {
+    return card !== null
+        && card !== undefined
+        && (getSafeNonNegativeInteger(card.hp, 0) === 0 || getEncounterStatus(card) === encounterStatuses.eliminated);
 }
 
 function createOutOfActionStampHtml(entity) {
@@ -1330,7 +947,7 @@ function createOutOfActionStampHtml(entity) {
         return "";
     }
 
-    const isOutOfAction = entity.isOutOfAction === true || isCreatureOutOfAction(entity);
+    const isOutOfAction = entity.isOutOfAction === true || isCardOutOfAction(entity);
 
     if (isOutOfAction !== true) {
         return "";
@@ -1344,8 +961,8 @@ function createOutOfActionStampHtml(entity) {
 }
 
 function getHandCards() {
-    const handCards = creatures.filter(function(creature) {
-        return creature.isInCombat === true;
+    const handCards = cards.filter(function(card) {
+        return getCardLocation(card) === cardLocations.hand;
     });
 
     handCards.sort(function(a, b) {
@@ -1353,7 +970,7 @@ function getHandCards() {
             return b.initiative - a.initiative;
         }
 
-        const typeDifference = getTypeSortValue(a.type) - getTypeSortValue(b.type);
+        const typeDifference = getTypeSortValue(getCharacterRole(a)) - getTypeSortValue(getCharacterRole(b));
 
         if (typeDifference !== 0) {
             return typeDifference;
@@ -1366,12 +983,12 @@ function getHandCards() {
 }
 
 function getDeckCards() {
-    const deckCards = creatures.filter(function(creature) {
-        return creature.isInCombat === false;
+    const deckCards = cards.filter(function(card) {
+        return getCardLocation(card) === cardLocations.deck;
     });
 
     deckCards.sort(function(a, b) {
-        const typeDifference = getTypeSortValue(a.type) - getTypeSortValue(b.type);
+        const typeDifference = getTypeSortValue(getCharacterRole(a)) - getTypeSortValue(getCharacterRole(b));
 
         if (typeDifference !== 0) {
             return typeDifference;
@@ -1383,40 +1000,50 @@ function getDeckCards() {
     return deckCards;
 }
 
+function getTrashCards() {
+    return cards
+        .filter(function(card) {
+            return getCardLocation(card) === cardLocations.trash;
+        })
+        .sort(function(a, b) {
+            return getSafeOptionalString(b.deletedAt).localeCompare(getSafeOptionalString(a.deletedAt));
+        });
+}
+
 function normalizeDeckSearchText(value) {
     return getSafeOptionalString(value).toLocaleLowerCase("de-DE");
 }
 
-function getCreatureDeckSearchText(creature) {
-    const traitText = getCreatureTraits(creature).map(function(trait) {
+function getCardDeckSearchText(card) {
+    const traitText = getCardTraits(card).map(function(trait) {
         return `${trait.name} ${trait.description}`;
     }).join(" ");
-    const actionText = getCreatureActions(creature).map(function(action) {
+    const actionText = getCardActions(card).map(function(action) {
         return `${action.name} ${action.description} ${action.attack} ${action.save} ${action.range} ${action.damage}`;
     }).join(" ");
-    const spellText = getCreatureSpellcasting(creature).spells.map(function(spell) {
+    const spellText = getCardSpellcasting(card).spells.map(function(spell) {
         return `${spell.name} ${spell.description} ${spell.notes}`;
     }).join(" ");
-    const inventory = getInventoryData(creature);
+    const inventory = getInventoryData(card);
     const inventoryText = [
         ...inventory.cards.map(function(item) { return `${item.name} ${item.description} ${item.effect}`; }),
         ...inventory.list.map(function(item) { return `${item.name} ${item.description} ${item.notes}`; })
     ].join(" ");
     const searchableParts = [
-        creature.name,
-        creature.publicName,
-        creature.type,
+        card.name,
+        card.publicName,
+        card.type,
         traitText,
         actionText,
         spellText,
-        creature.notes,
+        card.notes,
         inventoryText
     ];
 
     return normalizeDeckSearchText(searchableParts.join(" "));
 }
 
-function doesCreatureMatchDeckSearch(creature) {
+function doesCardMatchDeckSearch(card) {
     const normalizedQuery = normalizeDeckSearchText(deckSearchQuery);
 
     if (normalizedQuery === "") {
@@ -1427,19 +1054,19 @@ function doesCreatureMatchDeckSearch(creature) {
         return token !== "";
     });
 
-    const searchableText = getCreatureDeckSearchText(creature);
+    const searchableText = getCardDeckSearchText(card);
 
     return queryTokens.every(function(token) {
         return searchableText.includes(token);
     });
 }
 
-function doesCreatureMatchDeckTypeFilter(creature) {
+function doesCardMatchDeckTypeFilter(card) {
     if (deckTypeFilter === "all") {
         return true;
     }
 
-    return creature.type === deckTypeFilter;
+    return card.type === deckTypeFilter;
 }
 
 function sortDeckCardsForWorkbench(deckCards) {
@@ -1453,7 +1080,7 @@ function sortDeckCardsForWorkbench(deckCards) {
         }
 
         if (deckSortMode === "initiativeModifier") {
-            const modifierDifference = getCreatureInitiativeModifier(b) - getCreatureInitiativeModifier(a);
+            const modifierDifference = getCardInitiativeModifier(b) - getCardInitiativeModifier(a);
 
             if (modifierDifference !== 0) {
                 return modifierDifference;
@@ -1475,8 +1102,8 @@ function sortDeckCardsForWorkbench(deckCards) {
 }
 
 function getVisibleDeckCards(deckCards = getDeckCards()) {
-    const visibleDeckCards = deckCards.filter(function(creature) {
-        return doesCreatureMatchDeckTypeFilter(creature) && doesCreatureMatchDeckSearch(creature);
+    const visibleDeckCards = deckCards.filter(function(card) {
+        return doesCardMatchDeckTypeFilter(card) && doesCardMatchDeckSearch(card);
     });
 
     return sortDeckCardsForWorkbench(visibleDeckCards);
@@ -1488,23 +1115,23 @@ function getVisibleDeckCards(deckCards = getDeckCards()) {
 // ============================================================
 
 function getFocusedCard(handCards, activeCard) {
-    if (focusedCreatureId !== null) {
-        const focusedCard = findCreatureById(focusedCreatureId);
+    if (focusedCardId !== null) {
+        const focusedCard = findCardById(focusedCardId);
 
         if (focusedCard !== null) {
             return focusedCard;
         }
 
-        focusedCreatureId = null;
+        focusedCardId = null;
     }
 
     if (activeCard !== null) {
-        focusedCreatureId = activeCard.id;
+        focusedCardId = activeCard.id;
         return activeCard;
     }
 
     if (handCards.length > 0) {
-        focusedCreatureId = handCards[0].id;
+        focusedCardId = handCards[0].id;
         return handCards[0];
     }
 
@@ -1609,7 +1236,7 @@ function getCurrentDmFocusedHandCard() {
     return getFocusedCard(handCards, activeCard);
 }
 
-function getDmFocusTransitionDirection(previousCreatureId, nextCreatureId, explicitDirection = null) {
+function getDmFocusTransitionDirection(previousCardId, nextCardId, explicitDirection = null) {
     if (explicitDirection === "next") {
         return 1;
     }
@@ -1620,15 +1247,15 @@ function getDmFocusTransitionDirection(previousCreatureId, nextCreatureId, expli
 
     const handCards = getHandCards();
 
-    if (handCards.length < 2 || previousCreatureId === null || nextCreatureId === null || previousCreatureId === nextCreatureId) {
+    if (handCards.length < 2 || previousCardId === null || nextCardId === null || previousCardId === nextCardId) {
         return 1;
     }
 
     const previousIndex = handCards.findIndex(function(card) {
-        return card.id === previousCreatureId;
+        return card.id === previousCardId;
     });
     const nextIndex = handCards.findIndex(function(card) {
-        return card.id === nextCreatureId;
+        return card.id === nextCardId;
     });
 
     if (previousIndex === -1 || nextIndex === -1) {
@@ -1649,7 +1276,7 @@ function cancelActiveDmFocusTransition() {
     activeDmFocusTransitionCleanup = null;
 }
 
-function prepareDmFocusTransition(nextCreatureId, explicitDirection = null) {
+function prepareDmFocusTransition(nextCardId, explicitDirection = null) {
     if (appView !== "dm" || isApplyingExternalState === true) {
         pendingDmFocusTransition = null;
         return;
@@ -1662,7 +1289,7 @@ function prepareDmFocusTransition(nextCreatureId, explicitDirection = null) {
 
     const previousFocusedCard = getCurrentDmFocusedHandCard();
 
-    if (previousFocusedCard === null || previousFocusedCard.id === nextCreatureId) {
+    if (previousFocusedCard === null || previousFocusedCard.id === nextCardId) {
         pendingDmFocusTransition = null;
         return;
     }
@@ -1684,9 +1311,9 @@ function prepareDmFocusTransition(nextCreatureId, explicitDirection = null) {
     cancelActiveDmFocusTransition();
 
     pendingDmFocusTransition = {
-        previousCreatureId: previousFocusedCard.id,
-        nextCreatureId: nextCreatureId,
-        direction: getDmFocusTransitionDirection(previousFocusedCard.id, nextCreatureId, explicitDirection),
+        previousCardId: previousFocusedCard.id,
+        nextCardId: nextCardId,
+        direction: getDmFocusTransitionDirection(previousFocusedCard.id, nextCardId, explicitDirection),
         oldRect: {
             left: oldRect.left,
             top: oldRect.top,
@@ -1804,15 +1431,15 @@ function runPendingDmFocusTransition() {
     window.setTimeout(cleanup, duration + 140);
 }
 
-function setFocusedCreature(creatureId) {
-    const creature = findCreatureById(creatureId);
+function setFocusedCard(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null || creature.isInCombat !== true) {
+    if (card === null || card.isInCombat !== true) {
         return;
     }
 
-    prepareDmFocusTransition(creatureId);
-    focusedCreatureId = creatureId;
+    prepareDmFocusTransition(cardId);
+    focusedCardId = cardId;
     preserveViewportWhileRendering(function() {
         renderCards();
     });
@@ -1829,14 +1456,14 @@ function scrollToActiveHandView() {
     window.scrollTo(0, 0);
 }
 
-function setFocusedDeckCreature(creatureId) {
-    const creature = findCreatureById(creatureId);
+function setFocusedDeckCard(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null || creature.isInCombat === true) {
+    if (card === null || card.isInCombat === true) {
         return;
     }
 
-    focusedCreatureId = creatureId;
+    focusedCardId = cardId;
     renderCards();
 
     requestAnimationFrame(function() {
@@ -1844,7 +1471,7 @@ function setFocusedDeckCreature(creatureId) {
     });
 }
 
-function getDefaultFocusedHandCreatureId() {
+function getDefaultFocusedHandCardId() {
     const activeCard = getActiveCard(getHandCards());
 
     if (activeCard !== null) {
@@ -1860,27 +1487,27 @@ function getDefaultFocusedHandCreatureId() {
     return null;
 }
 
-function showDeckCardFromFocus(creatureId) {
-    const creature = findCreatureById(creatureId);
+function showDeckCardFromFocus(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null || creature.isInCombat === true) {
+    if (card === null || card.isInCombat === true) {
         return;
     }
 
-    if (focusedCreatureId === creatureId) {
-        focusedCreatureId = getDefaultFocusedHandCreatureId();
+    if (focusedCardId === cardId) {
+        focusedCardId = getDefaultFocusedHandCardId();
     }
 
     renderCards();
 
     requestAnimationFrame(function() {
-        scrollToDeckCard(creatureId, true);
+        scrollToDeckCard(cardId, true);
     });
 }
 
-function scrollToDeckCard(creatureId, highlightCard) {
+function scrollToDeckCard(cardId, highlightCard) {
     const deckElement = document.querySelector(".deck-workbench");
-    const cardElement = document.querySelector(`[data-deck-card-id="${creatureId}"]`);
+    const cardElement = document.querySelector(`[data-deck-card-id="${cardId}"]`);
 
     if (deckElement instanceof HTMLElement) {
         deckElement.scrollIntoView({ behavior: "smooth", block: "start", inline: "nearest" });
@@ -1899,7 +1526,7 @@ function scrollToDeckCard(creatureId, highlightCard) {
     }
 }
 
-function focusActiveCreature() {
+function focusActiveCard() {
     const activeCard = getActiveCard(getHandCards());
 
     if (activeCard === null) {
@@ -1907,7 +1534,7 @@ function focusActiveCreature() {
     }
 
     prepareDmFocusTransition(activeCard.id);
-    focusedCreatureId = activeCard.id;
+    focusedCardId = activeCard.id;
     renderCardsPreservingViewport();
 }
 
@@ -1928,7 +1555,7 @@ function setActiveDmFeedTab(tabName) {
     renderCards();
 }
 
-function focusAdjacentHandCreature(direction) {
+function focusAdjacentHandCard(direction) {
     const handCards = getHandCards();
 
     if (handCards.length === 0) {
@@ -1960,9 +1587,9 @@ function focusAdjacentHandCreature(direction) {
         }
     }
 
-    const nextFocusedCreatureId = handCards[focusedIndex].id;
-    prepareDmFocusTransition(nextFocusedCreatureId, direction);
-    focusedCreatureId = nextFocusedCreatureId;
+    const nextFocusedCardId = handCards[focusedIndex].id;
+    prepareDmFocusTransition(nextFocusedCardId, direction);
+    focusedCardId = nextFocusedCardId;
     preserveViewportWhileRendering(function() {
         renderCards();
     });
@@ -1980,8 +1607,8 @@ function shouldPlayerSideFollowActiveCard() {
     return manuallySelectedPublicCardId === null;
 }
 
-function isCreatureManuallySelected(creature) {
-    return hasManualPublicSelection() && creature.id === manuallySelectedPublicCardId;
+function isCardManuallySelected(card) {
+    return hasManualPublicSelection() && card.id === manuallySelectedPublicCardId;
 }
 
 function isPublicCardManuallySelected(publicCard) {
@@ -1992,31 +1619,31 @@ function clearManualPublicSelection() {
     manuallySelectedPublicCardId = null;
 }
 
-function toggleCreatureTurnOrder(creatureId) {
-    const creature = findCreatureById(creatureId);
+function toggleCardTurnOrder(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null || creature.isInCombat !== true) {
+    if (card === null || card.isInCombat !== true) {
         return;
     }
 
-    const wasInTurnOrder = creature.isInitiativeActive !== false;
+    const wasInTurnOrder = card.isInitiativeActive !== false;
     const activeCardBeforeChange = getActiveCard(getHandCards());
     const activeCardIdBeforeChange = activeCardBeforeChange !== null ? activeCardBeforeChange.id : null;
 
-    creature.isInitiativeActive = wasInTurnOrder !== true;
+    setEncounterStatus(card, wasInTurnOrder === true ? encounterStatuses.eliminated : encounterStatuses.active);
 
-    if (creature.isInitiativeActive === false) {
-        creature.isSelected = false;
-        addCombatLogMessage(`${creature.name} wurde aus der Zugfolge genommen.`);
+    if (card.isInitiativeActive === false) {
+        card.isSelected = false;
+        addCombatLogMessage(`${card.name} wurde aus der Zugfolge genommen.`);
     } else {
-        addCombatLogMessage(`${creature.name} wurde wieder in die Zugfolge aufgenommen.`);
+        addCombatLogMessage(`${card.name} wurde wieder in die Zugfolge aufgenommen.`);
     }
 
     const initiativeCards = getInitiativeCards();
 
     if (initiativeCards.length === 0) {
         currentTurnIndex = 0;
-    } else if (activeCardIdBeforeChange !== null && activeCardIdBeforeChange !== creature.id) {
+    } else if (activeCardIdBeforeChange !== null && activeCardIdBeforeChange !== card.id) {
         const retainedActiveIndex = initiativeCards.findIndex(function(card) {
             return card.id === activeCardIdBeforeChange;
         });
@@ -2035,14 +1662,14 @@ function toggleCreatureTurnOrder(creatureId) {
 // ============================================================
 
 function getSelectedHandCards() {
-    return getHandCards().filter(function(creature) {
-        return creature.isSelected === true;
+    return getHandCards().filter(function(card) {
+        return card.isSelected === true;
     });
 }
 
 function getSelectedDeckCards() {
-    return getDeckCards().filter(function(creature) {
-        return creature.isSelected === true;
+    return getDeckCards().filter(function(card) {
+        return card.isSelected === true;
     });
 }
 
@@ -2054,14 +1681,14 @@ function getSelectedDeckCardCount() {
     return getSelectedDeckCards().length;
 }
 
-function toggleCreatureSelection(creatureId) {
-    const creature = findCreatureById(creatureId);
+function toggleCardSelection(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.isSelected = creature.isSelected !== true;
+    card.isSelected = card.isSelected !== true;
 
     preserveViewportWhileRendering(function() {
         renderCards();
@@ -2069,17 +1696,17 @@ function toggleCreatureSelection(creatureId) {
 }
 
 function clearCardSelection() {
-    for (const creature of creatures) {
-        creature.isSelected = false;
+    for (const card of cards) {
+        card.isSelected = false;
     }
 
     renderCards();
 }
 
 function clearDeckSelection() {
-    for (const creature of creatures) {
-        if (creature.isInCombat === false) {
-            creature.isSelected = false;
+    for (const card of cards) {
+        if (card.isInCombat === false) {
+            card.isSelected = false;
         }
     }
 
@@ -2089,9 +1716,9 @@ function clearDeckSelection() {
 }
 
 function selectAllHandCards() {
-    for (const creature of creatures) {
-        if (creature.isInCombat === true) {
-            creature.isSelected = true;
+    for (const card of cards) {
+        if (card.isInCombat === true) {
+            card.isSelected = true;
         }
     }
 
@@ -2099,9 +1726,9 @@ function selectAllHandCards() {
 }
 
 function selectAllDeckCards() {
-    for (const creature of creatures) {
-        if (creature.isInCombat === false) {
-            creature.isSelected = true;
+    for (const card of cards) {
+        if (card.isInCombat === false) {
+            card.isSelected = true;
         }
     }
 
@@ -2111,8 +1738,8 @@ function selectAllDeckCards() {
 function selectVisibleDeckCards() {
     const visibleDeckCards = getVisibleDeckCards();
 
-    for (const creature of visibleDeckCards) {
-        creature.isSelected = true;
+    for (const card of visibleDeckCards) {
+        card.isSelected = true;
     }
 
     preserveViewportWhileRendering(function() {
@@ -2159,7 +1786,7 @@ function updateDeckSelectionStatus() {
         return;
     }
 
-    const deckCards = getDeckCards();
+    const deckCards = getPreparationLocationCards();
     const visibleDeckCards = getVisibleDeckCards(deckCards);
     const selectedDeckCards = getSelectedDeckCards();
     const selectedCount = selectedDeckCards.length;
@@ -2246,10 +1873,10 @@ function startEncounter() {
     const activeCard = getActiveCard(handCards);
 
     if (activeCard !== null) {
-        focusedCreatureId = activeCard.id;
-        resetUsageCountersForCreature(activeCard, ["turn"]);
-        for (const creature of handCards) {
-            resetUsageCountersForCreature(creature, ["round"]);
+        focusedCardId = activeCard.id;
+        resetUsageCountersForCard(activeCard, ["turn"]);
+        for (const card of handCards) {
+            resetUsageCountersForCard(card, ["round"]);
         }
     }
 
@@ -2279,11 +1906,11 @@ function nextTurn() {
 
     if (newActiveCard !== null) {
         prepareDmFocusTransition(newActiveCard.id, "next");
-        focusedCreatureId = newActiveCard.id;
-        resetUsageCountersForCreature(newActiveCard, ["turn"]);
+        focusedCardId = newActiveCard.id;
+        resetUsageCountersForCard(newActiveCard, ["turn"]);
         if (currentTurnIndex === 0) {
-            for (const creature of getHandCards()) {
-                resetUsageCountersForCreature(creature, ["round"]);
+            for (const card of getHandCards()) {
+                resetUsageCountersForCard(card, ["round"]);
             }
         }
         triggerMirielBoardForTurn(currentTurnIndex === 0);
@@ -2316,7 +1943,7 @@ function previousTurn() {
 
     if (newActiveCard !== null) {
         prepareDmFocusTransition(newActiveCard.id, "previous");
-        focusedCreatureId = newActiveCard.id;
+        focusedCardId = newActiveCard.id;
         triggerMirielBoardForTurn(currentTurnIndex === 0);
         addCombatLogMessage(`Vorheriger Zug: ${newActiveCard.name}.`);
     }
@@ -2328,10 +1955,10 @@ function resetCombatTurnCounter() {
     currentTurnIndex = 0;
     roundNumber = 1;
     clearManualPublicSelection();
-    focusedCreatureId = null;
+    focusedCardId = null;
 
-    for (const creature of getHandCards()) {
-        resetUsageCountersForCreature(creature, ["turn", "round"]);
+    for (const card of getHandCards()) {
+        resetUsageCountersForCard(card, ["turn", "round"]);
     }
 
     addCombatLogMessage("Zähler zurückgesetzt.");
@@ -2628,35 +2255,35 @@ function setupClickAwayBehavior() {
 // 6. Karten finden, verschieben, entfernen und Combat-Aufräumen
 // ============================================================
 
-function findCreatureById(id) {
-    for (const creature of creatures) {
-        if (creature.id === id) {
-            return creature;
+function findCardById(id) {
+    for (const card of cards) {
+        if (card.id === id) {
+            return card;
         }
     }
 
     return null;
 }
 
-function getNextCreatureId() {
+function getNextCardId() {
     let highestId = 0;
 
-    for (const creature of creatures) {
-        if (creature.id > highestId) {
-            highestId = creature.id;
+    for (const card of cards) {
+        if (card.id > highestId) {
+            highestId = card.id;
         }
     }
 
     return highestId + 1;
 }
 
-function createCreatureCopyName(baseName) {
+function createCardCopyName(baseName) {
     const cleanBaseName = getSafeOptionalString(baseName) || "Karte";
     const copyBaseName = `${cleanBaseName} Kopie`;
     let copyName = copyBaseName;
     let counter = 2;
 
-    while (creatures.some(function(creature) { return creature.name === copyName; }) === true) {
+    while (cards.some(function(card) { return card.name === copyName; }) === true) {
         copyName = `${copyBaseName} ${counter}`;
         counter += 1;
     }
@@ -2676,44 +2303,56 @@ function clonePlainData(value) {
     return JSON.parse(JSON.stringify(value));
 }
 
-function cloneCreatureData(creature) {
-    return clonePlainData(creature);
+function cloneCardData(card) {
+    return clonePlainData(card);
 }
 
-function copyCreatureToDeck(creatureId) {
-    const sourceCreature = findCreatureById(creatureId);
+function copyCardToDeck(cardId) {
+    const sourceCard = findCardById(cardId);
 
-    if (sourceCreature === null) {
+    if (sourceCard === null) {
         return;
     }
 
-    const creatureCopy = cloneCreatureData(sourceCreature);
-    creatureCopy.id = getNextCreatureId();
-    creatureCopy.name = createCreatureCopyName(sourceCreature.name);
-    creatureCopy.publicName = getSafeOptionalString(sourceCreature.publicName) || sourceCreature.publicName;
-    creatureCopy.isInCombat = false;
-    creatureCopy.isSelected = false;
-    creatureCopy.isDemoCard = false;
+    const cardCopy = cloneCardData(sourceCard);
+    cardCopy.id = getNextCardId();
+    cardCopy.name = createCardCopyName(sourceCard.name);
+    cardCopy.publicName = getSafeOptionalString(sourceCard.publicName) || sourceCard.publicName;
+    setCardLocation(cardCopy, cardLocations.deck);
+    cardCopy.encounterStatus = null;
+    cardCopy.deletedAt = null;
+    cardCopy.isDemoCard = false;
 
-    creatures.push(creatureCopy);
-    addCombatLogMessage(`Karte kopiert und ins Deck gelegt: ${creatureCopy.name}.`);
+    cards.push(cardCopy);
+    addCombatLogMessage(`Karte kopiert und ins Deck gelegt: ${cardCopy.name}.`);
 
     preserveViewportWhileRendering(function() {
         renderCards();
     });
 }
 
-function removeCreatureById(id) {
-    creatures = creatures.filter(function(creature) {
-        return creature.id !== id;
-    });
+function moveCardToTrash(id) {
+    const card = findCardById(id);
+
+    if (card === null) {
+        return;
+    }
+
+    if (confirm(`„${card.name}“ in den Papierkorb verschieben?`) !== true) {
+        return;
+    }
+
+    setCardLocation(card, cardLocations.trash);
+    card.encounterStatus = null;
+    card.deletedAt = new Date().toISOString();
+    addCombatLogMessage(`Karte in den Papierkorb verschoben: ${card.name}.`);
 
     if (manuallySelectedPublicCardId === id) {
         clearManualPublicSelection();
     }
 
-    if (focusedCreatureId === id) {
-        focusedCreatureId = null;
+    if (focusedCardId === id) {
+        focusedCardId = null;
     }
 
     const handCards = getHandCards();
@@ -2728,15 +2367,51 @@ function removeCreatureById(id) {
     });
 }
 
-function moveCardToHand(creatureId) {
-    const creature = findCreatureById(creatureId);
+function restoreCardFromTrash(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null || getCardLocation(card) !== cardLocations.trash) {
         return;
     }
 
-    creature.isInCombat = true;
-    creature.isSelected = false;
+    setCardLocation(card, cardLocations.deck);
+    card.deletedAt = null;
+    addCombatLogMessage(`Karte aus dem Papierkorb wiederhergestellt: ${card.name}.`);
+    renderCards();
+}
+
+function permanentlyDeleteCard(cardId) {
+    const card = findCardById(cardId);
+
+    if (card === null || getCardLocation(card) !== cardLocations.trash) {
+        return;
+    }
+
+    if (confirm(`„${card.name}“ endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.`) !== true) {
+        return;
+    }
+
+    cards = cards.filter(function(existingCard) {
+        return existingCard.id !== cardId;
+    });
+
+    if (focusedCardId === cardId) {
+        focusedCardId = null;
+    }
+
+    addCombatLogMessage(`Karte endgültig gelöscht: ${card.name}.`);
+    renderCards();
+}
+
+function moveCardToHand(cardId) {
+    const card = findCardById(cardId);
+
+    if (card === null) {
+        return;
+    }
+
+    setCardLocation(card, cardLocations.hand);
+    setEncounterStatus(card, encounterStatuses.active);
 
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
@@ -2746,22 +2421,22 @@ function moveCardToHand(creatureId) {
     });
 }
 
-function moveCardToDeck(creatureId) {
-    const creature = findCreatureById(creatureId);
+function moveCardToDeck(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.isInCombat = false;
-    creature.isSelected = false;
+    setCardLocation(card, cardLocations.deck);
+    card.encounterStatus = null;
 
-    if (manuallySelectedPublicCardId === creatureId) {
+    if (manuallySelectedPublicCardId === cardId) {
         clearManualPublicSelection();
     }
 
-    if (focusedCreatureId === creatureId) {
-        focusedCreatureId = null;
+    if (focusedCardId === cardId) {
+        focusedCardId = null;
     }
 
     const handCards = getHandCards();
@@ -2777,24 +2452,24 @@ function moveCardToDeck(creatureId) {
 }
 
 function moveAllHandCardsToDeck() {
-    for (const creature of creatures) {
-        if (creature.isInCombat === true) {
-            creature.isInCombat = false;
-            creature.isSelected = false;
+    for (const card of cards) {
+        if (getCardLocation(card) === cardLocations.hand) {
+            setCardLocation(card, cardLocations.deck);
+            card.encounterStatus = null;
         }
     }
 
     resetEncounterStartGateState({ resetTurn: true });
-    focusedCreatureId = null;
+    focusedCardId = null;
 
     renderCards();
 }
 
 function moveAllDeckCardsToHand() {
-    for (const creature of creatures) {
-        if (creature.isInCombat === false) {
-            creature.isInCombat = true;
-            creature.isSelected = false;
+    for (const card of cards) {
+        if (getCardLocation(card) === cardLocations.deck) {
+            setCardLocation(card, cardLocations.hand);
+            setEncounterStatus(card, encounterStatuses.active);
         }
     }
 
@@ -2814,9 +2489,9 @@ function moveSelectedDeckCardsToHand() {
 
     const selectedNamesText = createTargetNamesText(selectedDeckCards);
 
-    for (const creature of selectedDeckCards) {
-        creature.isInCombat = true;
-        creature.isSelected = false;
+    for (const card of selectedDeckCards) {
+        card.isInCombat = true;
+        card.isSelected = false;
     }
 
     const handCards = getHandCards();
@@ -2829,10 +2504,10 @@ function moveSelectedDeckCardsToHand() {
 }
 
 function moveHandCardsOfTypeToDeck(type) {
-    for (const creature of creatures) {
-        if (creature.isInCombat === true && creature.type === type) {
-            creature.isInCombat = false;
-            creature.isSelected = false;
+    for (const card of cards) {
+        if (card.isInCombat === true && card.type === type) {
+            card.isInCombat = false;
+            card.isSelected = false;
         }
     }
 
@@ -2845,10 +2520,10 @@ function moveHandCardsOfTypeToDeck(type) {
 }
 
 function moveDeckCardsOfTypeToHand(type) {
-    for (const creature of creatures) {
-        if (creature.isInCombat === false && creature.type === type) {
-            creature.isInCombat = true;
-            creature.isSelected = false;
+    for (const card of cards) {
+        if (card.isInCombat === false && card.type === type) {
+            card.isInCombat = true;
+            card.isSelected = false;
         }
     }
 
@@ -2865,8 +2540,8 @@ function clearAllTempHp() {
         return;
     }
 
-    for (const creature of creatures) {
-        creature.tempHp = 0;
+    for (const card of cards) {
+        card.tempHp = 0;
     }
 
     addCombatLogMessage("Alle Temp HP entfernt.");
@@ -2880,9 +2555,9 @@ function clearConditionsFromHandCards() {
         return;
     }
 
-    for (const creature of creatures) {
-        if (creature.isInCombat === true) {
-            creature.conditions = [];
+    for (const card of cards) {
+        if (card.isInCombat === true) {
+            card.conditions = [];
         }
     }
 
@@ -2902,8 +2577,8 @@ function endCombat() {
     const handCardsBeforeEnd = getHandCards();
     const movedCardCount = handCardsBeforeEnd.length;
 
-    for (const creature of handCardsBeforeEnd) {
-        resetUsageCountersForCreature(creature, ["encounter", "turn", "round"]);
+    for (const card of handCardsBeforeEnd) {
+        resetUsageCountersForCard(card, ["encounter", "turn", "round"]);
     }
 
     let movedCardNamesText = "keine Karten";
@@ -2912,21 +2587,21 @@ function endCombat() {
         movedCardNamesText = createTargetNamesText(handCardsBeforeEnd);
     }
 
-    for (const creature of creatures) {
-        if (creature.isInCombat === true) {
-            creature.isInCombat = false;
+    for (const card of cards) {
+        if (card.isInCombat === true) {
+            card.isInCombat = false;
         }
 
-        creature.isSelected = false;
+        card.isSelected = false;
     }
 
     resetEncounterStartGateState({ resetTurn: true });
 
-    if (editingCreatureId !== null) {
-        const editedCreature = getEditFormCreature();
+    if (editingCardId !== null) {
+        const editedCard = getEditFormCard();
 
-        if (editedCreature !== null) {
-            setCheckboxValue("edit-creature-is-in-combat", editedCreature.isInCombat === true);
+        if (editedCard !== null) {
+            setCheckboxValue("edit-card-is-in-combat", editedCard.isInCombat === true);
         }
     }
 
@@ -2938,8 +2613,8 @@ function endCombat() {
 }
 
 function longRestPlayerCards() {
-    const playerCards = creatures.filter(function(creature) {
-        return creature.type === "player";
+    const playerCards = cards.filter(function(card) {
+        return card.type === "player";
     });
 
     if (playerCards.length === 0) {
@@ -2955,13 +2630,13 @@ function longRestPlayerCards() {
         return;
     }
 
-    for (const creature of playerCards) {
-        creature.hp = creature.maxHp;
-        creature.tempHp = 0;
-        creature.conditions = [];
-        resetSpellSlotsForCreature(creature);
-        resetUsageCountersForCreature(creature, ["shortRest", "longRest", "encounter", "turn", "round"]);
-        creature.isSelected = false;
+    for (const card of playerCards) {
+        card.hp = card.maxHp;
+        card.tempHp = 0;
+        card.conditions = [];
+        resetSpellSlotsForCard(card);
+        resetUsageCountersForCard(card, ["shortRest", "longRest", "encounter", "turn", "round"]);
+        card.isSelected = false;
     }
 
     currentTurnIndex = 0;
@@ -2984,8 +2659,8 @@ function deleteAllCards() {
 
     setDemoCardsAutoloadEnabled(false);
     encounterName = "Unbenannter Encounter";
-    creatures = [];
-    focusedCreatureId = null;
+    cards = [];
+    focusedCardId = null;
     currentTurnIndex = 0;
     roundNumber = 1;
     combatLogMessages = [];
@@ -3057,18 +2732,18 @@ function formatSignedModifier(value) {
     return String(numericValue);
 }
 
-function getCreatureInitiativeModifier(creature) {
-    if (creature === null || creature === undefined) {
+function getCardInitiativeModifier(card) {
+    if (card === null || card === undefined) {
         return 0;
     }
 
-    const explicitModifier = getSafeOptionalString(creature.initiativeModifier);
+    const explicitModifier = getSafeOptionalString(card.initiativeModifier);
 
     if (explicitModifier !== "") {
         return parseSignedModifier(explicitModifier);
     }
 
-    return parseSignedModifier(creature.dexterityModifier);
+    return parseSignedModifier(card.dexterityModifier);
 }
 
 function getSelectedHandCardsForInitiativeOrWarn() {
@@ -3101,8 +2776,8 @@ function restoreActiveTurnAfterInitiativeChange(activeCardId) {
         return;
     }
 
-    const newActiveIndex = initiativeCards.findIndex(function(creature) {
-        return creature.id === activeCardId;
+    const newActiveIndex = initiativeCards.findIndex(function(card) {
+        return card.id === activeCardId;
     });
 
     if (newActiveIndex === -1) {
@@ -3128,8 +2803,8 @@ function applyInitiativeToSelectedCards() {
 
     const activeCardId = rememberActiveCardId();
 
-    for (const creature of selectedCards) {
-        creature.initiative = initiativeValue;
+    for (const card of selectedCards) {
+        card.initiative = initiativeValue;
     }
 
     restoreActiveTurnAfterInitiativeChange(activeCardId);
@@ -3147,12 +2822,12 @@ function rollInitiativeForCards(cardsToRoll, logLabel) {
     const activeCardId = rememberActiveCardId();
     const rollResults = [];
 
-    for (const creature of cardsToRoll) {
+    for (const card of cardsToRoll) {
         const rolledInitiative = rollD20();
-        const initiativeModifier = getCreatureInitiativeModifier(creature);
+        const initiativeModifier = getCardInitiativeModifier(card);
         const finalInitiative = rolledInitiative + initiativeModifier;
-        creature.initiative = finalInitiative;
-        rollResults.push(`${creature.name}: ${finalInitiative} (${rolledInitiative}${formatSignedModifier(initiativeModifier)})`);
+        card.initiative = finalInitiative;
+        rollResults.push(`${card.name}: ${finalInitiative} (${rolledInitiative}${formatSignedModifier(initiativeModifier)})`);
     }
 
     restoreActiveTurnAfterInitiativeChange(activeCardId);
@@ -3172,16 +2847,16 @@ function rollInitiativeForSelectedCards() {
 }
 
 function rollInitiativeForHandMonsters() {
-    const monsterCards = getHandCards().filter(function(creature) {
-        return creature.type === "monster";
+    const monsterCards = getHandCards().filter(function(card) {
+        return card.type === "monster";
     });
 
     rollInitiativeForCards(monsterCards, "Monster-Initiative gewürfelt");
 }
 
 function rollInitiativeForHandEnemies() {
-    const enemyCards = getHandCards().filter(function(creature) {
-        return creature.type === "monster" || creature.type === "npc";
+    const enemyCards = getHandCards().filter(function(card) {
+        return card.type === "monster" || card.type === "npc";
     });
 
     rollInitiativeForCards(enemyCards, "Gegner-Initiative gewürfelt (NPCs und Monster)");
@@ -3226,8 +2901,8 @@ function updateInitiativeToolStatus() {
 // 7. HP und Kampfaktionen
 // ============================================================
 
-function getHpChangeAmount(creatureId) {
-    const inputElement = document.querySelector(`#hp-change-amount-${creatureId}`);
+function getHpChangeAmount(cardId) {
+    const inputElement = document.querySelector(`#hp-change-amount-${cardId}`);
 
     if (inputElement === null) {
         return 0;
@@ -3236,8 +2911,8 @@ function getHpChangeAmount(creatureId) {
     return Number(inputElement.value);
 }
 
-function applyDamage(creature, amount) {
-    if (creature === null) {
+function applyDamage(card, amount) {
+    if (card === null) {
         return;
     }
 
@@ -3245,19 +2920,19 @@ function applyDamage(creature, amount) {
         return;
     }
 
-    if (amount <= creature.tempHp) {
-        creature.tempHp = creature.tempHp - amount;
+    if (amount <= card.tempHp) {
+        card.tempHp = card.tempHp - amount;
         return;
     }
 
-    const remainingDamage = amount - creature.tempHp;
+    const remainingDamage = amount - card.tempHp;
 
-    creature.tempHp = 0;
-    creature.hp = Math.max(0, creature.hp - remainingDamage);
+    card.tempHp = 0;
+    card.hp = Math.max(0, card.hp - remainingDamage);
 }
 
-function applyHealing(creature, amount) {
-    if (creature === null) {
+function applyHealing(card, amount) {
+    if (card === null) {
         return;
     }
 
@@ -3265,11 +2940,11 @@ function applyHealing(creature, amount) {
         return;
     }
 
-    creature.hp = Math.min(creature.maxHp, creature.hp + amount);
+    card.hp = Math.min(card.maxHp, card.hp + amount);
 }
 
-function applyTempHp(creature, amount) {
-    if (creature === null) {
+function applyTempHp(card, amount) {
+    if (card === null) {
         return;
     }
 
@@ -3277,30 +2952,30 @@ function applyTempHp(creature, amount) {
         return;
     }
 
-    creature.tempHp = amount;
+    card.tempHp = amount;
 }
 
-function handleDamageButtonClick(creatureId) {
-    const creature = findCreatureById(creatureId);
-    const amount = getHpChangeAmount(creatureId);
+function handleDamageButtonClick(cardId) {
+    const card = findCardById(cardId);
+    const amount = getHpChangeAmount(cardId);
 
-    applyDamage(creature, amount);
+    applyDamage(card, amount);
     renderCards();
 }
 
-function handleHealingButtonClick(creatureId) {
-    const creature = findCreatureById(creatureId);
-    const amount = getHpChangeAmount(creatureId);
+function handleHealingButtonClick(cardId) {
+    const card = findCardById(cardId);
+    const amount = getHpChangeAmount(cardId);
 
-    applyHealing(creature, amount);
+    applyHealing(card, amount);
     renderCards();
 }
 
-function handleTempHpButtonClick(creatureId) {
-    const creature = findCreatureById(creatureId);
-    const amount = getHpChangeAmount(creatureId);
+function handleTempHpButtonClick(cardId) {
+    const card = findCardById(cardId);
+    const amount = getHpChangeAmount(cardId);
 
-    applyTempHp(creature, amount);
+    applyTempHp(card, amount);
     renderCards();
 }
 
@@ -3335,8 +3010,8 @@ function getCurrentTimeText() {
 }
 
 function createTargetNamesText(targets) {
-    return targets.map(function(creature) {
-        return creature.name;
+    return targets.map(function(card) {
+        return card.name;
     }).join(", ");
 }
 
@@ -3606,8 +3281,8 @@ function applyDamageToSelectedCards() {
         return;
     }
 
-    for (const creature of selectedTargets) {
-        applyDamage(creature, amount);
+    for (const card of selectedTargets) {
+        applyDamage(card, amount);
     }
 
     addCombatLogMessage(`${amount} Schaden auf ${createActionTargetLogText(selectedTargets)}.`);
@@ -3627,8 +3302,8 @@ function applyHealingToSelectedCards() {
         return;
     }
 
-    for (const creature of selectedTargets) {
-        applyHealing(creature, amount);
+    for (const card of selectedTargets) {
+        applyHealing(card, amount);
     }
 
     addCombatLogMessage(`${amount} Heilung auf ${createActionTargetLogText(selectedTargets)}.`);
@@ -3648,8 +3323,8 @@ function applyTempHpToSelectedCards() {
         return;
     }
 
-    for (const creature of selectedTargets) {
-        applyTempHp(creature, amount);
+    for (const card of selectedTargets) {
+        applyTempHp(card, amount);
     }
 
     addCombatLogMessage(`${amount} Temp HP auf ${createActionTargetLogText(selectedTargets)} gesetzt.`);
@@ -3670,9 +3345,9 @@ function addConditionToSelectedCards() {
         return;
     }
 
-    for (const creature of selectedTargets) {
-        if (creatureHasCondition(creature, conditionName) === false) {
-            creature.conditions.push(conditionName);
+    for (const card of selectedTargets) {
+        if (cardHasCondition(card, conditionName) === false) {
+            card.conditions.push(conditionName);
         }
     }
 
@@ -3694,8 +3369,8 @@ function removeConditionFromSelectedCards() {
         return;
     }
 
-    for (const creature of selectedTargets) {
-        creature.conditions = creature.conditions.filter(function(condition) {
+    for (const card of selectedTargets) {
+        card.conditions = card.conditions.filter(function(condition) {
             return condition !== conditionName;
         });
     }
@@ -3704,8 +3379,8 @@ function removeConditionFromSelectedCards() {
     renderCards();
 }
 
-function getHpPercent(creature) {
-    const rawPercent = Math.round((creature.hp / creature.maxHp) * 100);
+function getHpPercent(card) {
+    const rawPercent = Math.round((card.hp / card.maxHp) * 100);
 
     if (rawPercent < 0) {
         return 0;
@@ -3718,12 +3393,12 @@ function getHpPercent(creature) {
     return rawPercent;
 }
 
-function getTempHpPercent(creature) {
-    if (creature.maxHp <= 0) {
+function getTempHpPercent(card) {
+    if (card.maxHp <= 0) {
         return 0;
     }
 
-    const rawPercent = Math.round((creature.tempHp / creature.maxHp) * 100);
+    const rawPercent = Math.round((card.tempHp / card.maxHp) * 100);
 
     if (rawPercent < 0) {
         return 0;
@@ -3736,10 +3411,10 @@ function getTempHpPercent(creature) {
     return rawPercent;
 }
 
-function getHpDescription(creature) {
-    const hpPercent = getHpPercent(creature);
+function getHpDescription(card) {
+    const hpPercent = getHpPercent(card);
 
-    if (creature.hp === 0) {
+    if (card.hp === 0) {
         return "besiegt / bewusstlos";
     }
 
@@ -3758,20 +3433,20 @@ function getHpDescription(creature) {
     return "fast besiegt";
 }
 
-function getHpVisibilityLabel(creature) {
-    if (creature.hpVisibility === "full") {
+function getHpVisibilityLabel(card) {
+    if (card.hpVisibility === "full") {
         return "volle HP";
     }
 
-    if (creature.hpVisibility === "bar") {
+    if (card.hpVisibility === "bar") {
         return "Balken";
     }
 
-    if (creature.hpVisibility === "descriptive") {
+    if (card.hpVisibility === "descriptive") {
         return "Zustandsschleier";
     }
 
-    if (creature.hpVisibility === "hidden") {
+    if (card.hpVisibility === "hidden") {
         return "verborgen";
     }
 
@@ -3810,9 +3485,9 @@ function getHealthStateLabel(state) {
     return "unbekannt";
 }
 
-function getPublicVisibilitySummary(creature) {
-    const healthPresentation = getHealthPresentation(creature, true);
-    return `${getHpVisibilityLabel(creature)} · ${getHealthStateLabel(healthPresentation.state)}`;
+function getPublicVisibilitySummary(card) {
+    const healthPresentation = getHealthPresentation(card, true);
+    return `${getHpVisibilityLabel(card)} · ${getHealthStateLabel(healthPresentation.state)}`;
 }
 
 // ============================================================
@@ -3897,7 +3572,7 @@ function createNewConditionCheckboxesHtml() {
 }
 
 function renderEditConditionCheckboxes() {
-    const conditionListElement = document.querySelector("#edit-creature-condition-list");
+    const conditionListElement = document.querySelector("#edit-card-condition-list");
 
     if (conditionListElement === null) {
         return;
@@ -3907,7 +3582,7 @@ function renderEditConditionCheckboxes() {
 }
 
 function renderNewConditionCheckboxes() {
-    const conditionListElement = document.querySelector("#new-creature-condition-list");
+    const conditionListElement = document.querySelector("#new-card-condition-list");
 
     if (conditionListElement === null) {
         return;
@@ -3924,9 +3599,9 @@ function clearNewConditionCheckboxes() {
     }
 }
 
-function setEditConditionCheckboxes(creature) {
+function setEditConditionCheckboxes(card) {
     const checkboxElements = document.querySelectorAll(".edit-condition-checkbox");
-    const conditionValues = Array.isArray(creature.conditions) ? creature.conditions : [];
+    const conditionValues = Array.isArray(card.conditions) ? card.conditions : [];
 
     for (const checkboxElement of checkboxElements) {
         checkboxElement.checked = conditionValues.includes(checkboxElement.value);
@@ -3954,8 +3629,8 @@ function getNewConditionValues() {
     return getConditionValuesFromCheckboxes(".new-condition-checkbox");
 }
 
-function getSelectedCondition(creatureId) {
-    const selectElement = document.querySelector(`#condition-select-${creatureId}`);
+function getSelectedCondition(cardId) {
+    const selectElement = document.querySelector(`#condition-select-${cardId}`);
 
     if (selectElement === null) {
         return "";
@@ -3964,40 +3639,40 @@ function getSelectedCondition(creatureId) {
     return selectElement.value;
 }
 
-function creatureHasCondition(creature, conditionName) {
-    return creature.conditions.includes(conditionName);
+function cardHasCondition(card, conditionName) {
+    return card.conditions.includes(conditionName);
 }
 
-function addConditionToCreature(creatureId) {
-    const creature = findCreatureById(creatureId);
+function addConditionToCard(cardId) {
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    const conditionName = getSelectedCondition(creatureId);
+    const conditionName = getSelectedCondition(cardId);
 
     if (conditionName === "") {
         return;
     }
 
-    if (creatureHasCondition(creature, conditionName)) {
+    if (cardHasCondition(card, conditionName)) {
         return;
     }
 
-    creature.conditions.push(conditionName);
+    card.conditions.push(conditionName);
 
     renderCards();
 }
 
-function removeConditionFromCreature(creatureId, conditionName) {
-    const creature = findCreatureById(creatureId);
+function removeConditionFromCard(cardId, conditionName) {
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.conditions = creature.conditions.filter(function(condition) {
+    card.conditions = card.conditions.filter(function(condition) {
         return condition !== conditionName;
     });
 
@@ -4193,8 +3868,8 @@ async function readAndOptimizeImageFileAsDataUrl(file) {
 
 function createGameStateExportData() {
     return {
-        formatName: "Miriel\'s Deck of Encounters Game State",
-        schemaVersion: 1,
+        formatName: MirielsGameStateSchema.formatName,
+        schemaVersion: MirielsGameStateSchema.supportedSchemaVersion,
         exportedAt: new Date().toISOString(),
         metadata: {
             appVersion: appVersion,
@@ -4202,33 +3877,7 @@ function createGameStateExportData() {
             licenseNotice: "Enthält bearbeitetes Material aus dem SRD 5.1 unter CC BY 4.0.",
             legalDocument: "legal.html"
         },
-        gameState: {
-            name: encounterName,
-            encounterName: encounterName,
-            roundNumber: roundNumber,
-            currentTurnIndex: currentTurnIndex,
-            isEncounterStarted: isEncounterStarted,
-            encounterStartGateVersion: 2,
-            mirielBoardAutomationDefaultsVersion: mirielBoardAutomationDefaultsVersion,
-            manuallySelectedPublicCardId: manuallySelectedPublicCardId,
-            focusedCreatureId: focusedCreatureId,
-            activeDetailTab: activeDetailTab,
-            activeDmFeedTab: activeDmFeedTab,
-            expandedSpellDetailKey: expandedSpellDetailKey,
-            combatLogMessages: combatLogMessages,
-            mirielBoardManualImageData: mirielBoardManualImageData,
-            mirielBoardManualImageName: mirielBoardManualImageName,
-            mirielBoardManualText: mirielBoardManualText,
-            mirielBoardManualTextSize: mirielBoardManualTextSize,
-            mirielBoardManualTextPosition: mirielBoardManualTextPosition,
-            mirielBoardPersistentMode: mirielBoardPersistentMode,
-            isMirielBoardAutoTurnEnabled: isMirielBoardAutoTurnEnabled,
-            mirielBoardDurationMode: mirielBoardDurationMode,
-            isMirielBoardNewRoundCallEnabled: isMirielBoardNewRoundCallEnabled,
-            mirielBoardTriggerId: mirielBoardTriggerId,
-            mirielBoardAnnouncement: mirielBoardAnnouncement,
-            creatures: creatures
-        }
+        gameState: createCurrentGameState()
     };
 }
 
@@ -4377,15 +4026,15 @@ async function handleGameStateImportFileChange(event) {
             return;
         }
 
-        const importData = JSON.parse(fileText);
-        const validationResult = validateGameStateImport(importData);
+        const preparationResult = MirielsGameStateSchema.parseAndPrepareImport(fileText, importSecurityLimits);
 
-        if (validationResult.valid !== true) {
-            alert(`Die Datei konnte nicht importiert werden: ${validationResult.message}`);
+        if (preparationResult.valid !== true) {
+            const errorPath = preparationResult.error.path ? ` (${preparationResult.error.path})` : "";
+            alert(`Die Datei konnte nicht importiert werden: ${preparationResult.error.message}${errorPath}`);
             return;
         }
 
-        showGameStateImportPreview(validationResult.gameState, importFile.name);
+        showGameStateImportPreview(preparationResult.gameState, importFile.name);
     } catch (error) {
         console.error("Spielstand-Import fehlgeschlagen.", error);
         alert("Die Spielstand-Datei konnte nicht importiert werden.");
@@ -4408,9 +4057,9 @@ function showGameStateImportPreview(gameStateData, fileName) {
         return;
     }
 
-    const importCount = Array.isArray(gameStateData.creatures) ? gameStateData.creatures.length : 0;
+    const importCount = Array.isArray(gameStateData.cards) ? gameStateData.cards.length : 0;
     const currentDeckCount = getDeckCards().length;
-    const currentTotalCount = creatures.length;
+    const currentTotalCount = cards.length;
     const importedGameStateName = getSafeEncounterName(gameStateData.name || gameStateData.encounterName || gameStateData.deckName);
 
     fileNameElement.textContent = `Datei: ${pendingDeckImportFileName}`;
@@ -4447,16 +4096,16 @@ function confirmDeckImportReplace() {
 }
 
 function confirmDeckImportAppend() {
-    if (pendingDeckImportData === null || Array.isArray(pendingDeckImportData.creatures) === false) {
+    if (pendingDeckImportData === null || Array.isArray(pendingDeckImportData.cards) === false) {
         closeDeckImportPreview();
         return;
     }
 
-    const importedCards = createImportedCreaturesForDeckAppend(pendingDeckImportData.creatures);
+    const importedCards = createImportedCardsForDeckAppend(pendingDeckImportData.cards);
     const importCount = importedCards.length;
 
     for (const importedCard of importedCards) {
-        creatures.push(importedCard);
+        cards.push(importedCard);
     }
 
     addCombatLogMessage(`${importCount} Karte(n) aus ${pendingDeckImportFileName} zum Deck hinzugefügt. Laufender Spielstand bleibt erhalten.`);
@@ -4467,135 +4116,54 @@ function confirmDeckImportAppend() {
     });
 }
 
-function createImportedCreaturesForDeckAppend(rawCreatures) {
-    const importedCreatures = [];
-    const usedIds = creatures.map(function(creature) {
-        return creature.id;
+function createImportedCardsForDeckAppend(rawCards) {
+    const importedCards = [];
+    const usedIds = cards.map(function(card) {
+        return card.id;
     });
 
-    for (const rawCreature of rawCreatures) {
-        if (rawCreature !== null && typeof rawCreature === "object") {
-            const importedCreature = createImportedCreature(rawCreature, usedIds);
+    for (const rawCard of rawCards) {
+        if (rawCard !== null && typeof rawCard === "object") {
+            const importedCard = createImportedCard(rawCard, usedIds);
 
-            importedCreature.isInCombat = false;
-            importedCreature.isSelected = false;
-            importedCreatures.push(importedCreature);
-            usedIds.push(importedCreature.id);
+            importedCard.isInCombat = false;
+            importedCard.isSelected = false;
+            importedCards.push(importedCard);
+            usedIds.push(importedCard.id);
         }
     }
 
-    return importedCreatures;
+    return importedCards;
 }
 
 function importGameStateData(gameStateData) {
-    if (
-        gameStateData === null ||
-        typeof gameStateData !== "object" ||
-        Array.isArray(gameStateData.creatures) === false
-    ) {
-        alert("Die Datei enthält keinen gültigen Spielstand.");
+    const validationResult = MirielsGameStateSchema.validateGameStateData(gameStateData, importSecurityLimits);
+
+    if (validationResult.valid !== true) {
+        const errorPath = validationResult.error.path ? ` (${validationResult.error.path})` : "";
+        alert(`Die Datei enthält keinen gültigen Spielstand: ${validationResult.error.message}${errorPath}`);
         return;
     }
 
-    const importedCreatures = createImportedCreatures(gameStateData.creatures);
-
-    encounterName = getSafeEncounterName(gameStateData.name || gameStateData.encounterName);
-    creatures = importedCreatures;
-    roundNumber = getSafePositiveInteger(gameStateData.roundNumber, 1);
-    currentTurnIndex = getSafeNonNegativeInteger(gameStateData.currentTurnIndex, 0);
-    isEncounterStarted = gameStateData.isEncounterStarted === true;
-
-    if (isImportedPublicSelectionValid(gameStateData.manuallySelectedPublicCardId, creatures)) {
-        manuallySelectedPublicCardId = Number(gameStateData.manuallySelectedPublicCardId);
-    } else {
-        clearManualPublicSelection();
-    }
-
-    if (isImportedPublicSelectionValid(gameStateData.focusedCreatureId, creatures)) {
-        focusedCreatureId = Number(gameStateData.focusedCreatureId);
-    } else {
-        focusedCreatureId = null;
-    }
-
-    activeDetailTab = getSafeDetailTab(gameStateData.activeDetailTab);
-    activeDmFeedTab = getSafeDmFeedTab(gameStateData.activeDmFeedTab);
-    expandedSpellDetailKey = getSafeOptionalString(gameStateData.expandedSpellDetailKey);
-
-    combatLogMessages = getSafeCombatLogMessages(gameStateData.combatLogMessages);
-    mirielBoardManualImageData = getSafeString(gameStateData.mirielBoardManualImageData, "");
-    mirielBoardManualImageName = getSafeString(gameStateData.mirielBoardManualImageName, "");
-    mirielBoardManualText = getSafeString(gameStateData.mirielBoardManualText, "");
-    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(gameStateData.mirielBoardManualTextSize);
-    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(gameStateData.mirielBoardManualTextPosition);
-    mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(gameStateData);
-    isMirielBoardAutoTurnEnabled = gameStateData.isMirielBoardAutoTurnEnabled === true;
-    mirielBoardDurationMode = getSafeMirielBoardDurationMode(gameStateData.mirielBoardDurationMode);
-    isMirielBoardNewRoundCallEnabled = gameStateData.isMirielBoardNewRoundCallEnabled !== false;
-    mirielBoardTriggerId = getSafeOptionalString(gameStateData.mirielBoardTriggerId);
-    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(gameStateData.mirielBoardAnnouncement);
-
-    const handCards = getHandCards();
-    ensureCurrentTurnIndexIsValid(handCards);
-
+    const normalizedGameState = MirielsGameStateSchema.normalizeGameStateData(gameStateData);
+    applyGameStateData(normalizedGameState);
+    applyUiStateData({});
     renderCards();
 }
 
 function validateGameStateImport(importData) {
-    if (importData === null || typeof importData !== "object" || Array.isArray(importData)) {
-        return { valid: false, message: "Die Hauptstruktur muss ein JSON-Objekt sein." };
+    const validationResult = MirielsGameStateSchema.validateEnvelope(importData, importSecurityLimits);
+
+    if (validationResult.valid === true) {
+        return { valid: true, gameState: validationResult.gameState };
     }
 
-    if (importData.schemaVersion !== 1) {
-        return { valid: false, message: "Diese Exportversion wird nicht unterstützt." };
-    }
-
-    const gameStateData = importData.gameState;
-
-    if (gameStateData === null || typeof gameStateData !== "object" || Array.isArray(gameStateData)) {
-        return { valid: false, message: "Spielstand-Daten fehlen oder sind beschädigt." };
-    }
-
-    if (Array.isArray(gameStateData.creatures) === false) {
-        return { valid: false, message: "Die Kartenliste fehlt." };
-    }
-
-    if (gameStateData.creatures.length > importSecurityLimits.maxCreatures) {
-        return { valid: false, message: `Es dürfen höchstens ${importSecurityLimits.maxCreatures} Karten importiert werden.` };
-    }
-
-    for (let index = 0; index < gameStateData.creatures.length; index += 1) {
-        const rawCreature = gameStateData.creatures[index];
-
-        if (rawCreature === null || typeof rawCreature !== "object" || Array.isArray(rawCreature)) {
-            return { valid: false, message: `Karte ${index + 1} hat keine gültige Objektstruktur.` };
-        }
-
-        const collectionChecks = [
-            [rawCreature.traits, importSecurityLimits.maxTraitsPerCreature, "Merkmale"],
-            [rawCreature.actions, importSecurityLimits.maxActionsPerCreature, "Aktionen"],
-            [rawCreature.inventoryCards, importSecurityLimits.maxInventoryCardsPerCreature, "Itemkarten"],
-            [rawCreature.inventoryList, importSecurityLimits.maxInventoryListItemsPerCreature, "Inventareinträge"]
-        ];
-
-        for (const [collection, maximum, label] of collectionChecks) {
-            if (collection !== undefined && Array.isArray(collection) === false) {
-                return { valid: false, message: `${label} von Karte ${index + 1} müssen als Liste gespeichert sein.` };
-            }
-            if (Array.isArray(collection) && collection.length > maximum) {
-                return { valid: false, message: `${label} von Karte ${index + 1} überschreiten das erlaubte Limit.` };
-            }
-        }
-
-        if (rawCreature.spellcasting !== undefined && (rawCreature.spellcasting === null || typeof rawCreature.spellcasting !== "object" || Array.isArray(rawCreature.spellcasting))) {
-            return { valid: false, message: `Zauberdaten von Karte ${index + 1} sind ungültig.` };
-        }
-
-        if (Array.isArray(rawCreature.spellcasting?.spells) && rawCreature.spellcasting.spells.length > importSecurityLimits.maxSpellsPerCreature) {
-            return { valid: false, message: `Karte ${index + 1} enthält zu viele Zauber.` };
-        }
-    }
-
-    return { valid: true, gameState: gameStateData };
+    return {
+        valid: false,
+        message: validationResult.error.message,
+        path: validationResult.error.path,
+        code: validationResult.error.code
+    };
 }
 
 function getGameStateDataFromImport(importData) {
@@ -4603,84 +4171,96 @@ function getGameStateDataFromImport(importData) {
     return validationResult.valid === true ? validationResult.gameState : null;
 }
 
-function createImportedCreatures(rawCreatures) {
-    const importedCreatures = [];
+function createImportedCards(rawCards) {
+    const importedCards = [];
     const usedIds = [];
 
-    for (const rawCreature of rawCreatures) {
-        if (rawCreature !== null && typeof rawCreature === "object") {
-            const importedCreature = createImportedCreature(rawCreature, usedIds);
+    for (const rawCard of rawCards) {
+        if (rawCard !== null && typeof rawCard === "object") {
+            const importedCard = createImportedCard(rawCard, usedIds);
 
-            importedCreatures.push(importedCreature);
-            usedIds.push(importedCreature.id);
+            importedCards.push(importedCard);
+            usedIds.push(importedCard.id);
         }
     }
 
-    return importedCreatures;
+    return importedCards.map(normalizeCardModel);
 }
 
-function createImportedCreature(rawCreature, usedIds) {
-    const id = createImportedCreatureId(rawCreature.id, usedIds);
+function createImportedCard(rawCard, usedIds) {
+    const id = createImportedCardId(rawCard.id, usedIds);
 
-    const maxHp = getSafePositiveInteger(rawCreature.maxHp, 1);
+    const maxHp = getSafePositiveInteger(rawCard.maxHp, 1);
     const hp = clampNumber(
-        getSafeNonNegativeInteger(rawCreature.hp, maxHp),
+        getSafeNonNegativeInteger(rawCard.hp, maxHp),
         0,
         maxHp
     );
 
     return {
         id: id,
-        name: getSafeString(rawCreature.name, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
-        publicName: getSafeString(rawCreature.publicName, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
-        type: getSafeCreatureType(rawCreature.type),
-        initiative: getSafeInteger(rawCreature.initiative, 0),
-        initiativeModifier: getSafeOptionalString(rawCreature.initiativeModifier) || getSafeOptionalString(rawCreature.dexterityModifier) || "+0",
+        name: getSafeString(rawCard.name, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
+        publicName: getSafeString(rawCard.publicName, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
+        cardKind: Object.values(cardKinds).includes(rawCard.cardKind) ? rawCard.cardKind : cardKinds.character,
+        characterRole: getSafeCardType(rawCard.characterRole || rawCard.type),
+        type: getSafeCardType(rawCard.characterRole || rawCard.type),
+        initiative: getSafeInteger(rawCard.initiative, 0),
+        initiativeModifier: getSafeOptionalString(rawCard.initiativeModifier) || getSafeOptionalString(rawCard.dexterityModifier) || "+0",
         hp: hp,
         maxHp: maxHp,
-        tempHp: getSafeNonNegativeInteger(rawCreature.tempHp, 0),
-        armorClass: getSafeNonNegativeInteger(rawCreature.armorClass, 10),
-        passivePerception: getSafeNonNegativeInteger(rawCreature.passivePerception, 10),
-        passiveInsight: getSafeNonNegativeInteger(rawCreature.passiveInsight, 10),
-        passiveInvestigation: getSafeNonNegativeInteger(rawCreature.passiveInvestigation, 10),
-        strengthScore: getSafeNonNegativeInteger(rawCreature.strengthScore, 10),
-        strengthModifier: getSafeOptionalString(rawCreature.strengthModifier) || "+0",
-        dexterityScore: getSafeNonNegativeInteger(rawCreature.dexterityScore, 10),
-        dexterityModifier: getSafeOptionalString(rawCreature.dexterityModifier) || "+0",
-        constitutionScore: getSafeNonNegativeInteger(rawCreature.constitutionScore, 10),
-        constitutionModifier: getSafeOptionalString(rawCreature.constitutionModifier) || "+0",
-        intelligenceScore: getSafeNonNegativeInteger(rawCreature.intelligenceScore, 10),
-        intelligenceModifier: getSafeOptionalString(rawCreature.intelligenceModifier) || "+0",
-        wisdomScore: getSafeNonNegativeInteger(rawCreature.wisdomScore, 10),
-        wisdomModifier: getSafeOptionalString(rawCreature.wisdomModifier) || "+0",
-        charismaScore: getSafeNonNegativeInteger(rawCreature.charismaScore, 10),
-        charismaModifier: getSafeOptionalString(rawCreature.charismaModifier) || "+0",
-        speed: getSafeOptionalString(rawCreature.speed),
-        savingThrows: getSafeOptionalString(rawCreature.savingThrows),
-        resistances: getSafeOptionalString(rawCreature.resistances),
-        immunities: getSafeOptionalString(rawCreature.immunities),
-        vulnerabilities: getSafeOptionalString(rawCreature.vulnerabilities),
-        senses: getSafeOptionalString(rawCreature.senses),
-        spellSaveDc: getSafeOptionalString(rawCreature.spellSaveDc),
-        specialResources: getSafeOptionalString(rawCreature.specialResources),
-        traits: getSafeCreatureTraits(rawCreature.traits),
-        actions: getSafeCreatureActions(rawCreature.actions),
-        notes: getSafeOptionalString(rawCreature.notes, importSecurityLimits.maxLongTextLength),
-        spellcasting: getSafeSpellcasting(rawCreature.spellcasting, rawCreature),
-        currency: getSafeCurrency(rawCreature.currency),
-        inventoryCards: getSafeInventoryCards(rawCreature.inventoryCards),
-        inventoryList: getSafeInventoryList(rawCreature.inventoryList),
-        hpVisibility: getSafeHpVisibility(rawCreature.hpVisibility),
-        imageData: getSafeImageSource(rawCreature.imageData),
-        conditions: getSafeConditions(rawCreature.conditions),
-        isDemoCard: rawCreature.isDemoCard === true || isKnownDemoCreatureData(rawCreature) === true,
-        isInCombat: rawCreature.isInCombat === true,
-        isInitiativeActive: rawCreature.isInitiativeActive !== false,
-        isSelected: rawCreature.isSelected === true
+        tempHp: getSafeNonNegativeInteger(rawCard.tempHp, 0),
+        armorClass: getSafeNonNegativeInteger(rawCard.armorClass, 10),
+        passivePerception: getSafeNonNegativeInteger(rawCard.passivePerception, 10),
+        passiveInsight: getSafeNonNegativeInteger(rawCard.passiveInsight, 10),
+        passiveInvestigation: getSafeNonNegativeInteger(rawCard.passiveInvestigation, 10),
+        strengthScore: getSafeNonNegativeInteger(rawCard.strengthScore, 10),
+        strengthModifier: getSafeOptionalString(rawCard.strengthModifier) || "+0",
+        dexterityScore: getSafeNonNegativeInteger(rawCard.dexterityScore, 10),
+        dexterityModifier: getSafeOptionalString(rawCard.dexterityModifier) || "+0",
+        constitutionScore: getSafeNonNegativeInteger(rawCard.constitutionScore, 10),
+        constitutionModifier: getSafeOptionalString(rawCard.constitutionModifier) || "+0",
+        intelligenceScore: getSafeNonNegativeInteger(rawCard.intelligenceScore, 10),
+        intelligenceModifier: getSafeOptionalString(rawCard.intelligenceModifier) || "+0",
+        wisdomScore: getSafeNonNegativeInteger(rawCard.wisdomScore, 10),
+        wisdomModifier: getSafeOptionalString(rawCard.wisdomModifier) || "+0",
+        charismaScore: getSafeNonNegativeInteger(rawCard.charismaScore, 10),
+        charismaModifier: getSafeOptionalString(rawCard.charismaModifier) || "+0",
+        speed: getSafeOptionalString(rawCard.speed),
+        savingThrows: getSafeOptionalString(rawCard.savingThrows),
+        resistances: getSafeOptionalString(rawCard.resistances),
+        immunities: getSafeOptionalString(rawCard.immunities),
+        vulnerabilities: getSafeOptionalString(rawCard.vulnerabilities),
+        senses: getSafeOptionalString(rawCard.senses),
+        spellSaveDc: getSafeOptionalString(rawCard.spellSaveDc),
+        specialResources: getSafeOptionalString(rawCard.specialResources),
+        traits: getSafeCardTraits(rawCard.traits),
+        actions: getSafeCardActions(rawCard.actions),
+        notes: getSafeOptionalString(rawCard.notes, importSecurityLimits.maxLongTextLength),
+        spellcasting: getSafeSpellcasting(rawCard.spellcasting, rawCard),
+        currency: getSafeCurrency(rawCard.currency),
+        inventoryCards: getSafeInventoryCards(rawCard.inventoryCards),
+        inventoryList: getSafeInventoryList(rawCard.inventoryList),
+        hpVisibility: getSafeHpVisibility(rawCard.hpVisibility),
+        imageData: getSafeImageSource(rawCard.imageData),
+        conditions: getSafeConditions(rawCard.conditions),
+        isDemoCard: rawCard.isDemoCard === true || isKnownDemoCardData(rawCard) === true,
+        location: Object.values(cardLocations).includes(rawCard.location)
+            ? rawCard.location
+            : rawCard.isInCombat === true ? cardLocations.hand : cardLocations.deck,
+        encounterStatus: rawCard.encounterStatus === encounterStatuses.eliminated
+            ? encounterStatuses.eliminated
+            : rawCard.isInitiativeActive === false ? encounterStatuses.eliminated : encounterStatuses.active,
+        isInCombat: rawCard.location === cardLocations.hand || rawCard.isInCombat === true,
+        isInitiativeActive: rawCard.encounterStatus !== encounterStatuses.eliminated && rawCard.isInitiativeActive !== false,
+        isSelected: rawCard.isSelected === true,
+        version: getSafePositiveInteger(rawCard.version, 1),
+        createdAt: getSafeOptionalString(rawCard.createdAt) || new Date().toISOString(),
+        updatedAt: getSafeOptionalString(rawCard.updatedAt) || getSafeOptionalString(rawCard.createdAt) || new Date().toISOString(),
+        deletedAt: getSafeOptionalString(rawCard.deletedAt) || null
     };
 }
 
-function createImportedCreatureId(rawId, usedIds) {
+function createImportedCardId(rawId, usedIds) {
     const numericId = Number(rawId);
 
     if (
@@ -4700,7 +4280,7 @@ function createImportedCreatureId(rawId, usedIds) {
     return nextId;
 }
 
-function isImportedPublicSelectionValid(importedSelectionId, importedCreatures) {
+function isImportedPublicSelectionValid(importedSelectionId, importedCards) {
     if (importedSelectionId === null) {
         return false;
     }
@@ -4711,8 +4291,8 @@ function isImportedPublicSelectionValid(importedSelectionId, importedCreatures) 
         return false;
     }
 
-    for (const creature of importedCreatures) {
-        if (creature.id === numericSelectionId) {
+    for (const card of importedCards) {
+        if (card.id === numericSelectionId) {
             return true;
         }
     }
@@ -5095,11 +4675,11 @@ function getDetailValue(value) {
     return escapeHtml(safeValue);
 }
 
-function createAbilityScoreHtml(creature, shortName, scorePropertyName, modifierPropertyName) {
-    const scoreValue = Number.isFinite(Number(creature[scorePropertyName]))
-        ? String(creature[scorePropertyName])
+function createAbilityScoreHtml(card, shortName, scorePropertyName, modifierPropertyName) {
+    const scoreValue = Number.isFinite(Number(card[scorePropertyName]))
+        ? String(card[scorePropertyName])
         : "10";
-    const modifierValue = getDetailValue(creature[modifierPropertyName] || "+0");
+    const modifierValue = getDetailValue(card[modifierPropertyName] || "+0");
 
     return `
         <p class="active-hand-ability-tile">
@@ -5191,8 +4771,8 @@ function createEmptySpellSlots() {
     return slots;
 }
 
-function createDefaultSpellcasting(rawCreature = {}) {
-    const saveDcText = getSafeOptionalString(rawCreature.spellSaveDc);
+function createDefaultSpellcasting(rawCard = {}) {
+    const saveDcText = getSafeOptionalString(rawCard.spellSaveDc);
     const parsedSaveDc = parseSpellSaveDcText(saveDcText);
 
     return {
@@ -5217,8 +4797,8 @@ function parseSpellSaveDcText(value) {
     };
 }
 
-function getSafeSpellcasting(rawSpellcasting, rawCreature = {}) {
-    const spellcasting = createDefaultSpellcasting(rawCreature);
+function getSafeSpellcasting(rawSpellcasting, rawCard = {}) {
+    const spellcasting = createDefaultSpellcasting(rawCard);
 
     if (rawSpellcasting !== null && typeof rawSpellcasting === "object") {
         const safeAbility = getSafeOptionalString(rawSpellcasting.ability).toUpperCase();
@@ -5294,7 +4874,7 @@ function getSafeSpell(rawSpell, index) {
         notes: getSafeOptionalString(rawSpell.notes),
         description: getSafeOptionalString(rawSpell.description),
         showAsAction: rawSpell.showAsAction === true,
-        actionType: getSafeCreatureActionType(rawSpell.actionType),
+        actionType: getSafeCardActionType(rawSpell.actionType),
         usageMax: getSafeNonNegativeInteger(rawSpell.usageMax, 0),
         usageReset: getSafeUsageReset(rawSpell.usageReset),
         used: getSafeNonNegativeInteger(rawSpell.used, 0)
@@ -5345,7 +4925,7 @@ function createSpellObject(rawSpell, index) {
         notes: getSafeOptionalString(rawSpell.notes),
         description: getSafeOptionalString(rawSpell.description),
         showAsAction: rawSpell.showAsAction === true,
-        actionType: getSafeCreatureActionType(rawSpell.actionType),
+        actionType: getSafeCardActionType(rawSpell.actionType),
         usageMax: getSafeNonNegativeInteger(rawSpell.usageMax, 0),
         usageReset: getSafeUsageReset(rawSpell.usageReset),
         used: getSafeNonNegativeInteger(rawSpell.used, 0)
@@ -5433,8 +5013,8 @@ function parseLegacySpellsText(spellsText) {
     return spells;
 }
 
-function applyLegacySlotHints(spellcasting, rawCreature = {}) {
-    const hintsText = `${getSafeOptionalString(rawCreature.specialResources)} ${getSafeOptionalString(rawCreature.spellsText)}`;
+function applyLegacySlotHints(spellcasting, rawCard = {}) {
+    const hintsText = `${getSafeOptionalString(rawCard.specialResources)} ${getSafeOptionalString(rawCard.spellsText)}`;
 
     for (let level = 1; level <= 9; level += 1) {
         const key = String(level);
@@ -5480,14 +5060,14 @@ function groupSpellsByLevel(spells) {
     return groups;
 }
 
-function getCreatureSpellcasting(creature) {
-    if (creature === null) {
+function getCardSpellcasting(card) {
+    if (card === null) {
         return createDefaultSpellcasting();
     }
 
-    creature.spellcasting = getSafeSpellcasting(creature.spellcasting, creature);
+    card.spellcasting = getSafeSpellcasting(card.spellcasting, card);
 
-    return creature.spellcasting;
+    return card.spellcasting;
 }
 
 function getAvailableSpellSlotCount(slotData) {
@@ -5570,15 +5150,15 @@ function renderCardsPreservingDetailScroll() {
     restoreDetailScrollAfterRender(detailScrollTop);
 }
 
-function toggleSpellSlot(creatureId, spellLevel, slotIndex) {
+function toggleSpellSlot(cardId, spellLevel, slotIndex) {
     const detailScrollTop = captureActiveDetailScrollTop();
-    const creature = findCreatureById(creatureId);
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    const spellcasting = getCreatureSpellcasting(creature);
+    const spellcasting = getCardSpellcasting(card);
     const level = clampNumber(Number(spellLevel), 1, 9);
     const key = String(level);
     const slotData = spellcasting.slots[key];
@@ -5594,20 +5174,20 @@ function toggleSpellSlot(creatureId, spellLevel, slotIndex) {
 
     slotData.used = clampNumber(slotData.max - newAvailable, 0, slotData.max);
 
-    addCombatLogMessage(`${creature.publicName || creature.name}: Spell Slots ${spellLevelLabels[level]} ${getAvailableSpellSlotCount(slotData)} / ${slotData.max}.`);
+    addCombatLogMessage(`${card.publicName || card.name}: Spell Slots ${spellLevelLabels[level]} ${getAvailableSpellSlotCount(slotData)} / ${slotData.max}.`);
     renderCards();
     restoreDetailScrollAfterRender(detailScrollTop);
 }
 
-function toggleSpellPrepared(creatureId, spellId) {
+function toggleSpellPrepared(cardId, spellId) {
     const detailScrollTop = captureActiveDetailScrollTop();
-    const creature = findCreatureById(creatureId);
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    const spell = getCreatureSpellcasting(creature).spells.find(function(candidate) {
+    const spell = getCardSpellcasting(card).spells.find(function(candidate) {
         return candidate.id === spellId;
     });
 
@@ -5620,9 +5200,9 @@ function toggleSpellPrepared(creatureId, spellId) {
     restoreDetailScrollAfterRender(detailScrollTop);
 }
 
-function toggleSpellDetail(creatureId, spellId) {
+function toggleSpellDetail(cardId, spellId) {
     const detailScrollTop = captureActiveDetailScrollTop();
-    const key = `${creatureId}:${spellId}`;
+    const key = `${cardId}:${spellId}`;
     const shouldExpandSpell = expandedSpellDetailKey !== key;
 
     expandedSpellDetailKey = shouldExpandSpell ? key : null;
@@ -5630,8 +5210,8 @@ function toggleSpellDetail(creatureId, spellId) {
     restoreDetailScrollAfterRender(detailScrollTop, shouldExpandSpell ? key : "");
 }
 
-function resetSpellSlotsForCreature(creature) {
-    const spellcasting = getCreatureSpellcasting(creature);
+function resetSpellSlotsForCard(card) {
+    const spellcasting = getCardSpellcasting(card);
 
     for (let level = 1; level <= 9; level += 1) {
         spellcasting.slots[String(level)].used = 0;
@@ -5656,7 +5236,7 @@ function createSpellcastingSummaryText(spellcasting) {
     return parts.length > 0 ? parts.join(" · ") : "Keine Spellcasting-Basis eingetragen.";
 }
 
-function createCreatureSpellSaveDcText(spellcasting) {
+function createCardSpellSaveDcText(spellcasting) {
     const parts = [];
 
     if (spellcasting.saveDc > 0) {
@@ -5737,7 +5317,7 @@ function createSpellFlagsHtml(spell) {
     }).join("")}</span>`;
 }
 
-function createSpellSlotButtonsHtml(creatureId, level, slotData) {
+function createSpellSlotButtonsHtml(cardId, level, slotData) {
     if (level === 0 || slotData.max <= 0) {
         return "";
     }
@@ -5751,7 +5331,7 @@ function createSpellSlotButtonsHtml(creatureId, level, slotData) {
             <button
                 class="spell-slot-orb ${isAvailable ? "spell-slot-orb-available" : "spell-slot-orb-used"}"
                 type="button"
-                onclick="toggleSpellSlot(${creatureId}, ${level}, ${index})"
+                onclick="toggleSpellSlot(${cardId}, ${level}, ${index})"
                 title="Spell Slot ${index + 1} umschalten"
                 aria-label="Spell Slot ${index + 1} von ${spellLevelLabels[level]} umschalten"
             >
@@ -5768,7 +5348,7 @@ function createSpellSlotButtonsHtml(creatureId, level, slotData) {
     `;
 }
 
-function createSpellDetailHtml(creatureId, spell) {
+function createSpellDetailHtml(cardId, spell) {
     const isReaction = /reaction|\b1R\b/i.test(spell.castingTime);
     const isBonusAction = /bonus|\bBA\b/i.test(spell.castingTime);
     const detailRows = [
@@ -5803,42 +5383,42 @@ function createSpellDetailHtml(creatureId, spell) {
             ${rowsHtml !== "" ? `<div class="spell-detail-grid">${rowsHtml}</div>` : ""}
             ${text !== "" ? `<p class="spell-detail-description">${escapeHtml(text).replace(/\n/g, "<br>")}</p>` : `<p class="spell-detail-description spell-detail-empty">Keine Kartendetails eingetragen.</p>`}
             <div class="spell-detail-actions">
-                ${spell.level > 0 && getCreatureSpellcasting(findCreatureById(creatureId)).slots[String(spell.level)].max > 0 ? `<button type="button" onclick="toggleSpellSlot(${creatureId}, ${spell.level}, ${Math.max(0, getAvailableSpellSlotCount(getCreatureSpellcasting(findCreatureById(creatureId)).slots[String(spell.level)]) - 1)})">Slot verwenden</button>` : ""}
+                ${spell.level > 0 && getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)].max > 0 ? `<button type="button" onclick="toggleSpellSlot(${cardId}, ${spell.level}, ${Math.max(0, getAvailableSpellSlotCount(getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)]) - 1)})">Slot verwenden</button>` : ""}
             </div>
         </div>
     `;
 }
 
-function createSpellRowHtml(creatureId, spell) {
-    const isExpanded = expandedSpellDetailKey === `${creatureId}:${spell.id}`;
+function createSpellRowHtml(cardId, spell) {
+    const isExpanded = expandedSpellDetailKey === `${cardId}:${spell.id}`;
     const preparedSymbol = spell.prepared === true ? "✓" : "○";
 
     return `
-        <article class="spell-row-card ${spell.prepared === true ? "spell-prepared" : "spell-unprepared"} ${isExpanded ? "spell-row-expanded" : ""}" data-spell-key="${escapeHtml(`${creatureId}:${spell.id}`)}">
+        <article class="spell-row-card ${spell.prepared === true ? "spell-prepared" : "spell-unprepared"} ${isExpanded ? "spell-row-expanded" : ""}" data-spell-key="${escapeHtml(`${cardId}:${spell.id}`)}">
             <div class="spell-row-shell">
-                <button class="spell-prepared-toggle" type="button" onclick="toggleSpellPrepared(${creatureId}, '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">
+                <button class="spell-prepared-toggle" type="button" onclick="toggleSpellPrepared(${cardId}, '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">
                     ${preparedSymbol}
                 </button>
-                <button class="spell-row-button" type="button" onclick="toggleSpellDetail(${creatureId}, '${spell.id}')" aria-expanded="${isExpanded ? "true" : "false"}">
+                <button class="spell-row-button" type="button" onclick="toggleSpellDetail(${cardId}, '${spell.id}')" aria-expanded="${isExpanded ? "true" : "false"}">
                     <span class="spell-row-chevron" aria-hidden="true">›</span>
                     <span class="spell-row-name">${escapeHtml(spell.name)}</span>
                 </button>
             </div>
-            ${isExpanded ? createSpellDetailHtml(creatureId, spell) : ""}
+            ${isExpanded ? createSpellDetailHtml(cardId, spell) : ""}
         </article>
     `;
 }
 
-function createSpellLevelCardHtml(creatureId, level, spells, slotData) {
+function createSpellLevelCardHtml(cardId, level, spells, slotData) {
     if (spells.length === 0 && (slotData === undefined || slotData.max === 0)) {
         return "";
     }
 
-    const slotHtml = level === 0 ? "" : createSpellSlotButtonsHtml(creatureId, level, slotData);
+    const slotHtml = level === 0 ? "" : createSpellSlotButtonsHtml(cardId, level, slotData);
     const spellRowsHtml = spells.length === 0
         ? `<p class="detail-placeholder-text">Keine Spells auf diesem Level eingetragen.</p>`
         : spells.map(function(spell) {
-            return createSpellRowHtml(creatureId, spell);
+            return createSpellRowHtml(cardId, spell);
         }).join("");
 
     return `
@@ -5854,14 +5434,14 @@ function createSpellLevelCardHtml(creatureId, level, spells, slotData) {
     `;
 }
 
-function createSpellTrackerHtml(creature) {
-    const spellcasting = getCreatureSpellcasting(creature);
+function createSpellTrackerHtml(card) {
+    const spellcasting = getCardSpellcasting(card);
     const groupedSpells = groupSpellsByLevel(spellcasting.spells);
     const levelCards = [];
 
     for (let level = 0; level <= 9; level += 1) {
         const slotData = level === 0 ? { max: 0, used: 0 } : spellcasting.slots[String(level)];
-        const levelHtml = createSpellLevelCardHtml(creature.id, level, groupedSpells[level], slotData);
+        const levelHtml = createSpellLevelCardHtml(card.id, level, groupedSpells[level], slotData);
 
         if (levelHtml !== "") {
             levelCards.push(levelHtml);
@@ -5944,7 +5524,7 @@ function parseSpellListText(spellListText) {
                 pageRef: parts[10] || "",
                 description: parts[11] || "",
                 showAsAction: parts[12] === "action-visible",
-                actionType: getSafeCreatureActionType(parts[13]),
+                actionType: getSafeCardActionType(parts[13]),
                 usageMax: getSafeNonNegativeInteger(parts[14], 0),
                 usageReset: getSafeUsageReset(parts[15]),
                 used: getSafeNonNegativeInteger(parts[16], 0)
@@ -5977,8 +5557,8 @@ function readSpellcastingFromForge(prefix) {
     return base;
 }
 
-function writeSpellcastingToForge(prefix, creature) {
-    const spellcasting = getCreatureSpellcasting(creature);
+function writeSpellcastingToForge(prefix, card) {
+    const spellcasting = getCardSpellcasting(card);
 
     setInputValue(`${prefix}-spellcasting-ability`, spellcasting.ability || "");
     setInputValue(`${prefix}-spellcasting-save-dc`, spellcasting.saveDc || 0);
@@ -5993,13 +5573,13 @@ function writeSpellcastingToForge(prefix, creature) {
 
 
 function getVisibleForgePrefix() {
-    const editSectionElement = document.querySelector("#edit-creature-section");
+    const editSectionElement = document.querySelector("#edit-card-section");
 
     if (editSectionElement !== null && editSectionElement.classList.contains("card-forge-panel-hidden") === false) {
-        return "edit-creature";
+        return "edit-card";
     }
 
-    return "new-creature";
+    return "new-card";
 }
 
 function renderVisibleForgeSpellManager() {
@@ -6029,18 +5609,18 @@ function keepCardForgeOpenForInternalAction() {
 }
 
 function commitForgeSpellcastingIfEditing(prefix) {
-    if (prefix !== "edit-creature") {
+    if (prefix !== "edit-card") {
         return;
     }
 
-    const creature = getEditFormCreature();
+    const card = getEditFormCard();
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.spellcasting = readSpellcastingFromForge(prefix);
-    creature.spellSaveDc = createCreatureSpellSaveDcText(creature.spellcasting);
+    card.spellcasting = readSpellcastingFromForge(prefix);
+    card.spellSaveDc = createCardSpellSaveDcText(card.spellcasting);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -6550,8 +6130,8 @@ function createUsageTextFromFields(max, reset) {
 }
 
 
-function resetUsageCountersForCreature(creature, resetTypes) {
-    if (creature === null || Array.isArray(resetTypes) === false || resetTypes.length === 0) {
+function resetUsageCountersForCard(card, resetTypes) {
+    if (card === null || Array.isArray(resetTypes) === false || resetTypes.length === 0) {
         return;
     }
 
@@ -6559,38 +6139,38 @@ function resetUsageCountersForCreature(creature, resetTypes) {
         return resetTypes.includes(getUsageReset(item));
     };
 
-    const actions = getCreatureActions(creature).map(function(action) {
-        return shouldReset(action) ? createCreatureAction({ ...action, used: 0 }, 0) : action;
+    const actions = getCardActions(card).map(function(action) {
+        return shouldReset(action) ? createCardAction({ ...action, used: 0 }, 0) : action;
     });
-    creature.actions = actions;
+    card.actions = actions;
 
-    const traits = getCreatureTraits(creature).map(function(trait) {
-        return shouldReset(trait) ? createCreatureTrait({ ...trait, used: 0 }, 0) : trait;
+    const traits = getCardTraits(card).map(function(trait) {
+        return shouldReset(trait) ? createCardTrait({ ...trait, used: 0 }, 0) : trait;
     });
-    creature.traits = traits;
+    card.traits = traits;
 
-    const spellcasting = getCreatureSpellcasting(creature);
+    const spellcasting = getCardSpellcasting(card);
     spellcasting.spells = spellcasting.spells.map(function(spell) {
         return shouldReset(spell) ? createSpellObject({ ...spell, used: 0 }, 0) : spell;
     });
-    creature.spellcasting = spellcasting;
+    card.spellcasting = spellcasting;
 }
 
-const creatureActionTypeLabels = {
+const cardActionTypeLabels = {
     action: "Aktionen",
     bonus: "Bonusaktionen",
     reaction: "Reaktionen",
     special: "Sonstiges"
 };
 
-const creatureActionTypeSingularLabels = {
+const cardActionTypeSingularLabels = {
     action: "Aktion",
     bonus: "Bonusaktion",
     reaction: "Reaktion",
     special: "Sonstiges"
 };
 
-function getSafeCreatureActionType(value) {
+function getSafeCardActionType(value) {
     if (value === "action" || value === "bonus" || value === "reaction" || value === "special") {
         return value;
     }
@@ -6598,11 +6178,11 @@ function getSafeCreatureActionType(value) {
     return "action";
 }
 
-function createCreatureAction(rawAction = {}, fallbackIndex = 0) {
+function createCardAction(rawAction = {}, fallbackIndex = 0) {
     return {
         id: getSafeOptionalString(rawAction.id) || `action-${Date.now()}-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
         name: getSafeOptionalString(rawAction.name) || "Neue Aktion",
-        type: getSafeCreatureActionType(rawAction.type),
+        type: getSafeCardActionType(rawAction.type),
         usage: getSafeOptionalString(rawAction.usage),
         usageMax: getSafeNonNegativeInteger(rawAction.usageMax, inferUsageMaxFromText(rawAction.usage)),
         usageReset: getSafeUsageReset(rawAction.usageReset) !== "none" ? getSafeUsageReset(rawAction.usageReset) : inferUsageResetFromText(rawAction.usage),
@@ -6653,29 +6233,29 @@ function getActionTextFromStructuredAction(action) {
     return `${action.name}. ${details.join("; ")}`.trim();
 }
 
-function getSafeCreatureActions(value) {
+function getSafeCardActions(value) {
     if (Array.isArray(value) === false) {
         return [];
     }
 
     return value
-        .slice(0, importSecurityLimits.maxActionsPerCreature)
+        .slice(0, importSecurityLimits.maxActionsPerCard)
         .filter(function(action) { return action !== null && typeof action === "object"; })
-        .map(function(action, index) { return createCreatureAction(action, index); })
+        .map(function(action, index) { return createCardAction(action, index); })
         .filter(function(action) { return action.name.trim() !== ""; });
 }
 
-function getCreatureActions(creature) {
-    if (creature === null) {
+function getCardActions(card) {
+    if (card === null) {
         return [];
     }
 
-    return getSafeCreatureActions(creature.actions);
+    return getSafeCardActions(card.actions);
 }
 
 
 function createActionFromTrait(trait) {
-    return createCreatureAction({
+    return createCardAction({
         id: `trait-${trait.id}`,
         name: trait.name,
         type: trait.actionType,
@@ -6710,11 +6290,11 @@ function inferSpellActionType(spell) {
         return "action";
     }
 
-    return getSafeCreatureActionType(spell.actionType);
+    return getSafeCardActionType(spell.actionType);
 }
 
 function createActionFromSpell(spell) {
-    return createCreatureAction({
+    return createCardAction({
         id: `spell-${spell.id}`,
         name: spell.name,
         type: inferSpellActionType(spell),
@@ -6732,17 +6312,17 @@ function createActionFromSpell(spell) {
     });
 }
 
-function getCreatureActionReferences(creature) {
-    const directActions = getCreatureActions(creature).map(function(action) {
-        return createCreatureAction({ ...action, sourceType: action.sourceType || "action", sourceId: action.sourceId || action.id }, 0);
+function getCardActionReferences(card) {
+    const directActions = getCardActions(card).map(function(action) {
+        return createCardAction({ ...action, sourceType: action.sourceType || "action", sourceId: action.sourceId || action.id }, 0);
     });
-    const traitActions = getCreatureTraits(creature)
+    const traitActions = getCardTraits(card)
         .filter(function(trait) { return trait.showAsAction === true; })
         .map(createActionFromTrait);
-    const spellActions = getCreatureSpellcasting(creature).spells
+    const spellActions = getCardSpellcasting(card).spells
         .filter(function(spell) { return spell.showAsAction === true; })
         .map(createActionFromSpell);
-    const itemActions = getInventoryCards(creature)
+    const itemActions = getInventoryCards(card)
         .filter(function(item) { return item.showAsAction === true; })
         .map(createActionFromInventoryItem);
 
@@ -6764,7 +6344,7 @@ function getForgeActionsDraft(prefix) {
         return [];
     }
 
-    return getSafeCreatureActions(parseJsonValue(actionsElement.value.trim(), []), "");
+    return getSafeCardActions(parseJsonValue(actionsElement.value.trim(), []), "");
 }
 
 function setForgeActions(prefix, actions) {
@@ -6774,27 +6354,27 @@ function setForgeActions(prefix, actions) {
         return;
     }
 
-    const safeActions = getSafeCreatureActions(actions, "");
+    const safeActions = getSafeCardActions(actions, "");
     actionsElement.value = JSON.stringify(safeActions);
 }
 
-function writeActionsToForge(prefix, creature) {
-    setForgeActions(prefix, getCreatureActions(creature));
+function writeActionsToForge(prefix, card) {
+    setForgeActions(prefix, getCardActions(card));
     renderForgeActionManager(prefix);
 }
 
 function commitForgeActionsIfEditing(prefix) {
-    if (prefix !== "edit-creature") {
+    if (prefix !== "edit-card") {
         return;
     }
 
-    const creature = getEditFormCreature();
+    const card = getEditFormCard();
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.actions = getForgeActionsDraft(prefix);
+    card.actions = getForgeActionsDraft(prefix);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -6834,7 +6414,7 @@ function openForgeActionEditor(prefix, actionId) {
 
 function addForgeAction(prefix) {
     keepCardForgeOpenForInternalAction();
-    const action = createCreatureAction({
+    const action = createCardAction({
         name: "Neue Aktion",
         type: "action"
     }, Date.now());
@@ -6905,7 +6485,7 @@ function saveForgeAction(prefix, actionId) {
         : activeForgeActionEditor !== null && activeForgeActionEditor.prefix === prefix && activeForgeActionEditor.actionId === actionId && activeForgeActionEditor.draftAction !== undefined
             ? activeForgeActionEditor.draftAction
             : {};
-    const nextAction = createCreatureAction({
+    const nextAction = createCardAction({
         id: previousAction.id || actionId,
         name: name,
         type: typeElement.value,
@@ -6935,7 +6515,7 @@ function saveForgeAction(prefix, actionId) {
 
 function createForgeActionRowHtml(prefix, action) {
     const editorIsOpen = activeForgeActionEditor !== null && activeForgeActionEditor.prefix === prefix && activeForgeActionEditor.actionId === action.id;
-    const label = creatureActionTypeSingularLabels[action.type] || "Aktion";
+    const label = cardActionTypeSingularLabels[action.type] || "Aktion";
 
     return `
         <div class="forge-action-row ${editorIsOpen ? "forge-action-row-active" : ""}">
@@ -6973,7 +6553,7 @@ function createForgeActionGroupHtml(prefix, type, actions) {
 
     return `
         <section class="forge-action-group">
-            <h5>${creatureActionTypeLabels[type]}</h5>
+            <h5>${cardActionTypeLabels[type]}</h5>
             <div class="forge-action-row-list">
                 ${actions.map(function(action) { return createForgeActionRowHtml(prefix, action); }).join("")}
             </div>
@@ -6982,7 +6562,7 @@ function createForgeActionGroupHtml(prefix, type, actions) {
 }
 
 function createForgeActionEditorHtml(prefix, action) {
-    const safeAction = action || createCreatureAction({ name: "", type: "action" }, 0);
+    const safeAction = action || createCardAction({ name: "", type: "action" }, 0);
 
     return `
         <section class="forge-action-editor forge-action-inline-editor" aria-label="Aktion bearbeiten">
@@ -7048,7 +6628,7 @@ function renderForgeActionManager(prefix) {
     `;
 }
 
-function getSafeCreatureType(value) {
+function getSafeCardType(value) {
     if (value === "player" || value === "npc" || value === "monster") {
         return value;
     }
@@ -7251,7 +6831,7 @@ function clearMirielBoardTransientAnnouncement() {
 
 
 function hasPreparedEncounterCards() {
-    return Array.isArray(creatures) === true && creatures.length > 0;
+    return Array.isArray(cards) === true && cards.length > 0;
 }
 
 function hasEncounterHandCards() {
@@ -7532,14 +7112,14 @@ function getMirielBoardRenderState() {
 }
 
 function commitPendingPublicStageAfterMirielBoard() {
-    if (publicStagePendingCreatureId === null) {
+    if (publicStagePendingCardId === null) {
         return;
     }
 
     const stageRailState = capturePublicStageRailState();
 
-    publicStagePresentedCreatureId = publicStagePendingCreatureId;
-    publicStagePendingCreatureId = null;
+    publicStagePresentedCardId = publicStagePendingCardId;
+    publicStagePendingCardId = null;
 
     renderCards();
     playPublicStageRailTransition(stageRailState);
@@ -7628,7 +7208,7 @@ function scheduleMirielBoardAutoHide(shouldAutoShow, cardCount, isNewRound) {
 
     if (shouldAutoShow !== true) {
         clearPublicStageSequenceTimer();
-        publicStagePendingCreatureId = null;
+        publicStagePendingCardId = null;
         return;
     }
 
@@ -7910,9 +7490,9 @@ function clampNumber(value, minValue, maxValue) {
     return Math.max(minValue, Math.min(maxValue, value));
 }
 
-function getHealthPresentation(creature, shouldRevealHealth) {
-    const safeMaxHp = Number(creature.maxHp) > 0 ? Number(creature.maxHp) : 0;
-    const safeHp = Number(creature.hp);
+function getHealthPresentation(card, shouldRevealHealth) {
+    const safeMaxHp = Number(card.maxHp) > 0 ? Number(card.maxHp) : 0;
+    const safeHp = Number(card.hp);
 
     if (shouldRevealHealth !== true || safeMaxHp <= 0 || Number.isFinite(safeHp) === false) {
         return {
@@ -7989,39 +7569,39 @@ function getHealthPresentation(creature, shouldRevealHealth) {
     };
 }
 
-function getHealthPresentationForCreature(creature) {
-    return getHealthPresentation(creature, creature.hpVisibility !== "hidden");
+function getHealthPresentationForCard(card) {
+    return getHealthPresentation(card, card.hpVisibility !== "hidden");
 }
 
-function createPublicHpData(creature) {
-    const hasTempHp = creature.tempHp > 0;
-    const shouldRevealHealth = creature.hpVisibility !== "hidden";
-    const healthPresentation = getHealthPresentation(creature, shouldRevealHealth);
+function createPublicHpData(card) {
+    const hasTempHp = card.tempHp > 0;
+    const shouldRevealHealth = card.hpVisibility !== "hidden";
+    const healthPresentation = getHealthPresentation(card, shouldRevealHealth);
 
-    if (creature.hpVisibility === "full") {
+    if (card.hpVisibility === "full") {
         return {
             mode: "full",
-            hp: creature.hp,
-            maxHp: creature.maxHp,
-            percent: getHpPercent(creature),
-            tempHp: creature.tempHp,
+            hp: card.hp,
+            maxHp: card.maxHp,
+            percent: getHpPercent(card),
+            tempHp: card.tempHp,
             hasTempHp: hasTempHp,
-            tempHpPercent: getTempHpPercent(creature),
+            tempHpPercent: getTempHpPercent(card),
             health: healthPresentation
         };
     }
 
-    if (creature.hpVisibility === "bar") {
+    if (card.hpVisibility === "bar") {
         return {
             mode: "bar",
-            percent: getHpPercent(creature),
+            percent: getHpPercent(card),
             hasTempHp: hasTempHp,
-            tempHpPercent: getTempHpPercent(creature),
+            tempHpPercent: getTempHpPercent(card),
             health: healthPresentation
         };
     }
 
-    if (creature.hpVisibility === "descriptive") {
+    if (card.hpVisibility === "descriptive") {
         return {
             mode: "descriptive",
             hasTempHp: false,
@@ -8035,22 +7615,22 @@ function createPublicHpData(creature) {
     };
 }
 
-function createPublicCardData(creature, isActive, isFocused) {
-    const publicName = getSafeOptionalString(creature.publicName) || getSafeOptionalString(creature.name) || "Unbenannte Karte";
-    const conditionList = Array.isArray(creature.conditions) ? creature.conditions : [];
+function createPublicCardData(card, isActive, isFocused) {
+    const publicName = getSafeOptionalString(card.publicName) || getSafeOptionalString(card.name) || "Unbenannte Karte";
+    const conditionList = Array.isArray(card.conditions) ? card.conditions : [];
 
     return {
-        id: creature.id,
+        id: card.id,
         publicName: publicName,
-        type: getSafeCreatureType(creature.type),
-        initiative: getSafeInteger(creature.initiative, 0),
-        imageData: getSafeOptionalString(creature.imageData),
-        hp: createPublicHpData(creature),
+        type: getSafeCardType(card.type),
+        initiative: getSafeInteger(card.initiative, 0),
+        imageData: getSafeOptionalString(card.imageData),
+        hp: createPublicHpData(card),
         conditions: conditionList.slice(),
         isActive: isActive,
         isFocused: isFocused,
-        isInTurnOrder: creature.isInitiativeActive !== false,
-        isOutOfAction: isCreatureOutOfAction(creature)
+        isInTurnOrder: card.isInitiativeActive !== false,
+        isOutOfAction: isCardOutOfAction(card)
     };
 }
 
@@ -8061,7 +7641,7 @@ function shouldPublicCardBeFocused(card, activeCard) {
         return isActive;
     }
 
-    return isCreatureManuallySelected(card);
+    return isCardManuallySelected(card);
 }
 
 function createPublicEncounterState(handCards, activeCard) {
@@ -8161,13 +7741,13 @@ function getPublicTurnWindow(publicCards) {
 // 12. HTML-Erzeugung: Bilder, HP und Conditions
 // ============================================================
 
-function createCreatureImageHtml(creature) {
-    const healthPresentation = getHealthPresentationForCreature(creature);
+function createCardImageHtml(card) {
+    const healthPresentation = getHealthPresentationForCard(card);
 
-    if (creature.imageData === "") {
+    if (card.imageData === "") {
         return `
             <div
-                class="creature-image-box creature-image-placeholder health-wound-frame dm-wound-frame ${healthPresentation.stateClass}"
+                class="card-image-box card-image-placeholder health-wound-frame dm-wound-frame ${healthPresentation.stateClass}"
                 style="${healthPresentation.style}"
             >
                 Bild folgt
@@ -8177,13 +7757,13 @@ function createCreatureImageHtml(creature) {
 
     return `
         <div
-            class="creature-image-box health-wound-frame dm-wound-frame ${healthPresentation.stateClass}"
+            class="card-image-box health-wound-frame dm-wound-frame ${healthPresentation.stateClass}"
             style="${healthPresentation.style}"
         >
             <img
-                class="creature-image"
-                src="${escapeAttribute(getSafeImageSource(creature.imageData))}"
-                alt="Bild von ${escapeAttribute(creature.publicName)}"
+                class="card-image"
+                src="${escapeAttribute(getSafeImageSource(card.imageData))}"
+                alt="Bild von ${escapeAttribute(card.publicName)}"
             >
         </div>
     `;
@@ -8221,39 +7801,39 @@ function createPublicImageHtml(publicCard, imageContext = "stage") {
     `;
 }
 
-function createDmHpBarHtml(creature) {
-    const hpPercent = getHpPercent(creature);
+function createDmHpBarHtml(card) {
+    const hpPercent = getHpPercent(card);
 
     return `
-        <div class="dm-resource-meter dm-hp-meter" title="HP ${creature.hp} von ${creature.maxHp}">
+        <div class="dm-resource-meter dm-hp-meter" title="HP ${card.hp} von ${card.maxHp}">
             <div
                 class="dm-resource-meter-fill dm-hp-meter-fill"
                 style="width: ${hpPercent}%;"
             ></div>
-            <span class="dm-resource-meter-label">${creature.hp <= 0 ? "0 HP · Initiative prüfen" : `HP ${creature.hp} / ${creature.maxHp}`}</span>
-            ${creature.hp <= 0 ? '<span class="dm-zero-hp-overlay" aria-hidden="true"></span>' : ""}
+            <span class="dm-resource-meter-label">${card.hp <= 0 ? "0 HP · Initiative prüfen" : `HP ${card.hp} / ${card.maxHp}`}</span>
+            ${card.hp <= 0 ? '<span class="dm-zero-hp-overlay" aria-hidden="true"></span>' : ""}
         </div>
     `;
 }
 
-function createDmTempHpBarHtml(creature) {
-    const tempHpPercent = getTempHpPercent(creature);
+function createDmTempHpBarHtml(card) {
+    const tempHpPercent = getTempHpPercent(card);
 
     return `
-        <div class="dm-resource-meter dm-temp-hp-meter" title="Temporary HP ${creature.tempHp}">
+        <div class="dm-resource-meter dm-temp-hp-meter" title="Temporary HP ${card.tempHp}">
             <div
                 class="dm-resource-meter-fill dm-temp-hp-meter-fill"
                 style="width: ${tempHpPercent}%;"
             ></div>
-            <span class="dm-resource-meter-label">Temp HP ${creature.tempHp}</span>
+            <span class="dm-resource-meter-label">Temp HP ${card.tempHp}</span>
         </div>
     `;
 }
 
-function getPublicHpDisplayHtml(creature) {
+function getPublicHpDisplayHtml(card) {
     return `
         <div class="hp-display">
-            <p>Spieler sehen: ${getHpVisibilityLabel(creature)}</p>
+            <p>Spieler sehen: ${getHpVisibilityLabel(card)}</p>
         </div>
     `;
 }
@@ -8343,8 +7923,8 @@ function getPublicHpPreviewHtml(publicCard) {
     `;
 }
 
-function createConditionChipsHtml(creature) {
-    if (creature.conditions.length === 0) {
+function createConditionChipsHtml(card) {
+    if (card.conditions.length === 0) {
         return `
             <p class="condition-empty">
                 Keine Conditions.
@@ -8354,7 +7934,7 @@ function createConditionChipsHtml(creature) {
 
     let html = "";
 
-    for (const condition of creature.conditions) {
+    for (const condition of card.conditions) {
         html += `
             <span class="condition-chip ${getConditionClassName(condition)}">
                 <span class="condition-chip-name">
@@ -8399,7 +7979,7 @@ function getForgeTraitsDraft(prefix) {
         return [];
     }
 
-    return getSafeCreatureTraits(parseJsonValue(traitsElement.value.trim(), []), "");
+    return getSafeCardTraits(parseJsonValue(traitsElement.value.trim(), []), "");
 }
 
 function setForgeTraits(prefix, traits) {
@@ -8409,26 +7989,26 @@ function setForgeTraits(prefix, traits) {
         return;
     }
 
-    traitsElement.value = JSON.stringify(getSafeCreatureTraits(traits, ""));
+    traitsElement.value = JSON.stringify(getSafeCardTraits(traits, ""));
 }
 
-function writeTraitsToForge(prefix, creature) {
-    setForgeTraits(prefix, getCreatureTraits(creature));
+function writeTraitsToForge(prefix, card) {
+    setForgeTraits(prefix, getCardTraits(card));
     renderForgeTraitManager(prefix);
 }
 
 function commitForgeTraitsIfEditing(prefix) {
-    if (prefix !== "edit-creature") {
+    if (prefix !== "edit-card") {
         return;
     }
 
-    const creature = getEditFormCreature();
+    const card = getEditFormCard();
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    creature.traits = getForgeTraitsDraft(prefix);
+    card.traits = getForgeTraitsDraft(prefix);
 
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
@@ -8464,7 +8044,7 @@ function openForgeTraitEditor(prefix, traitId) {
 
 function addForgeTrait(prefix) {
     keepCardForgeOpenForInternalAction();
-    const trait = createCreatureTrait({ name: "Neuer Trait", category: "other" }, Date.now());
+    const trait = createCardTrait({ name: "Neuer Trait", category: "other" }, Date.now());
     activeForgeTraitEditor = { prefix: prefix, traitId: trait.id, isNewDraft: true, draftTrait: trait };
     renderForgeTraitManager(prefix);
     scrollActiveForgeTraitEditorIntoView(prefix);
@@ -8529,7 +8109,7 @@ function saveForgeTrait(prefix, traitId) {
         : activeForgeTraitEditor !== null && activeForgeTraitEditor.prefix === prefix && activeForgeTraitEditor.traitId === traitId && activeForgeTraitEditor.draftTrait !== undefined
             ? activeForgeTraitEditor.draftTrait
             : {};
-    const nextTrait = createCreatureTrait({
+    const nextTrait = createCardTrait({
         id: previousTrait.id || traitId,
         name: name,
         category: categoryElement !== null ? categoryElement.value : "other",
@@ -8562,11 +8142,11 @@ function saveForgeTrait(prefix, traitId) {
 
 function createForgeTraitRowHtml(prefix, trait) {
     const editorIsOpen = activeForgeTraitEditor !== null && activeForgeTraitEditor.prefix === prefix && activeForgeTraitEditor.traitId === trait.id;
-    const actionHint = trait.showAsAction === true ? ` · ${creatureActionTypeSingularLabels[trait.actionType] || "Aktion"}` : "";
+    const actionHint = trait.showAsAction === true ? ` · ${cardActionTypeSingularLabels[trait.actionType] || "Aktion"}` : "";
 
     return `
         <div class="forge-trait-row ${editorIsOpen ? "forge-trait-row-active" : ""}">
-            <span class="forge-action-type-pill">${escapeHtml(creatureTraitCategoryLabels[trait.category] || "Trait")}</span>
+            <span class="forge-action-type-pill">${escapeHtml(cardTraitCategoryLabels[trait.category] || "Trait")}</span>
             <span class="forge-action-name">${escapeHtml(trait.name)}${escapeHtml(actionHint)}</span>
             <div class="forge-action-row-actions">
                 <button class="forge-trait-edit-button" type="button" onclick="openForgeTraitEditor('${prefix}', '${trait.id}')">Edit</button>
@@ -8594,9 +8174,9 @@ function createForgeTraitDraftGroupHtml(prefix, trait) {
 }
 
 function createForgeTraitEditorHtml(prefix, trait) {
-    const safeTrait = trait || createCreatureTrait({ name: "", category: "other" }, 0);
-    const categoryOptions = Object.keys(creatureTraitCategoryLabels).map(function(key) {
-        return `<option value="${key}"${safeTrait.category === key ? " selected" : ""}>${creatureTraitCategoryLabels[key]}</option>`;
+    const safeTrait = trait || createCardTrait({ name: "", category: "other" }, 0);
+    const categoryOptions = Object.keys(cardTraitCategoryLabels).map(function(key) {
+        return `<option value="${key}"${safeTrait.category === key ? " selected" : ""}>${cardTraitCategoryLabels[key]}</option>`;
     }).join("");
 
     return `
@@ -8755,7 +8335,7 @@ function createPublicStageCardHtml(publicCard, slotName) {
 
             <article
                 class="public-stage-card ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
-                data-creature-id="${publicCard.id}"
+                data-card-id="${publicCard.id}"
                 data-public-stage-card-id="${publicCard.id}"
                 onclick="focusPublicCard(${publicCard.id})"
                 title="Diese Karte groß anzeigen"
@@ -8842,7 +8422,7 @@ function createPublicRibbonCardHtml(publicCard) {
     return `
         <article
             class="public-ribbon-card ${activeTurnClass} ${selectedCardClass} ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
-            data-creature-id="${publicCard.id}"
+            data-card-id="${publicCard.id}"
             data-public-ribbon-card-id="${publicCard.id}"
             onclick="focusPublicCard(${publicCard.id})"
             title="Diese Karte groß anzeigen"
@@ -8920,108 +8500,79 @@ function createPublicTurnStatusHtml(handCards, activeCard) {
 // 14. HTML-Erzeugung: DM-Karten
 // ============================================================
 
-function createCardMenuHtml(creature) {
-    const isOnHand = creature.isInCombat === true;
-    const isFocusedDeckCard = creature.isInCombat !== true && focusedCreatureId === creature.id;
-    const deckFocusButtonHtml = isFocusedDeckCard
-        ? `
-                <button type="button" onclick="showDeckCardFromFocus(${creature.id})">
-                    Aus Fokus entfernen
-                </button>
-        `
-        : `
-                <button type="button" onclick="setFocusedDeckCreature(${creature.id})">
-                    In den Fokus nehmen
-                </button>
+function createCardMenuHtml(card) {
+    const location = getCardLocation(card);
+    const isOnHand = location === cardLocations.hand;
+    const isInTrash = location === cardLocations.trash;
+
+    if (isInTrash) {
+        return `
+            <details class="card-menu" onclick="event.stopPropagation()">
+                <summary class="card-menu-summary" title="Kartenmenü öffnen" aria-label="Kartenmenü öffnen">☰</summary>
+                <div class="card-menu-panel">
+                    <button type="button" onclick="restoreCardFromTrash(${card.id})">Ins Deck wiederherstellen</button>
+                    <button class="card-menu-danger" type="button" onclick="permanentlyDeleteCard(${card.id})">Endgültig löschen</button>
+                </div>
+            </details>
         `;
+    }
+
+    const isFocusedDeckCard = location === cardLocations.deck && focusedCardId === card.id;
+    const deckFocusButtonHtml = isFocusedDeckCard
+        ? `<button type="button" onclick="showDeckCardFromFocus(${card.id})">Aus Fokus entfernen</button>`
+        : `<button type="button" onclick="setFocusedDeckCard(${card.id})">In den Fokus nehmen</button>`;
     const turnOrderButtonHtml = isOnHand
-        ? `
-                <button type="button" onclick="toggleCreatureTurnOrder(${creature.id})">
-                    ${creature.isInitiativeActive === false ? "Wieder in die Zugfolge aufnehmen" : "Aus der Zugfolge nehmen"}
-                </button>
-        `
+        ? `<button type="button" onclick="toggleCardTurnOrder(${card.id})">${getEncounterStatus(card) === encounterStatuses.eliminated ? "Wieder in die Zugfolge aufnehmen" : "Aus der Zugfolge nehmen"}</button>`
         : "";
     const movementButtonHtml = isOnHand
-        ? `
-                ${turnOrderButtonHtml}
-
-                <button type="button" onclick="moveCardToDeck(${creature.id})">
-                    Karte ins Deck verschieben
-                </button>
-        `
-        : `
-                ${deckFocusButtonHtml}
-
-                <button type="button" onclick="moveCardToHand(${creature.id})">
-                    Karte auf die Hand nehmen
-                </button>
-        `;
+        ? `${turnOrderButtonHtml}<button type="button" onclick="moveCardToDeck(${card.id})">Karte ins Deck verschieben</button>`
+        : `${deckFocusButtonHtml}<button type="button" onclick="moveCardToHand(${card.id})">Karte auf die Hand nehmen</button>`;
 
     return `
         <details class="card-menu" onclick="event.stopPropagation()">
-            <summary
-                class="card-menu-summary"
-                title="Kartenmenü öffnen"
-                aria-label="Kartenmenü öffnen"
-            >
-                ☰
-            </summary>
-
+            <summary class="card-menu-summary" title="Kartenmenü öffnen" aria-label="Kartenmenü öffnen">☰</summary>
             <div class="card-menu-panel">
-                <button type="button" onclick="openEditCreatureForm(${creature.id})">
-                    Karte bearbeiten
-                </button>
-
-                <button type="button" onclick="copyCreatureToDeck(${creature.id})">
-                    Karte kopieren
-                </button>
-
+                <button type="button" onclick="openEditCardForm(${card.id})">Karte bearbeiten</button>
+                <button type="button" onclick="copyCardToDeck(${card.id})">Karte kopieren</button>
                 ${movementButtonHtml}
-
-                <button
-                    class="card-menu-danger"
-                    onclick="removeCreatureById(${creature.id})"
-                    type="button"
-                >
-                    Karte entfernen
-                </button>
+                <button class="card-menu-danger" onclick="moveCardToTrash(${card.id})" type="button">In den Papierkorb</button>
             </div>
         </details>
     `;
 }
 
-function createCreatureCardHtml(creature, isActive) {
-    const isCompactDeckCard = creature.isInCombat === false;
+function createCardHtml(card, isActive) {
+    const isCompactDeckCard = getCardLocation(card) !== cardLocations.hand;
 
     const selectableCardClass = "selectable-card";
 
-    const selectedTargetCardClass = creature.isInCombat === true && creature.isSelected === true
+    const selectedTargetCardClass = card.isInCombat === true && card.isSelected === true
         ? "selected-target-card"
         : "";
 
-    const selectedDeckCardClass = creature.isInCombat === false && creature.isSelected === true
+    const selectedDeckCardClass = card.isInCombat === false && card.isSelected === true
         ? "selected-deck-card"
         : "";
 
-    const selectionClickAttribute = `onclick="toggleCreatureSelection(${creature.id})"`;
+    const selectionClickAttribute = `onclick="toggleCardSelection(${card.id})"`;
 
     let selectedTargetLabelHtml = "";
 
-    if (creature.isInCombat === true && creature.isSelected === true) {
+    if (card.isInCombat === true && card.isSelected === true) {
         selectedTargetLabelHtml = `<span class="selected-target-label">Ziel</span>`;
     }
 
-    if (creature.isInCombat === false && creature.isSelected === true) {
+    if (card.isInCombat === false && card.isSelected === true) {
         selectedTargetLabelHtml = `<span class="selected-deck-label">Deck-Auswahl</span>`;
     }
 
-    const conditionsSectionHtml = creature.isInCombat === true
+    const conditionsSectionHtml = card.isInCombat === true
         ? `
-            <div class="creature-card-section">
+            <div class="card-section">
                 <h4>Conditions</h4>
 
                 <div class="condition-chip-list">
-                    ${createConditionChipsHtml(creature)}
+                    ${createConditionChipsHtml(card)}
                 </div>
             </div>
         `
@@ -9029,62 +8580,62 @@ function createCreatureCardHtml(creature, isActive) {
 
     return `
         <article
-            class="creature-card ${isActive ? "active" : ""} ${isCompactDeckCard ? "deck-card-compact" : ""} ${selectableCardClass} ${selectedTargetCardClass} ${selectedDeckCardClass}"
+            class="card ${isActive ? "active" : ""} ${isCompactDeckCard ? "deck-card-compact" : ""} ${selectableCardClass} ${selectedTargetCardClass} ${selectedDeckCardClass}"
             ${selectionClickAttribute}
         >
-            <div class="creature-card-inner">
-                <div class="creature-card-title-row">
-                    <div class="creature-card-header">
+            <div class="card-inner">
+                <div class="card-title-row">
+                    <div class="card-header">
                         <h3>
-                            ${escapeHtml(creature.name)}
-                            <span class="creature-public-alias">
-                                aka "${escapeHtml(creature.publicName)}"
+                            ${escapeHtml(card.name)}
+                            <span class="card-public-alias">
+                                aka "${escapeHtml(card.publicName)}"
                             </span>
                         </h3>
                     </div>
 
-                    ${createCardMenuHtml(creature)}
+                    ${createCardMenuHtml(card)}
                 </div>
 
-                ${createCreatureImageHtml(creature)}
+                ${createCardImageHtml(card)}
 
-                <div class="creature-type-line">
+                <div class="card-type-line">
                     <p>
-                        ${escapeHtml(getDeckTypeLabel(creature.type))} · ${creature.isInCombat ? "auf der Hand" : "im Deck"}
+                        ${escapeHtml(getDeckTypeLabel(getCharacterRole(card)))} · ${getCardLocation(card) === cardLocations.hand ? "auf der Hand" : getCardLocation(card) === cardLocations.trash ? "im Papierkorb" : "im Deck"}
                     </p>
 
                     ${selectedTargetLabelHtml}
                 </div>
 
-                <div class="creature-card-section">
+                <div class="card-section">
                     <h4>HP</h4>
 
-                    <div class="creature-stat-grid">
-                        <p>Aktuell: ${creature.hp} / ${creature.maxHp}</p>
-                        <p>Temp: ${creature.tempHp}</p>
+                    <div class="card-stat-grid">
+                        <p>Aktuell: ${card.hp} / ${card.maxHp}</p>
+                        <p>Temp: ${card.tempHp}</p>
                     </div>
 
-                    ${createDmHpBarHtml(creature)}
-                    ${createDmTempHpBarHtml(creature)}
-                    ${getPublicHpDisplayHtml(creature)}
+                    ${createDmHpBarHtml(card)}
+                    ${createDmTempHpBarHtml(card)}
+                    ${getPublicHpDisplayHtml(card)}
                 </div>
 
-                <div class="creature-card-section">
+                <div class="card-section">
                     <h4>Kampfwerte</h4>
 
-                    <div class="creature-stat-grid">
-                        <p>Initiative: ${creature.initiative}</p>
-                        <p>AC: ${creature.armorClass}</p>
+                    <div class="card-stat-grid">
+                        <p>Initiative: ${card.initiative}</p>
+                        <p>AC: ${card.armorClass}</p>
                     </div>
                 </div>
 
-                <div class="creature-card-section">
+                <div class="card-section">
                     <h4>Passive Werte</h4>
 
-                    <div class="creature-stat-grid">
-                        <p>Perception: ${creature.passivePerception}</p>
-                        <p>Insight: ${creature.passiveInsight}</p>
-                        <p>Investigation: ${creature.passiveInvestigation}</p>
+                    <div class="card-stat-grid">
+                        <p>Perception: ${card.passivePerception}</p>
+                        <p>Insight: ${card.passiveInsight}</p>
+                        <p>Investigation: ${card.passiveInvestigation}</p>
                     </div>
                 </div>
 
@@ -9098,8 +8649,8 @@ function createCreatureCardHtml(creature, isActive) {
 // 15. Formular: Karte bearbeiten
 // ============================================================
 
-function showEditCreatureError(message) {
-    const errorElement = document.querySelector("#edit-creature-error");
+function showEditCardError(message) {
+    const errorElement = document.querySelector("#edit-card-error");
 
     if (errorElement === null) {
         return;
@@ -9108,8 +8659,8 @@ function showEditCreatureError(message) {
     errorElement.textContent = message;
 }
 
-function clearEditCreatureError() {
-    showEditCreatureError("");
+function clearEditCardError() {
+    showEditCardError("");
 }
 
 function setInputValue(elementId, value) {
@@ -9132,12 +8683,12 @@ function setCheckboxValue(elementId, value) {
     }
 }
 
-function getEditFormCreature() {
-    if (editingCreatureId === null) {
+function getEditFormCard() {
+    if (editingCardId === null) {
         return null;
     }
 
-    return findCreatureById(editingCreatureId);
+    return findCardById(editingCardId);
 }
 
 
@@ -9366,7 +8917,7 @@ function openFocusedCardForgeFromToolkit() {
 
     suppressCardForgeClickAwayOnce = true;
     closeDmActionDrawer();
-    openEditCreatureForm(focusedCard.id);
+    openEditCardForm(focusedCard.id);
 }
 
 function openNewCardForgeFromToolkit() {
@@ -9431,20 +8982,20 @@ function setForgeTab(tabName) {
 }
 
 function openNewCardForge() {
-    const editSectionElement = document.querySelector("#edit-creature-section");
-    const addSectionElement = document.querySelector(".card-forge .add-creature-section");
-    const editImageInputElement = document.querySelector("#edit-creature-image");
+    const editSectionElement = document.querySelector("#edit-card-section");
+    const addSectionElement = document.querySelector(".card-forge .add-card-section");
+    const editImageInputElement = document.querySelector("#edit-card-image");
 
-    editingCreatureId = null;
-    clearEditCreatureError();
-    clearAddCreatureError();
+    editingCardId = null;
+    clearEditCardError();
+    clearAddCardError();
 
     if (editImageInputElement !== null) {
         editImageInputElement.value = "";
     }
 
     if (editSectionElement !== null) {
-        editSectionElement.classList.add("edit-creature-section-hidden");
+        editSectionElement.classList.add("edit-card-section-hidden");
         editSectionElement.classList.add("card-forge-panel-hidden");
     }
 
@@ -9456,120 +9007,120 @@ function openNewCardForge() {
     activeForgeActionEditor = null;
     activeForgeTraitEditor = null;
     activeForgeInventoryEditor = null;
-    setForgeActions("new-creature", []);
-    setForgeTraits("new-creature", []);
-    setForgeInventory("new-creature", createEmptyInventoryData());
-    renderForgeActionManager("new-creature");
-    renderForgeTraitManager("new-creature");
-    renderForgeSpellManager("new-creature");
-    setForgeNotes("new-creature", "");
-    renderForgeInventoryManager("new-creature");
+    setForgeActions("new-card", []);
+    setForgeTraits("new-card", []);
+    setForgeInventory("new-card", createEmptyInventoryData());
+    renderForgeActionManager("new-card");
+    renderForgeTraitManager("new-card");
+    renderForgeSpellManager("new-card");
+    setForgeNotes("new-card", "");
+    renderForgeInventoryManager("new-card");
     renderNewConditionCheckboxes();
     clearNewConditionCheckboxes();
     openCardForgeDrawer();
     setForgeTab("basis");
 }
 
-function openEditCreatureForm(creatureId) {
-    const creature = findCreatureById(creatureId);
-    const editSectionElement = document.querySelector("#edit-creature-section");
-    const editTitleElement = document.querySelector("#edit-creature-title");
-    const imageInputElement = document.querySelector("#edit-creature-image");
+function openEditCardForm(cardId) {
+    const card = findCardById(cardId);
+    const editSectionElement = document.querySelector("#edit-card-section");
+    const editTitleElement = document.querySelector("#edit-card-title");
+    const imageInputElement = document.querySelector("#edit-card-image");
 
-    if (creature === null || editSectionElement === null) {
+    if (card === null || editSectionElement === null) {
         return;
     }
 
-    editingCreatureId = creatureId;
-    clearEditCreatureError();
+    editingCardId = cardId;
+    clearEditCardError();
 
     if (editTitleElement !== null) {
-        editTitleElement.textContent = `Karte bearbeiten: ${creature.name}`;
+        editTitleElement.textContent = `Karte bearbeiten: ${card.name}`;
     }
 
-    setInputValue("edit-creature-name", creature.name);
-    setInputValue("edit-creature-public-name", creature.publicName);
-    setInputValue("edit-creature-type", creature.type);
-    setInputValue("edit-creature-image-path", creature.imageData);
-    setInputValue("edit-creature-initiative", creature.initiative);
-    setInputValue("edit-creature-initiative-modifier", creature.initiativeModifier || creature.dexterityModifier || "+0");
-    setInputValue("edit-creature-hp", creature.hp);
-    setInputValue("edit-creature-max-hp", creature.maxHp);
-    setInputValue("edit-creature-temp-hp", creature.tempHp);
-    setInputValue("edit-creature-ac", creature.armorClass);
-    setInputValue("edit-creature-passive-perception", creature.passivePerception);
-    setInputValue("edit-creature-passive-insight", creature.passiveInsight);
-    setInputValue("edit-creature-passive-investigation", creature.passiveInvestigation);
-    setInputValue("edit-creature-strength-score", creature.strengthScore || 10);
-    setInputValue("edit-creature-strength-modifier", creature.strengthModifier || "+0");
-    setInputValue("edit-creature-dexterity-score", creature.dexterityScore || 10);
-    setInputValue("edit-creature-dexterity-modifier", creature.dexterityModifier || "+0");
-    setInputValue("edit-creature-constitution-score", creature.constitutionScore || 10);
-    setInputValue("edit-creature-constitution-modifier", creature.constitutionModifier || "+0");
-    setInputValue("edit-creature-intelligence-score", creature.intelligenceScore || 10);
-    setInputValue("edit-creature-intelligence-modifier", creature.intelligenceModifier || "+0");
-    setInputValue("edit-creature-wisdom-score", creature.wisdomScore || 10);
-    setInputValue("edit-creature-wisdom-modifier", creature.wisdomModifier || "+0");
-    setInputValue("edit-creature-charisma-score", creature.charismaScore || 10);
-    setInputValue("edit-creature-charisma-modifier", creature.charismaModifier || "+0");
-    setInputValue("edit-creature-speed", creature.speed || "");
-    setInputValue("edit-creature-saving-throws", creature.savingThrows || "");
-    setInputValue("edit-creature-resistances", creature.resistances || "");
-    setInputValue("edit-creature-immunities", creature.immunities || "");
-    setInputValue("edit-creature-vulnerabilities", creature.vulnerabilities || "");
-    setInputValue("edit-creature-senses", creature.senses || "");
-    setInputValue("edit-creature-special-resources", creature.specialResources || "");
-    writeTraitsToForge("edit-creature", creature);
-    writeActionsToForge("edit-creature", creature);
-    setForgeNotes("edit-creature", creature.notes || "");
-    writeSpellcastingToForge("edit-creature", creature);
-    renderForgeSpellManager("edit-creature");
-    writeInventoryToForge("edit-creature", creature);
-    renderForgeInventoryManager("edit-creature");
-    setInputValue("edit-creature-hp-visibility", creature.hpVisibility);
-    setCheckboxValue("edit-creature-is-in-combat", creature.isInCombat === true);
+    setInputValue("edit-card-name", card.name);
+    setInputValue("edit-card-public-name", card.publicName);
+    setInputValue("edit-card-type", card.type);
+    setInputValue("edit-card-image-path", card.imageData);
+    setInputValue("edit-card-initiative", card.initiative);
+    setInputValue("edit-card-initiative-modifier", card.initiativeModifier || card.dexterityModifier || "+0");
+    setInputValue("edit-card-hp", card.hp);
+    setInputValue("edit-card-max-hp", card.maxHp);
+    setInputValue("edit-card-temp-hp", card.tempHp);
+    setInputValue("edit-card-ac", card.armorClass);
+    setInputValue("edit-card-passive-perception", card.passivePerception);
+    setInputValue("edit-card-passive-insight", card.passiveInsight);
+    setInputValue("edit-card-passive-investigation", card.passiveInvestigation);
+    setInputValue("edit-card-strength-score", card.strengthScore || 10);
+    setInputValue("edit-card-strength-modifier", card.strengthModifier || "+0");
+    setInputValue("edit-card-dexterity-score", card.dexterityScore || 10);
+    setInputValue("edit-card-dexterity-modifier", card.dexterityModifier || "+0");
+    setInputValue("edit-card-constitution-score", card.constitutionScore || 10);
+    setInputValue("edit-card-constitution-modifier", card.constitutionModifier || "+0");
+    setInputValue("edit-card-intelligence-score", card.intelligenceScore || 10);
+    setInputValue("edit-card-intelligence-modifier", card.intelligenceModifier || "+0");
+    setInputValue("edit-card-wisdom-score", card.wisdomScore || 10);
+    setInputValue("edit-card-wisdom-modifier", card.wisdomModifier || "+0");
+    setInputValue("edit-card-charisma-score", card.charismaScore || 10);
+    setInputValue("edit-card-charisma-modifier", card.charismaModifier || "+0");
+    setInputValue("edit-card-speed", card.speed || "");
+    setInputValue("edit-card-saving-throws", card.savingThrows || "");
+    setInputValue("edit-card-resistances", card.resistances || "");
+    setInputValue("edit-card-immunities", card.immunities || "");
+    setInputValue("edit-card-vulnerabilities", card.vulnerabilities || "");
+    setInputValue("edit-card-senses", card.senses || "");
+    setInputValue("edit-card-special-resources", card.specialResources || "");
+    writeTraitsToForge("edit-card", card);
+    writeActionsToForge("edit-card", card);
+    setForgeNotes("edit-card", card.notes || "");
+    writeSpellcastingToForge("edit-card", card);
+    renderForgeSpellManager("edit-card");
+    writeInventoryToForge("edit-card", card);
+    renderForgeInventoryManager("edit-card");
+    setInputValue("edit-card-hp-visibility", card.hpVisibility);
+    setCheckboxValue("edit-card-is-in-combat", card.isInCombat === true);
 
     renderEditConditionCheckboxes();
-    setEditConditionCheckboxes(creature);
+    setEditConditionCheckboxes(card);
 
     if (imageInputElement !== null) {
         imageInputElement.value = "";
     }
 
-    const addSectionElement = document.querySelector(".card-forge .add-creature-section");
+    const addSectionElement = document.querySelector(".card-forge .add-card-section");
 
     if (addSectionElement !== null) {
         addSectionElement.classList.add("card-forge-panel-hidden");
     }
 
-    editSectionElement.classList.remove("edit-creature-section-hidden");
+    editSectionElement.classList.remove("edit-card-section-hidden");
     editSectionElement.classList.remove("card-forge-panel-hidden");
 
     openCardForgeDrawer();
     setForgeTab("basis");
 }
 
-function closeEditCreatureForm() {
-    const editSectionElement = document.querySelector("#edit-creature-section");
-    const imageInputElement = document.querySelector("#edit-creature-image");
+function closeEditCardForm() {
+    const editSectionElement = document.querySelector("#edit-card-section");
+    const imageInputElement = document.querySelector("#edit-card-image");
 
-    editingCreatureId = null;
+    editingCardId = null;
     activeForgeSpellEditor = null;
     activeForgeActionEditor = null;
     activeForgeTraitEditor = null;
     activeForgeInventoryEditor = null;
-    clearEditCreatureError();
+    clearEditCardError();
 
     if (imageInputElement !== null) {
         imageInputElement.value = "";
     }
 
     if (editSectionElement !== null) {
-        editSectionElement.classList.add("edit-creature-section-hidden");
+        editSectionElement.classList.add("edit-card-section-hidden");
         editSectionElement.classList.add("card-forge-panel-hidden");
     }
 
-    const addSectionElement = document.querySelector(".card-forge .add-creature-section");
+    const addSectionElement = document.querySelector(".card-forge .add-card-section");
 
     if (addSectionElement !== null) {
         addSectionElement.classList.remove("card-forge-panel-hidden");
@@ -9578,54 +9129,54 @@ function closeEditCreatureForm() {
     closeCardForgeDrawer();
 }
 
-async function handleEditCreatureSaveButtonClick() {
-    clearEditCreatureError();
+async function handleEditCardSaveButtonClick() {
+    clearEditCardError();
     const scrollSnapshot = getViewportScrollSnapshot();
 
-    const creature = getEditFormCreature();
+    const card = getEditFormCard();
 
-    if (creature === null) {
-        showEditCreatureError("Es ist keine Karte zum Bearbeiten geöffnet.");
+    if (card === null) {
+        showEditCardError("Es ist keine Karte zum Bearbeiten geöffnet.");
         return;
     }
 
-    const nameInputElement = document.querySelector("#edit-creature-name");
-    const publicNameInputElement = document.querySelector("#edit-creature-public-name");
-    const typeSelectElement = document.querySelector("#edit-creature-type");
-    const imagePathInputElement = document.querySelector("#edit-creature-image-path");
-    const imageInputElement = document.querySelector("#edit-creature-image");
-    const initiativeInputElement = document.querySelector("#edit-creature-initiative");
-    const initiativeModifierInputElement = document.querySelector("#edit-creature-initiative-modifier");
-    const hpInputElement = document.querySelector("#edit-creature-hp");
-    const maxHpInputElement = document.querySelector("#edit-creature-max-hp");
-    const tempHpInputElement = document.querySelector("#edit-creature-temp-hp");
-    const acInputElement = document.querySelector("#edit-creature-ac");
-    const passivePerceptionInputElement = document.querySelector("#edit-creature-passive-perception");
-    const passiveInsightInputElement = document.querySelector("#edit-creature-passive-insight");
-    const passiveInvestigationInputElement = document.querySelector("#edit-creature-passive-investigation");
-    const strengthScoreInputElement = document.querySelector("#edit-creature-strength-score");
-    const strengthModifierInputElement = document.querySelector("#edit-creature-strength-modifier");
-    const dexterityScoreInputElement = document.querySelector("#edit-creature-dexterity-score");
-    const dexterityModifierInputElement = document.querySelector("#edit-creature-dexterity-modifier");
-    const constitutionScoreInputElement = document.querySelector("#edit-creature-constitution-score");
-    const constitutionModifierInputElement = document.querySelector("#edit-creature-constitution-modifier");
-    const intelligenceScoreInputElement = document.querySelector("#edit-creature-intelligence-score");
-    const intelligenceModifierInputElement = document.querySelector("#edit-creature-intelligence-modifier");
-    const wisdomScoreInputElement = document.querySelector("#edit-creature-wisdom-score");
-    const wisdomModifierInputElement = document.querySelector("#edit-creature-wisdom-modifier");
-    const charismaScoreInputElement = document.querySelector("#edit-creature-charisma-score");
-    const charismaModifierInputElement = document.querySelector("#edit-creature-charisma-modifier");
-    const speedInputElement = document.querySelector("#edit-creature-speed");
-    const savingThrowsInputElement = document.querySelector("#edit-creature-saving-throws");
-    const resistancesInputElement = document.querySelector("#edit-creature-resistances");
-    const immunitiesInputElement = document.querySelector("#edit-creature-immunities");
-    const vulnerabilitiesInputElement = document.querySelector("#edit-creature-vulnerabilities");
-    const sensesInputElement = document.querySelector("#edit-creature-senses");
-    const specialResourcesInputElement = document.querySelector("#edit-creature-special-resources");
-    const notesInputElement = document.querySelector("#edit-creature-notes");
-    const hpVisibilitySelectElement = document.querySelector("#edit-creature-hp-visibility");
-    const isInCombatInputElement = document.querySelector("#edit-creature-is-in-combat");
-    const conditionListElement = document.querySelector("#edit-creature-condition-list");
+    const nameInputElement = document.querySelector("#edit-card-name");
+    const publicNameInputElement = document.querySelector("#edit-card-public-name");
+    const typeSelectElement = document.querySelector("#edit-card-type");
+    const imagePathInputElement = document.querySelector("#edit-card-image-path");
+    const imageInputElement = document.querySelector("#edit-card-image");
+    const initiativeInputElement = document.querySelector("#edit-card-initiative");
+    const initiativeModifierInputElement = document.querySelector("#edit-card-initiative-modifier");
+    const hpInputElement = document.querySelector("#edit-card-hp");
+    const maxHpInputElement = document.querySelector("#edit-card-max-hp");
+    const tempHpInputElement = document.querySelector("#edit-card-temp-hp");
+    const acInputElement = document.querySelector("#edit-card-ac");
+    const passivePerceptionInputElement = document.querySelector("#edit-card-passive-perception");
+    const passiveInsightInputElement = document.querySelector("#edit-card-passive-insight");
+    const passiveInvestigationInputElement = document.querySelector("#edit-card-passive-investigation");
+    const strengthScoreInputElement = document.querySelector("#edit-card-strength-score");
+    const strengthModifierInputElement = document.querySelector("#edit-card-strength-modifier");
+    const dexterityScoreInputElement = document.querySelector("#edit-card-dexterity-score");
+    const dexterityModifierInputElement = document.querySelector("#edit-card-dexterity-modifier");
+    const constitutionScoreInputElement = document.querySelector("#edit-card-constitution-score");
+    const constitutionModifierInputElement = document.querySelector("#edit-card-constitution-modifier");
+    const intelligenceScoreInputElement = document.querySelector("#edit-card-intelligence-score");
+    const intelligenceModifierInputElement = document.querySelector("#edit-card-intelligence-modifier");
+    const wisdomScoreInputElement = document.querySelector("#edit-card-wisdom-score");
+    const wisdomModifierInputElement = document.querySelector("#edit-card-wisdom-modifier");
+    const charismaScoreInputElement = document.querySelector("#edit-card-charisma-score");
+    const charismaModifierInputElement = document.querySelector("#edit-card-charisma-modifier");
+    const speedInputElement = document.querySelector("#edit-card-speed");
+    const savingThrowsInputElement = document.querySelector("#edit-card-saving-throws");
+    const resistancesInputElement = document.querySelector("#edit-card-resistances");
+    const immunitiesInputElement = document.querySelector("#edit-card-immunities");
+    const vulnerabilitiesInputElement = document.querySelector("#edit-card-vulnerabilities");
+    const sensesInputElement = document.querySelector("#edit-card-senses");
+    const specialResourcesInputElement = document.querySelector("#edit-card-special-resources");
+    const notesInputElement = document.querySelector("#edit-card-notes");
+    const hpVisibilitySelectElement = document.querySelector("#edit-card-hp-visibility");
+    const isInCombatInputElement = document.querySelector("#edit-card-is-in-combat");
+    const conditionListElement = document.querySelector("#edit-card-condition-list");
 
     if (
         nameInputElement === null ||
@@ -9666,7 +9217,7 @@ async function handleEditCreatureSaveButtonClick() {
         isInCombatInputElement === null ||
         conditionListElement === null
     ) {
-        showEditCreatureError("Ein Bearbeitungsfeld wurde nicht gefunden. Bitte prüfe die IDs in index.html.");
+        showEditCardError("Ein Bearbeitungsfeld wurde nicht gefunden. Bitte prüfe die IDs in index.html.");
         return;
     }
 
@@ -9689,57 +9240,57 @@ async function handleEditCreatureSaveButtonClick() {
     const charismaScore = Number(charismaScoreInputElement.value);
 
     if (name === "") {
-        showEditCreatureError("Bitte gib einen internen Namen ein.");
+        showEditCardError("Bitte gib einen internen Namen ein.");
         return;
     }
 
     if (publicName === "") {
-        showEditCreatureError("Bitte gib einen öffentlichen Namen ein.");
+        showEditCardError("Bitte gib einen öffentlichen Namen ein.");
         return;
     }
 
     if (Number.isFinite(initiative) === false) {
-        showEditCreatureError("Initiative muss eine Zahl sein.");
+        showEditCardError("Initiative muss eine Zahl sein.");
         return;
     }
 
     if (Number.isFinite(hp) === false || hp < 0) {
-        showEditCreatureError("HP müssen eine Zahl ab 0 sein.");
+        showEditCardError("HP müssen eine Zahl ab 0 sein.");
         return;
     }
 
     if (Number.isFinite(maxHp) === false || maxHp <= 0) {
-        showEditCreatureError("Max HP müssen größer als 0 sein.");
+        showEditCardError("Max HP müssen größer als 0 sein.");
         return;
     }
 
     if (hp > maxHp) {
-        showEditCreatureError("Aktuelle HP dürfen nicht größer als Max HP sein.");
+        showEditCardError("Aktuelle HP dürfen nicht größer als Max HP sein.");
         return;
     }
 
     if (Number.isFinite(tempHp) === false || tempHp < 0) {
-        showEditCreatureError("Temp HP müssen eine Zahl ab 0 sein.");
+        showEditCardError("Temp HP müssen eine Zahl ab 0 sein.");
         return;
     }
 
     if (Number.isFinite(armorClass) === false || armorClass < 0) {
-        showEditCreatureError("AC muss eine Zahl ab 0 sein.");
+        showEditCardError("AC muss eine Zahl ab 0 sein.");
         return;
     }
 
     if (Number.isFinite(passivePerception) === false || passivePerception < 0) {
-        showEditCreatureError("Passive Perception muss eine Zahl ab 0 sein.");
+        showEditCardError("Passive Perception muss eine Zahl ab 0 sein.");
         return;
     }
 
     if (Number.isFinite(passiveInsight) === false || passiveInsight < 0) {
-        showEditCreatureError("Passive Insight muss eine Zahl ab 0 sein.");
+        showEditCardError("Passive Insight muss eine Zahl ab 0 sein.");
         return;
     }
 
     if (Number.isFinite(passiveInvestigation) === false || passiveInvestigation < 0) {
-        showEditCreatureError("Passive Investigation muss eine Zahl ab 0 sein.");
+        showEditCardError("Passive Investigation muss eine Zahl ab 0 sein.");
         return;
     }
 
@@ -9751,7 +9302,7 @@ async function handleEditCreatureSaveButtonClick() {
         Number.isFinite(wisdomScore) === false ||
         Number.isFinite(charismaScore) === false
     ) {
-        showEditCreatureError("Attribute müssen Zahlen sein.");
+        showEditCardError("Attribute müssen Zahlen sein.");
         return;
     }
 
@@ -9763,68 +9314,68 @@ async function handleEditCreatureSaveButtonClick() {
         try {
             imageData = await readImageFileAsDataUrl(imageFile);
         } catch (error) {
-            showEditCreatureError("Das Bild konnte nicht gelesen werden.");
+            showEditCardError("Das Bild konnte nicht gelesen werden.");
             return;
         }
     }
 
-    const oldName = creature.name;
+    const oldName = card.name;
 
-    creature.name = name;
-    creature.publicName = publicName;
-    creature.type = typeSelectElement.value;
-    creature.initiative = Math.floor(initiative);
-    creature.initiativeModifier = initiativeModifierInputElement.value.trim() || dexterityModifierInputElement.value.trim() || "+0";
-    creature.hp = Math.floor(hp);
-    creature.maxHp = Math.floor(maxHp);
-    creature.tempHp = Math.floor(tempHp);
-    creature.armorClass = Math.floor(armorClass);
-    creature.passivePerception = Math.floor(passivePerception);
-    creature.passiveInsight = Math.floor(passiveInsight);
-    creature.passiveInvestigation = Math.floor(passiveInvestigation);
-    creature.strengthScore = Math.floor(strengthScore);
-    creature.strengthModifier = strengthModifierInputElement.value.trim() || "+0";
-    creature.dexterityScore = Math.floor(dexterityScore);
-    creature.dexterityModifier = dexterityModifierInputElement.value.trim() || "+0";
-    creature.constitutionScore = Math.floor(constitutionScore);
-    creature.constitutionModifier = constitutionModifierInputElement.value.trim() || "+0";
-    creature.intelligenceScore = Math.floor(intelligenceScore);
-    creature.intelligenceModifier = intelligenceModifierInputElement.value.trim() || "+0";
-    creature.wisdomScore = Math.floor(wisdomScore);
-    creature.wisdomModifier = wisdomModifierInputElement.value.trim() || "+0";
-    creature.charismaScore = Math.floor(charismaScore);
-    creature.charismaModifier = charismaModifierInputElement.value.trim() || "+0";
-    creature.speed = speedInputElement.value.trim();
-    creature.savingThrows = savingThrowsInputElement.value.trim();
-    creature.resistances = resistancesInputElement.value.trim();
-    creature.immunities = immunitiesInputElement.value.trim();
-    creature.vulnerabilities = vulnerabilitiesInputElement.value.trim();
-    creature.senses = sensesInputElement.value.trim();
-    creature.spellcasting = readSpellcastingFromForge("edit-creature");
-    creature.spellSaveDc = createCreatureSpellSaveDcText(creature.spellcasting);
-    creature.specialResources = specialResourcesInputElement.value.trim();
-    creature.traits = getForgeTraitsDraft("edit-creature");
-    creature.actions = getForgeActionsDraft("edit-creature");
-    creature.notes = getForgeNotesText("edit-creature");
-    const nextInventory = readInventoryFromForge("edit-creature");
-    creature.currency = nextInventory.currency;
-    creature.inventoryCards = nextInventory.cards;
-    creature.inventoryList = nextInventory.list;
-    creature.hpVisibility = hpVisibilitySelectElement.value;
-    creature.imageData = imageData;
-    creature.conditions = getEditConditionValues();
-    creature.isInCombat = isInCombatInputElement.checked;
-    creature.isSelected = false;
+    card.name = name;
+    card.publicName = publicName;
+    card.type = typeSelectElement.value;
+    card.initiative = Math.floor(initiative);
+    card.initiativeModifier = initiativeModifierInputElement.value.trim() || dexterityModifierInputElement.value.trim() || "+0";
+    card.hp = Math.floor(hp);
+    card.maxHp = Math.floor(maxHp);
+    card.tempHp = Math.floor(tempHp);
+    card.armorClass = Math.floor(armorClass);
+    card.passivePerception = Math.floor(passivePerception);
+    card.passiveInsight = Math.floor(passiveInsight);
+    card.passiveInvestigation = Math.floor(passiveInvestigation);
+    card.strengthScore = Math.floor(strengthScore);
+    card.strengthModifier = strengthModifierInputElement.value.trim() || "+0";
+    card.dexterityScore = Math.floor(dexterityScore);
+    card.dexterityModifier = dexterityModifierInputElement.value.trim() || "+0";
+    card.constitutionScore = Math.floor(constitutionScore);
+    card.constitutionModifier = constitutionModifierInputElement.value.trim() || "+0";
+    card.intelligenceScore = Math.floor(intelligenceScore);
+    card.intelligenceModifier = intelligenceModifierInputElement.value.trim() || "+0";
+    card.wisdomScore = Math.floor(wisdomScore);
+    card.wisdomModifier = wisdomModifierInputElement.value.trim() || "+0";
+    card.charismaScore = Math.floor(charismaScore);
+    card.charismaModifier = charismaModifierInputElement.value.trim() || "+0";
+    card.speed = speedInputElement.value.trim();
+    card.savingThrows = savingThrowsInputElement.value.trim();
+    card.resistances = resistancesInputElement.value.trim();
+    card.immunities = immunitiesInputElement.value.trim();
+    card.vulnerabilities = vulnerabilitiesInputElement.value.trim();
+    card.senses = sensesInputElement.value.trim();
+    card.spellcasting = readSpellcastingFromForge("edit-card");
+    card.spellSaveDc = createCardSpellSaveDcText(card.spellcasting);
+    card.specialResources = specialResourcesInputElement.value.trim();
+    card.traits = getForgeTraitsDraft("edit-card");
+    card.actions = getForgeActionsDraft("edit-card");
+    card.notes = getForgeNotesText("edit-card");
+    const nextInventory = readInventoryFromForge("edit-card");
+    card.currency = nextInventory.currency;
+    card.inventoryCards = nextInventory.cards;
+    card.inventoryList = nextInventory.list;
+    card.hpVisibility = hpVisibilitySelectElement.value;
+    card.imageData = imageData;
+    card.conditions = getEditConditionValues();
+    setCardLocation(card, isInCombatInputElement.checked ? cardLocations.hand : cardLocations.deck);
+    card.encounterStatus = isInCombatInputElement.checked ? encounterStatuses.active : null;
 
-    if (manuallySelectedPublicCardId === creature.id && creature.isInCombat === false) {
+    if (manuallySelectedPublicCardId === card.id && card.isInCombat === false) {
         clearManualPublicSelection();
     }
 
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
 
-    addCombatLogMessage(`Karte bearbeitet: ${oldName} → ${creature.name}.`);
-    closeEditCreatureForm();
+    addCombatLogMessage(`Karte bearbeitet: ${oldName} → ${card.name}.`);
+    closeEditCardForm();
     renderCards();
     restoreViewportScrollSnapshotRobustly(scrollSnapshot);
 }
@@ -9833,8 +9384,8 @@ async function handleEditCreatureSaveButtonClick() {
 // 16. Formular: Neue Karte hinzufügen
 // ============================================================
 
-function showAddCreatureError(message) {
-    const errorElement = document.querySelector("#add-creature-error");
+function showAddCardError(message) {
+    const errorElement = document.querySelector("#add-card-error");
 
     if (errorElement === null) {
         return;
@@ -9843,11 +9394,11 @@ function showAddCreatureError(message) {
     errorElement.textContent = message;
 }
 
-function clearAddCreatureError() {
-    showAddCreatureError("");
+function clearAddCardError() {
+    showAddCardError("");
 }
 
-function getNumberedCreatureName(baseName, index, quantity) {
+function getNumberedCardName(baseName, index, quantity) {
     if (quantity === 1) {
         return baseName;
     }
@@ -9855,46 +9406,46 @@ function getNumberedCreatureName(baseName, index, quantity) {
     return `${baseName} ${index + 1}`;
 }
 
-async function handleAddCreatureButtonClick() {
-    clearAddCreatureError();
+async function handleAddCardButtonClick() {
+    clearAddCardError();
 
-    const nameInputElement = document.querySelector("#new-creature-name");
-    const publicNameInputElement = document.querySelector("#new-creature-public-name");
-    const typeSelectElement = document.querySelector("#new-creature-type");
-    const quantityInputElement = document.querySelector("#new-creature-quantity");
-    const imageInputElement = document.querySelector("#new-creature-image");
-    const initiativeInputElement = document.querySelector("#new-creature-initiative");
-    const initiativeModifierInputElement = document.querySelector("#new-creature-initiative-modifier");
-    const hpInputElement = document.querySelector("#new-creature-hp");
-    const maxHpInputElement = document.querySelector("#new-creature-max-hp");
-    const tempHpInputElement = document.querySelector("#new-creature-temp-hp");
-    const hpVisibilitySelectElement = document.querySelector("#new-creature-hp-visibility");
-    const acInputElement = document.querySelector("#new-creature-ac");
-    const passivePerceptionInputElement = document.querySelector("#new-creature-passive-perception");
-    const passiveInsightInputElement = document.querySelector("#new-creature-passive-insight");
-    const passiveInvestigationInputElement = document.querySelector("#new-creature-passive-investigation");
-    const strengthScoreInputElement = document.querySelector("#new-creature-strength-score");
-    const strengthModifierInputElement = document.querySelector("#new-creature-strength-modifier");
-    const dexterityScoreInputElement = document.querySelector("#new-creature-dexterity-score");
-    const dexterityModifierInputElement = document.querySelector("#new-creature-dexterity-modifier");
-    const constitutionScoreInputElement = document.querySelector("#new-creature-constitution-score");
-    const constitutionModifierInputElement = document.querySelector("#new-creature-constitution-modifier");
-    const intelligenceScoreInputElement = document.querySelector("#new-creature-intelligence-score");
-    const intelligenceModifierInputElement = document.querySelector("#new-creature-intelligence-modifier");
-    const wisdomScoreInputElement = document.querySelector("#new-creature-wisdom-score");
-    const wisdomModifierInputElement = document.querySelector("#new-creature-wisdom-modifier");
-    const charismaScoreInputElement = document.querySelector("#new-creature-charisma-score");
-    const charismaModifierInputElement = document.querySelector("#new-creature-charisma-modifier");
-    const speedInputElement = document.querySelector("#new-creature-speed");
-    const savingThrowsInputElement = document.querySelector("#new-creature-saving-throws");
-    const resistancesInputElement = document.querySelector("#new-creature-resistances");
-    const immunitiesInputElement = document.querySelector("#new-creature-immunities");
-    const vulnerabilitiesInputElement = document.querySelector("#new-creature-vulnerabilities");
-    const sensesInputElement = document.querySelector("#new-creature-senses");
-    const specialResourcesInputElement = document.querySelector("#new-creature-special-resources");
-    const notesInputElement = document.querySelector("#new-creature-notes");
-    const isInCombatInputElement = document.querySelector("#new-creature-is-in-combat");
-    const conditionListElement = document.querySelector("#new-creature-condition-list");
+    const nameInputElement = document.querySelector("#new-card-name");
+    const publicNameInputElement = document.querySelector("#new-card-public-name");
+    const typeSelectElement = document.querySelector("#new-card-type");
+    const quantityInputElement = document.querySelector("#new-card-quantity");
+    const imageInputElement = document.querySelector("#new-card-image");
+    const initiativeInputElement = document.querySelector("#new-card-initiative");
+    const initiativeModifierInputElement = document.querySelector("#new-card-initiative-modifier");
+    const hpInputElement = document.querySelector("#new-card-hp");
+    const maxHpInputElement = document.querySelector("#new-card-max-hp");
+    const tempHpInputElement = document.querySelector("#new-card-temp-hp");
+    const hpVisibilitySelectElement = document.querySelector("#new-card-hp-visibility");
+    const acInputElement = document.querySelector("#new-card-ac");
+    const passivePerceptionInputElement = document.querySelector("#new-card-passive-perception");
+    const passiveInsightInputElement = document.querySelector("#new-card-passive-insight");
+    const passiveInvestigationInputElement = document.querySelector("#new-card-passive-investigation");
+    const strengthScoreInputElement = document.querySelector("#new-card-strength-score");
+    const strengthModifierInputElement = document.querySelector("#new-card-strength-modifier");
+    const dexterityScoreInputElement = document.querySelector("#new-card-dexterity-score");
+    const dexterityModifierInputElement = document.querySelector("#new-card-dexterity-modifier");
+    const constitutionScoreInputElement = document.querySelector("#new-card-constitution-score");
+    const constitutionModifierInputElement = document.querySelector("#new-card-constitution-modifier");
+    const intelligenceScoreInputElement = document.querySelector("#new-card-intelligence-score");
+    const intelligenceModifierInputElement = document.querySelector("#new-card-intelligence-modifier");
+    const wisdomScoreInputElement = document.querySelector("#new-card-wisdom-score");
+    const wisdomModifierInputElement = document.querySelector("#new-card-wisdom-modifier");
+    const charismaScoreInputElement = document.querySelector("#new-card-charisma-score");
+    const charismaModifierInputElement = document.querySelector("#new-card-charisma-modifier");
+    const speedInputElement = document.querySelector("#new-card-speed");
+    const savingThrowsInputElement = document.querySelector("#new-card-saving-throws");
+    const resistancesInputElement = document.querySelector("#new-card-resistances");
+    const immunitiesInputElement = document.querySelector("#new-card-immunities");
+    const vulnerabilitiesInputElement = document.querySelector("#new-card-vulnerabilities");
+    const sensesInputElement = document.querySelector("#new-card-senses");
+    const specialResourcesInputElement = document.querySelector("#new-card-special-resources");
+    const notesInputElement = document.querySelector("#new-card-notes");
+    const isInCombatInputElement = document.querySelector("#new-card-is-in-combat");
+    const conditionListElement = document.querySelector("#new-card-condition-list");
 
     if (
         nameInputElement === null ||
@@ -9935,7 +9486,7 @@ async function handleAddCreatureButtonClick() {
         isInCombatInputElement === null ||
         conditionListElement === null
     ) {
-        showAddCreatureError("Ein Formularfeld wurde nicht gefunden. Bitte prüfe die IDs in index.html.");
+        showAddCardError("Ein Formularfeld wurde nicht gefunden. Bitte prüfe die IDs in index.html.");
         return;
     }
 
@@ -9959,62 +9510,62 @@ async function handleAddCreatureButtonClick() {
     const charismaScore = Number(charismaScoreInputElement.value);
 
     if (name === "") {
-        showAddCreatureError("Bitte gib einen internen Namen ein.");
+        showAddCardError("Bitte gib einen internen Namen ein.");
         return;
     }
 
     if (publicName === "") {
-        showAddCreatureError("Bitte gib einen öffentlichen Namen ein.");
+        showAddCardError("Bitte gib einen öffentlichen Namen ein.");
         return;
     }
 
     if (!Number.isFinite(quantity) || quantity < 1) {
-        showAddCreatureError("Die Anzahl muss mindestens 1 sein.");
+        showAddCardError("Die Anzahl muss mindestens 1 sein.");
         return;
     }
 
     if (quantity > 20) {
-        showAddCreatureError("Die Anzahl darf höchstens 20 sein.");
+        showAddCardError("Die Anzahl darf höchstens 20 sein.");
         return;
     }
 
     if (hp < 0) {
-        showAddCreatureError("HP dürfen nicht negativ sein.");
+        showAddCardError("HP dürfen nicht negativ sein.");
         return;
     }
 
     if (maxHp <= 0) {
-        showAddCreatureError("Max HP müssen größer als 0 sein.");
+        showAddCardError("Max HP müssen größer als 0 sein.");
         return;
     }
 
     if (hp > maxHp) {
-        showAddCreatureError("Aktuelle HP dürfen nicht größer als Max HP sein.");
+        showAddCardError("Aktuelle HP dürfen nicht größer als Max HP sein.");
         return;
     }
 
     if (Number.isFinite(tempHp) === false || tempHp < 0) {
-        showAddCreatureError("Temp HP müssen eine Zahl ab 0 sein.");
+        showAddCardError("Temp HP müssen eine Zahl ab 0 sein.");
         return;
     }
 
     if (armorClass < 0) {
-        showAddCreatureError("AC darf nicht negativ sein.");
+        showAddCardError("AC darf nicht negativ sein.");
         return;
     }
 
     if (passivePerception < 0) {
-        showAddCreatureError("Passive Perception darf nicht negativ sein.");
+        showAddCardError("Passive Perception darf nicht negativ sein.");
         return;
     }
 
     if (passiveInsight < 0) {
-        showAddCreatureError("Passive Insight darf nicht negativ sein.");
+        showAddCardError("Passive Insight darf nicht negativ sein.");
         return;
     }
 
     if (passiveInvestigation < 0) {
-        showAddCreatureError("Passive Investigation darf nicht negativ sein.");
+        showAddCardError("Passive Investigation darf nicht negativ sein.");
         return;
     }
 
@@ -10026,7 +9577,7 @@ async function handleAddCreatureButtonClick() {
         Number.isFinite(wisdomScore) === false ||
         Number.isFinite(charismaScore) === false
     ) {
-        showAddCreatureError("Attribute müssen Zahlen sein.");
+        showAddCardError("Attribute müssen Zahlen sein.");
         return;
     }
 
@@ -10038,20 +9589,22 @@ async function handleAddCreatureButtonClick() {
         try {
             imageData = await readImageFileAsDataUrl(imageFile);
         } catch (error) {
-            showAddCreatureError("Das Bild konnte nicht gelesen werden.");
+            showAddCardError("Das Bild konnte nicht gelesen werden.");
             return;
         }
     }
 
     const startConditions = getNewConditionValues();
-    const createdDeckCreatureIds = [];
+    const createdDeckCardIds = [];
 
     for (let index = 0; index < quantity; index = index + 1) {
-        const newCreatureId = getNextCreatureId();
-        const newCreature = {
-            id: newCreatureId,
-            name: getNumberedCreatureName(name, index, quantity),
-            publicName: getNumberedCreatureName(publicName, index, quantity),
+        const newCardId = getNextCardId();
+        const newCard = {
+            id: newCardId,
+            name: getNumberedCardName(name, index, quantity),
+            publicName: getNumberedCardName(publicName, index, quantity),
+            cardKind: cardKinds.character,
+            characterRole: typeSelectElement.value,
             type: typeSelectElement.value,
             initiative: initiative,
             initiativeModifier: initiativeModifierInputElement.value.trim() || dexterityModifierInputElement.value.trim() || "+0",
@@ -10080,25 +9633,32 @@ async function handleAddCreatureButtonClick() {
             immunities: immunitiesInputElement.value.trim(),
             vulnerabilities: vulnerabilitiesInputElement.value.trim(),
             senses: sensesInputElement.value.trim(),
-            spellSaveDc: createCreatureSpellSaveDcText(readSpellcastingFromForge("new-creature")),
+            spellSaveDc: createCardSpellSaveDcText(readSpellcastingFromForge("new-card")),
             specialResources: specialResourcesInputElement.value.trim(),
-            traits: getForgeTraitsDraft("new-creature"),
-            actions: getForgeActionsDraft("new-creature"),
-            notes: getForgeNotesText("new-creature"),
-            spellcasting: readSpellcastingFromForge("new-creature"),
-            ...createInventoryFieldsFromForge("new-creature"),
+            traits: getForgeTraitsDraft("new-card"),
+            actions: getForgeActionsDraft("new-card"),
+            notes: getForgeNotesText("new-card"),
+            spellcasting: readSpellcastingFromForge("new-card"),
+            ...createInventoryFieldsFromForge("new-card"),
             hpVisibility: hpVisibilitySelectElement.value,
             imageData: imageData,
             conditions: startConditions.slice(),
             isDemoCard: false,
+            location: isInCombatInputElement.checked ? cardLocations.hand : cardLocations.deck,
+            encounterStatus: isInCombatInputElement.checked ? encounterStatuses.active : null,
             isInCombat: isInCombatInputElement.checked,
-            isSelected: false
+            isInitiativeActive: true,
+            isSelected: false,
+            version: 1,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null
         };
 
-        creatures.push(newCreature);
+        cards.push(normalizeCardModel(newCard));
 
-        if (newCreature.isInCombat === false) {
-            createdDeckCreatureIds.push(newCreatureId);
+        if (newCard.isInCombat === false) {
+            createdDeckCardIds.push(newCardId);
         }
     }
 
@@ -10107,10 +9667,10 @@ async function handleAddCreatureButtonClick() {
 
     renderCards();
 
-    if (createdDeckCreatureIds.length > 0) {
+    if (createdDeckCardIds.length > 0) {
         requestAnimationFrame(function() {
             requestAnimationFrame(function() {
-                scrollToDeckCard(createdDeckCreatureIds[0], true);
+                scrollToDeckCard(createdDeckCardIds[0], true);
             });
         });
     }
@@ -10211,7 +9771,7 @@ function renderTurnInfo(handCards) {
                 <strong>Runde ${roundNumber}</strong>
                 <span>Keine Handkarten</span>
             </div>
-            <button class="active-round-creature-card active-round-creature-card-empty" type="button" disabled>
+            <button class="active-round-card active-round-card-empty" type="button" disabled>
                 <span class="active-round-portrait active-round-portrait-placeholder">✦</span>
                 <span class="active-round-copy">
                     <span>Aktiv</span>
@@ -10235,9 +9795,9 @@ function renderTurnInfo(handCards) {
         </div>
 
         <button
-            class="active-round-creature-card"
+            class="active-round-card"
             type="button"
-            onclick="focusActiveCreature()"
+            onclick="focusActiveCard()"
             title="Aktive Karte als Fokuskarte anzeigen: ${escapeHtml(activeDisplayName)}"
             aria-label="Aktive Karte als Fokuskarte anzeigen: ${escapeHtml(activeDisplayName)}"
         >
@@ -10600,25 +10160,25 @@ function createPlayerSideFallbackHtml(error) {
 
 function getPublicStageCardsForRender(publicCards, activeCard, shouldHoldStage) {
     if (publicCards.length === 0) {
-        publicStagePresentedCreatureId = null;
-        publicStagePendingCreatureId = null;
+        publicStagePresentedCardId = null;
+        publicStagePendingCardId = null;
         return publicCards;
     }
 
-    const activeCreatureId = activeCard !== null ? activeCard.id : publicCards[0].id;
+    const activeCardId = activeCard !== null ? activeCard.id : publicCards[0].id;
     const presentedCardExists = publicCards.some(function(publicCard) {
-        return publicCard.id === publicStagePresentedCreatureId;
+        return publicCard.id === publicStagePresentedCardId;
     });
 
-    if (publicStagePresentedCreatureId === null || presentedCardExists === false || shouldPlayerSideFollowActiveCard() === false) {
-        publicStagePresentedCreatureId = activeCreatureId;
+    if (publicStagePresentedCardId === null || presentedCardExists === false || shouldPlayerSideFollowActiveCard() === false) {
+        publicStagePresentedCardId = activeCardId;
     }
 
-    if (shouldHoldStage === true && publicStagePresentedCreatureId !== activeCreatureId) {
-        publicStagePendingCreatureId = activeCreatureId;
+    if (shouldHoldStage === true && publicStagePresentedCardId !== activeCardId) {
+        publicStagePendingCardId = activeCardId;
     } else {
-        publicStagePresentedCreatureId = activeCreatureId;
-        publicStagePendingCreatureId = null;
+        publicStagePresentedCardId = activeCardId;
+        publicStagePendingCardId = null;
     }
 
     if (shouldPlayerSideFollowActiveCard() === false) {
@@ -10627,7 +10187,7 @@ function getPublicStageCardsForRender(publicCards, activeCard, shouldHoldStage) 
 
     return publicCards.map(function(publicCard) {
         return Object.assign({}, publicCard, {
-            isFocused: publicCard.id === publicStagePresentedCreatureId
+            isFocused: publicCard.id === publicStagePresentedCardId
         });
     });
 }
@@ -10711,16 +10271,16 @@ function renderPlayerSide(publicCards, handCards) {
         }
 
         const ribbonCards = getPublicRibbonCardsForRender(publicCards, activeCard);
-        const ribbonFirstCreatureId = ribbonCards.length > 0 ? ribbonCards[0].id : null;
-        const shouldAnimateRibbonAdvance = publicRibbonPresentedFirstCreatureId !== null
-            && ribbonFirstCreatureId !== null
-            && publicRibbonPresentedFirstCreatureId !== ribbonFirstCreatureId;
+        const ribbonFirstCardId = ribbonCards.length > 0 ? ribbonCards[0].id : null;
+        const shouldAnimateRibbonAdvance = publicRibbonPresentedFirstCardId !== null
+            && ribbonFirstCardId !== null
+            && publicRibbonPresentedFirstCardId !== ribbonFirstCardId;
 
         for (const publicCard of ribbonCards) {
             ribbonHtml += createPublicRibbonCardHtml(publicCard);
         }
 
-        publicRibbonPresentedFirstCreatureId = ribbonFirstCreatureId;
+        publicRibbonPresentedFirstCardId = ribbonFirstCardId;
 
         previewElement.innerHTML = `
             <div class="public-three-card-stage public-encounter-stage">
@@ -10769,10 +10329,10 @@ function renderPlayerSide(publicCards, handCards) {
 }
 
 
-function createFocusedCreatureCardHtml(creature, activeCard) {
-    if (creature === null) {
+function createFocusedCardHtml(card, activeCard) {
+    if (card === null) {
         return `
-            <article class="focused-creature-empty focused-creature-empty-stage">
+            <article class="focused-card-empty focused-card-empty-stage">
                 <div class="focused-empty-ghost-stack" aria-hidden="true">
                     <span class="focused-empty-ghost-card focused-empty-ghost-card-left"></span>
                     <span class="focused-empty-ghost-card focused-empty-ghost-card-center"></span>
@@ -10786,40 +10346,40 @@ function createFocusedCreatureCardHtml(creature, activeCard) {
         `;
     }
 
-    const isActive = activeCard !== null && creature.id === activeCard.id;
-    const isDeckFocus = creature.isInCombat !== true;
+    const isActive = activeCard !== null && card.id === activeCard.id;
+    const isDeckFocus = card.isInCombat !== true;
     const activeLabelHtml = isActive ? `<span class="focused-status-badge active-focus-badge">Am Zug</span>` : "";
     const deckFocusLabelHtml = isDeckFocus ? `<span class="focused-status-badge deck-focus-badge">Deckkarte · nicht aktiv</span>` : "";
-    const selectedLabelHtml = creature.isSelected === true
+    const selectedLabelHtml = card.isSelected === true
         ? (isDeckFocus ? `<span class="selected-deck-label">Deck-Auswahl</span>` : `<span class="focused-status-badge target-focus-badge">Ziel</span>`)
         : "";
-    const targetButtonText = creature.isSelected === true ? "Ziel entfernen" : "Ziel setzen";
-    const targetButtonStateClass = creature.isSelected === true ? "focus-target-toggle-button-selected" : "";
+    const targetButtonText = card.isSelected === true ? "Ziel entfernen" : "Ziel setzen";
+    const targetButtonStateClass = card.isSelected === true ? "focus-target-toggle-button-selected" : "";
     const focusActionButtonHtml = isDeckFocus
-        ? `<button class="focus-target-toggle-button deck-focus-hand-button" onclick="event.stopPropagation(); moveCardToHand(${creature.id})" type="button">Auf die Hand</button>`
-        : `<button class="focus-target-toggle-button ${targetButtonStateClass}" onclick="event.stopPropagation(); toggleCreatureSelection(${creature.id})" type="button">${targetButtonText}</button>`;
-    const conditionCount = Array.isArray(creature.conditions) ? creature.conditions.length : 0;
-    const conditionChipsHtml = createConditionChipsHtml(creature);
+        ? `<button class="focus-target-toggle-button deck-focus-hand-button" onclick="event.stopPropagation(); moveCardToHand(${card.id})" type="button">Auf die Hand</button>`
+        : `<button class="focus-target-toggle-button ${targetButtonStateClass}" onclick="event.stopPropagation(); toggleCardSelection(${card.id})" type="button">${targetButtonText}</button>`;
+    const conditionCount = Array.isArray(card.conditions) ? card.conditions.length : 0;
+    const conditionChipsHtml = createConditionChipsHtml(card);
     const conditionMarqueeClass = conditionCount > 3 ? "focus-condition-marquee is-scrolling" : "focus-condition-marquee";
     const repeatedConditionChipsHtml = conditionCount > 3
         ? `<span class="focus-condition-track-copy" aria-hidden="true">${conditionChipsHtml}</span>`
         : "";
 
     return `
-        <article class="active-hand-focus-card ${isActive ? "active" : ""} ${creature.isSelected ? "selected-target-card" : ""} ${isCreatureOutOfAction(creature) ? "is-out-of-action" : ""}">
-            ${createOutOfActionStampHtml(creature)}
+        <article class="active-hand-focus-card ${isActive ? "active" : ""} ${card.isSelected ? "selected-target-card" : ""} ${isCardOutOfAction(card) ? "is-out-of-action" : ""}">
+            ${createOutOfActionStampHtml(card)}
             <div class="active-hand-focus-card-inner">
                 <header class="active-hand-focus-header">
                     <div class="active-hand-focus-title">
-                        <h3>${escapeHtml(creature.name)}</h3>
-                        <p class="creature-public-alias">aka "${escapeHtml(creature.publicName)}"</p>
+                        <h3>${escapeHtml(card.name)}</h3>
+                        <p class="card-public-alias">aka "${escapeHtml(card.publicName)}"</p>
                     </div>
 
-                    ${createCardMenuHtml(creature)}
+                    ${createCardMenuHtml(card)}
                 </header>
 
                 <div class="active-hand-focus-image">
-                    ${createCreatureImageHtml(creature)}
+                    ${createCardImageHtml(card)}
                 </div>
 
                 <div class="active-hand-focus-action-row">
@@ -10835,28 +10395,28 @@ function createFocusedCreatureCardHtml(creature, activeCard) {
                 <div class="active-hand-focus-section active-hand-focus-resource-section">
                     <div class="active-hand-focus-resource-header">
                         <h4 class="active-hand-focus-section-title">HP</h4>
-                        <span class="hp-visibility-inline">Spieler sehen: ${getPublicVisibilitySummary(creature)}</span>
+                        <span class="hp-visibility-inline">Spieler sehen: ${getPublicVisibilitySummary(card)}</span>
                     </div>
                     <div class="active-hand-focus-resource-stack">
-                        ${createDmHpBarHtml(creature)}
-                        ${createDmTempHpBarHtml(creature)}
+                        ${createDmHpBarHtml(card)}
+                        ${createDmTempHpBarHtml(card)}
                     </div>
                 </div>
 
                 <div class="active-hand-focus-section">
                     <h4 class="active-hand-focus-section-title">Kampfwerte</h4>
                     <div class="active-hand-focus-stat-grid active-hand-focus-stat-grid-two">
-                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Initiative</span><strong class="active-hand-focus-stat-value">${creature.initiative}</strong></p>
-                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Armor Class</span><strong class="active-hand-focus-stat-value">${creature.armorClass}</strong></p>
+                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Initiative</span><strong class="active-hand-focus-stat-value">${card.initiative}</strong></p>
+                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Armor Class</span><strong class="active-hand-focus-stat-value">${card.armorClass}</strong></p>
                     </div>
                 </div>
 
                 <div class="active-hand-focus-section active-hand-focus-passive-section">
                     <h4 class="active-hand-focus-section-title">Passive Werte</h4>
                     <div class="active-hand-focus-stat-grid active-hand-focus-stat-grid-three">
-                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Perception</span><strong class="active-hand-focus-stat-value">${creature.passivePerception}</strong></p>
-                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Insight</span><strong class="active-hand-focus-stat-value">${creature.passiveInsight}</strong></p>
-                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Investigation</span><strong class="active-hand-focus-stat-value">${creature.passiveInvestigation}</strong></p>
+                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Perception</span><strong class="active-hand-focus-stat-value">${card.passivePerception}</strong></p>
+                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Insight</span><strong class="active-hand-focus-stat-value">${card.passiveInsight}</strong></p>
+                        <p class="active-hand-focus-stat-tile"><span class="active-hand-focus-stat-label">Investigation</span><strong class="active-hand-focus-stat-value">${card.passiveInvestigation}</strong></p>
                     </div>
                 </div>
 
@@ -10901,8 +10461,8 @@ function getFocusStageSiblingCards(focusedCard) {
     };
 }
 
-function createFocusStagePreviewCardHtml(creature, positionLabel) {
-    if (creature === null) {
+function createFocusStagePreviewCardHtml(card, positionLabel) {
+    if (card === null) {
         return `<div class="focus-stage-ghost-card focus-stage-ghost-card-empty" aria-hidden="true"></div>`;
     }
 
@@ -10912,10 +10472,10 @@ function createFocusStagePreviewCardHtml(creature, positionLabel) {
             aria-hidden="true"
         >
             <span class="focus-stage-ghost-image">
-                ${createCreatureImageHtml(creature)}
+                ${createCardImageHtml(card)}
             </span>
-            <span class="focus-stage-ghost-title">${escapeHtml(creature.name)}</span>
-            <span class="focus-stage-ghost-meta">Ini ${creature.initiative} · HP ${creature.hp}/${creature.maxHp}</span>
+            <span class="focus-stage-ghost-title">${escapeHtml(card.name)}</span>
+            <span class="focus-stage-ghost-meta">Ini ${card.initiative} · HP ${card.hp}/${card.maxHp}</span>
         </div>
     `;
 }
@@ -10934,7 +10494,7 @@ function renderFocusedCard(focusedCard, activeCard) {
         <div class="focus-stage-card-stack ${hasFocusedCard ? "" : "focus-stage-card-stack-empty"}">
             ${createFocusStagePreviewCardHtml(siblingCards.previousCard, "previous")}
             <div class="focus-stage-main-card">
-                ${createFocusedCreatureCardHtml(focusedCard, activeCard)}
+                ${createFocusedCardHtml(focusedCard, activeCard)}
             </div>
             ${createFocusStagePreviewCardHtml(siblingCards.nextCard, "next")}
         </div>
@@ -10961,15 +10521,15 @@ function getDetailTabButtonHtml(tabName, label) {
     `;
 }
 
-function createDetailPanelHeaderHtml(creature) {
-    const creatureName = creature === null
+function createDetailPanelHeaderHtml(card) {
+    const cardName = card === null
         ? "Keine Karte"
-        : (creature.publicName || creature.name);
+        : (card.publicName || card.name);
 
     return `
         <header class="active-hand-details-header">
             <p class="section-eyebrow">Kartendetails</p>
-            <span class="active-hand-details-subtitle">${escapeHtml(creatureName)}</span>
+            <span class="active-hand-details-subtitle">${escapeHtml(cardName)}</span>
         </header>
     `;
 }
@@ -11061,7 +10621,7 @@ function getDetailEntryBody(entry) {
 // Trait-Modell und Trait-Editor
 // ============================================================
 
-const creatureTraitCategoryLabels = {
+const cardTraitCategoryLabels = {
     resource: "Ressource",
     classFeature: "Klassenfeature",
     species: "Spezies",
@@ -11072,7 +10632,7 @@ const creatureTraitCategoryLabels = {
     other: "Sonstiges"
 };
 
-function getSafeCreatureTraitCategory(value) {
+function getSafeCardTraitCategory(value) {
     if (value === "resource" || value === "classFeature" || value === "species" || value === "feat" || value === "monsterTrait" || value === "npc" || value === "passive" || value === "other") {
         return value;
     }
@@ -11080,18 +10640,18 @@ function getSafeCreatureTraitCategory(value) {
     return "other";
 }
 
-function createCreatureTrait(rawTrait = {}, fallbackIndex = 0) {
+function createCardTrait(rawTrait = {}, fallbackIndex = 0) {
     return {
         id: getSafeOptionalString(rawTrait.id) || `trait-${Date.now()}-${fallbackIndex}-${Math.random().toString(36).slice(2, 8)}`,
         name: getSafeOptionalString(rawTrait.name) || "Neuer Trait",
-        category: getSafeCreatureTraitCategory(rawTrait.category),
+        category: getSafeCardTraitCategory(rawTrait.category),
         description: getSafeOptionalString(rawTrait.description),
         usage: getSafeOptionalString(rawTrait.usage),
         usageMax: getSafeNonNegativeInteger(rawTrait.usageMax, inferUsageMaxFromText(rawTrait.usage)),
         usageReset: getSafeUsageReset(rawTrait.usageReset) !== "none" ? getSafeUsageReset(rawTrait.usageReset) : inferUsageResetFromText(rawTrait.usage),
         used: getSafeNonNegativeInteger(rawTrait.used, 0),
         showAsAction: rawTrait.showAsAction === true,
-        actionType: getSafeCreatureActionType(rawTrait.actionType),
+        actionType: getSafeCardActionType(rawTrait.actionType),
         actionSummary: getSafeOptionalString(rawTrait.actionSummary),
         attack: getSafeOptionalString(rawTrait.attack),
         save: getSafeOptionalString(rawTrait.save),
@@ -11101,24 +10661,24 @@ function createCreatureTrait(rawTrait = {}, fallbackIndex = 0) {
     };
 }
 
-function getSafeCreatureTraits(value) {
+function getSafeCardTraits(value) {
     if (Array.isArray(value) === false) {
         return [];
     }
 
     return value
-        .slice(0, importSecurityLimits.maxTraitsPerCreature)
+        .slice(0, importSecurityLimits.maxTraitsPerCard)
         .filter(function(trait) { return trait !== null && typeof trait === "object"; })
-        .map(function(trait, index) { return createCreatureTrait(trait, index); })
+        .map(function(trait, index) { return createCardTrait(trait, index); })
         .filter(function(trait) { return trait.name.trim() !== ""; });
 }
 
-function getCreatureTraits(creature) {
-    if (creature === null) {
+function getCardTraits(card) {
+    if (card === null) {
         return [];
     }
 
-    return getSafeCreatureTraits(creature.traits);
+    return getSafeCardTraits(card.traits);
 }
 
 function getTraitTextFromStructuredTrait(trait) {
@@ -11165,13 +10725,13 @@ function getAvailableActionUsageCount(action) {
     return getAvailableUsageCount(action);
 }
 
-function setExpandedActionDetail(creatureId, actionId, isOpen) {
-    expandedActionDetailKey = isOpen === true ? `${creatureId}:${actionId}` : "";
+function setExpandedActionDetail(cardId, actionId, isOpen) {
+    expandedActionDetailKey = isOpen === true ? `${cardId}:${actionId}` : "";
 }
 
 
-function findUsageActionReference(creature, actionId) {
-    const directAction = getCreatureActions(creature).find(function(item) { return item.id === actionId; });
+function findUsageActionReference(card, actionId) {
+    const directAction = getCardActions(card).find(function(item) { return item.id === actionId; });
 
     if (directAction !== undefined) {
         return directAction;
@@ -11179,57 +10739,57 @@ function findUsageActionReference(creature, actionId) {
 
     if (actionId.startsWith("trait-")) {
         const traitId = actionId.replace(/^trait-/, "");
-        const trait = getCreatureTraits(creature).find(function(item) { return item.id === traitId || item.id === actionId; });
+        const trait = getCardTraits(card).find(function(item) { return item.id === traitId || item.id === actionId; });
         return trait !== undefined ? createActionFromTrait(trait) : null;
     }
 
     if (actionId.startsWith("spell-")) {
         const spellId = actionId.replace(/^spell-/, "");
-        const spell = getCreatureSpellcasting(creature).spells.find(function(item) { return item.id === spellId || item.id === actionId; });
+        const spell = getCardSpellcasting(card).spells.find(function(item) { return item.id === spellId || item.id === actionId; });
         return spell !== undefined ? createActionFromSpell(spell) : null;
     }
 
     return null;
 }
 
-function saveUsageActionReference(creature, actionReference) {
+function saveUsageActionReference(card, actionReference) {
     if (actionReference.sourceType === "trait") {
-        const traits = getCreatureTraits(creature);
+        const traits = getCardTraits(card);
         const trait = traits.find(function(item) { return item.id === actionReference.sourceId; });
         if (trait !== undefined) {
             trait.used = actionReference.used;
-            creature.traits = traits;
+            card.traits = traits;
         }
         return;
     }
 
     if (actionReference.sourceType === "spell") {
-        const spellcasting = getCreatureSpellcasting(creature);
+        const spellcasting = getCardSpellcasting(card);
         const spell = spellcasting.spells.find(function(item) { return item.id === actionReference.sourceId; });
         if (spell !== undefined) {
             spell.used = actionReference.used;
-            creature.spellcasting = spellcasting;
+            card.spellcasting = spellcasting;
         }
         return;
     }
 
-    const actions = getCreatureActions(creature);
+    const actions = getCardActions(card);
     const action = actions.find(function(item) { return item.id === actionReference.id; });
     if (action !== undefined) {
         action.used = actionReference.used;
-        creature.actions = actions;
+        card.actions = actions;
     }
 }
 
-function toggleActionUsage(creatureId, actionId, usageIndex) {
+function toggleActionUsage(cardId, actionId, usageIndex) {
     const detailScrollTop = captureActiveDetailScrollTop();
-    const creature = findCreatureById(creatureId);
+    const card = findCardById(cardId);
 
-    if (creature === null) {
+    if (card === null) {
         return;
     }
 
-    const action = findUsageActionReference(creature, actionId);
+    const action = findUsageActionReference(card, actionId);
 
     if (action === null) {
         return;
@@ -11247,10 +10807,10 @@ function toggleActionUsage(creatureId, actionId, usageIndex) {
     const newAvailable = clickedUseIsAvailable ? index : index + 1;
     action.used = clampNumber(max - newAvailable, 0, max);
 
-    saveUsageActionReference(creature, action);
-    expandedActionDetailKey = `${creatureId}:${action.id}`;
+    saveUsageActionReference(card, action);
+    expandedActionDetailKey = `${cardId}:${action.id}`;
 
-    addCombatLogMessage(`${creature.publicName || creature.name}: ${action.name} Nutzung ${getAvailableActionUsageCount(action)} / ${max}.`);
+    addCombatLogMessage(`${card.publicName || card.name}: ${action.name} Nutzung ${getAvailableActionUsageCount(action)} / ${max}.`);
     saveAndBroadcastAppState();
     renderCards();
     restoreDetailScrollAfterRender(detailScrollTop);
@@ -11265,7 +10825,7 @@ function getActionUsageResetTitle(action) {
     return usageResetLabels[reset] || getSafeOptionalString(action.usage);
 }
 
-function createActionUsageButtonsHtml(creatureId, action) {
+function createActionUsageButtonsHtml(cardId, action) {
     const max = getActionUsageMax(action);
 
     if (max <= 0) {
@@ -11284,7 +10844,7 @@ function createActionUsageButtonsHtml(creatureId, action) {
             <button
                 class="action-use-orb ${isAvailable ? "action-use-orb-available" : "action-use-orb-used"}"
                 type="button"
-                onclick="event.preventDefault(); event.stopPropagation(); toggleActionUsage(${creatureId}, '${action.id}', ${index})"
+                onclick="event.preventDefault(); event.stopPropagation(); toggleActionUsage(${cardId}, '${action.id}', ${index})"
                 title="${escapeHtml(action.name)}: Nutzung ${index + 1} umschalten${resetTitle !== "" ? ` (${escapeHtml(resetTitle)})` : ""}"
                 aria-label="Nutzung ${index + 1} von ${escapeHtml(action.name)} umschalten${resetTitle !== "" ? `, ${escapeHtml(resetTitle)}` : ""}"
             >
@@ -11301,8 +10861,8 @@ function createActionUsageButtonsHtml(creatureId, action) {
     `;
 }
 
-function createActionDetailCardHtml(creatureId, action) {
-    const usageControlsHtml = createActionUsageButtonsHtml(creatureId, action);
+function createActionDetailCardHtml(cardId, action) {
+    const usageControlsHtml = createActionUsageButtonsHtml(cardId, action);
     const rows = [];
 
     if (action.usage !== "" && usageControlsHtml === "") {
@@ -11324,15 +10884,15 @@ function createActionDetailCardHtml(creatureId, action) {
         rows.push(["Trigger", action.trigger]);
     }
 
-    const isOpen = expandedActionDetailKey === `${creatureId}:${action.id}`;
+    const isOpen = expandedActionDetailKey === `${cardId}:${action.id}`;
     const metaParts = [];
     if (action.sourceLabel !== "") {
         metaParts.push(action.sourceLabel);
     }
-    metaParts.push(creatureActionTypeSingularLabels[action.type] || "Aktion");
+    metaParts.push(cardActionTypeSingularLabels[action.type] || "Aktion");
 
     return `
-        <details class="active-hand-entry-card active-hand-action-card active-hand-action-card-${escapeHtml(action.type)} ${isOpen ? "active-hand-action-expanded" : ""}" ${isOpen ? "open" : ""} ontoggle="setExpandedActionDetail(${creatureId}, '${action.id}', this.open)">
+        <details class="active-hand-entry-card active-hand-action-card active-hand-action-card-${escapeHtml(action.type)} ${isOpen ? "active-hand-action-expanded" : ""}" ${isOpen ? "open" : ""} ontoggle="setExpandedActionDetail(${cardId}, '${action.id}', this.open)">
             <summary class="active-hand-action-summary">
                 <span class="active-hand-action-summary-main">
                     <span class="active-hand-action-chevron" aria-hidden="true">›</span>
@@ -11353,24 +10913,24 @@ function createActionDetailCardHtml(creatureId, action) {
     `;
 }
 
-function createActionDetailGroupHtml(creatureId, type, actions) {
+function createActionDetailGroupHtml(cardId, type, actions) {
     if (actions.length === 0) {
         return "";
     }
 
     return `
         <section class="active-hand-detail-section active-hand-action-group">
-            <p class="section-eyebrow">${creatureActionTypeLabels[type]}</p>
+            <p class="section-eyebrow">${cardActionTypeLabels[type]}</p>
             <div class="active-hand-entry-list">
-                ${actions.map(function(action) { return createActionDetailCardHtml(creatureId, action); }).join("")}
+                ${actions.map(function(action) { return createActionDetailCardHtml(cardId, action); }).join("")}
             </div>
         </section>
     `;
 }
 
 
-function createTraitUsageButtonsHtml(creatureId, trait) {
-    return createActionUsageButtonsHtml(creatureId, createCreatureAction({
+function createTraitUsageButtonsHtml(cardId, trait) {
+    return createActionUsageButtonsHtml(cardId, createCardAction({
         id: `trait-${trait.id}`,
         name: trait.name,
         usage: trait.usage,
@@ -11382,12 +10942,12 @@ function createTraitUsageButtonsHtml(creatureId, trait) {
     }));
 }
 
-function createTraitDetailCardHtml(creatureId, trait) {
-    const usageHtml = createTraitUsageButtonsHtml(creatureId, trait);
-    const metaParts = [creatureTraitCategoryLabels[trait.category] || "Trait"];
+function createTraitDetailCardHtml(cardId, trait) {
+    const usageHtml = createTraitUsageButtonsHtml(cardId, trait);
+    const metaParts = [cardTraitCategoryLabels[trait.category] || "Trait"];
 
     if (trait.showAsAction === true) {
-        metaParts.push(creatureActionTypeSingularLabels[trait.actionType] || "Aktion");
+        metaParts.push(cardActionTypeSingularLabels[trait.actionType] || "Aktion");
     }
 
     return `
@@ -11406,25 +10966,25 @@ function createTraitDetailCardHtml(creatureId, trait) {
     `;
 }
 
-function createTraitDetailTabHtml(creature) {
-    const traits = getCreatureTraits(creature);
+function createTraitDetailTabHtml(card) {
+    const traits = getCardTraits(card);
 
     return `
         <div class="active-hand-detail-content active-hand-detail-scroll active-hand-action-reference detail-tab-surface">
             <section class="active-hand-detail-section active-hand-long-section">
                 <p class="section-eyebrow">Traits</p>
                 <div class="active-hand-entry-list">
-                    ${traits.length > 0 ? traits.map(function(trait) { return createTraitDetailCardHtml(creature.id, trait); }).join("") : `<p class="detail-placeholder-text">Keine Traits eingetragen.</p>`}
+                    ${traits.length > 0 ? traits.map(function(trait) { return createTraitDetailCardHtml(card.id, trait); }).join("") : `<p class="detail-placeholder-text">Keine Traits eingetragen.</p>`}
                 </div>
             </section>
         </div>
     `;
 }
 
-function createActionDetailTabHtml(creature) {
-    const actions = getCreatureActionReferences(creature);
+function createActionDetailTabHtml(card) {
+    const actions = getCardActionReferences(card);
     const groups = ["action", "bonus", "reaction", "special"].map(function(type) {
-        return createActionDetailGroupHtml(creature.id, type, actions.filter(function(action) { return action.type === type; }));
+        return createActionDetailGroupHtml(card.id, type, actions.filter(function(action) { return action.type === type; }));
     }).filter(function(html) { return html !== ""; });
 
     return `
@@ -11495,7 +11055,7 @@ function createInventoryCard(rawItem = {}, fallbackIndex = 0) {
         healingFormula: getSafeOptionalString(rawItem.healingFormula),
         image: normalizeInventoryImagePath(rawItem.image, category),
         showAsAction: rawItem.showAsAction === true,
-        actionType: getSafeCreatureActionType(rawItem.actionType),
+        actionType: getSafeCardActionType(rawItem.actionType),
         used: 0
     };
 }
@@ -11683,7 +11243,7 @@ function getSafeInventoryCards(value) {
     }
 
     return value
-        .slice(0, importSecurityLimits.maxInventoryCardsPerCreature)
+        .slice(0, importSecurityLimits.maxInventoryCardsPerCard)
         .filter(function(item) { return item !== null && typeof item === "object"; })
         .map(function(item, index) { return createInventoryCard(item, index); })
         .filter(function(item) { return item.name.trim() !== ""; });
@@ -11695,7 +11255,7 @@ function getSafeInventoryList(value) {
     }
 
     return value
-        .slice(0, importSecurityLimits.maxInventoryListItemsPerCreature)
+        .slice(0, importSecurityLimits.maxInventoryListItemsPerCard)
         .map(function(item, index) { return createInventoryListItem(item, index); })
         .filter(function(item) { return item.name.trim() !== ""; });
 }
@@ -11728,31 +11288,31 @@ function sortInventoryCardsForDisplay(cards) {
     });
 }
 
-function getInventoryData(creature) {
-    if (creature === null) {
+function getInventoryData(card) {
+    if (card === null) {
         return createEmptyInventoryData();
     }
 
     return {
-        currency: getSafeCurrency(creature.currency),
-        cards: sortInventoryCardsForDisplay(getSafeInventoryCards(creature.inventoryCards)),
-        list: sortInventoryListByName(getSafeInventoryList(creature.inventoryList))
+        currency: getSafeCurrency(card.currency),
+        cards: sortInventoryCardsForDisplay(getSafeInventoryCards(card.inventoryCards)),
+        list: sortInventoryListByName(getSafeInventoryList(card.inventoryList))
     };
 }
 
-function getInventoryCards(creature) {
-    return getInventoryData(creature).cards;
+function getInventoryCards(card) {
+    return getInventoryData(card).cards;
 }
 
-function syncCreatureInventoryData(creature) {
-    const inventoryData = getInventoryData(creature);
-    creature.currency = inventoryData.currency;
-    creature.inventoryCards = inventoryData.cards;
-    creature.inventoryList = inventoryData.list;
+function syncCardInventoryData(card) {
+    const inventoryData = getInventoryData(card);
+    card.currency = inventoryData.currency;
+    card.inventoryCards = inventoryData.cards;
+    card.inventoryList = inventoryData.list;
 }
 
 function createActionFromInventoryItem(item) {
-    return createCreatureAction({
+    return createCardAction({
         id: `item-${item.id}`,
         name: item.name,
         type: item.actionType,
@@ -11788,24 +11348,24 @@ function rollDiceFormula(formula) {
     return { total: Math.max(0, total), rolls: rolls, formula: cleanFormula };
 }
 
-function removeInventoryCardById(creature, itemId) {
-    const cards = getSafeInventoryCards(creature.inventoryCards);
-    creature.inventoryCards = cards.filter(function(item) { return item.id !== itemId; });
-    syncCreatureInventoryData(creature);
+function removeInventoryCardById(card, itemId) {
+    const cards = getSafeInventoryCards(card.inventoryCards);
+    card.inventoryCards = cards.filter(function(item) { return item.id !== itemId; });
+    syncCardInventoryData(card);
 }
 
-function useInventoryCard(creatureId, itemId, mode) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function useInventoryCard(cardId, itemId, mode) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
 
-    const item = getInventoryCards(creature).find(function(candidate) { return candidate.id === itemId; });
+    const item = getInventoryCards(card).find(function(candidate) { return candidate.id === itemId; });
     if (item === undefined) { return; }
 
-    let logText = `${creature.publicName || creature.name} verwendet ${item.name}.`;
+    let logText = `${card.publicName || card.name} verwendet ${item.name}.`;
 
     if (item.healingFormula !== "") {
         const result = rollDiceFormula(item.healingFormula);
-        let target = creature;
+        let target = card;
         let targetLabel = "sich selbst";
 
         if (mode === "target") {
@@ -11819,59 +11379,59 @@ function useInventoryCard(creatureId, itemId, mode) {
         }
 
         applyHealing(target, result.total);
-        logText = `${creature.publicName || creature.name} verwendet ${item.name} auf ${targetLabel}: ${result.total} HP Heilung (${result.formula}: ${result.rolls.join("+")}).`;
+        logText = `${card.publicName || card.name} verwendet ${item.name} auf ${targetLabel}: ${result.total} HP Heilung (${result.formula}: ${result.rolls.join("+")}).`;
     }
 
-    removeInventoryCardById(creature, itemId);
+    removeInventoryCardById(card, itemId);
     addCombatLogMessage(logText);
     saveAndBroadcastAppState();
     renderCards();
 }
 
-function addInventoryTemplateToCreature(creatureId, templateName) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function addInventoryTemplateToCard(cardId, templateName) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
 
-    const cards = getInventoryCards(creature);
+    const cards = getInventoryCards(card);
     cards.push(createInventoryCardFromTemplate(templateName));
-    creature.inventoryCards = cards;
-    syncCreatureInventoryData(creature);
-    addCombatLogMessage(`${creature.publicName || creature.name}: ${inventoryCardTemplates[templateName]?.name || "Item"} ins Inventar gelegt.`);
+    card.inventoryCards = cards;
+    syncCardInventoryData(card);
+    addCombatLogMessage(`${card.publicName || card.name}: ${inventoryCardTemplates[templateName]?.name || "Item"} ins Inventar gelegt.`);
     saveAndBroadcastAppState();
     renderCardsPreservingDetailScroll();
 }
 
-function updateInventoryCurrency(creatureId) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function updateInventoryCurrency(cardId) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
 
-    const previousCurrency = getSafeCurrency(creature.currency);
+    const previousCurrency = getSafeCurrency(card.currency);
     const nextCurrency = {
-        gp: getSafeNonNegativeInteger(document.querySelector(`#inventory-gp-${creatureId}`)?.value, 0),
-        sp: getSafeNonNegativeInteger(document.querySelector(`#inventory-sp-${creatureId}`)?.value, 0),
-        cp: getSafeNonNegativeInteger(document.querySelector(`#inventory-cp-${creatureId}`)?.value, 0)
+        gp: getSafeNonNegativeInteger(document.querySelector(`#inventory-gp-${cardId}`)?.value, 0),
+        sp: getSafeNonNegativeInteger(document.querySelector(`#inventory-sp-${cardId}`)?.value, 0),
+        cp: getSafeNonNegativeInteger(document.querySelector(`#inventory-cp-${cardId}`)?.value, 0)
     };
 
-    creature.currency = nextCurrency;
-    syncCreatureInventoryData(creature);
+    card.currency = nextCurrency;
+    syncCardInventoryData(card);
 
     const currencyChanges = [];
     if (previousCurrency.gp !== nextCurrency.gp) { currencyChanges.push(`Gold ${previousCurrency.gp} → ${nextCurrency.gp}`); }
     if (previousCurrency.sp !== nextCurrency.sp) { currencyChanges.push(`Silber ${previousCurrency.sp} → ${nextCurrency.sp}`); }
     if (previousCurrency.cp !== nextCurrency.cp) { currencyChanges.push(`Kupfer ${previousCurrency.cp} → ${nextCurrency.cp}`); }
     if (currencyChanges.length > 0) {
-        addCombatLogMessage(`${creature.publicName || creature.name}: Geldbeutel geändert (${currencyChanges.join(", ")}).`);
+        addCombatLogMessage(`${card.publicName || card.name}: Geldbeutel geändert (${currencyChanges.join(", ")}).`);
     }
 
     saveAndBroadcastAppState();
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
-function openDetailInventoryCardEditor(creatureId, itemId = "", templateName = "customPotion") {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function openDetailInventoryCardEditor(cardId, itemId = "", templateName = "customPotion") {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
     activeDetailInventoryListEditor = null;
-    activeDetailInventoryCardEditor = { creatureId: creatureId, itemId: itemId, templateName: templateName };
+    activeDetailInventoryCardEditor = { cardId: cardId, itemId: itemId, templateName: templateName };
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
@@ -11881,37 +11441,37 @@ function cancelDetailInventoryEditor() {
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
-function getDetailCardEditorItem(creature, editor) {
-    if (editor === null || creature === null) { return null; }
+function getDetailCardEditorItem(card, editor) {
+    if (editor === null || card === null) { return null; }
     if (editor.itemId !== "") {
-        return getInventoryCards(creature).find(function(item) { return item.id === editor.itemId; }) || null;
+        return getInventoryCards(card).find(function(item) { return item.id === editor.itemId; }) || null;
     }
     return createInventoryCardFromTemplate(editor.templateName || "customPotion");
 }
 
-function readDetailInventoryCardEditor(creatureId, existingId = "") {
-    const category = document.querySelector(`#detail-item-category-${creatureId}`)?.value || "potion";
+function readDetailInventoryCardEditor(cardId, existingId = "") {
+    const category = document.querySelector(`#detail-item-category-${cardId}`)?.value || "potion";
     return createInventoryCard({
         id: existingId,
-        name: document.querySelector(`#detail-item-name-${creatureId}`)?.value.trim() || "Eigene Itemkarte",
+        name: document.querySelector(`#detail-item-name-${cardId}`)?.value.trim() || "Eigene Itemkarte",
         category: category,
-        effect: document.querySelector(`#detail-item-effect-${creatureId}`)?.value.trim() || "",
-        healingFormula: document.querySelector(`#detail-item-healing-${creatureId}`)?.value.trim() || "",
-        description: document.querySelector(`#detail-item-description-${creatureId}`)?.value.trim() || "",
-        image: document.querySelector(`#detail-item-image-${creatureId}`)?.value.trim() || (category === "scroll" ? "assets/items/scroll_custom.jpg" : "assets/items/potion_custom.jpg"),
-        showAsAction: document.querySelector(`#detail-item-show-action-${creatureId}`)?.checked === true,
-        actionType: document.querySelector(`#detail-item-action-type-${creatureId}`)?.value || "action"
+        effect: document.querySelector(`#detail-item-effect-${cardId}`)?.value.trim() || "",
+        healingFormula: document.querySelector(`#detail-item-healing-${cardId}`)?.value.trim() || "",
+        description: document.querySelector(`#detail-item-description-${cardId}`)?.value.trim() || "",
+        image: document.querySelector(`#detail-item-image-${cardId}`)?.value.trim() || (category === "scroll" ? "assets/items/scroll_custom.jpg" : "assets/items/potion_custom.jpg"),
+        showAsAction: document.querySelector(`#detail-item-show-action-${cardId}`)?.checked === true,
+        actionType: document.querySelector(`#detail-item-action-type-${cardId}`)?.value || "action"
     });
 }
 
-function saveDetailInventoryCardEditor(creatureId, openForgeAfterSave = false) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null || activeDetailInventoryCardEditor === null) { return; }
+function saveDetailInventoryCardEditor(cardId, openForgeAfterSave = false) {
+    const card = findCardById(cardId);
+    if (card === null || activeDetailInventoryCardEditor === null) { return; }
 
-    const cards = getInventoryCards(creature);
+    const cards = getInventoryCards(card);
     const editor = activeDetailInventoryCardEditor;
     const existingIndex = cards.findIndex(function(item) { return item.id === editor.itemId; });
-    const nextItem = readDetailInventoryCardEditor(creatureId, existingIndex >= 0 ? cards[existingIndex].id : "");
+    const nextItem = readDetailInventoryCardEditor(cardId, existingIndex >= 0 ? cards[existingIndex].id : "");
 
     if (existingIndex >= 0) {
         cards[existingIndex] = nextItem;
@@ -11919,68 +11479,68 @@ function saveDetailInventoryCardEditor(creatureId, openForgeAfterSave = false) {
         cards.push(nextItem);
     }
 
-    creature.inventoryCards = cards;
-    syncCreatureInventoryData(creature);
+    card.inventoryCards = cards;
+    syncCardInventoryData(card);
     activeDetailInventoryCardEditor = null;
     saveAndBroadcastAppState();
 
     if (openForgeAfterSave === true) {
-        openInventoryCardInForge(creatureId, nextItem.id);
+        openInventoryCardInForge(cardId, nextItem.id);
         return;
     }
 
     renderCardsPreservingDetailScroll();
 }
 
-function removeInventoryCardFromDetails(creatureId, itemId, shouldLog = false) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
-    const item = getInventoryCards(creature).find(function(candidate) { return candidate.id === itemId; });
-    removeInventoryCardById(creature, itemId);
+function removeInventoryCardFromDetails(cardId, itemId, shouldLog = false) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
+    const item = getInventoryCards(card).find(function(candidate) { return candidate.id === itemId; });
+    removeInventoryCardById(card, itemId);
     activeDetailInventoryCardEditor = null;
     if (shouldLog === true && item !== undefined) {
-        addCombatLogMessage(`${creature.publicName || creature.name}: ${item.name} aus dem Inventar entfernt.`);
+        addCombatLogMessage(`${card.publicName || card.name}: ${item.name} aus dem Inventar entfernt.`);
     }
     saveAndBroadcastAppState();
     renderCardsPreservingDetailScroll();
 }
 
-function openInventoryCardInForge(creatureId, itemId) {
-    openEditCreatureForm(creatureId);
-    activeForgeInventoryEditor = { prefix: "edit-creature", itemId: itemId, itemType: "card", isNewDraft: false };
+function openInventoryCardInForge(cardId, itemId) {
+    openEditCardForm(cardId);
+    activeForgeInventoryEditor = { prefix: "edit-card", itemId: itemId, itemType: "card", isNewDraft: false };
     setForgeTab("inventory");
-    renderForgeInventoryManager("edit-creature");
+    renderForgeInventoryManager("edit-card");
 }
 
-function openDetailInventoryListEditor(creatureId, itemId = "") {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function openDetailInventoryListEditor(cardId, itemId = "") {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
     activeDetailInventoryCardEditor = null;
-    activeDetailInventoryListEditor = { creatureId: creatureId, itemId: itemId };
+    activeDetailInventoryListEditor = { cardId: cardId, itemId: itemId };
     renderCardDetailPanelPreservingScroll(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
-function getDetailListEditorItem(creature, editor) {
-    if (editor === null || creature === null) { return null; }
+function getDetailListEditorItem(card, editor) {
+    if (editor === null || card === null) { return null; }
     if (editor.itemId !== "") {
-        return getInventoryData(creature).list.find(function(item) { return item.id === editor.itemId; }) || null;
+        return getInventoryData(card).list.find(function(item) { return item.id === editor.itemId; }) || null;
     }
     return createInventoryListItem({ name: "", category: "equipment", quantity: 1, description: "" });
 }
 
-function saveDetailInventoryListEditor(creatureId) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null || activeDetailInventoryListEditor === null) { return; }
+function saveDetailInventoryListEditor(cardId) {
+    const card = findCardById(cardId);
+    if (card === null || activeDetailInventoryListEditor === null) { return; }
 
     const editor = activeDetailInventoryListEditor;
-    const list = getInventoryData(creature).list;
+    const list = getInventoryData(card).list;
     const existingIndex = list.findIndex(function(item) { return item.id === editor.itemId; });
     const nextItem = createInventoryListItem({
         id: existingIndex >= 0 ? list[existingIndex].id : "",
-        name: document.querySelector(`#detail-list-name-${creatureId}`)?.value.trim() || "Neuer Gegenstand",
-        category: document.querySelector(`#detail-list-category-${creatureId}`)?.value || "equipment",
-        quantity: document.querySelector(`#detail-list-quantity-${creatureId}`)?.value || 1,
-        description: document.querySelector(`#detail-list-description-${creatureId}`)?.value.trim() || ""
+        name: document.querySelector(`#detail-list-name-${cardId}`)?.value.trim() || "Neuer Gegenstand",
+        category: document.querySelector(`#detail-list-category-${cardId}`)?.value || "equipment",
+        quantity: document.querySelector(`#detail-list-quantity-${cardId}`)?.value || 1,
+        description: document.querySelector(`#detail-list-description-${cardId}`)?.value.trim() || ""
     }, list.length);
 
     if (existingIndex >= 0) {
@@ -11989,28 +11549,28 @@ function saveDetailInventoryListEditor(creatureId) {
         list.push(nextItem);
     }
 
-    creature.inventoryList = list;
-    syncCreatureInventoryData(creature);
+    card.inventoryList = list;
+    syncCardInventoryData(card);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
     renderCardsPreservingDetailScroll();
 }
 
-function removeInventoryListItem(creatureId, itemId) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
+function removeInventoryListItem(cardId, itemId) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
 
-    creature.inventoryList = getInventoryData(creature).list.filter(function(item) { return item.id !== itemId; });
-    syncCreatureInventoryData(creature);
+    card.inventoryList = getInventoryData(card).list.filter(function(item) { return item.id !== itemId; });
+    syncCardInventoryData(card);
     activeDetailInventoryListEditor = null;
     saveAndBroadcastAppState();
     renderCardsPreservingDetailScroll();
 }
 
-function createInventoryAddMenuHtml(creatureId, context = "details", prefix = "") {
-    const actionPrefix = context === "forge" ? `addForgeInventoryTemplate('${prefix}',` : `addInventoryTemplateToCreature(${creatureId},`;
-    const customPotionAction = context === "forge" ? `addForgeInventoryTemplate('${prefix}', 'customPotion')` : `openDetailInventoryCardEditor(${creatureId}, '', 'customPotion')`;
-    const customScrollAction = context === "forge" ? `addForgeInventoryTemplate('${prefix}', 'customScroll')` : `openDetailInventoryCardEditor(${creatureId}, '', 'customScroll')`;
+function createInventoryAddMenuHtml(cardId, context = "details", prefix = "") {
+    const actionPrefix = context === "forge" ? `addForgeInventoryTemplate('${prefix}',` : `addInventoryTemplateToCard(${cardId},`;
+    const customPotionAction = context === "forge" ? `addForgeInventoryTemplate('${prefix}', 'customPotion')` : `openDetailInventoryCardEditor(${cardId}, '', 'customPotion')`;
+    const customScrollAction = context === "forge" ? `addForgeInventoryTemplate('${prefix}', 'customScroll')` : `openDetailInventoryCardEditor(${cardId}, '', 'customScroll')`;
 
     return `
         <details class="section-menu inventory-add-menu">
@@ -12027,7 +11587,7 @@ function createInventoryAddMenuHtml(creatureId, context = "details", prefix = ""
     `;
 }
 
-function createInventoryCardHtml(creatureId, item) {
+function createInventoryCardHtml(cardId, item) {
     const safeImage = escapeHtml(normalizeInventoryImagePath(item.image, item.category));
     const metaText = inventoryCategoryLabels[item.category] || "Item";
     const isHealingPotion = item.healingFormula !== "";
@@ -12045,11 +11605,11 @@ function createInventoryCardHtml(creatureId, item) {
                 <details class="inventory-item-menu">
                     <summary class="inventory-item-menu-summary" aria-label="Aktionen für ${escapeHtml(item.name)}">☰</summary>
                     <div class="inventory-item-menu-panel">
-                        ${isHealingPotion ? `<button type="button" onclick="useInventoryCard(${creatureId}, '${item.id}', 'self')">Selbst trinken</button>` : ""}
-                        ${isHealingPotion ? `<button class="inventory-item-target-menu-button" type="button" onclick="useInventoryCard(${creatureId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
-                        ${isHealingPotion ? "" : `<button type="button" onclick="useInventoryCard(${creatureId}, '${item.id}', 'self')">${useLabel}</button>`}
-                        <button type="button" onclick="openDetailInventoryCardEditor(${creatureId}, '${item.id}')">Edit</button>
-                        <button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${creatureId}, '${item.id}', true)">Entfernen</button>
+                        ${isHealingPotion ? `<button type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">Selbst trinken</button>` : ""}
+                        ${isHealingPotion ? `<button class="inventory-item-target-menu-button" type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
+                        ${isHealingPotion ? "" : `<button type="button" onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${useLabel}</button>`}
+                        <button type="button" onclick="openDetailInventoryCardEditor(${cardId}, '${item.id}')">Edit</button>
+                        <button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${cardId}, '${item.id}', true)">Entfernen</button>
                     </div>
                 </details>
             </div>
@@ -12063,17 +11623,17 @@ function createInventoryCardHtml(creatureId, item) {
     `;
 }
 
-function createDetailInventoryCardEditorHtml(creature) {
-    if (activeDetailInventoryCardEditor === null || activeDetailInventoryCardEditor.creatureId !== creature.id) { return ""; }
-    const item = getDetailCardEditorItem(creature, activeDetailInventoryCardEditor);
+function createDetailInventoryCardEditorHtml(card) {
+    if (activeDetailInventoryCardEditor === null || activeDetailInventoryCardEditor.cardId !== card.id) { return ""; }
+    const item = getDetailCardEditorItem(card, activeDetailInventoryCardEditor);
     if (item === null) { return ""; }
 
     const categoryOptions = Object.keys(inventoryCategoryLabels)
         .filter(function(key) { return ["potion", "scroll", "consumable", "magicItem", "quest", "misc"].includes(key); })
         .map(function(key) { return `<option value="${key}" ${item.category === key ? "selected" : ""}>${inventoryCategoryLabels[key]}</option>`; })
         .join("");
-    const typeOptions = Object.keys(creatureActionTypeSingularLabels).map(function(key) {
-        return `<option value="${key}" ${item.actionType === key ? "selected" : ""}>${creatureActionTypeSingularLabels[key]}</option>`;
+    const typeOptions = Object.keys(cardActionTypeSingularLabels).map(function(key) {
+        return `<option value="${key}" ${item.actionType === key ? "selected" : ""}>${cardActionTypeSingularLabels[key]}</option>`;
     }).join("");
     const isNew = activeDetailInventoryCardEditor.itemId === "";
 
@@ -12081,26 +11641,26 @@ function createDetailInventoryCardEditorHtml(creature) {
         <section class="inventory-inline-editor">
             <div class="forge-spell-editor-header"><h5>${isNew ? "Itemkarte hinzufügen" : "Itemkarte bearbeiten"}</h5><span>${escapeHtml(item.name)}</span></div>
             <div class="forge-spell-editor-grid">
-                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-item-name-${creature.id}" type="text" value="${escapeHtml(item.name)}"></label>
-                <label class="form-field"><span>Kategorie</span><select id="detail-item-category-${creature.id}">${categoryOptions}</select></label>
-                <label class="form-field"><span>Aktionstyp</span><select id="detail-item-action-type-${creature.id}">${typeOptions}</select></label>
-                <label class="form-field"><span>Effekt/Kurztext</span><input id="detail-item-effect-${creature.id}" type="text" placeholder="Kurzer Effekt oder Nutzen" value="${escapeHtml(item.effect)}"></label>
-                <label class="form-field"><span>Heilformel</span><input id="detail-item-healing-${creature.id}" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
-                <label class="form-field forge-spell-editor-wide"><span>Bildpfad</span><input id="detail-item-image-${creature.id}" type="text" value="${escapeHtml(item.image)}"></label>
-                <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="detail-item-show-action-${creature.id}" type="checkbox" ${item.showAsAction === true ? "checked" : ""}><span>Im Aktionen-Tab anzeigen</span></label>
-                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${creature.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
+                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-item-name-${card.id}" type="text" value="${escapeHtml(item.name)}"></label>
+                <label class="form-field"><span>Kategorie</span><select id="detail-item-category-${card.id}">${categoryOptions}</select></label>
+                <label class="form-field"><span>Aktionstyp</span><select id="detail-item-action-type-${card.id}">${typeOptions}</select></label>
+                <label class="form-field"><span>Effekt/Kurztext</span><input id="detail-item-effect-${card.id}" type="text" placeholder="Kurzer Effekt oder Nutzen" value="${escapeHtml(item.effect)}"></label>
+                <label class="form-field"><span>Heilformel</span><input id="detail-item-healing-${card.id}" type="text" placeholder="2d4+2" value="${escapeHtml(item.healingFormula)}"></label>
+                <label class="form-field forge-spell-editor-wide"><span>Bildpfad</span><input id="detail-item-image-${card.id}" type="text" value="${escapeHtml(item.image)}"></label>
+                <label class="checkbox-field forge-checkbox-card forge-spell-editor-wide"><input id="detail-item-show-action-${card.id}" type="checkbox" ${item.showAsAction === true ? "checked" : ""}><span>Im Aktionen-Tab anzeigen</span></label>
+                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
-                <button type="button" onclick="saveDetailInventoryCardEditor(${creature.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
-                <button type="button" onclick="saveDetailInventoryCardEditor(${creature.id}, true)">In Kartenschmiede verfeinern</button>
-                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${creature.id}, '${item.id}')">Löschen</button>`}
+                <button type="button" onclick="saveDetailInventoryCardEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
+                <button type="button" onclick="saveDetailInventoryCardEditor(${card.id}, true)">In Kartenschmiede verfeinern</button>
+                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${card.id}, '${item.id}')">Löschen</button>`}
                 <button type="button" onclick="cancelDetailInventoryEditor()">Abbrechen</button>
             </div>
         </section>
     `;
 }
 
-function createInventoryListHtml(creatureId, list) {
+function createInventoryListHtml(cardId, list) {
     if (list.length === 0) {
         return `<p class="detail-placeholder-text">Keine normalen Inventareinträge.</p>`;
     }
@@ -12120,8 +11680,8 @@ function createInventoryListHtml(creatureId, list) {
                         <div class="inventory-list-row-body">
                             <p>${escapeHtml(item.description || "Keine Beschreibung eingetragen.")}</p>
                             <div class="inventory-list-row-actions">
-                                <button type="button" onclick="openDetailInventoryListEditor(${creatureId}, '${item.id}')">Edit</button>
-                                <button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${creatureId}, '${item.id}')" title="Eintrag entfernen" aria-label="${escapeHtml(item.name)} entfernen">Löschen</button>
+                                <button type="button" onclick="openDetailInventoryListEditor(${cardId}, '${item.id}')">Edit</button>
+                                <button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${cardId}, '${item.id}')" title="Eintrag entfernen" aria-label="${escapeHtml(item.name)} entfernen">Löschen</button>
                             </div>
                         </div>
                     </details>
@@ -12131,9 +11691,9 @@ function createInventoryListHtml(creatureId, list) {
     `;
 }
 
-function createDetailInventoryListEditorHtml(creature) {
-    if (activeDetailInventoryListEditor === null || activeDetailInventoryListEditor.creatureId !== creature.id) { return ""; }
-    const item = getDetailListEditorItem(creature, activeDetailInventoryListEditor);
+function createDetailInventoryListEditorHtml(card) {
+    if (activeDetailInventoryListEditor === null || activeDetailInventoryListEditor.cardId !== card.id) { return ""; }
+    const item = getDetailListEditorItem(card, activeDetailInventoryListEditor);
     if (item === null) { return ""; }
     const categoryOptions = Object.keys(inventoryCategoryLabels).map(function(key) {
         return `<option value="${key}" ${item.category === key ? "selected" : ""}>${inventoryCategoryLabels[key]}</option>`;
@@ -12144,14 +11704,14 @@ function createDetailInventoryListEditorHtml(creature) {
         <section class="inventory-inline-editor inventory-list-inline-editor">
             <div class="forge-spell-editor-header"><h5>${isNew ? "Gegenstand hinzufügen" : "Gegenstand bearbeiten"}</h5><span>${escapeHtml(item.name)}</span></div>
             <div class="forge-spell-editor-grid">
-                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-list-name-${creature.id}" type="text" placeholder="Name des Gegenstands" value="${escapeHtml(item.name)}"></label>
-                <label class="form-field"><span>Kategorie</span><select id="detail-list-category-${creature.id}">${categoryOptions}</select></label>
-                <label class="form-field"><span>Menge</span><input id="detail-list-quantity-${creature.id}" type="number" min="1" value="${item.quantity}"></label>
-                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${creature.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
+                <label class="form-field forge-spell-editor-wide"><span>Name</span><input id="detail-list-name-${card.id}" type="text" placeholder="Name des Gegenstands" value="${escapeHtml(item.name)}"></label>
+                <label class="form-field"><span>Kategorie</span><select id="detail-list-category-${card.id}">${categoryOptions}</select></label>
+                <label class="form-field"><span>Menge</span><input id="detail-list-quantity-${card.id}" type="number" min="1" value="${item.quantity}"></label>
+                <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
-                <button type="button" onclick="saveDetailInventoryListEditor(${creature.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
-                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${creature.id}, '${item.id}')">Löschen</button>`}
+                <button type="button" onclick="saveDetailInventoryListEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
+                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${card.id}, '${item.id}')">Löschen</button>`}
                 <button type="button" onclick="cancelDetailInventoryEditor()">Abbrechen</button>
             </div>
         </section>
@@ -12159,22 +11719,22 @@ function createDetailInventoryListEditorHtml(creature) {
 }
 
 
-function getInventoryStageStartIndex(creatureId, cardCount, visibleCount = 2) {
+function getInventoryStageStartIndex(cardId, cardCount, visibleCount = 2) {
     const maxStart = Math.max(0, cardCount - visibleCount);
-    const currentStart = Number(inventoryStageStartIndexes[creatureId] || 0);
+    const currentStart = Number(inventoryStageStartIndexes[cardId] || 0);
     const nextStart = Math.max(0, Math.min(maxStart, currentStart));
-    inventoryStageStartIndexes[creatureId] = nextStart;
+    inventoryStageStartIndexes[cardId] = nextStart;
     return nextStart;
 }
 
-function shiftInventoryStage(creatureId, direction) {
-    const creature = findCreatureById(creatureId);
-    if (creature === null) { return; }
-    const cards = getInventoryData(creature).cards;
+function shiftInventoryStage(cardId, direction) {
+    const card = findCardById(cardId);
+    if (card === null) { return; }
+    const cards = getInventoryData(card).cards;
     const visibleCount = 2;
-    const currentStart = getInventoryStageStartIndex(creatureId, cards.length, visibleCount);
+    const currentStart = getInventoryStageStartIndex(cardId, cards.length, visibleCount);
     const maxStart = Math.max(0, cards.length - visibleCount);
-    inventoryStageStartIndexes[creatureId] = Math.max(0, Math.min(maxStart, currentStart + direction));
+    inventoryStageStartIndexes[cardId] = Math.max(0, Math.min(maxStart, currentStart + direction));
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
 
@@ -12189,10 +11749,10 @@ function createInventoryGhostCardHtml(item, side) {
     `;
 }
 
-function createInventoryTabHtml(creature) {
-    const inventory = getInventoryData(creature);
+function createInventoryTabHtml(card) {
+    const inventory = getInventoryData(card);
     const visibleInventoryCardCount = 2;
-    const stageStartIndex = getInventoryStageStartIndex(creature.id, inventory.cards.length, visibleInventoryCardCount);
+    const stageStartIndex = getInventoryStageStartIndex(card.id, inventory.cards.length, visibleInventoryCardCount);
     const visibleCards = inventory.cards.slice(stageStartIndex, stageStartIndex + visibleInventoryCardCount);
     const leftGhostItem = inventory.cards[stageStartIndex - 1] || (inventory.cards.length > visibleInventoryCardCount ? inventory.cards[stageStartIndex] : null);
     const rightGhostItem = inventory.cards[stageStartIndex + visibleInventoryCardCount] || (inventory.cards.length > visibleInventoryCardCount ? inventory.cards[Math.min(inventory.cards.length - 1, stageStartIndex + visibleCards.length - 1)] : null);
@@ -12203,7 +11763,7 @@ function createInventoryTabHtml(creature) {
     const hasLeftGhost = leftGhostHtml !== "";
     const hasRightGhost = rightGhostHtml !== "";
     const cardsHtml = inventory.cards.length > 0
-        ? visibleCards.map(function(item) { return createInventoryCardHtml(creature.id, item); }).join("")
+        ? visibleCards.map(function(item) { return createInventoryCardHtml(card.id, item); }).join("")
         : `<p class="detail-placeholder-text inventory-empty-ribbon-message">Keine Itemkarten im Schnellzugriff.</p>`;
 
     return `
@@ -12213,20 +11773,20 @@ function createInventoryTabHtml(creature) {
                     <div>
                         <p class="section-eyebrow">Itemkarten</p>
                     </div>
-                    ${createInventoryAddMenuHtml(creature.id)}
+                    ${createInventoryAddMenuHtml(card.id)}
                 </div>
-                ${createDetailInventoryCardEditorHtml(creature)}
+                ${createDetailInventoryCardEditorHtml(card)}
                 <div class="inventory-consumable-shell">
                     <div class="inventory-stage-rail inventory-stage-rail-left ${hasLeftGhost ? "has-ghost-card" : "is-empty"} ${canMoveLeft ? "can-scroll" : "at-edge"}">
                         ${leftGhostHtml}
-                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-left" type="button" onclick="shiftInventoryStage(${creature.id}, -1)" aria-label="Vorherige Itemkarten anzeigen" ${canMoveLeft ? "" : "disabled"}>‹</button>
+                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-left" type="button" onclick="shiftInventoryStage(${card.id}, -1)" aria-label="Vorherige Itemkarten anzeigen" ${canMoveLeft ? "" : "disabled"}>‹</button>
                     </div>
                     <div class="inventory-card-ribbon-viewport">
-                        <div class="inventory-card-ribbon inventory-card-ribbon-static" id="inventory-card-ribbon-${creature.id}">${cardsHtml}</div>
+                        <div class="inventory-card-ribbon inventory-card-ribbon-static" id="inventory-card-ribbon-${card.id}">${cardsHtml}</div>
                     </div>
                     <div class="inventory-stage-rail inventory-stage-rail-right ${hasRightGhost ? "has-ghost-card" : "is-empty"} ${canMoveRight ? "can-scroll" : "at-edge"}">
                         ${rightGhostHtml}
-                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-right" type="button" onclick="shiftInventoryStage(${creature.id}, 1)" aria-label="Weitere Itemkarten anzeigen" ${canMoveRight ? "" : "disabled"}>›</button>
+                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-right" type="button" onclick="shiftInventoryStage(${card.id}, 1)" aria-label="Weitere Itemkarten anzeigen" ${canMoveRight ? "" : "disabled"}>›</button>
                     </div>
                 </div>
             </section>
@@ -12238,17 +11798,17 @@ function createInventoryTabHtml(creature) {
                         <p class="section-eyebrow">Inventarliste</p>
                         <p class="inventory-section-hint">Normale Ausrüstung, Loot und Questgegenstände. Details öffnen sich per Klick.</p>
                     </div>
-                    <button class="inventory-list-add-button forge-add-button" type="button" onclick="openDetailInventoryListEditor(${creature.id})">Gegenstand hinzufügen</button>
+                    <button class="inventory-list-add-button forge-add-button" type="button" onclick="openDetailInventoryListEditor(${card.id})">Gegenstand hinzufügen</button>
                 </div>
-                ${createDetailInventoryListEditorHtml(creature)}
-                ${createInventoryListHtml(creature.id, inventory.list)}
+                ${createDetailInventoryListEditorHtml(card)}
+                ${createInventoryListHtml(card.id, inventory.list)}
             </section>
             <section class="active-hand-detail-section inventory-currency-section">
                 <div class="inventory-currency-card">
                     <div class="inventory-currency-title">Geldbeutel</div>
-                    <label><span>Gold</span><input id="inventory-gp-${creature.id}" type="number" min="0" value="${inventory.currency.gp}" onchange="updateInventoryCurrency(${creature.id})"></label>
-                    <label><span>Silber</span><input id="inventory-sp-${creature.id}" type="number" min="0" value="${inventory.currency.sp}" onchange="updateInventoryCurrency(${creature.id})"></label>
-                    <label><span>Kupfer</span><input id="inventory-cp-${creature.id}" type="number" min="0" value="${inventory.currency.cp}" onchange="updateInventoryCurrency(${creature.id})"></label>
+                    <label><span>Gold</span><input id="inventory-gp-${card.id}" type="number" min="0" value="${inventory.currency.gp}" onchange="updateInventoryCurrency(${card.id})"></label>
+                    <label><span>Silber</span><input id="inventory-sp-${card.id}" type="number" min="0" value="${inventory.currency.sp}" onchange="updateInventoryCurrency(${card.id})"></label>
+                    <label><span>Kupfer</span><input id="inventory-cp-${card.id}" type="number" min="0" value="${inventory.currency.cp}" onchange="updateInventoryCurrency(${card.id})"></label>
                 </div>
             </section>
 
@@ -12301,18 +11861,18 @@ function createInventoryFieldsFromForge(prefix) {
     };
 }
 
-function writeInventoryToForge(prefix, creature) {
-    setForgeInventory(prefix, getInventoryData(creature));
+function writeInventoryToForge(prefix, card) {
+    setForgeInventory(prefix, getInventoryData(card));
 }
 
 function commitForgeInventoryIfEditing(prefix) {
-    if (prefix !== "edit-creature") { return; }
-    const creature = getEditFormCreature();
-    if (creature === null) { return; }
+    if (prefix !== "edit-card") { return; }
+    const card = getEditFormCard();
+    if (card === null) { return; }
     const inventory = getForgeInventoryDraft(prefix);
-    creature.currency = inventory.currency;
-    creature.inventoryCards = inventory.cards;
-    creature.inventoryList = inventory.list;
+    card.currency = inventory.currency;
+    card.inventoryCards = inventory.cards;
+    card.inventoryList = inventory.list;
     saveAndBroadcastAppState();
     renderCardDetailPanel(getFocusedCard(getHandCards(), getActiveCard(getHandCards())));
 }
@@ -12431,8 +11991,8 @@ function createForgeInventoryCardRowHtml(prefix, item) {
         const categoryOptions = Object.keys(inventoryCategoryLabels).map(function(key) {
             return `<option value="${key}" ${item.category === key ? "selected" : ""}>${inventoryCategoryLabels[key]}</option>`;
         }).join("");
-        const typeOptions = Object.keys(creatureActionTypeSingularLabels).map(function(key) {
-            return `<option value="${key}" ${item.actionType === key ? "selected" : ""}>${creatureActionTypeSingularLabels[key]}</option>`;
+        const typeOptions = Object.keys(cardActionTypeSingularLabels).map(function(key) {
+            return `<option value="${key}" ${item.actionType === key ? "selected" : ""}>${cardActionTypeSingularLabels[key]}</option>`;
         }).join("");
         return `
             <section class="forge-inventory-editor" aria-label="Itemkarte bearbeiten">
@@ -12539,8 +12099,8 @@ function renderForgeInventoryManager(prefix) {
 }
 
 
-function createDetailTabContentHtml(creature) {
-    if (creature === null) {
+function createDetailTabContentHtml(card) {
+    if (card === null) {
         return `
             <div class="active-hand-detail-content active-hand-detail-empty">
                 <p>Keine Karte ausgewählt.</p>
@@ -12549,17 +12109,17 @@ function createDetailTabContentHtml(creature) {
     }
 
     if (activeDetailTab === "actions") {
-        return createActionDetailTabHtml(creature);
+        return createActionDetailTabHtml(card);
     }
 
     if (activeDetailTab === "traits") {
-        return createTraitDetailTabHtml(creature);
+        return createTraitDetailTabHtml(card);
     }
 
     if (activeDetailTab === "notes") {
         return `
             <div class="active-hand-detail-content active-hand-detail-scroll detail-tab-surface">
-                ${createDetailTextPanelHtml("Notizen", creature.notes, "Noch keine DM-Notizen eingetragen.")}
+                ${createDetailTextPanelHtml("Notizen", card.notes, "Noch keine DM-Notizen eingetragen.")}
             </div>
         `;
     }
@@ -12567,13 +12127,13 @@ function createDetailTabContentHtml(creature) {
     if (activeDetailTab === "spells") {
         return `
             <div class="active-hand-detail-content active-hand-detail-scroll active-hand-spell-reference detail-tab-surface">
-                ${createSpellTrackerHtml(creature)}
+                ${createSpellTrackerHtml(card)}
             </div>
         `;
     }
 
     if (activeDetailTab === "inventory") {
-        return createInventoryTabHtml(creature);
+        return createInventoryTabHtml(card);
     }
 
     return `
@@ -12587,33 +12147,33 @@ function createDetailTabContentHtml(creature) {
                         </div>
                     </div>
                     <div class="active-hand-ability-grid card-profile-ability-grid card-profile-ability-row">
-                        ${createAbilityScoreHtml(creature, "STR", "strengthScore", "strengthModifier")}
-                        ${createAbilityScoreHtml(creature, "DEX", "dexterityScore", "dexterityModifier")}
-                        ${createAbilityScoreHtml(creature, "CON", "constitutionScore", "constitutionModifier")}
-                        ${createAbilityScoreHtml(creature, "INT", "intelligenceScore", "intelligenceModifier")}
-                        ${createAbilityScoreHtml(creature, "WIS", "wisdomScore", "wisdomModifier")}
-                        ${createAbilityScoreHtml(creature, "CHA", "charismaScore", "charismaModifier")}
+                        ${createAbilityScoreHtml(card, "STR", "strengthScore", "strengthModifier")}
+                        ${createAbilityScoreHtml(card, "DEX", "dexterityScore", "dexterityModifier")}
+                        ${createAbilityScoreHtml(card, "CON", "constitutionScore", "constitutionModifier")}
+                        ${createAbilityScoreHtml(card, "INT", "intelligenceScore", "intelligenceModifier")}
+                        ${createAbilityScoreHtml(card, "WIS", "wisdomScore", "wisdomModifier")}
+                        ${createAbilityScoreHtml(card, "CHA", "charismaScore", "charismaModifier")}
                     </div>
                 </section>
 
                 <section class="active-hand-detail-section card-profile-section card-profile-reference-section">
                     <p class="section-eyebrow">Bewegung & Wahrnehmung</p>
                     <div class="active-hand-stat-grid card-profile-stat-grid card-profile-stat-grid-two">
-                        ${createDetailStatCardHtml("Bewegung", creature.speed, "active-hand-stat-card card-profile-stat-card")}
-                        ${createDetailStatCardHtml("Sinne", creature.senses, "active-hand-stat-card card-profile-stat-card")}
-                        ${createDetailStatCardHtml("Passive Perception", creature.passivePerception, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
-                        ${createDetailStatCardHtml("Passive Insight", creature.passiveInsight, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
-                        ${createDetailStatCardHtml("Passive Investigation", creature.passiveInvestigation, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
+                        ${createDetailStatCardHtml("Bewegung", card.speed, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Sinne", card.senses, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Passive Perception", card.passivePerception, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
+                        ${createDetailStatCardHtml("Passive Insight", card.passiveInsight, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
+                        ${createDetailStatCardHtml("Passive Investigation", card.passiveInvestigation, "active-hand-stat-card card-profile-stat-card tablet-profile-passive-stat")}
                     </div>
                 </section>
 
                 <section class="active-hand-detail-section card-profile-section card-profile-defense-section">
                     <p class="section-eyebrow">Verteidigung</p>
                     <div class="active-hand-stat-grid card-profile-stat-grid card-profile-stat-grid-defense">
-                        ${createDetailStatCardHtml("Rettungswürfe", creature.savingThrows, "active-hand-stat-card card-profile-stat-card card-profile-stat-card-wide")}
-                        ${createDetailStatCardHtml("Resistenzen", creature.resistances, "active-hand-stat-card card-profile-stat-card")}
-                        ${createDetailStatCardHtml("Immunitäten", creature.immunities, "active-hand-stat-card card-profile-stat-card")}
-                        ${createDetailStatCardHtml("Verwundbarkeiten", creature.vulnerabilities, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Rettungswürfe", card.savingThrows, "active-hand-stat-card card-profile-stat-card card-profile-stat-card-wide")}
+                        ${createDetailStatCardHtml("Resistenzen", card.resistances, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Immunitäten", card.immunities, "active-hand-stat-card card-profile-stat-card")}
+                        ${createDetailStatCardHtml("Verwundbarkeiten", card.vulnerabilities, "active-hand-stat-card card-profile-stat-card")}
                     </div>
                 </section>
             </div>
@@ -12661,17 +12221,17 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
 
     return `
         <article
-            class="active-hand-mini-card ${isActive ? "active-turn-card" : ""} ${isFocused ? "focused-hand-card" : ""} ${isSelected ? "selected-target-card" : ""} ${isCreatureOutOfAction(card) ? "is-out-of-action" : ""}"
+            class="active-hand-mini-card ${isActive ? "active-turn-card" : ""} ${isFocused ? "focused-hand-card" : ""} ${isSelected ? "selected-target-card" : ""} ${isCardOutOfAction(card) ? "is-out-of-action" : ""}"
             title="Handkarte"
         >
             ${createOutOfActionStampHtml(card)}
             <button
                 class="active-hand-mini-main"
-                onclick="setFocusedCreature(${card.id})"
+                onclick="setFocusedCard(${card.id})"
                 title="Diese Karte groß anzeigen"
             >
                 <span class="active-hand-mini-image">
-                    ${createCreatureImageHtml(card)}
+                    ${createCardImageHtml(card)}
                 </span>
 
                 <span class="active-hand-mini-copy">
@@ -12683,7 +12243,7 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
 
             <button
                 class="active-hand-mini-target"
-                onclick="event.stopPropagation(); toggleCreatureSelection(${card.id});"
+                onclick="event.stopPropagation(); toggleCardSelection(${card.id});"
                 title="Als Ziel markieren oder abwählen"
             >
                 ${targetButtonText}
@@ -12757,34 +12317,44 @@ function createDeckConditionSummaryHtml(card) {
 }
 
 function createPreparationDeckCardHtml(card) {
-    const isSelected = card.isSelected === true;
-    const initiativeModifierText = formatSignedModifier(getCreatureInitiativeModifier(card));
+    const isInTrash = getCardLocation(card) === cardLocations.trash;
+    const isSelected = isInTrash !== true && card.isSelected === true;
+    const initiativeModifierText = formatSignedModifier(getCardInitiativeModifier(card));
     const publicNameText = getSafeOptionalString(card.publicName) !== "" ? card.publicName : "Öffentlicher Name offen";
-    const deckStateLabel = isSelected ? "Gewählt" : "Im Deck";
-    const deckStateClass = isSelected ? "deck-status-selected" : "deck-status-position";
+    const deckStateLabel = isInTrash ? "Im Papierkorb" : isSelected ? "Gewählt" : "Im Deck";
+    const deckStateClass = isInTrash ? "deck-status-trash" : isSelected ? "deck-status-selected" : "deck-status-position";
+    const cardClickAttribute = isInTrash ? "" : `onclick="toggleCardSelection(${card.id})"`;
+    const cardTitle = isInTrash ? "Gelöschte Karte" : "Deckkarte auswählen";
+    const focusButtonHtml = isInTrash
+        ? ""
+        : `<button class="deck-focus-button" onclick="event.stopPropagation(); setFocusedDeckCard(${card.id});" type="button">Fokus</button>`;
+    const deletedAtText = isInTrash && getSafeOptionalString(card.deletedAt) !== ""
+        ? `<p class="deck-trash-date">Gelöscht: ${escapeHtml(new Date(card.deletedAt).toLocaleString("de-DE"))}</p>`
+        : "";
 
     return `
-        <article class="preparation-deck-card ${isSelected ? "selected-deck-card" : ""}" data-deck-card-id="${card.id}" onclick="toggleCreatureSelection(${card.id})" title="Deckkarte auswählen">
+        <article class="preparation-deck-card ${isSelected ? "selected-deck-card" : ""} ${isInTrash ? "trash-deck-card" : ""}" data-deck-card-id="${card.id}" ${cardClickAttribute} title="${cardTitle}">
             <div class="preparation-deck-card-inner">
                 <div class="deck-card-topline">
                     <div class="deck-card-title-block">
                         <h3>${escapeHtml(card.name)}</h3>
-                        <span class="creature-public-alias">${escapeHtml(publicNameText)}</span>
+                        <span class="card-public-alias">${escapeHtml(publicNameText)}</span>
+                        ${deletedAtText}
                     </div>
                     ${createCardMenuHtml(card)}
                 </div>
 
                 <div class="deck-card-image-frame">
-                    ${createCreatureImageHtml(card)}
+                    ${createCardImageHtml(card)}
                 </div>
 
-                <div class="deck-card-state-action-row" aria-label="Kartentyp, Deckstatus und Fokus">
+                <div class="deck-card-state-action-row" aria-label="Kartentyp, Kartenort und Fokus">
                     <div class="deck-card-state-list">
-                        <span class="deck-status-label deck-status-type deck-status-type-${escapeAttribute(card.type)}">${escapeHtml(getDeckTypeLabel(card.type))}</span>
+                        <span class="deck-status-label deck-status-type deck-status-type-${escapeAttribute(getCharacterRole(card))}">${escapeHtml(getDeckTypeLabel(getCharacterRole(card)))}</span>
                         <span class="deck-status-separator" aria-hidden="true">·</span>
                         <span class="deck-status-label ${deckStateClass}">${deckStateLabel}</span>
                     </div>
-                    <button class="deck-focus-button" onclick="event.stopPropagation(); setFocusedDeckCreature(${card.id});" type="button">Fokus</button>
+                    ${focusButtonHtml}
                 </div>
 
                 <div class="deck-card-section deck-card-resource-section" aria-label="HP und temporäre HP">
@@ -12816,8 +12386,14 @@ function createPreparationDeckCardHtml(card) {
 
 function renderDeckControlsState() {
     const searchElement = document.querySelector("#deck-search-input");
+    const locationViewElement = document.querySelector("#deck-location-view");
     const typeFilterElement = document.querySelector("#deck-type-filter");
     const sortElement = document.querySelector("#deck-sort-mode");
+
+    if (locationViewElement instanceof HTMLSelectElement && locationViewElement.value !== deckLocationView) {
+        locationViewElement.value = deckLocationView;
+        updateArcaneSelectForElement(locationViewElement);
+    }
 
     if (searchElement instanceof HTMLInputElement && searchElement.value !== deckSearchQuery) {
         searchElement.value = deckSearchQuery;
@@ -12847,7 +12423,7 @@ function renderPreparationDeckRibbon(listCards) {
         listElement.innerHTML = `
             <div class="deck-empty-state">
                 <p class="empty-list-message">
-                    Keine passenden Karten im Deck.
+                    ${deckLocationView === cardLocations.trash ? "Der Papierkorb ist leer." : "Keine passenden Karten im Deck."}
                 </p>
             </div>
         `;
@@ -12863,13 +12439,25 @@ function renderPreparationDeckRibbon(listCards) {
     listElement.innerHTML = html;
 }
 
+function getPreparationLocationCards() {
+    return deckLocationView === cardLocations.trash ? getTrashCards() : getDeckCards();
+}
+
 function renderDeckWorkbenchOnly() {
-    const deckCards = getDeckCards();
+    const deckCards = getPreparationLocationCards();
     const visibleDeckCards = getVisibleDeckCards(deckCards);
 
     renderPreparationDeckRibbon(visibleDeckCards);
     updateDeckSelectionStatus();
     enhanceArcaneSelects();
+}
+
+function setDeckLocationView(value) {
+    deckLocationView = value === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
+    clearDeckSelection();
+    preserveViewportWhileRendering(function() {
+        renderDeckWorkbenchOnly();
+    });
 }
 
 function setDeckSearchQuery(value) {
@@ -12914,17 +12502,17 @@ function renderCardList(elementId, listCards, activeCard) {
     for (const card of listCards) {
         const isActive = activeCard !== null && card.id === activeCard.id;
 
-        html += createCreatureCardHtml(card, isActive);
+        html += createCardHtml(card, isActive);
     }
 
     listElement.innerHTML = html;
 }
 
 function renderCards() {
-    if (shouldAutoloadDemoCards() === true && creatures.length === 0) {
-        creatures = createDemoCreatures();
+    if (shouldAutoloadDemoCards() === true && cards.length === 0) {
+        cards = createDemoCards().map(normalizeCardModel);
         encounterName = demoEncounterName;
-        focusedCreatureId = null;
+        focusedCardId = null;
         resetEncounterStartGateState({ clearLog: true });
         isMirielBoardAutoTurnEnabled = false;
     }
@@ -12983,21 +12571,21 @@ function longRest() {
 
     }
 
-    for (const creature of creatures) {
+    for (const card of cards) {
 
-        if (creature.type === "player") {
+        if (card.type === "player") {
 
-            creature.hp = creature.maxHp;
+            card.hp = card.maxHp;
 
-            creature.tempHp = 0;
+            card.tempHp = 0;
 
-            creature.conditions = [];
+            card.conditions = [];
 
-            resetSpellSlotsForCreature(creature);
+            resetSpellSlotsForCard(card);
 
-            resetUsageCountersForCreature(creature, ["shortRest", "longRest", "encounter", "turn", "round"]);
+            resetUsageCountersForCard(card, ["shortRest", "longRest", "encounter", "turn", "round"]);
 
-            creature.isSelected = false;
+            card.isSelected = false;
 
         }
 
@@ -13415,9 +13003,9 @@ setupCrossTabSync();
 const wasStateLoaded = loadAppStateFromBrowser();
 
 if (wasStateLoaded === false && shouldAutoloadDemoCards() === true) {
-    creatures = createDemoCreatures();
+    cards = createDemoCards().map(normalizeCardModel);
     encounterName = demoEncounterName;
-    focusedCreatureId = null;
+    focusedCardId = null;
     resetEncounterStartGateState({ clearLog: true });
     isMirielBoardAutoTurnEnabled = false;
     updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
