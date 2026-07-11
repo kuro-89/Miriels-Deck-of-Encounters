@@ -1,6 +1,6 @@
 # Miriel’s Deck of Encounters
 
-v0.8.9 by kuro
+v0.9.1 by kuro
 
 Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
@@ -259,6 +259,17 @@ The archive area supports save/load workflows for:
 
 Exported JSON files are recommended for backups or prepared sessions.
 
+Import validation currently allows up to:
+
+- 1,000 cards per encounter export.
+- 150 traits and 150 actions per card.
+- 500 spells and 500 item cards per card.
+- 1,000 regular inventory entries per card.
+- 20 MB for JSON exports without embedded images.
+- 100 MB for exports containing embedded raster images.
+
+Files that exceed a limit are rejected with an error message; imported collections are not silently shortened.
+
 ### UI and Visual Design
 
 The app uses a dark fantasy interface with:
@@ -369,7 +380,7 @@ The project intentionally remains framework-free and build-step-free for now.
 
 ## Important Security Note
 
-The current app is a local browser prototype. The player-facing display is not a secure client.
+The current release is a statically hosted browser application. The player-facing display is not a security boundary because all local state is processed in the same client application.
 
 Hidden information is hidden in the interface, but the full state can still exist in the same browser-side JavaScript application.
 
@@ -381,9 +392,9 @@ The bundled demo cards have been revised to reduce reliance on names associated 
 
 Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, **Fluch der Schattenklinge**, **Gunst des Schicksals**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.8.9 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.9.1 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
-The project’s AI-generated and project-created images were not compared against every official artwork or third-party source. Asset provenance should be documented separately, and any image that reproduces a protected character, logo, trade dress, or recognizable official artwork should be replaced.
+The bundled AI-generated and project-created images are documented file by file in `ASSET_PROVENANCE.md`. According to the documented project review, they use no third-party source images, official logos, or intentionally reproduced official artwork.
 
 ## Known Limitations
 
@@ -414,11 +425,11 @@ Possible future directions include:
 - Backend image upload.
 - Optional desktop packaging.
 
-These are not promises or public roadmap commitments. The project is currently private and developed for personal use.
+These are possible development directions and not promises or public roadmap commitments. The project is currently published as a free, ad-free hobby project.
 
 ## Project Structure
 
-Typical local project structure:
+Typical project structure:
 
 ```text
 Miriels-Deck-of-Encounters/
@@ -457,7 +468,7 @@ The public, controlling legal notice is `legal.html`. In summary:
 - SRD-derived material may have been translated, shortened, renamed, or editorially rewritten.
 - Original source code, UI, original characters, original editorial text, and project-created assets remain proprietary unless a separate license says otherwise.
 - User-entered and imported content is not reviewed or licensed by the project. Users are responsible for having the necessary rights.
-- The current version is local-only, does not provide accounts, and does not automatically upload content to an operator.
+- The current GitHub Pages version stores application state locally in the browser, provides no accounts, and does not automatically upload card or encounter content to the project operator.
 
 See [`legal.html`](legal.html) for the complete notice and official source links.
 

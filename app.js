@@ -3,7 +3,21 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.8.9";
+const appVersion = "0.9.1";
+
+const importSecurityLimits = Object.freeze({
+    maxFileBytesWithoutEmbeddedImages: 20 * 1024 * 1024,
+    maxFileBytesWithEmbeddedImages: 100 * 1024 * 1024,
+    maxCreatures: 1000,
+    maxShortTextLength: 160,
+    maxMediumTextLength: 2000,
+    maxLongTextLength: 20000,
+    maxTraitsPerCreature: 150,
+    maxActionsPerCreature: 150,
+    maxSpellsPerCreature: 500,
+    maxInventoryCardsPerCreature: 500,
+    maxInventoryListItemsPerCreature: 1000
+});
 const appOperatingMode = "Statisch gehostete Browser-Version";
 
 const appStorageKey = "miriels-deck-encounter-state-v18";
@@ -3401,8 +3415,8 @@ function createCombatLogHtml() {
     for (const logMessage of messagesInDisplayOrder) {
         html += `
             <article class="combat-log-entry">
-                <span class="combat-log-time">${logMessage.time}</span>
-                <span class="combat-log-text">${logMessage.text}</span>
+                <span class="combat-log-time">${escapeHtml(logMessage.time)}</span>
+                <span class="combat-log-text">${escapeHtml(logMessage.text)}</span>
             </article>
         `;
     }
@@ -4341,18 +4355,37 @@ async function handleEncounterImportFileChange(event) {
 
     const importFile = fileInputElement.files[0];
 
+    if (importFile.size > importSecurityLimits.maxFileBytesWithEmbeddedImages) {
+        alert("Die Importdatei ist zu groß. Erlaubt sind höchstens 100 MB bei Exporten mit eingebetteten Bildern.");
+        fileInputElement.value = "";
+        return;
+    }
+
     try {
         const fileText = await readTextFile(importFile);
-        const importData = JSON.parse(fileText);
-        const encounterData = getEncounterDataFromImport(importData);
+        const containsEmbeddedImages = /data:image\/(?:png|jpe?g|webp);base64,/i.test(fileText);
+        const applicableFileLimit = containsEmbeddedImages
+            ? importSecurityLimits.maxFileBytesWithEmbeddedImages
+            : importSecurityLimits.maxFileBytesWithoutEmbeddedImages;
 
-        if (encounterData === null) {
-            alert("Die Datei enthält keinen gültigen Encounter.");
+        if (importFile.size > applicableFileLimit) {
+            const limitLabel = containsEmbeddedImages ? "100 MB" : "20 MB";
+            alert(`Die Importdatei ist zu groß. Für diesen Exporttyp sind höchstens ${limitLabel} erlaubt.`);
+            fileInputElement.value = "";
             return;
         }
 
-        showEncounterImportPreview(encounterData, importFile.name);
+        const importData = JSON.parse(fileText);
+        const validationResult = validateEncounterImport(importData);
+
+        if (validationResult.valid !== true) {
+            alert(`Die Datei konnte nicht importiert werden: ${validationResult.message}`);
+            return;
+        }
+
+        showEncounterImportPreview(validationResult.encounter, importFile.name);
     } catch (error) {
+        console.error("Encounter-Import fehlgeschlagen.", error);
         alert("Die Encounter-Datei konnte nicht importiert werden.");
     }
 }
@@ -4505,19 +4538,67 @@ function importEncounterData(encounterData) {
     renderCards();
 }
 
-function getEncounterDataFromImport(importData) {
-    if (
-        importData === null ||
-        typeof importData !== "object" ||
-        importData.formatVersion !== 2 ||
-        importData.encounter === null ||
-        typeof importData.encounter !== "object" ||
-        Array.isArray(importData.encounter.creatures) === false
-    ) {
-        return null;
+function validateEncounterImport(importData) {
+    if (importData === null || typeof importData !== "object" || Array.isArray(importData)) {
+        return { valid: false, message: "Die Hauptstruktur muss ein JSON-Objekt sein." };
     }
 
-    return importData.encounter;
+    if (importData.formatVersion !== 2) {
+        return { valid: false, message: "Diese Exportversion wird nicht unterstützt." };
+    }
+
+    const encounterData = importData.encounter;
+
+    if (encounterData === null || typeof encounterData !== "object" || Array.isArray(encounterData)) {
+        return { valid: false, message: "Encounter-Daten fehlen oder sind beschädigt." };
+    }
+
+    if (Array.isArray(encounterData.creatures) === false) {
+        return { valid: false, message: "Die Kartenliste fehlt." };
+    }
+
+    if (encounterData.creatures.length > importSecurityLimits.maxCreatures) {
+        return { valid: false, message: `Es dürfen höchstens ${importSecurityLimits.maxCreatures} Karten importiert werden.` };
+    }
+
+    for (let index = 0; index < encounterData.creatures.length; index += 1) {
+        const rawCreature = encounterData.creatures[index];
+
+        if (rawCreature === null || typeof rawCreature !== "object" || Array.isArray(rawCreature)) {
+            return { valid: false, message: `Karte ${index + 1} hat keine gültige Objektstruktur.` };
+        }
+
+        const collectionChecks = [
+            [rawCreature.traits, importSecurityLimits.maxTraitsPerCreature, "Merkmale"],
+            [rawCreature.actions, importSecurityLimits.maxActionsPerCreature, "Aktionen"],
+            [rawCreature.inventoryCards, importSecurityLimits.maxInventoryCardsPerCreature, "Itemkarten"],
+            [rawCreature.inventoryList, importSecurityLimits.maxInventoryListItemsPerCreature, "Inventareinträge"]
+        ];
+
+        for (const [collection, maximum, label] of collectionChecks) {
+            if (collection !== undefined && Array.isArray(collection) === false) {
+                return { valid: false, message: `${label} von Karte ${index + 1} müssen als Liste gespeichert sein.` };
+            }
+            if (Array.isArray(collection) && collection.length > maximum) {
+                return { valid: false, message: `${label} von Karte ${index + 1} überschreiten das erlaubte Limit.` };
+            }
+        }
+
+        if (rawCreature.spellcasting !== undefined && (rawCreature.spellcasting === null || typeof rawCreature.spellcasting !== "object" || Array.isArray(rawCreature.spellcasting))) {
+            return { valid: false, message: `Zauberdaten von Karte ${index + 1} sind ungültig.` };
+        }
+
+        if (Array.isArray(rawCreature.spellcasting?.spells) && rawCreature.spellcasting.spells.length > importSecurityLimits.maxSpellsPerCreature) {
+            return { valid: false, message: `Karte ${index + 1} enthält zu viele Zauber.` };
+        }
+    }
+
+    return { valid: true, encounter: encounterData };
+}
+
+function getEncounterDataFromImport(importData) {
+    const validationResult = validateEncounterImport(importData);
+    return validationResult.valid === true ? validationResult.encounter : null;
 }
 
 function createImportedCreatures(rawCreatures) {
@@ -4548,8 +4629,8 @@ function createImportedCreature(rawCreature, usedIds) {
 
     return {
         id: id,
-        name: getSafeString(rawCreature.name, `Karte ${id}`),
-        publicName: getSafeString(rawCreature.publicName, `Karte ${id}`),
+        name: getSafeString(rawCreature.name, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
+        publicName: getSafeString(rawCreature.publicName, `Karte ${id}`, importSecurityLimits.maxShortTextLength),
         type: getSafeCreatureType(rawCreature.type),
         initiative: getSafeInteger(rawCreature.initiative, 0),
         initiativeModifier: getSafeOptionalString(rawCreature.initiativeModifier) || getSafeOptionalString(rawCreature.dexterityModifier) || "+0",
@@ -4582,13 +4663,13 @@ function createImportedCreature(rawCreature, usedIds) {
         specialResources: getSafeOptionalString(rawCreature.specialResources),
         traits: getSafeCreatureTraits(rawCreature.traits),
         actions: getSafeCreatureActions(rawCreature.actions),
-        notes: getSafeOptionalString(rawCreature.notes),
+        notes: getSafeOptionalString(rawCreature.notes, importSecurityLimits.maxLongTextLength),
         spellcasting: getSafeSpellcasting(rawCreature.spellcasting, rawCreature),
         currency: getSafeCurrency(rawCreature.currency),
         inventoryCards: getSafeInventoryCards(rawCreature.inventoryCards),
         inventoryList: getSafeInventoryList(rawCreature.inventoryList),
         hpVisibility: getSafeHpVisibility(rawCreature.hpVisibility),
-        imageData: getSafeString(rawCreature.imageData, ""),
+        imageData: getSafeImageSource(rawCreature.imageData),
         conditions: getSafeConditions(rawCreature.conditions),
         isDemoCard: rawCreature.isDemoCard === true || isKnownDemoCreatureData(rawCreature) === true,
         isInCombat: rawCreature.isInCombat === true,
@@ -4637,12 +4718,12 @@ function isImportedPublicSelectionValid(importedSelectionId, importedCreatures) 
     return false;
 }
 
-function getSafeString(value, fallbackValue) {
+function getSafeString(value, fallbackValue, maximumLength = importSecurityLimits.maxLongTextLength) {
     if (typeof value !== "string") {
         return fallbackValue;
     }
 
-    const trimmedValue = value.trim();
+    const trimmedValue = value.trim().slice(0, maximumLength);
 
     if (trimmedValue === "") {
         return fallbackValue;
@@ -4651,12 +4732,34 @@ function getSafeString(value, fallbackValue) {
     return trimmedValue;
 }
 
-function getSafeOptionalString(value) {
+function getSafeOptionalString(value, maximumLength = importSecurityLimits.maxLongTextLength) {
     if (typeof value !== "string") {
         return "";
     }
 
-    return value.trim();
+    return value.trim().slice(0, maximumLength);
+}
+
+function getSafeImageSource(value) {
+    const source = getSafeOptionalString(value, 4 * 1024 * 1024);
+
+    if (source === "") {
+        return "";
+    }
+
+    if (/^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-z0-9+/=\s]+$/i.test(source)) {
+        return source;
+    }
+
+    if (/^blob:[a-z0-9.+-]+:/i.test(source)) {
+        return source;
+    }
+
+    if (/^(Images|assets)\/[a-z0-9_./ -]+\.(png|jpe?g|webp|gif)$/i.test(source) && source.includes("..") === false) {
+        return source;
+    }
+
+    return "";
 }
 
 function getTextAreaValue(elementId) {
@@ -6554,6 +6657,7 @@ function getSafeCreatureActions(value) {
     }
 
     return value
+        .slice(0, importSecurityLimits.maxActionsPerCreature)
         .filter(function(action) { return action !== null && typeof action === "object"; })
         .map(function(action, index) { return createCreatureAction(action, index); })
         .filter(function(action) { return action.name.trim() !== ""; });
@@ -8076,8 +8180,8 @@ function createCreatureImageHtml(creature) {
         >
             <img
                 class="creature-image"
-                src="${creature.imageData}"
-                alt="Bild von ${creature.publicName}"
+                src="${escapeAttribute(getSafeImageSource(creature.imageData))}"
+                alt="Bild von ${escapeAttribute(creature.publicName)}"
             >
         </div>
     `;
@@ -8930,9 +9034,9 @@ function createCreatureCardHtml(creature, isActive) {
                 <div class="creature-card-title-row">
                     <div class="creature-card-header">
                         <h3>
-                            ${creature.name}
+                            ${escapeHtml(creature.name)}
                             <span class="creature-public-alias">
-                                aka "${creature.publicName}"
+                                aka "${escapeHtml(creature.publicName)}"
                             </span>
                         </h3>
                     </div>
@@ -8944,7 +9048,7 @@ function createCreatureCardHtml(creature, isActive) {
 
                 <div class="creature-type-line">
                     <p>
-                        ${creature.type} · ${creature.isInCombat ? "auf der Hand" : "im Deck"}
+                        ${escapeHtml(getDeckTypeLabel(creature.type))} · ${creature.isInCombat ? "auf der Hand" : "im Deck"}
                     </p>
 
                     ${selectedTargetLabelHtml}
@@ -10705,8 +10809,8 @@ function createFocusedCreatureCardHtml(creature, activeCard) {
             <div class="active-hand-focus-card-inner">
                 <header class="active-hand-focus-header">
                     <div class="active-hand-focus-title">
-                        <h3>${creature.name}</h3>
-                        <p class="creature-public-alias">aka "${creature.publicName}"</p>
+                        <h3>${escapeHtml(creature.name)}</h3>
+                        <p class="creature-public-alias">aka "${escapeHtml(creature.publicName)}"</p>
                     </div>
 
                     ${createCardMenuHtml(creature)}
@@ -10808,7 +10912,7 @@ function createFocusStagePreviewCardHtml(creature, positionLabel) {
             <span class="focus-stage-ghost-image">
                 ${createCreatureImageHtml(creature)}
             </span>
-            <span class="focus-stage-ghost-title">${creature.name}</span>
+            <span class="focus-stage-ghost-title">${escapeHtml(creature.name)}</span>
             <span class="focus-stage-ghost-meta">Ini ${creature.initiative} · HP ${creature.hp}/${creature.maxHp}</span>
         </div>
     `;
@@ -11001,6 +11105,7 @@ function getSafeCreatureTraits(value) {
     }
 
     return value
+        .slice(0, importSecurityLimits.maxTraitsPerCreature)
         .filter(function(trait) { return trait !== null && typeof trait === "object"; })
         .map(function(trait, index) { return createCreatureTrait(trait, index); })
         .filter(function(trait) { return trait.name.trim() !== ""; });
@@ -11576,6 +11681,7 @@ function getSafeInventoryCards(value) {
     }
 
     return value
+        .slice(0, importSecurityLimits.maxInventoryCardsPerCreature)
         .filter(function(item) { return item !== null && typeof item === "object"; })
         .map(function(item, index) { return createInventoryCard(item, index); })
         .filter(function(item) { return item.name.trim() !== ""; });
@@ -11587,6 +11693,7 @@ function getSafeInventoryList(value) {
     }
 
     return value
+        .slice(0, importSecurityLimits.maxInventoryListItemsPerCreature)
         .map(function(item, index) { return createInventoryListItem(item, index); })
         .filter(function(item) { return item.name.trim() !== ""; });
 }
