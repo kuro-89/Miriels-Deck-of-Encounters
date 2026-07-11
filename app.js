@@ -3,7 +3,7 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.8.8";
+const appVersion = "0.8.9";
 const appOperatingMode = "Statisch gehostete Browser-Version";
 
 const appStorageKey = "miriels-deck-encounter-state-v18";

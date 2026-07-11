@@ -1,6 +1,6 @@
 # Miriel’s Deck of Encounters
 
-v0.8.8 by kuro
+v0.8.9 by kuro
 
 Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
@@ -381,7 +381,7 @@ The bundled demo cards have been revised to reduce reliance on names associated 
 
 Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, **Fluch der Schattenklinge**, **Gunst des Schicksals**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.8.8 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.8.9 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
 The project’s AI-generated and project-created images were not compared against every official artwork or third-party source. Asset provenance should be documented separately, and any image that reproduces a protected character, logo, trade dress, or recognizable official artwork should be replaced.
 
