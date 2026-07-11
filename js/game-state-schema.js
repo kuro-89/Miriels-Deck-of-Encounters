@@ -1,7 +1,7 @@
 "use strict";
 
 (function(globalScope) {
-    const supportedSchemaVersion = 5;
+    const supportedSchemaVersion = 7;
     const formatName = "Miriel's Deck of Encounters Game State";
 
     function isPlainObject(value) {
@@ -105,7 +105,38 @@
         normalized.name = typeof normalized.name === "string" ? normalized.name : "Unbenannter Spielstand";
         normalized.cards = Array.isArray(normalized.cards) ? normalized.cards : [];
         normalized.encounter = isPlainObject(normalized.encounter) ? normalized.encounter : {};
-        normalized.eventLog = Array.isArray(normalized.eventLog) ? normalized.eventLog : [];
+        normalized.encounter.activeRun = isPlainObject(normalized.encounter.activeRun) ? normalized.encounter.activeRun : null;
+        normalized.encounter.lastCompletedRun = isPlainObject(normalized.encounter.lastCompletedRun) ? normalized.encounter.lastCompletedRun : null;
+        normalized.eventLog = Array.isArray(normalized.eventLog)
+            ? normalized.eventLog.map(function(rawEvent) {
+                if (isPlainObject(rawEvent) === false) {
+                    return null;
+                }
+                const createdAt = typeof rawEvent.createdAt === "string"
+                    ? rawEvent.createdAt
+                    : new Date().toISOString();
+                const message = typeof rawEvent.message === "string"
+                    ? rawEvent.message
+                    : (typeof rawEvent.text === "string" ? rawEvent.text : "Ereignis protokolliert.");
+                return {
+                    id: typeof rawEvent.id === "string" && rawEvent.id !== "" ? rawEvent.id : crypto.randomUUID(),
+                    type: typeof rawEvent.type === "string" && rawEvent.type !== "" ? rawEvent.type : "system",
+                    actorParticipantId: rawEvent.actorParticipantId ?? null,
+                    sourceCardId: rawEvent.sourceCardId ?? null,
+                    targetCardId: rawEvent.targetCardId ?? null,
+                    targetCardIds: Array.isArray(rawEvent.targetCardIds) ? rawEvent.targetCardIds : [],
+                    amount: Number.isFinite(rawEvent.amount) ? rawEvent.amount : null,
+                    condition: typeof rawEvent.condition === "string" ? rawEvent.condition : null,
+                    before: rawEvent.before ?? null,
+                    after: rawEvent.after ?? null,
+                    metadata: isPlainObject(rawEvent.metadata) ? rawEvent.metadata : {},
+                    createdAt,
+                    message,
+                    time: typeof rawEvent.time === "string" ? rawEvent.time : new Date(createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+                    text: message
+                };
+            }).filter(Boolean)
+            : [];
         normalized.presentation = isPlainObject(normalized.presentation) ? normalized.presentation : {};
         normalized.settings = isPlainObject(normalized.settings) ? normalized.settings : {};
         return normalized;

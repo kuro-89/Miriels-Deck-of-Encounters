@@ -3,7 +3,7 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.16.0";
+const appVersion = "0.20.1";
 
 const cardKinds = Object.freeze({
     character: "character",
@@ -154,10 +154,9 @@ const inventoryCardTemplates = {
 
 
 
-// Zentrale Zustandsobjekte. Die bestehenden Funktionsnamen greifen über
-// Kompatibilitäts-Accessors direkt auf diese Objekte zu. Dadurch bleiben
-// Render- und Aktionslogik stabil, während gameState/uiState die einzige
-// Quelle für persistente Zustände sind.
+// Zentrale Zustandsobjekte. Sämtliche Spiel- und UI-Funktionen greifen
+// direkt auf gameState beziehungsweise uiState zu. Es gibt keine globalen
+// Kompatibilitätsvariablen mehr.
 const gameState = {
     id: crypto.randomUUID(),
     name: useDemoData ? demoEncounterName : "Unbenannter Spielstand",
@@ -166,7 +165,9 @@ const gameState = {
         roundNumber: 1,
         currentTurnCardId: null,
         isStarted: false,
-        startGateVersion: 2
+        startGateVersion: 2,
+        activeRun: null,
+        lastCompletedRun: null
     },
     eventLog: [],
     presentation: {
@@ -203,16 +204,7 @@ const uiState = {
     }
 };
 
-function defineStateAlias(name, getter, setter) {
-    Object.defineProperty(globalThis, name, {
-        configurable: false,
-        enumerable: false,
-        get: getter,
-        set: setter
-    });
-}
-
-function getCurrentTurnIndexFromState() {
+function getCurrentTurnIndex() {
     const initiativeCards = getInitiativeCards(getHandCards());
     if (initiativeCards.length === 0 || gameState.encounter.currentTurnCardId === null) {
         return 0;
@@ -221,7 +213,7 @@ function getCurrentTurnIndexFromState() {
     return index >= 0 ? index : 0;
 }
 
-function setCurrentTurnIndexInState(value) {
+function setCurrentTurnIndex(value) {
     const initiativeCards = getInitiativeCards(getHandCards());
     if (initiativeCards.length === 0) {
         gameState.encounter.currentTurnCardId = null;
@@ -231,33 +223,6 @@ function setCurrentTurnIndexInState(value) {
     const safeIndex = Math.min(Math.max(numericIndex, 0), initiativeCards.length - 1);
     gameState.encounter.currentTurnCardId = initiativeCards[safeIndex].id;
 }
-
-defineStateAlias("cards", () => gameState.cards, value => { gameState.cards = Array.isArray(value) ? value : []; });
-defineStateAlias("encounterName", () => gameState.name, value => { gameState.name = getSafeEncounterName(value); });
-defineStateAlias("roundNumber", () => gameState.encounter.roundNumber, value => { gameState.encounter.roundNumber = value; });
-defineStateAlias("currentTurnIndex", getCurrentTurnIndexFromState, setCurrentTurnIndexInState);
-defineStateAlias("isEncounterStarted", () => gameState.encounter.isStarted, value => { gameState.encounter.isStarted = value === true; });
-defineStateAlias("combatLogMessages", () => gameState.eventLog, value => { gameState.eventLog = Array.isArray(value) ? value : []; });
-defineStateAlias("manuallySelectedPublicCardId", () => gameState.presentation.manuallySelectedCardId, value => { gameState.presentation.manuallySelectedCardId = value; });
-defineStateAlias("mirielBoardManualImageData", () => gameState.presentation.mirielBoard.manualImageData, value => { gameState.presentation.mirielBoard.manualImageData = value; });
-defineStateAlias("mirielBoardManualImageName", () => gameState.presentation.mirielBoard.manualImageName, value => { gameState.presentation.mirielBoard.manualImageName = value; });
-defineStateAlias("mirielBoardManualText", () => gameState.presentation.mirielBoard.manualText, value => { gameState.presentation.mirielBoard.manualText = value; });
-defineStateAlias("mirielBoardManualTextSize", () => gameState.presentation.mirielBoard.manualTextSize, value => { gameState.presentation.mirielBoard.manualTextSize = value; });
-defineStateAlias("mirielBoardManualTextPosition", () => gameState.presentation.mirielBoard.manualTextPosition, value => { gameState.presentation.mirielBoard.manualTextPosition = value; });
-defineStateAlias("mirielBoardPersistentMode", () => gameState.presentation.mirielBoard.persistentMode, value => { gameState.presentation.mirielBoard.persistentMode = value; });
-defineStateAlias("isMirielBoardAutoTurnEnabled", () => gameState.presentation.mirielBoard.autoTurnEnabled, value => { gameState.presentation.mirielBoard.autoTurnEnabled = value === true; });
-defineStateAlias("mirielBoardDurationMode", () => gameState.presentation.mirielBoard.durationMode, value => { gameState.presentation.mirielBoard.durationMode = value; });
-defineStateAlias("isMirielBoardNewRoundCallEnabled", () => gameState.presentation.mirielBoard.newRoundCallEnabled, value => { gameState.presentation.mirielBoard.newRoundCallEnabled = value !== false; });
-defineStateAlias("mirielBoardTriggerId", () => gameState.presentation.mirielBoard.triggerId, value => { gameState.presentation.mirielBoard.triggerId = value; });
-defineStateAlias("mirielBoardAnnouncement", () => gameState.presentation.mirielBoard.announcement, value => { gameState.presentation.mirielBoard.announcement = value; });
-defineStateAlias("focusedCardId", () => uiState.focusedCardId, value => { uiState.focusedCardId = value; });
-defineStateAlias("activeDetailTab", () => uiState.activeDetailTab, value => { uiState.activeDetailTab = value; });
-defineStateAlias("activeDmFeedTab", () => uiState.activeDmFeedTab, value => { uiState.activeDmFeedTab = value; });
-defineStateAlias("expandedSpellDetailKey", () => uiState.expandedSpellDetailKey, value => { uiState.expandedSpellDetailKey = value; });
-defineStateAlias("deckSearchQuery", () => uiState.deck.searchQuery, value => { uiState.deck.searchQuery = value; });
-defineStateAlias("deckTypeFilter", () => uiState.deck.typeFilter, value => { uiState.deck.typeFilter = value; });
-defineStateAlias("deckSortMode", () => uiState.deck.sortMode, value => { uiState.deck.sortMode = value; });
-defineStateAlias("deckLocationView", () => uiState.deck.locationView, value => { uiState.deck.locationView = value; });
 
 const availableConditions = [
     "blessed",
@@ -417,11 +382,11 @@ function getSafeEncounterName(rawName) {
 }
 
 function setEncounterName(rawName, options = {}) {
-    encounterName = getSafeEncounterName(rawName);
+    gameState.name = getSafeEncounterName(rawName);
     renderEncounterNameDisplay();
 
     if (options.silent !== true) {
-        addCombatLogMessage(`Encounter benannt: ${encounterName}.`);
+        addCombatLogMessage(`Encounter benannt: ${gameState.name}.`);
         saveAndBroadcastAppState();
     }
 }
@@ -429,7 +394,7 @@ function setEncounterName(rawName, options = {}) {
 function renameEncounter() {
     const inputName = prompt(
         "Encounter benennen. Sonderzeichen werden beim Export im Dateinamen automatisch vereinfacht.",
-        getSafeEncounterName(encounterName)
+        getSafeEncounterName(gameState.name)
     );
 
     if (inputName === null) {
@@ -444,7 +409,7 @@ function renameEncounter() {
 
 function renderEncounterNameDisplay() {
     const nameElements = document.querySelectorAll("[data-encounter-name-display]");
-    const safeName = getSafeEncounterName(encounterName);
+    const safeName = getSafeEncounterName(gameState.name);
 
     for (const nameElement of nameElements) {
         nameElement.textContent = safeName;
@@ -549,12 +514,12 @@ function loadAppStateFromBrowser() {
         applyGameStateData(savedGameState);
         applyUiStateData(savedState.uiState);
 
-        if (shouldAutoloadDemoCards() === true && cards.length === 0) {
-            cards = createDemoCards().map(normalizeCardModel);
-            encounterName = demoEncounterName;
-            focusedCardId = null;
+        if (shouldAutoloadDemoCards() === true && gameState.cards.length === 0) {
+            gameState.cards = createDemoCards().map(normalizeCardModel);
+            gameState.name = demoEncounterName;
+            uiState.focusedCardId = null;
             resetEncounterStartGateState({ clearLog: true });
-            isMirielBoardAutoTurnEnabled = false;
+            gameState.presentation.mirielBoard.autoTurnEnabled = false;
             updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
             return false;
         }
@@ -582,36 +547,36 @@ function applyGameStateData(gameStateData) {
     const mirielBoardState = getSafeObject(presentationState.mirielBoard);
 
     gameState.id = getSafeOptionalString(gameStateData.id) || crypto.randomUUID();
-    encounterName = getSafeEncounterName(gameStateData.name);
-    cards = createImportedCards(gameStateData.cards);
-    roundNumber = getSafePositiveInteger(encounterState.roundNumber, 1);
-    isEncounterStarted = encounterState.isStarted === true;
+    gameState.name = getSafeEncounterName(gameStateData.name);
+    gameState.cards = createImportedCards(gameStateData.cards);
+    gameState.encounter.roundNumber = getSafePositiveInteger(encounterState.roundNumber, 1);
+    gameState.encounter.isStarted = encounterState.isStarted === true;
 
     const importedCurrentTurnCardId = Number(encounterState.currentTurnCardId);
-    if (Number.isFinite(importedCurrentTurnCardId) && cards.some(card => card.id === importedCurrentTurnCardId)) {
+    if (Number.isFinite(importedCurrentTurnCardId) && gameState.cards.some(card => card.id === importedCurrentTurnCardId)) {
         gameState.encounter.currentTurnCardId = importedCurrentTurnCardId;
     } else {
-        currentTurnIndex = getSafeNonNegativeInteger(encounterState.currentTurnIndex, 0);
+        setCurrentTurnIndex(getSafeNonNegativeInteger(encounterState.currentTurnIndex, 0));
     }
 
-    if (isImportedPublicSelectionValid(presentationState.manuallySelectedCardId, cards)) {
-        manuallySelectedPublicCardId = Number(presentationState.manuallySelectedCardId);
+    if (isImportedPublicSelectionValid(presentationState.manuallySelectedCardId, gameState.cards)) {
+        gameState.presentation.manuallySelectedCardId = Number(presentationState.manuallySelectedCardId);
     } else {
         clearManualPublicSelection();
     }
 
-    combatLogMessages = getSafeCombatLogMessages(gameStateData.eventLog);
-    mirielBoardManualImageData = getSafeString(mirielBoardState.manualImageData, "");
-    mirielBoardManualImageName = getSafeString(mirielBoardState.manualImageName, "");
-    mirielBoardManualText = getSafeString(mirielBoardState.manualText, "");
-    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(mirielBoardState.manualTextSize);
-    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(mirielBoardState.manualTextPosition);
-    mirielBoardPersistentMode = getSafeMirielBoardPersistentMode(mirielBoardState.persistentMode);
-    isMirielBoardAutoTurnEnabled = mirielBoardState.autoTurnEnabled === true;
-    mirielBoardDurationMode = getSafeMirielBoardDurationMode(mirielBoardState.durationMode);
-    isMirielBoardNewRoundCallEnabled = mirielBoardState.newRoundCallEnabled !== false;
-    mirielBoardTriggerId = getSafeOptionalString(mirielBoardState.triggerId);
-    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(mirielBoardState.announcement);
+    gameState.eventLog = getSafeCombatLogMessages(gameStateData.eventLog);
+    gameState.presentation.mirielBoard.manualImageData = getSafeString(mirielBoardState.manualImageData, "");
+    gameState.presentation.mirielBoard.manualImageName = getSafeString(mirielBoardState.manualImageName, "");
+    gameState.presentation.mirielBoard.manualText = getSafeString(mirielBoardState.manualText, "");
+    gameState.presentation.mirielBoard.manualTextSize = getSafeMirielBoardManualTextSize(mirielBoardState.manualTextSize);
+    gameState.presentation.mirielBoard.manualTextPosition = getSafeMirielBoardManualTextPosition(mirielBoardState.manualTextPosition);
+    gameState.presentation.mirielBoard.persistentMode = getSafeMirielBoardPersistentMode(mirielBoardState.persistentMode);
+    gameState.presentation.mirielBoard.autoTurnEnabled = mirielBoardState.autoTurnEnabled === true;
+    gameState.presentation.mirielBoard.durationMode = getSafeMirielBoardDurationMode(mirielBoardState.durationMode);
+    gameState.presentation.mirielBoard.newRoundCallEnabled = mirielBoardState.newRoundCallEnabled !== false;
+    gameState.presentation.mirielBoard.triggerId = getSafeOptionalString(mirielBoardState.triggerId);
+    gameState.presentation.mirielBoard.announcement = getSafeMirielBoardAnnouncement(mirielBoardState.announcement);
     gameState.settings = { ...gameState.settings, ...getSafeObject(gameStateData.settings) };
 
     const handCards = getHandCards();
@@ -619,23 +584,23 @@ function applyGameStateData(gameStateData) {
 }
 
 function applyUiStateData(rawUiState) {
-    const uiState = getSafeObject(rawUiState);
+    const incomingUiState = getSafeObject(rawUiState);
 
-    if (isImportedPublicSelectionValid(uiState.focusedCardId, cards)) {
-        focusedCardId = Number(uiState.focusedCardId);
+    if (isImportedPublicSelectionValid(incomingUiState.focusedCardId, gameState.cards)) {
+        uiState.focusedCardId = Number(incomingUiState.focusedCardId);
     } else {
-        focusedCardId = null;
+        uiState.focusedCardId = null;
     }
 
-    activeDetailTab = getSafeDetailTab(uiState.activeDetailTab);
-    activeDmFeedTab = getSafeDmFeedTab(uiState.activeDmFeedTab);
-    expandedSpellDetailKey = getSafeOptionalString(uiState.expandedSpellDetailKey);
+    uiState.activeDetailTab = getSafeDetailTab(incomingUiState.activeDetailTab);
+    uiState.activeDmFeedTab = getSafeDmFeedTab(incomingUiState.activeDmFeedTab);
+    uiState.expandedSpellDetailKey = getSafeOptionalString(incomingUiState.expandedSpellDetailKey);
 
-    const deckUiState = getSafeObject(uiState.deck);
-    deckSearchQuery = getSafeString(deckUiState.searchQuery, "");
-    deckTypeFilter = ["all", "player", "npc", "monster"].includes(deckUiState.typeFilter) ? deckUiState.typeFilter : "all";
-    deckSortMode = ["name", "initiative", "type"].includes(deckUiState.sortMode) ? deckUiState.sortMode : "name";
-    deckLocationView = deckUiState.locationView === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
+    const deckUiState = getSafeObject(incomingUiState.deck);
+    uiState.deck.searchQuery = getSafeString(deckUiState.searchQuery, "");
+    uiState.deck.typeFilter = ["all", "player", "npc", "monster"].includes(deckUiState.typeFilter) ? deckUiState.typeFilter : "all";
+    uiState.deck.sortMode = ["name", "initiative", "type"].includes(deckUiState.sortMode) ? deckUiState.sortMode : "name";
+    uiState.deck.locationView = deckUiState.locationView === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
 }
 
 function applyExternalAppStateAndRender() {
@@ -737,11 +702,11 @@ function reloadDemoCards() {
     }
 
     setDemoCardsAutoloadEnabled(true);
-    cards = createDemoCards().map(normalizeCardModel);
-    encounterName = demoEncounterName;
-    focusedCardId = null;
+    gameState.cards = createDemoCards().map(normalizeCardModel);
+    gameState.name = demoEncounterName;
+    uiState.focusedCardId = null;
     resetEncounterStartGateState({ clearLog: true });
-    isMirielBoardAutoTurnEnabled = false;
+    gameState.presentation.mirielBoard.autoTurnEnabled = false;
     addCombatLogMessage("Demo-Karten geladen.");
 
     renderCards();
@@ -755,7 +720,7 @@ function isDemoCard(card) {
 }
 
 function removeDemoCards() {
-    const demoCards = cards.filter(isDemoCard);
+    const demoCards = gameState.cards.filter(isDemoCard);
 
     if (demoCards.length === 0) {
         alert("Es sind keine Demo-Karten vorhanden.");
@@ -775,20 +740,20 @@ function removeDemoCards() {
     });
 
     setDemoCardsAutoloadEnabled(false);
-    cards = cards.filter(function(card) {
+    gameState.cards = gameState.cards.filter(function(card) {
         return isDemoCard(card) === false;
     });
 
-    if (focusedCardId !== null && removedIds.includes(focusedCardId) === true) {
-        focusedCardId = null;
+    if (uiState.focusedCardId !== null && removedIds.includes(uiState.focusedCardId) === true) {
+        uiState.focusedCardId = null;
     }
 
-    if (manuallySelectedPublicCardId !== null && removedIds.includes(manuallySelectedPublicCardId) === true) {
+    if (gameState.presentation.manuallySelectedCardId !== null && removedIds.includes(gameState.presentation.manuallySelectedCardId) === true) {
         clearManualPublicSelection();
     }
 
     resetEncounterStartGateState({ resetTurn: true });
-    focusedCardId = null;
+    uiState.focusedCardId = null;
     ensureCurrentTurnIndexIsValid(getHandCards());
     addCombatLogMessage(`${demoCards.length} Demo-Karte(n) entfernt.`);
 
@@ -961,7 +926,7 @@ function createOutOfActionStampHtml(entity) {
 }
 
 function getHandCards() {
-    const handCards = cards.filter(function(card) {
+    const handCards = gameState.cards.filter(function(card) {
         return getCardLocation(card) === cardLocations.hand;
     });
 
@@ -983,7 +948,7 @@ function getHandCards() {
 }
 
 function getDeckCards() {
-    const deckCards = cards.filter(function(card) {
+    const deckCards = gameState.cards.filter(function(card) {
         return getCardLocation(card) === cardLocations.deck;
     });
 
@@ -1001,7 +966,7 @@ function getDeckCards() {
 }
 
 function getTrashCards() {
-    return cards
+    return gameState.cards
         .filter(function(card) {
             return getCardLocation(card) === cardLocations.trash;
         })
@@ -1044,7 +1009,7 @@ function getCardDeckSearchText(card) {
 }
 
 function doesCardMatchDeckSearch(card) {
-    const normalizedQuery = normalizeDeckSearchText(deckSearchQuery);
+    const normalizedQuery = normalizeDeckSearchText(uiState.deck.searchQuery);
 
     if (normalizedQuery === "") {
         return true;
@@ -1062,16 +1027,16 @@ function doesCardMatchDeckSearch(card) {
 }
 
 function doesCardMatchDeckTypeFilter(card) {
-    if (deckTypeFilter === "all") {
+    if (uiState.deck.typeFilter === "all") {
         return true;
     }
 
-    return card.type === deckTypeFilter;
+    return card.type === uiState.deck.typeFilter;
 }
 
 function sortDeckCardsForWorkbench(deckCards) {
     deckCards.sort(function(a, b) {
-        if (deckSortMode === "type") {
+        if (uiState.deck.sortMode === "type") {
             const typeDifference = getTypeSortValue(a.type) - getTypeSortValue(b.type);
 
             if (typeDifference !== 0) {
@@ -1079,7 +1044,7 @@ function sortDeckCardsForWorkbench(deckCards) {
             }
         }
 
-        if (deckSortMode === "initiativeModifier") {
+        if (uiState.deck.sortMode === "initiativeModifier") {
             const modifierDifference = getCardInitiativeModifier(b) - getCardInitiativeModifier(a);
 
             if (modifierDifference !== 0) {
@@ -1087,7 +1052,7 @@ function sortDeckCardsForWorkbench(deckCards) {
             }
         }
 
-        if (deckSortMode === "hp") {
+        if (uiState.deck.sortMode === "hp") {
             const hpDifference = Number(b.maxHp || 0) - Number(a.maxHp || 0);
 
             if (hpDifference !== 0) {
@@ -1115,23 +1080,23 @@ function getVisibleDeckCards(deckCards = getDeckCards()) {
 // ============================================================
 
 function getFocusedCard(handCards, activeCard) {
-    if (focusedCardId !== null) {
-        const focusedCard = findCardById(focusedCardId);
+    if (uiState.focusedCardId !== null) {
+        const focusedCard = findCardById(uiState.focusedCardId);
 
         if (focusedCard !== null) {
             return focusedCard;
         }
 
-        focusedCardId = null;
+        uiState.focusedCardId = null;
     }
 
     if (activeCard !== null) {
-        focusedCardId = activeCard.id;
+        uiState.focusedCardId = activeCard.id;
         return activeCard;
     }
 
     if (handCards.length > 0) {
-        focusedCardId = handCards[0].id;
+        uiState.focusedCardId = handCards[0].id;
         return handCards[0];
     }
 
@@ -1439,7 +1404,7 @@ function setFocusedCard(cardId) {
     }
 
     prepareDmFocusTransition(cardId);
-    focusedCardId = cardId;
+    uiState.focusedCardId = cardId;
     preserveViewportWhileRendering(function() {
         renderCards();
     });
@@ -1463,7 +1428,7 @@ function setFocusedDeckCard(cardId) {
         return;
     }
 
-    focusedCardId = cardId;
+    uiState.focusedCardId = cardId;
     renderCards();
 
     requestAnimationFrame(function() {
@@ -1494,8 +1459,8 @@ function showDeckCardFromFocus(cardId) {
         return;
     }
 
-    if (focusedCardId === cardId) {
-        focusedCardId = getDefaultFocusedHandCardId();
+    if (uiState.focusedCardId === cardId) {
+        uiState.focusedCardId = getDefaultFocusedHandCardId();
     }
 
     renderCards();
@@ -1534,15 +1499,15 @@ function focusActiveCard() {
     }
 
     prepareDmFocusTransition(activeCard.id);
-    focusedCardId = activeCard.id;
+    uiState.focusedCardId = activeCard.id;
     renderCardsPreservingViewport();
 }
 
 function setActiveDetailTab(tabName) {
-    activeDetailTab = getSafeDetailTab(tabName);
+    uiState.activeDetailTab = getSafeDetailTab(tabName);
 
-    if (activeDetailTab !== "spells") {
-        expandedSpellDetailKey = null;
+    if (uiState.activeDetailTab !== "spells") {
+        uiState.expandedSpellDetailKey = null;
     }
 
     preserveViewportWhileRendering(function() {
@@ -1551,7 +1516,7 @@ function setActiveDetailTab(tabName) {
 }
 
 function setActiveDmFeedTab(tabName) {
-    activeDmFeedTab = getSafeDmFeedTab(tabName);
+    uiState.activeDmFeedTab = getSafeDmFeedTab(tabName);
     renderCards();
 }
 
@@ -1589,7 +1554,7 @@ function focusAdjacentHandCard(direction) {
 
     const nextFocusedCardId = handCards[focusedIndex].id;
     prepareDmFocusTransition(nextFocusedCardId, direction);
-    focusedCardId = nextFocusedCardId;
+    uiState.focusedCardId = nextFocusedCardId;
     preserveViewportWhileRendering(function() {
         renderCards();
     });
@@ -1600,23 +1565,23 @@ function focusAdjacentHandCard(direction) {
 // ============================================================
 
 function hasManualPublicSelection() {
-    return manuallySelectedPublicCardId !== null;
+    return gameState.presentation.manuallySelectedCardId !== null;
 }
 
 function shouldPlayerSideFollowActiveCard() {
-    return manuallySelectedPublicCardId === null;
+    return gameState.presentation.manuallySelectedCardId === null;
 }
 
 function isCardManuallySelected(card) {
-    return hasManualPublicSelection() && card.id === manuallySelectedPublicCardId;
+    return hasManualPublicSelection() && card.id === gameState.presentation.manuallySelectedCardId;
 }
 
 function isPublicCardManuallySelected(publicCard) {
-    return hasManualPublicSelection() && publicCard.id === manuallySelectedPublicCardId;
+    return hasManualPublicSelection() && publicCard.id === gameState.presentation.manuallySelectedCardId;
 }
 
 function clearManualPublicSelection() {
-    manuallySelectedPublicCardId = null;
+    gameState.presentation.manuallySelectedCardId = null;
 }
 
 function toggleCardTurnOrder(cardId) {
@@ -1642,14 +1607,14 @@ function toggleCardTurnOrder(cardId) {
     const initiativeCards = getInitiativeCards();
 
     if (initiativeCards.length === 0) {
-        currentTurnIndex = 0;
+        setCurrentTurnIndex(0);
     } else if (activeCardIdBeforeChange !== null && activeCardIdBeforeChange !== card.id) {
         const retainedActiveIndex = initiativeCards.findIndex(function(card) {
             return card.id === activeCardIdBeforeChange;
         });
-        currentTurnIndex = retainedActiveIndex >= 0 ? retainedActiveIndex : Math.min(currentTurnIndex, initiativeCards.length - 1);
+        setCurrentTurnIndex(retainedActiveIndex >= 0 ? retainedActiveIndex : Math.min(getCurrentTurnIndex(), initiativeCards.length - 1));
     } else {
-        currentTurnIndex = Math.min(currentTurnIndex, initiativeCards.length - 1);
+        setCurrentTurnIndex(Math.min(getCurrentTurnIndex(), initiativeCards.length - 1));
     }
 
     clearManualPublicSelection();
@@ -1696,7 +1661,7 @@ function toggleCardSelection(cardId) {
 }
 
 function clearCardSelection() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         card.isSelected = false;
     }
 
@@ -1704,7 +1669,7 @@ function clearCardSelection() {
 }
 
 function clearDeckSelection() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === false) {
             card.isSelected = false;
         }
@@ -1716,7 +1681,7 @@ function clearDeckSelection() {
 }
 
 function selectAllHandCards() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === true) {
             card.isSelected = true;
         }
@@ -1726,7 +1691,7 @@ function selectAllHandCards() {
 }
 
 function selectAllDeckCards() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === false) {
             card.isSelected = true;
         }
@@ -1813,17 +1778,17 @@ function ensureCurrentTurnIndexIsValid(handCards) {
     const initiativeCards = getInitiativeCards(handCards);
 
     if (initiativeCards.length === 0) {
-        currentTurnIndex = 0;
+        setCurrentTurnIndex(0);
         clearManualPublicSelection();
         return;
     }
 
-    if (currentTurnIndex < 0) {
-        currentTurnIndex = 0;
+    if (getCurrentTurnIndex() < 0) {
+        setCurrentTurnIndex(0);
     }
 
-    if (currentTurnIndex >= initiativeCards.length) {
-        currentTurnIndex = initiativeCards.length - 1;
+    if (getCurrentTurnIndex() >= initiativeCards.length) {
+        setCurrentTurnIndex(initiativeCards.length - 1);
     }
 }
 
@@ -1835,15 +1800,167 @@ function getActiveCard(handCards) {
         return null;
     }
 
-    return initiativeCards[currentTurnIndex];
+    return initiativeCards[getCurrentTurnIndex()];
+}
+
+
+function createEncounterRunId() {
+    return typeof crypto?.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `encounter-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function createEncounterSnapshot(snapshotType) {
+    const handCards = getHandCards();
+    const activeCard = getActiveCard(handCards);
+    return {
+        snapshotType,
+        createdAt: new Date().toISOString(),
+        gameStateId: gameState.id,
+        gameStateName: gameState.name,
+        roundNumber: gameState.encounter.roundNumber,
+        currentTurnCardId: gameState.encounter.currentTurnCardId,
+        activeCardName: activeCard?.name ?? null,
+        cards: structuredClone(handCards),
+        presentation: structuredClone(gameState.presentation)
+    };
+}
+
+function getCurrentEncounterRunForExport() {
+    if (gameState.encounter.isStarted === true && gameState.encounter.activeRun !== null) {
+        return {
+            ...structuredClone(gameState.encounter.activeRun),
+            endedAt: null,
+            endSnapshot: createEncounterSnapshot("current"),
+            status: "active"
+        };
+    }
+    if (gameState.encounter.lastCompletedRun !== null) {
+        return {
+            ...structuredClone(gameState.encounter.lastCompletedRun),
+            status: "completed"
+        };
+    }
+    return null;
+}
+
+function getEventsForEncounterRun(run) {
+    if (run === null) {
+        return [];
+    }
+    return gameState.eventLog
+        .filter(event => event?.metadata?.encounterRunId === run.id)
+        .slice()
+        .reverse();
+}
+
+function createEncounterChronicleExportData() {
+    const run = getCurrentEncounterRunForExport();
+    if (run === null) {
+        return null;
+    }
+    return {
+        formatName: "Miriel's Deck of Encounters Encounter Chronicle",
+        schemaVersion: 1,
+        exportedAt: new Date().toISOString(),
+        metadata: {
+            appVersion,
+            gameStateId: gameState.id,
+            gameStateName: gameState.name
+        },
+        encounter: run,
+        events: getEventsForEncounterRun(run)
+    };
+}
+
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function formatReportDate(value) {
+    const parsed = Date.parse(value || "");
+    return Number.isNaN(parsed) ? "—" : new Date(parsed).toLocaleString("de-DE");
+}
+
+function createEncounterReportHtml() {
+    const data = createEncounterChronicleExportData();
+    if (data === null) {
+        return null;
+    }
+    const run = data.encounter;
+    const startCards = Array.isArray(run.startSnapshot?.cards) ? run.startSnapshot.cards : [];
+    const endCards = Array.isArray(run.endSnapshot?.cards) ? run.endSnapshot.cards : [];
+    const cardRows = endCards.map(card => `
+        <tr>
+            <td>${escapeHtml(card.name)}</td>
+            <td>${escapeHtml(card.characterRole || card.type || card.cardKind || "Karte")}</td>
+            <td>${escapeHtml(card.hp)} / ${escapeHtml(card.maxHp)}</td>
+            <td>${escapeHtml(card.tempHp ?? 0)}</td>
+            <td>${escapeHtml(Array.isArray(card.conditions) && card.conditions.length ? card.conditions.join(", ") : "—")}</td>
+        </tr>`).join("");
+    const eventRows = data.events.map(event => `
+        <li>
+            <time>${escapeHtml(formatReportDate(event.createdAt))}</time>
+            <span>${escapeHtml(event.message || event.text || "Ereignis")}</span>
+            ${event.metadata?.undoneByEventId ? '<strong class="undone">Rückgängig gemacht</strong>' : ''}
+        </li>`).join("");
+    return `<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encounter-Bericht – ${escapeHtml(gameState.name)}</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:1000px;margin:0 auto;padding:32px;color:#21182f;background:#faf8fc}h1,h2{color:#4b2e5b}header{border-bottom:2px solid #8d6be8;margin-bottom:24px}.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.meta div,section{background:#fff;border:1px solid #ded5e8;border-radius:12px;padding:16px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px;border-bottom:1px solid #e9e2ef}ol{padding-left:24px}li{margin:0 0 10px;display:grid;grid-template-columns:170px 1fr auto;gap:12px}.undone{color:#7a2f46}@media print{body{background:#fff;padding:0}section,.meta div{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header><h1>Encounter-Bericht</h1><p>${escapeHtml(gameState.name)}</p></header>
+<div class="meta">
+<div><strong>Status</strong><br>${run.status === "active" ? "Laufender Encounter" : "Abgeschlossener Encounter"}</div>
+<div><strong>Beginn</strong><br>${escapeHtml(formatReportDate(run.startedAt))}</div>
+<div><strong>Ende</strong><br>${escapeHtml(run.endedAt ? formatReportDate(run.endedAt) : "noch nicht beendet")}</div>
+<div><strong>Ereignisse</strong><br>${data.events.length}</div>
+</div>
+<section><h2>Zusammenfassung</h2><p>Start: ${startCards.length} Karten auf der Hand. Ende/aktueller Stand: ${endCards.length} Karten.</p></section>
+<section><h2>Karten am Ende</h2><table><thead><tr><th>Name</th><th>Rolle</th><th>HP</th><th>Temp HP</th><th>Conditions</th></tr></thead><tbody>${cardRows || '<tr><td colspan="5">Keine Karten vorhanden.</td></tr>'}</tbody></table></section>
+<section><h2>Chronik</h2><ol>${eventRows || '<li>Keine Ereignisse vorhanden.</li>'}</ol></section>
+</body></html>`;
+}
+
+function createEncounterExportBaseName() {
+    return `miriels-deck-encounter-${createSafeFileNameSegment(gameState.name)}-${createExportTimestampText()}`;
+}
+
+function exportEncounterChronicleJson() {
+    const data = createEncounterChronicleExportData();
+    if (data === null) {
+        alert("Es gibt noch keinen laufenden oder abgeschlossenen Encounter, der exportiert werden kann.");
+        return;
+    }
+    downloadTextFile(`${createEncounterExportBaseName()}-chronik.json`, JSON.stringify(data, null, 4), "application/json");
+}
+
+function exportEncounterReportHtml() {
+    const html = createEncounterReportHtml();
+    if (html === null) {
+        alert("Es gibt noch keinen laufenden oder abgeschlossenen Encounter, der exportiert werden kann.");
+        return;
+    }
+    downloadTextFile(`${createEncounterExportBaseName()}-bericht.html`, html, "text/html;charset=utf-8");
 }
 
 function triggerMirielBoardForEncounterStart() {
     const activeCard = getActiveCard(getHandCards());
 
-    mirielBoardTriggerId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    mirielBoardAnnouncement = {
-        roundNumber: roundNumber,
+    gameState.presentation.mirielBoard.triggerId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    gameState.presentation.mirielBoard.announcement = {
+        roundNumber: gameState.encounter.roundNumber,
         activeName: activeCard !== null ? activeCard.publicName || activeCard.name : "",
         isNewRound: true,
         type: "encounter-start",
@@ -1865,23 +1982,41 @@ function startEncounter() {
         return;
     }
 
-    currentTurnIndex = 0;
-    roundNumber = 1;
-    isEncounterStarted = true;
+    setCurrentTurnIndex(0);
+    gameState.encounter.roundNumber = 1;
+    gameState.encounter.isStarted = true;
     clearManualPublicSelection();
 
     const activeCard = getActiveCard(handCards);
 
     if (activeCard !== null) {
-        focusedCardId = activeCard.id;
+        uiState.focusedCardId = activeCard.id;
         resetUsageCountersForCard(activeCard, ["turn"]);
         for (const card of handCards) {
             resetUsageCountersForCard(card, ["round"]);
         }
     }
 
+    const startedAt = new Date().toISOString();
+    gameState.encounter.activeRun = {
+        id: createEncounterRunId(),
+        startedAt,
+        endedAt: null,
+        startSnapshot: createEncounterSnapshot("start"),
+        endSnapshot: null
+    };
+
     triggerMirielBoardForEncounterStart();
-    addCombatLogMessage("Encounter gestartet. Runde 1 beginnt.");
+    recordGameEvent({
+        type: "encounter_started",
+        targetCardId: activeCard?.id ?? null,
+        after: {
+            roundNumber: gameState.encounter.roundNumber,
+            currentTurnCardId: gameState.encounter.currentTurnCardId,
+            isStarted: true
+        },
+        message: "Encounter gestartet. Runde 1 beginnt."
+    });
     saveAndBroadcastAppState();
     renderCardsPreservingViewport();
 }
@@ -1890,31 +2025,42 @@ function nextTurn() {
     const handCards = getHandCards();
     const initiativeCards = getInitiativeCards(handCards);
 
-    if (isEncounterStarted !== true || initiativeCards.length === 0) {
+    if (gameState.encounter.isStarted !== true || initiativeCards.length === 0) {
         return;
     }
 
-    currentTurnIndex = currentTurnIndex + 1;
+    const activeTurnIndex = getCurrentTurnIndex();
+    const nextTurnIndex = activeTurnIndex + 1;
+    const startsNewRound = nextTurnIndex >= initiativeCards.length;
+    setCurrentTurnIndex(startsNewRound ? 0 : nextTurnIndex);
     clearManualPublicSelection();
 
-    if (currentTurnIndex >= initiativeCards.length) {
-        currentTurnIndex = 0;
-        roundNumber = roundNumber + 1;
+    if (startsNewRound) {
+        gameState.encounter.roundNumber = gameState.encounter.roundNumber + 1;
     }
 
     const newActiveCard = getActiveCard(handCards);
 
     if (newActiveCard !== null) {
         prepareDmFocusTransition(newActiveCard.id, "next");
-        focusedCardId = newActiveCard.id;
+        uiState.focusedCardId = newActiveCard.id;
         resetUsageCountersForCard(newActiveCard, ["turn"]);
-        if (currentTurnIndex === 0) {
+        if (getCurrentTurnIndex() === 0) {
             for (const card of getHandCards()) {
                 resetUsageCountersForCard(card, ["round"]);
             }
         }
-        triggerMirielBoardForTurn(currentTurnIndex === 0);
-        addCombatLogMessage(`Nächster Zug: ${newActiveCard.name}.`);
+        triggerMirielBoardForTurn(getCurrentTurnIndex() === 0);
+        recordGameEvent({
+            type: startsNewRound ? "round_changed" : "turn_changed",
+            targetCardId: newActiveCard.id,
+            after: {
+                roundNumber: gameState.encounter.roundNumber,
+                currentTurnCardId: newActiveCard.id
+            },
+            metadata: { direction: "next", startsNewRound },
+            message: `Nächster Zug: ${newActiveCard.name}.`
+        });
     }
 
     renderCardsPreservingViewport();
@@ -1924,38 +2070,49 @@ function previousTurn() {
     const handCards = getHandCards();
     const initiativeCards = getInitiativeCards(handCards);
 
-    if (isEncounterStarted !== true || initiativeCards.length === 0) {
+    if (gameState.encounter.isStarted !== true || initiativeCards.length === 0) {
         return;
     }
 
-    currentTurnIndex = currentTurnIndex - 1;
-    clearManualPublicSelection();
+    const activeTurnIndex = getCurrentTurnIndex();
+    const crossesRoundBoundary = activeTurnIndex === 0 && gameState.encounter.roundNumber > 1;
+    const previousTurnIndex = activeTurnIndex > 0
+        ? activeTurnIndex - 1
+        : (crossesRoundBoundary ? initiativeCards.length - 1 : 0);
 
-    if (currentTurnIndex < 0) {
-        currentTurnIndex = initiativeCards.length - 1;
-
-        if (roundNumber > 1) {
-            roundNumber = roundNumber - 1;
-        }
+    if (crossesRoundBoundary) {
+        gameState.encounter.roundNumber = gameState.encounter.roundNumber - 1;
     }
+
+    setCurrentTurnIndex(previousTurnIndex);
+    clearManualPublicSelection();
 
     const newActiveCard = getActiveCard(getHandCards());
 
     if (newActiveCard !== null) {
         prepareDmFocusTransition(newActiveCard.id, "previous");
-        focusedCardId = newActiveCard.id;
-        triggerMirielBoardForTurn(currentTurnIndex === 0);
-        addCombatLogMessage(`Vorheriger Zug: ${newActiveCard.name}.`);
+        uiState.focusedCardId = newActiveCard.id;
+        triggerMirielBoardForTurn(false);
+        recordGameEvent({
+            type: crossesRoundBoundary ? "round_changed" : "turn_changed",
+            targetCardId: newActiveCard.id,
+            after: {
+                roundNumber: gameState.encounter.roundNumber,
+                currentTurnCardId: newActiveCard.id
+            },
+            metadata: { direction: "previous", crossesRoundBoundary },
+            message: `Vorheriger Zug: ${newActiveCard.name}.`
+        });
     }
 
     renderCardsPreservingViewport();
 }
 
 function resetCombatTurnCounter() {
-    currentTurnIndex = 0;
-    roundNumber = 1;
+    setCurrentTurnIndex(0);
+    gameState.encounter.roundNumber = 1;
     clearManualPublicSelection();
-    focusedCardId = null;
+    uiState.focusedCardId = null;
 
     for (const card of getHandCards()) {
         resetUsageCountersForCard(card, ["turn", "round"]);
@@ -2028,7 +2185,7 @@ function scrollPlayerSide(direction) {
 }
 
 function focusPublicCard(publicCardId) {
-    manuallySelectedPublicCardId = publicCardId;
+    gameState.presentation.manuallySelectedCardId = publicCardId;
     renderCards();
 }
 
@@ -2070,7 +2227,7 @@ function navigatePlayerSide(direction) {
         }
     }
 
-    manuallySelectedPublicCardId = publicCards[nextFocusedIndex].id;
+    gameState.presentation.manuallySelectedCardId = publicCards[nextFocusedIndex].id;
 
     renderCards();
 }
@@ -2202,6 +2359,13 @@ function setupClickAwayBehavior() {
             closeFloatingDetailsExcept(activeFloatingDetails);
         }
 
+        const activeCombatLogEntry = targetElement.closest(".combat-log-entry");
+        if (activeCombatLogEntry === null) {
+            closeCombatLogInlinePanelsExcept(null);
+        } else {
+            closeCombatLogInlinePanelsExcept(activeCombatLogEntry);
+        }
+
         const clickPath = typeof event.composedPath === "function" ? event.composedPath() : [];
         const drawerElement = getCardForgeDrawerElement();
 
@@ -2256,7 +2420,7 @@ function setupClickAwayBehavior() {
 // ============================================================
 
 function findCardById(id) {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.id === id) {
             return card;
         }
@@ -2268,7 +2432,7 @@ function findCardById(id) {
 function getNextCardId() {
     let highestId = 0;
 
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.id > highestId) {
             highestId = card.id;
         }
@@ -2283,7 +2447,7 @@ function createCardCopyName(baseName) {
     let copyName = copyBaseName;
     let counter = 2;
 
-    while (cards.some(function(card) { return card.name === copyName; }) === true) {
+    while (gameState.cards.some(function(card) { return card.name === copyName; }) === true) {
         copyName = `${copyBaseName} ${counter}`;
         counter += 1;
     }
@@ -2323,7 +2487,7 @@ function copyCardToDeck(cardId) {
     cardCopy.deletedAt = null;
     cardCopy.isDemoCard = false;
 
-    cards.push(cardCopy);
+    gameState.cards.push(cardCopy);
     addCombatLogMessage(`Karte kopiert und ins Deck gelegt: ${cardCopy.name}.`);
 
     preserveViewportWhileRendering(function() {
@@ -2347,12 +2511,12 @@ function moveCardToTrash(id) {
     card.deletedAt = new Date().toISOString();
     addCombatLogMessage(`Karte in den Papierkorb verschoben: ${card.name}.`);
 
-    if (manuallySelectedPublicCardId === id) {
+    if (gameState.presentation.manuallySelectedCardId === id) {
         clearManualPublicSelection();
     }
 
-    if (focusedCardId === id) {
-        focusedCardId = null;
+    if (uiState.focusedCardId === id) {
+        uiState.focusedCardId = null;
     }
 
     const handCards = getHandCards();
@@ -2391,12 +2555,12 @@ function permanentlyDeleteCard(cardId) {
         return;
     }
 
-    cards = cards.filter(function(existingCard) {
+    gameState.cards = gameState.cards.filter(function(existingCard) {
         return existingCard.id !== cardId;
     });
 
-    if (focusedCardId === cardId) {
-        focusedCardId = null;
+    if (uiState.focusedCardId === cardId) {
+        uiState.focusedCardId = null;
     }
 
     addCombatLogMessage(`Karte endgültig gelöscht: ${card.name}.`);
@@ -2431,12 +2595,12 @@ function moveCardToDeck(cardId) {
     setCardLocation(card, cardLocations.deck);
     card.encounterStatus = null;
 
-    if (manuallySelectedPublicCardId === cardId) {
+    if (gameState.presentation.manuallySelectedCardId === cardId) {
         clearManualPublicSelection();
     }
 
-    if (focusedCardId === cardId) {
-        focusedCardId = null;
+    if (uiState.focusedCardId === cardId) {
+        uiState.focusedCardId = null;
     }
 
     const handCards = getHandCards();
@@ -2452,7 +2616,7 @@ function moveCardToDeck(cardId) {
 }
 
 function moveAllHandCardsToDeck() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (getCardLocation(card) === cardLocations.hand) {
             setCardLocation(card, cardLocations.deck);
             card.encounterStatus = null;
@@ -2460,13 +2624,13 @@ function moveAllHandCardsToDeck() {
     }
 
     resetEncounterStartGateState({ resetTurn: true });
-    focusedCardId = null;
+    uiState.focusedCardId = null;
 
     renderCards();
 }
 
 function moveAllDeckCardsToHand() {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (getCardLocation(card) === cardLocations.deck) {
             setCardLocation(card, cardLocations.hand);
             setEncounterStatus(card, encounterStatuses.active);
@@ -2504,7 +2668,7 @@ function moveSelectedDeckCardsToHand() {
 }
 
 function moveHandCardsOfTypeToDeck(type) {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === true && card.type === type) {
             card.isInCombat = false;
             card.isSelected = false;
@@ -2520,7 +2684,7 @@ function moveHandCardsOfTypeToDeck(type) {
 }
 
 function moveDeckCardsOfTypeToHand(type) {
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === false && card.type === type) {
             card.isInCombat = true;
             card.isSelected = false;
@@ -2540,7 +2704,7 @@ function clearAllTempHp() {
         return;
     }
 
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         card.tempHp = 0;
     }
 
@@ -2555,7 +2719,7 @@ function clearConditionsFromHandCards() {
         return;
     }
 
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === true) {
             card.conditions = [];
         }
@@ -2576,6 +2740,7 @@ function endCombat() {
 
     const handCardsBeforeEnd = getHandCards();
     const movedCardCount = handCardsBeforeEnd.length;
+    const endSnapshotBeforeMove = createEncounterSnapshot("end");
 
     for (const card of handCardsBeforeEnd) {
         resetUsageCountersForCard(card, ["encounter", "turn", "round"]);
@@ -2587,7 +2752,7 @@ function endCombat() {
         movedCardNamesText = createTargetNamesText(handCardsBeforeEnd);
     }
 
-    for (const card of cards) {
+    for (const card of gameState.cards) {
         if (card.isInCombat === true) {
             card.isInCombat = false;
         }
@@ -2595,6 +2760,32 @@ function endCombat() {
         card.isSelected = false;
     }
 
+    const completedRun = gameState.encounter.activeRun !== null
+        ? {
+            ...structuredClone(gameState.encounter.activeRun),
+            endedAt: new Date().toISOString(),
+            endSnapshot: endSnapshotBeforeMove
+        }
+        : null;
+
+    recordGameEvent({
+        type: "encounter_ended",
+        before: {
+            roundNumber: gameState.encounter.roundNumber,
+            currentTurnCardId: gameState.encounter.currentTurnCardId,
+            isStarted: true
+        },
+        after: {
+            movedCardCount,
+            isStarted: false
+        },
+        message: `Encounter beendet. ${movedCardCount} Karte(n) ins Deck verschoben: ${movedCardNamesText}.`
+    });
+
+    if (completedRun !== null) {
+        gameState.encounter.lastCompletedRun = completedRun;
+    }
+    gameState.encounter.activeRun = null;
     resetEncounterStartGateState({ resetTurn: true });
 
     if (editingCardId !== null) {
@@ -2605,15 +2796,12 @@ function endCombat() {
         }
     }
 
-    addCombatLogMessage(
-        `Kampf beendet. ${movedCardCount} Karte(n) ins Deck verschoben: ${movedCardNamesText}.`
-    );
-
+    saveAndBroadcastAppState();
     renderCardsPreservingViewport();
 }
 
 function longRestPlayerCards() {
-    const playerCards = cards.filter(function(card) {
+    const playerCards = gameState.cards.filter(function(card) {
         return card.type === "player";
     });
 
@@ -2639,8 +2827,8 @@ function longRestPlayerCards() {
         card.isSelected = false;
     }
 
-    currentTurnIndex = 0;
-    roundNumber = 1;
+    setCurrentTurnIndex(0);
+    gameState.encounter.roundNumber = 1;
     clearManualPublicSelection();
 
     addCombatLogMessage(
@@ -2658,12 +2846,12 @@ function deleteAllCards() {
     }
 
     setDemoCardsAutoloadEnabled(false);
-    encounterName = "Unbenannter Encounter";
-    cards = [];
-    focusedCardId = null;
-    currentTurnIndex = 0;
-    roundNumber = 1;
-    combatLogMessages = [];
+    gameState.name = "Unbenannter Encounter";
+    gameState.cards = [];
+    uiState.focusedCardId = null;
+    setCurrentTurnIndex(0);
+    gameState.encounter.roundNumber = 1;
+    gameState.eventLog = [];
     clearManualPublicSelection();
     addCombatLogMessage("Spielstand geleert. Alle Karten wurden gelöscht.");
 
@@ -2785,7 +2973,7 @@ function restoreActiveTurnAfterInitiativeChange(activeCardId) {
         return;
     }
 
-    currentTurnIndex = newActiveIndex;
+    setCurrentTurnIndex(newActiveIndex);
 }
 
 function applyInitiativeToSelectedCards() {
@@ -3025,19 +3213,387 @@ function createActionTargetLogText(targets) {
     return `: ${targetNamesText}`;
 }
 
-function addCombatLogMessage(message) {
-    combatLogMessages.unshift({
-        time: getCurrentTimeText(),
-        text: message
-    });
+const eventLogRetention = Object.freeze({
+    maximumEvents: 5000,
+    maximumAgeDays: 30
+});
 
-    if (combatLogMessages.length > 12) {
-        combatLogMessages = combatLogMessages.slice(0, 12);
+const undoConfiguration = Object.freeze({
+    immediateUndoWindowMs: 30 * 1000,
+    undoableEventTypes: new Set([
+        "damage",
+        "healing",
+        "temporary_hp",
+        "condition_added",
+        "condition_removed"
+    ])
+});
+
+let recentUndoOffer = null;
+let recentUndoTimerId = null;
+let recentUndoCountdownId = null;
+
+function createGameEventId() {
+    return typeof crypto?.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `event-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function pruneGameEventLog() {
+    const maximumAgeMs = eventLogRetention.maximumAgeDays * 24 * 60 * 60 * 1000;
+    const oldestAllowedTimestamp = Date.now() - maximumAgeMs;
+
+    gameState.eventLog = gameState.eventLog.filter(function(event) {
+        const timestamp = Date.parse(event.createdAt || "");
+        return Number.isNaN(timestamp) || timestamp >= oldestAllowedTimestamp;
+    }).slice(0, eventLogRetention.maximumEvents);
+}
+
+function recordGameEvent(eventData = {}) {
+    const createdAt = typeof eventData.createdAt === "string"
+        ? eventData.createdAt
+        : new Date().toISOString();
+    const message = typeof eventData.message === "string"
+        ? eventData.message
+        : "Ereignis protokolliert.";
+
+    const event = {
+        id: typeof eventData.id === "string" && eventData.id !== ""
+            ? eventData.id
+            : createGameEventId(),
+        type: typeof eventData.type === "string" && eventData.type !== ""
+            ? eventData.type
+            : "system",
+        actorParticipantId: eventData.actorParticipantId ?? null,
+        sourceCardId: eventData.sourceCardId ?? null,
+        targetCardId: eventData.targetCardId ?? null,
+        targetCardIds: Array.isArray(eventData.targetCardIds)
+            ? [...eventData.targetCardIds]
+            : (eventData.targetCardId !== undefined && eventData.targetCardId !== null ? [eventData.targetCardId] : []),
+        amount: Number.isFinite(eventData.amount) ? eventData.amount : null,
+        condition: typeof eventData.condition === "string" ? eventData.condition : null,
+        before: eventData.before === undefined ? null : structuredClone(eventData.before),
+        after: eventData.after === undefined ? null : structuredClone(eventData.after),
+        metadata: {
+            ...(eventData.metadata && typeof eventData.metadata === "object"
+                ? structuredClone(eventData.metadata)
+                : {}),
+            ...(gameState.encounter.activeRun?.id
+                ? { encounterRunId: gameState.encounter.activeRun.id }
+                : {})
+        },
+        createdAt,
+        message,
+        // Kompatible Darstellungsfelder für die bestehende Chronik-UI.
+        time: new Date(createdAt).toLocaleTimeString("de-DE", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        }),
+        text: message
+    };
+
+    gameState.eventLog.unshift(event);
+    pruneGameEventLog();
+    window.setTimeout(function() {
+        showRecentUndoOffer(event);
+    }, 0);
+    return event;
+}
+
+function getGameEventById(eventId) {
+    return gameState.eventLog.find(function(event) {
+        return event.id === eventId;
+    }) ?? null;
+}
+
+function getEventStateFields(event) {
+    if (event.type === "damage" || event.type === "healing") {
+        return ["hp", "tempHp"];
+    }
+    if (event.type === "temporary_hp") {
+        return ["tempHp"];
+    }
+    if (event.type === "condition_added" || event.type === "condition_removed") {
+        return ["conditions"];
+    }
+    return [];
+}
+
+function isGameEventUndoable(event) {
+    return event !== null
+        && undoConfiguration.undoableEventTypes.has(event.type)
+        && Array.isArray(event.before)
+        && Array.isArray(event.after)
+        && event.before.length > 0
+        && event.metadata?.undoneByEventId === undefined;
+}
+
+function getSnapshotValue(card, fieldName) {
+    if (fieldName === "conditions") {
+        return Array.isArray(card.conditions) ? [...card.conditions] : [];
+    }
+    return card[fieldName];
+}
+
+function valuesMatchForUndo(currentValue, expectedValue) {
+    return JSON.stringify(currentValue) === JSON.stringify(expectedValue);
+}
+
+function getUndoConflictMessage(event) {
+    if (isGameEventUndoable(event) === false) {
+        return "Dieses Ereignis kann nicht rückgängig gemacht werden.";
+    }
+
+    const fields = getEventStateFields(event);
+    for (const afterSnapshot of event.after) {
+        const card = findCardById(afterSnapshot.cardId);
+        if (card === null) {
+            return "Eine betroffene Karte ist nicht mehr vorhanden.";
+        }
+        for (const fieldName of fields) {
+            if (Object.prototype.hasOwnProperty.call(afterSnapshot, fieldName) === false) {
+                continue;
+            }
+            const currentValue = getSnapshotValue(card, fieldName);
+            if (valuesMatchForUndo(currentValue, afterSnapshot[fieldName]) === false) {
+                return "Diese Aktion kann nicht sicher rückgängig gemacht werden, weil der betroffene Zustand danach erneut verändert wurde.";
+            }
+        }
+    }
+
+    return "";
+}
+
+function restoreEventBeforeState(event) {
+    const fields = getEventStateFields(event);
+    for (const beforeSnapshot of event.before) {
+        const card = findCardById(beforeSnapshot.cardId);
+        if (card === null) {
+            continue;
+        }
+        for (const fieldName of fields) {
+            if (Object.prototype.hasOwnProperty.call(beforeSnapshot, fieldName) === false) {
+                continue;
+            }
+            card[fieldName] = fieldName === "conditions"
+                ? [...beforeSnapshot[fieldName]]
+                : beforeSnapshot[fieldName];
+        }
+        card.version = Number.isInteger(card.version) ? card.version + 1 : 1;
+        card.updatedAt = new Date().toISOString();
     }
 }
 
+function clearRecentUndoOffer() {
+    recentUndoOffer = null;
+    if (recentUndoTimerId !== null) {
+        window.clearTimeout(recentUndoTimerId);
+        recentUndoTimerId = null;
+    }
+    if (recentUndoCountdownId !== null) {
+        window.clearInterval(recentUndoCountdownId);
+        recentUndoCountdownId = null;
+    }
+    document.querySelector("#recent-undo-toast")?.remove();
+}
+
+function updateRecentUndoCountdown() {
+    const countdownElement = document.querySelector("#recent-undo-countdown");
+    if (countdownElement === null || recentUndoOffer === null) {
+        return;
+    }
+    const remainingMs = Math.max(0, recentUndoOffer.expiresAt - Date.now());
+    countdownElement.textContent = `${Math.ceil(remainingMs / 1000)} s`;
+}
+
+function showRecentUndoOffer(event) {
+    if (appView !== "dm" || isGameEventUndoable(event) === false) {
+        return;
+    }
+
+    clearRecentUndoOffer();
+    recentUndoOffer = {
+        eventId: event.id,
+        expiresAt: Date.now() + undoConfiguration.immediateUndoWindowMs
+    };
+
+    const toast = document.createElement("aside");
+    toast.id = "recent-undo-toast";
+    toast.className = "recent-undo-toast";
+    toast.setAttribute("role", "status");
+    toast.innerHTML = `
+        <div class="recent-undo-toast-copy">
+            <strong>Aktion ausgeführt</strong>
+            <span>${escapeHtml(event.message)}</span>
+        </div>
+        <button type="button" onclick="undoRecentGameEvent()">
+            Rückgängig <span id="recent-undo-countdown">30 s</span>
+        </button>
+        <button class="recent-undo-toast-close" type="button" onclick="clearRecentUndoOffer()" aria-label="Hinweis schließen">×</button>
+    `;
+    document.body.appendChild(toast);
+    updateRecentUndoCountdown();
+    recentUndoCountdownId = window.setInterval(updateRecentUndoCountdown, 1000);
+    recentUndoTimerId = window.setTimeout(clearRecentUndoOffer, undoConfiguration.immediateUndoWindowMs);
+}
+
+function undoRecentGameEvent() {
+    if (recentUndoOffer === null || Date.now() > recentUndoOffer.expiresAt) {
+        clearRecentUndoOffer();
+        alert("Das Zeitfenster für das direkte Rückgängig ist abgelaufen.");
+        return;
+    }
+    const eventId = recentUndoOffer.eventId;
+    clearRecentUndoOffer();
+    undoGameEvent(eventId);
+}
+
+function undoGameEvent(eventId) {
+    const event = getGameEventById(eventId);
+    const conflictMessage = getUndoConflictMessage(event);
+    if (conflictMessage !== "") {
+        alert(conflictMessage);
+        return false;
+    }
+
+    restoreEventBeforeState(event);
+    const undoEvent = recordGameEvent({
+        type: "undo",
+        targetCardIds: [...event.targetCardIds],
+        metadata: {
+            revertedEventId: event.id,
+            revertedEventType: event.type
+        },
+        message: `„${event.message}“ wurde rückgängig gemacht.`
+    });
+    event.metadata = {
+        ...(event.metadata ?? {}),
+        undoneByEventId: undoEvent.id,
+        undoneAt: undoEvent.createdAt
+    };
+    clearRecentUndoOffer();
+    renderCardsPreservingViewport();
+    return true;
+}
+
+function getGameEventTypeLabel(eventType) {
+    const labels = {
+        damage: "Schaden",
+        healing: "Heilung",
+        temporary_hp: "Temporäre Trefferpunkte",
+        condition_added: "Condition hinzugefügt",
+        condition_removed: "Condition entfernt",
+        encounter_started: "Encounter gestartet",
+        encounter_ended: "Encounter beendet",
+        turn_changed: "Zug gewechselt",
+        round_changed: "Runde gewechselt",
+        card_moved: "Karte verschoben",
+        item_used: "Item verwendet",
+        undo: "Rückgängig",
+        system: "Systemmeldung"
+    };
+    return labels[eventType] ?? "Ereignis";
+}
+
+function getGameEventTargetNames(event) {
+    const targetIds = Array.isArray(event.targetCardIds) ? event.targetCardIds : [];
+    const names = targetIds.map(function(cardId) {
+        return findCardById(cardId)?.name ?? `Unbekannte Karte (${cardId})`;
+    });
+    return names.length > 0 ? names.join(", ") : "Kein Kartenziel";
+}
+
+function createGameEventStateChangeLines(event) {
+    if (!Array.isArray(event.before) || !Array.isArray(event.after)) {
+        return [];
+    }
+
+    const lines = [];
+    for (const beforeState of event.before) {
+        const afterState = event.after.find(function(candidate) {
+            return candidate.cardId === beforeState.cardId;
+        });
+        if (afterState === undefined) {
+            continue;
+        }
+        const cardName = findCardById(beforeState.cardId)?.name ?? "Unbekannte Karte";
+        const changes = [];
+
+        if (Object.prototype.hasOwnProperty.call(beforeState, "hp") && Object.prototype.hasOwnProperty.call(afterState, "hp")) {
+            changes.push(`HP ${beforeState.hp} → ${afterState.hp}`);
+        }
+        if (Object.prototype.hasOwnProperty.call(beforeState, "tempHp") && Object.prototype.hasOwnProperty.call(afterState, "tempHp")) {
+            changes.push(`Temp HP ${beforeState.tempHp} → ${afterState.tempHp}`);
+        }
+        if (Array.isArray(beforeState.conditions) && Array.isArray(afterState.conditions)) {
+            const beforeText = beforeState.conditions.length > 0 ? beforeState.conditions.join(", ") : "keine";
+            const afterText = afterState.conditions.length > 0 ? afterState.conditions.join(", ") : "keine";
+            changes.push(`Conditions: ${beforeText} → ${afterText}`);
+        }
+
+        if (changes.length > 0) {
+            lines.push(`${cardName}: ${changes.join(" · ")}`);
+        }
+    }
+    return lines;
+}
+
+function createGameEventDetailsText(event) {
+    const createdDate = new Date(event.createdAt);
+    const dateText = Number.isNaN(createdDate.getTime())
+        ? "Unbekannt"
+        : createdDate.toLocaleString("de-DE");
+    const lines = [
+        getGameEventTypeLabel(event.type),
+        "",
+        event.message,
+        "",
+        `Zeitpunkt: ${dateText}`,
+        `Betroffene Karten: ${getGameEventTargetNames(event)}`
+    ];
+
+    if (Number.isFinite(event.amount)) {
+        lines.push(`Wert: ${event.amount}`);
+    }
+    if (typeof event.condition === "string" && event.condition !== "") {
+        lines.push(`Condition: ${event.condition}`);
+    }
+
+    const changeLines = createGameEventStateChangeLines(event);
+    if (changeLines.length > 0) {
+        lines.push("", "Änderung:", ...changeLines);
+    }
+
+    if (event.metadata?.undoneByEventId !== undefined) {
+        lines.push("", "Status: Rückgängig gemacht");
+    } else if (isGameEventUndoable(event)) {
+        lines.push("", "Status: Kann rückgängig gemacht werden");
+    } else {
+        lines.push("", "Status: Nur zur Information");
+    }
+
+    return lines.join("\n");
+}
+
+function showGameEventDetails(eventId) {
+    const event = getGameEventById(eventId);
+    if (event === null) {
+        alert("Das Ereignis wurde nicht gefunden.");
+        return;
+    }
+    alert(createGameEventDetailsText(event));
+}
+
+function addCombatLogMessage(message, eventData = {}) {
+    return recordGameEvent({
+        ...eventData,
+        message
+    });
+}
+
 function getDmFeedTabButtonHtml(tabName, label) {
-    const activeClass = activeDmFeedTab === tabName ? "active-feed-tab" : "";
+    const activeClass = uiState.activeDmFeedTab === tabName ? "active-feed-tab" : "";
 
     return `
         <button
@@ -3053,7 +3609,13 @@ function getVisibleCombatLogMessages() {
     const visibleMessages = [];
     let hasShownBrowserSaveMessage = false;
 
-    for (const logMessage of combatLogMessages) {
+    for (const logMessage of gameState.eventLog) {
+        // Undo wird im Datenmodell als eigenes Ereignis behalten. In der kompakten
+        // Chronik genügt aber die Markierung am ursprünglichen Eintrag.
+        if (logMessage.type === "undo") {
+            continue;
+        }
+
         if (logMessage.text === "Browser-Zustand gespeichert.") {
             if (hasShownBrowserSaveMessage === true) {
                 continue;
@@ -3070,6 +3632,155 @@ function getVisibleCombatLogMessages() {
     }
 
     return visibleMessages;
+}
+
+function resetCombatLogInlineDetails(entryElement) {
+    if (!(entryElement instanceof HTMLElement)) {
+        return;
+    }
+
+    const detailsElement = entryElement.querySelector(".combat-log-inline-details");
+    const detailsButton = entryElement.querySelector(".combat-log-details-toggle");
+
+    if (detailsElement instanceof HTMLElement) {
+        detailsElement.hidden = true;
+    }
+    if (detailsButton instanceof HTMLButtonElement) {
+        detailsButton.setAttribute("aria-expanded", "false");
+        detailsButton.textContent = "Details anzeigen";
+    }
+}
+
+function closeCombatLogInlinePanelsExcept(keptEntryElement = null) {
+    const openEntries = document.querySelectorAll(".combat-log-entry.combat-log-entry-expanded");
+
+    for (const entryElement of openEntries) {
+        if (keptEntryElement !== null && entryElement === keptEntryElement) {
+            continue;
+        }
+
+        entryElement.classList.remove("combat-log-entry-expanded");
+        const panelElement = entryElement.querySelector(".combat-log-inline-panel");
+        const toggleButton = entryElement.querySelector(".combat-log-inline-toggle");
+
+        if (panelElement instanceof HTMLElement) {
+            panelElement.hidden = true;
+        }
+        if (toggleButton instanceof HTMLButtonElement) {
+            toggleButton.setAttribute("aria-expanded", "false");
+        }
+        resetCombatLogInlineDetails(entryElement);
+    }
+}
+
+function toggleCombatLogInlinePanel(eventId, buttonElement) {
+    if (!(buttonElement instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    const entryElement = buttonElement.closest(".combat-log-entry");
+    const panelElement = entryElement?.querySelector(".combat-log-inline-panel");
+
+    if (!(entryElement instanceof HTMLElement) || !(panelElement instanceof HTMLElement)) {
+        return;
+    }
+
+    const shouldOpen = entryElement.classList.contains("combat-log-entry-expanded") === false;
+    closeCombatLogInlinePanelsExcept(shouldOpen ? entryElement : null);
+
+    entryElement.classList.toggle("combat-log-entry-expanded", shouldOpen);
+    panelElement.hidden = shouldOpen === false;
+    buttonElement.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+
+    // Das Drei-Punkte-Menü öffnet nur die Aktionen. Die ausführlichen
+    // Ereignisdetails bleiben bis zu einem eigenen Klick geschlossen.
+    resetCombatLogInlineDetails(entryElement);
+
+    if (shouldOpen) {
+        window.requestAnimationFrame(function() {
+            entryElement.scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+                behavior: "smooth"
+            });
+        });
+    }
+}
+
+function toggleCombatLogEventDetails(buttonElement) {
+    if (!(buttonElement instanceof HTMLButtonElement)) {
+        return;
+    }
+
+    const entryElement = buttonElement.closest(".combat-log-entry");
+    const detailsElement = entryElement?.querySelector(".combat-log-inline-details");
+
+    if (!(entryElement instanceof HTMLElement) || !(detailsElement instanceof HTMLElement)) {
+        return;
+    }
+
+    const shouldOpen = detailsElement.hidden === true;
+    detailsElement.hidden = shouldOpen === false;
+    buttonElement.setAttribute("aria-expanded", shouldOpen ? "true" : "false");
+    buttonElement.textContent = shouldOpen ? "Details ausblenden" : "Details anzeigen";
+
+    if (shouldOpen) {
+        window.requestAnimationFrame(function() {
+            entryElement.scrollIntoView({
+                block: "nearest",
+                inline: "nearest",
+                behavior: "smooth"
+            });
+        });
+    }
+}
+
+function createGameEventDetailsHtml(event) {
+    const createdDate = new Date(event.createdAt);
+    const dateText = Number.isNaN(createdDate.getTime())
+        ? "Unbekannt"
+        : createdDate.toLocaleString("de-DE");
+    const changeLines = createGameEventStateChangeLines(event);
+    const statusText = event.metadata?.undoneByEventId !== undefined
+        ? "Rückgängig gemacht"
+        : isGameEventUndoable(event)
+            ? "Kann rückgängig gemacht werden"
+            : "Nur zur Information";
+
+    const detailRows = [
+        ["Ereignis", getGameEventTypeLabel(event.type)],
+        ["Zeitpunkt", dateText],
+        ["Betroffene Karten", getGameEventTargetNames(event)]
+    ];
+
+    if (Number.isFinite(event.amount)) {
+        detailRows.push(["Wert", String(event.amount)]);
+    }
+    if (typeof event.condition === "string" && event.condition !== "") {
+        detailRows.push(["Condition", event.condition]);
+    }
+
+    const rowsHtml = detailRows.map(([label, value]) => `
+        <div class="combat-log-detail-row">
+            <span>${escapeHtml(label)}</span>
+            <strong>${escapeHtml(value)}</strong>
+        </div>
+    `).join("");
+    const changesHtml = changeLines.length > 0
+        ? `
+            <div class="combat-log-detail-changes">
+                <span>Änderung</span>
+                ${changeLines.map(line => `<p>${escapeHtml(line)}</p>`).join("")}
+            </div>
+        `
+        : "";
+
+    return `
+        <div class="combat-log-detail-summary">${escapeHtml(event.message)}</div>
+        <div class="combat-log-detail-grid">${rowsHtml}</div>
+        ${changesHtml}
+        <div class="combat-log-detail-status">${escapeHtml(statusText)}</div>
+    `;
 }
 
 function createCombatLogHtml() {
@@ -3089,10 +3800,44 @@ function createCombatLogHtml() {
     const messagesInDisplayOrder = [...visibleMessages].reverse();
 
     for (const logMessage of messagesInDisplayOrder) {
+        const wasUndone = logMessage.metadata?.undoneByEventId !== undefined;
+        const undoable = isGameEventUndoable(logMessage);
+        const statusHtml = wasUndone
+            ? `<span class="combat-log-status">Rückgängig gemacht</span>`
+            : "";
+        const actionsHtml = undoable
+            ? `<button type="button" onclick="undoGameEvent('${escapeHtml(logMessage.id)}')">Rückgängig</button>`
+            : "";
+
         html += `
-            <article class="combat-log-entry">
-                <span class="combat-log-time">${escapeHtml(logMessage.time)}</span>
-                <span class="combat-log-text">${escapeHtml(logMessage.text)}</span>
+            <article class="combat-log-entry ${wasUndone ? "combat-log-entry-undone" : ""}" data-event-id="${escapeHtml(logMessage.id)}">
+                <div class="combat-log-entry-main">
+                    <span class="combat-log-time">${escapeHtml(logMessage.time)}</span>
+                    <span class="combat-log-text">${escapeHtml(logMessage.text)}</span>
+                    ${statusHtml}
+                </div>
+                <button
+                    type="button"
+                    class="combat-log-inline-toggle"
+                    aria-label="Ereignisaktionen und Details öffnen"
+                    aria-expanded="false"
+                    title="Ereignisaktionen und Details"
+                    onclick="toggleCombatLogInlinePanel('${escapeHtml(logMessage.id)}', this)"
+                >⋯</button>
+                <div class="combat-log-inline-panel" hidden>
+                    <div class="combat-log-inline-actions">
+                        ${actionsHtml}
+                        <button
+                            type="button"
+                            class="combat-log-details-toggle"
+                            aria-expanded="false"
+                            onclick="toggleCombatLogEventDetails(this)"
+                        >Details anzeigen</button>
+                    </div>
+                    <div class="combat-log-inline-details" hidden>
+                        ${createGameEventDetailsHtml(logMessage)}
+                    </div>
+                </div>
             </article>
         `;
     }
@@ -3281,12 +4026,27 @@ function applyDamageToSelectedCards() {
         return;
     }
 
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
+
     for (const card of selectedTargets) {
         applyDamage(card, amount);
     }
 
-    addCombatLogMessage(`${amount} Schaden auf ${createActionTargetLogText(selectedTargets)}.`);
-    renderCards();
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
+
+    recordGameEvent({
+        type: "damage",
+        targetCardIds: selectedTargets.map(card => card.id),
+        amount,
+        before,
+        after,
+        message: `${amount} Schaden auf ${createActionTargetLogText(selectedTargets)}.`
+    });
+    renderCardsPreservingViewport();
 }
 
 function applyHealingToSelectedCards() {
@@ -3302,12 +4062,27 @@ function applyHealingToSelectedCards() {
         return;
     }
 
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
+
     for (const card of selectedTargets) {
         applyHealing(card, amount);
     }
 
-    addCombatLogMessage(`${amount} Heilung auf ${createActionTargetLogText(selectedTargets)}.`);
-    renderCards();
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
+
+    recordGameEvent({
+        type: "healing",
+        targetCardIds: selectedTargets.map(card => card.id),
+        amount,
+        before,
+        after,
+        message: `${amount} Heilung auf ${createActionTargetLogText(selectedTargets)}.`
+    });
+    renderCardsPreservingViewport();
 }
 
 function applyTempHpToSelectedCards() {
@@ -3323,12 +4098,27 @@ function applyTempHpToSelectedCards() {
         return;
     }
 
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, tempHp: card.tempHp };
+    });
+
     for (const card of selectedTargets) {
         applyTempHp(card, amount);
     }
 
-    addCombatLogMessage(`${amount} Temp HP auf ${createActionTargetLogText(selectedTargets)} gesetzt.`);
-    renderCards();
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, tempHp: card.tempHp };
+    });
+
+    recordGameEvent({
+        type: "temporary_hp",
+        targetCardIds: selectedTargets.map(card => card.id),
+        amount,
+        before,
+        after,
+        message: `${amount} Temp HP auf ${createActionTargetLogText(selectedTargets)} gesetzt.`
+    });
+    renderCardsPreservingViewport();
 }
 
 function addConditionToSelectedCards() {
@@ -3345,14 +4135,23 @@ function addConditionToSelectedCards() {
         return;
     }
 
+    const before = selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] }));
+
     for (const card of selectedTargets) {
         if (cardHasCondition(card, conditionName) === false) {
             card.conditions.push(conditionName);
         }
     }
 
-    addCombatLogMessage(`Condition ${conditionName} auf ${selectedTargets.length} Ziel(e) angewendet: ${createTargetNamesText(selectedTargets)}.`);
-    renderCards();
+    recordGameEvent({
+        type: "condition_added",
+        targetCardIds: selectedTargets.map(card => card.id),
+        condition: conditionName,
+        before,
+        after: selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] })),
+        message: `Condition ${conditionName} auf ${selectedTargets.length} Ziel(e) angewendet: ${createTargetNamesText(selectedTargets)}.`
+    });
+    renderCardsPreservingViewport();
 }
 
 function removeConditionFromSelectedCards() {
@@ -3369,14 +4168,23 @@ function removeConditionFromSelectedCards() {
         return;
     }
 
+    const before = selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] }));
+
     for (const card of selectedTargets) {
         card.conditions = card.conditions.filter(function(condition) {
             return condition !== conditionName;
         });
     }
 
-    addCombatLogMessage(`Condition ${conditionName} von ${selectedTargets.length} Ziel(e) entfernt: ${createTargetNamesText(selectedTargets)}.`);
-    renderCards();
+    recordGameEvent({
+        type: "condition_removed",
+        targetCardIds: selectedTargets.map(card => card.id),
+        condition: conditionName,
+        before,
+        after: selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] })),
+        message: `Condition ${conditionName} von ${selectedTargets.length} Ziel(e) entfernt: ${createTargetNamesText(selectedTargets)}.`
+    });
+    renderCardsPreservingViewport();
 }
 
 function getHpPercent(card) {
@@ -3721,20 +4529,20 @@ async function handleMirielBoardManualImageInput(event) {
         return;
     }
 
-    const previousImageData = mirielBoardManualImageData;
-    const previousImageName = mirielBoardManualImageName;
+    const previousImageData = gameState.presentation.mirielBoard.manualImageData;
+    const previousImageName = gameState.presentation.mirielBoard.manualImageName;
 
     try {
-        mirielBoardManualImageData = await readAndOptimizeImageFileAsDataUrl(imageFile);
-        mirielBoardManualImageName = imageFile.name || "Eigene Schautafel";
+        gameState.presentation.mirielBoard.manualImageData = await readAndOptimizeImageFileAsDataUrl(imageFile);
+        gameState.presentation.mirielBoard.manualImageName = imageFile.name || "Eigene Schautafel";
         renderMirielBoardManualPreview();
         updateMirielBoardControls();
-        addCombatLogMessage(`Bild für Miriels Schautafel vorbereitet: ${mirielBoardManualImageName}.`);
+        addCombatLogMessage(`Bild für Miriels Schautafel vorbereitet: ${gameState.presentation.mirielBoard.manualImageName}.`);
         saveAndBroadcastAppState();
         renderCards();
     } catch (error) {
-        mirielBoardManualImageData = previousImageData;
-        mirielBoardManualImageName = previousImageName;
+        gameState.presentation.mirielBoard.manualImageData = previousImageData;
+        gameState.presentation.mirielBoard.manualImageName = previousImageName;
 
         if (error instanceof DOMException && error.name === "QuotaExceededError") {
             alert("Das Bild ist zu groß für den Browser-Speicher. Bitte wähle ein kleineres Bild.");
@@ -3752,8 +4560,8 @@ async function handleMirielBoardManualImageInput(event) {
 }
 
 function clearMirielBoardManualImage() {
-    mirielBoardManualImageData = "";
-    mirielBoardManualImageName = "";
+    gameState.presentation.mirielBoard.manualImageData = "";
+    gameState.presentation.mirielBoard.manualImageName = "";
 
     ensureMirielBoardPersistentModeIsValid();
 
@@ -3762,7 +4570,7 @@ function clearMirielBoardManualImage() {
 }
 
 function setMirielBoardManualText(value) {
-    mirielBoardManualText = typeof value === "string" ? value.slice(0, 700) : "";
+    gameState.presentation.mirielBoard.manualText = typeof value === "string" ? value.slice(0, 700) : "";
     ensureMirielBoardPersistentModeIsValid();
     renderMirielBoardManualPreview();
     updateMirielBoardControls();
@@ -3776,7 +4584,7 @@ function setMirielBoardManualText(value) {
 }
 
 function setMirielBoardManualTextSize(size) {
-    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(size);
+    gameState.presentation.mirielBoard.manualTextSize = getSafeMirielBoardManualTextSize(size);
     renderMirielBoardManualPreview();
     updateMirielBoardControls();
     saveAndBroadcastAppState();
@@ -3784,7 +4592,7 @@ function setMirielBoardManualTextSize(size) {
 }
 
 function setMirielBoardManualTextPosition(position) {
-    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(position);
+    gameState.presentation.mirielBoard.manualTextPosition = getSafeMirielBoardManualTextPosition(position);
     renderMirielBoardManualPreview();
     updateMirielBoardControls();
     saveAndBroadcastAppState();
@@ -3792,7 +4600,7 @@ function setMirielBoardManualTextPosition(position) {
 }
 
 function clearMirielBoardManualText() {
-    mirielBoardManualText = "";
+    gameState.presentation.mirielBoard.manualText = "";
 
     ensureMirielBoardPersistentModeIsValid();
 
@@ -3914,14 +4722,14 @@ function gameStateNameNeedsFileNameWarning(rawName) {
     return /[^a-zA-Z0-9äöüÄÖÜß _.-]/.test(getSafeOptionalString(rawName));
 }
 
-function createExportFileName(nameForExport = encounterName) {
+function createExportFileName(nameForExport = gameState.name) {
     const safeNameSegment = createSafeFileNameSegment(nameForExport);
     return `miriels-deck-spielstand-${safeNameSegment}-${createExportTimestampText()}.json`;
 }
 
-function downloadTextFile(fileName, textContent) {
+function downloadTextFile(fileName, textContent, mimeType = "application/json") {
     const fileBlob = new Blob([textContent], {
-        type: "application/json"
+        type: mimeType
     });
 
     const temporaryUrl = URL.createObjectURL(fileBlob);
@@ -3938,7 +4746,7 @@ function downloadTextFile(fileName, textContent) {
 }
 
 function exportGameState() {
-    const proposedName = getSafeEncounterName(encounterName);
+    const proposedName = getSafeEncounterName(gameState.name);
     const inputName = prompt(
         "Spielstand vor dem Export benennen.\nSonderzeichen werden im Dateinamen automatisch vereinfacht.",
         proposedName
@@ -4059,7 +4867,7 @@ function showGameStateImportPreview(gameStateData, fileName) {
 
     const importCount = Array.isArray(gameStateData.cards) ? gameStateData.cards.length : 0;
     const currentDeckCount = getDeckCards().length;
-    const currentTotalCount = cards.length;
+    const currentTotalCount = gameState.cards.length;
     const importedGameStateName = getSafeEncounterName(gameStateData.name || gameStateData.encounterName || gameStateData.deckName);
 
     fileNameElement.textContent = `Datei: ${pendingDeckImportFileName}`;
@@ -4105,7 +4913,7 @@ function confirmDeckImportAppend() {
     const importCount = importedCards.length;
 
     for (const importedCard of importedCards) {
-        cards.push(importedCard);
+        gameState.cards.push(importedCard);
     }
 
     addCombatLogMessage(`${importCount} Karte(n) aus ${pendingDeckImportFileName} zum Deck hinzugefügt. Laufender Spielstand bleibt erhalten.`);
@@ -4118,7 +4926,7 @@ function confirmDeckImportAppend() {
 
 function createImportedCardsForDeckAppend(rawCards) {
     const importedCards = [];
-    const usedIds = cards.map(function(card) {
+    const usedIds = gameState.cards.map(function(card) {
         return card.id;
     });
 
@@ -4146,6 +4954,10 @@ function importGameStateData(gameStateData) {
     }
 
     const normalizedGameState = MirielsGameStateSchema.normalizeGameStateData(gameStateData);
+
+    // Ein vollständiger Import ersetzt den laufenden Spielstand. Die Demo darf
+    // danach auch bei einem absichtlich leeren Import nicht automatisch zurückkehren.
+    setDemoCardsAutoloadEnabled(false);
     applyGameStateData(normalizedGameState);
     applyUiStateData({});
     renderCards();
@@ -5203,9 +6015,9 @@ function toggleSpellPrepared(cardId, spellId) {
 function toggleSpellDetail(cardId, spellId) {
     const detailScrollTop = captureActiveDetailScrollTop();
     const key = `${cardId}:${spellId}`;
-    const shouldExpandSpell = expandedSpellDetailKey !== key;
+    const shouldExpandSpell = uiState.expandedSpellDetailKey !== key;
 
-    expandedSpellDetailKey = shouldExpandSpell ? key : null;
+    uiState.expandedSpellDetailKey = shouldExpandSpell ? key : null;
     renderCards();
     restoreDetailScrollAfterRender(detailScrollTop, shouldExpandSpell ? key : "");
 }
@@ -5390,7 +6202,7 @@ function createSpellDetailHtml(cardId, spell) {
 }
 
 function createSpellRowHtml(cardId, spell) {
-    const isExpanded = expandedSpellDetailKey === `${cardId}:${spell.id}`;
+    const isExpanded = uiState.expandedSpellDetailKey === `${cardId}:${spell.id}`;
     const preparedSymbol = spell.prepared === true ? "✓" : "○";
 
     return `
@@ -6702,21 +7514,47 @@ function getSafeCombatLogMessages(value) {
         return [];
     }
 
-    const safeMessages = [];
+    const safeEvents = [];
 
-    for (const rawMessage of value) {
-        if (rawMessage !== null && typeof rawMessage === "object") {
-            const safeTime = getSafeString(rawMessage.time, "--:--:--");
-            const safeText = getSafeString(rawMessage.text, "Unbekannte Aktion.");
-
-            safeMessages.push({
-                time: safeTime,
-                text: safeText
-            });
+    for (const rawEvent of value) {
+        if (rawEvent === null || typeof rawEvent !== "object") {
+            continue;
         }
+
+        const createdAt = getSafeString(rawEvent.createdAt, new Date().toISOString());
+        const message = getSafeString(rawEvent.message, getSafeString(rawEvent.text, "Unbekannte Aktion."));
+        const safeCreatedAt = Number.isNaN(Date.parse(createdAt)) ? new Date().toISOString() : createdAt;
+
+        safeEvents.push({
+            id: getSafeString(rawEvent.id, createGameEventId()),
+            type: getSafeString(rawEvent.type, "system"),
+            actorParticipantId: rawEvent.actorParticipantId ?? null,
+            sourceCardId: rawEvent.sourceCardId ?? null,
+            targetCardId: rawEvent.targetCardId ?? null,
+            targetCardIds: Array.isArray(rawEvent.targetCardIds) ? [...rawEvent.targetCardIds] : [],
+            amount: Number.isFinite(rawEvent.amount) ? rawEvent.amount : null,
+            condition: typeof rawEvent.condition === "string" ? rawEvent.condition : null,
+            before: rawEvent.before ?? null,
+            after: rawEvent.after ?? null,
+            metadata: rawEvent.metadata && typeof rawEvent.metadata === "object" ? rawEvent.metadata : {},
+            createdAt: safeCreatedAt,
+            message,
+            time: getSafeString(rawEvent.time, new Date(safeCreatedAt).toLocaleTimeString("de-DE", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            })),
+            text: message
+        });
     }
 
-    return safeMessages.slice(0, 12);
+    const maximumAgeMs = eventLogRetention.maximumAgeDays * 24 * 60 * 60 * 1000;
+    const oldestAllowedTimestamp = Date.now() - maximumAgeMs;
+
+    return safeEvents.filter(function(event) {
+        const timestamp = Date.parse(event.createdAt);
+        return Number.isNaN(timestamp) || timestamp >= oldestAllowedTimestamp;
+    }).slice(0, eventLogRetention.maximumEvents);
 }
 
 
@@ -6819,8 +7657,8 @@ function hasEncounterManualBoardContent(encounterData) {
 }
 
 function clearMirielBoardTransientAnnouncement() {
-    mirielBoardTriggerId = "";
-    mirielBoardAnnouncement = null;
+    gameState.presentation.mirielBoard.triggerId = "";
+    gameState.presentation.mirielBoard.announcement = null;
     lastRenderedMirielBoardTriggerId = "";
 
     if (mirielBoardAutoHideTimer !== null) {
@@ -6831,7 +7669,7 @@ function clearMirielBoardTransientAnnouncement() {
 
 
 function hasPreparedEncounterCards() {
-    return Array.isArray(cards) === true && cards.length > 0;
+    return Array.isArray(gameState.cards) === true && gameState.cards.length > 0;
 }
 
 function hasEncounterHandCards() {
@@ -6842,37 +7680,37 @@ function resetEncounterStartGateState(options = {}) {
     const shouldResetTurn = options.resetTurn !== false;
     const shouldClearLog = options.clearLog === true;
 
-    isEncounterStarted = false;
+    gameState.encounter.isStarted = false;
 
     if (shouldResetTurn === true) {
-        currentTurnIndex = 0;
-        roundNumber = 1;
+        setCurrentTurnIndex(0);
+        gameState.encounter.roundNumber = 1;
     }
 
     clearManualPublicSelection();
     clearMirielBoardTransientAnnouncement();
 
     if (shouldClearLog === true) {
-        combatLogMessages = [];
+        gameState.eventLog = [];
     }
 }
 
 function ensureEncounterStartGateConsistency() {
     const handCards = getHandCards();
 
-    if (handCards.length === 0 && isEncounterStarted === true) {
+    if (handCards.length === 0 && gameState.encounter.isStarted === true) {
         resetEncounterStartGateState({ resetTurn: true });
     }
 
-    if (isEncounterStarted !== true) {
-        currentTurnIndex = 0;
-        roundNumber = 1;
+    if (gameState.encounter.isStarted !== true) {
+        setCurrentTurnIndex(0);
+        gameState.encounter.roundNumber = 1;
     }
 }
 
 function getCurrentMirielBoardAnnouncement(activeCard) {
     return {
-        roundNumber: roundNumber,
+        roundNumber: gameState.encounter.roundNumber,
         activeName: activeCard !== null ? activeCard.publicName || activeCard.name : "",
         isNewRound: false,
         createdAt: new Date().toISOString()
@@ -6880,12 +7718,12 @@ function getCurrentMirielBoardAnnouncement(activeCard) {
 }
 
 function triggerMirielBoardForTurn(isNewRound) {
-    if (mirielBoardPersistentMode === "manual" && hasMirielBoardManualContent() === true) {
+    if (gameState.presentation.mirielBoard.persistentMode === "manual" && hasMirielBoardManualContent() === true) {
         return;
     }
 
-    const shouldShowNewRoundCall = isNewRound === true && isMirielBoardNewRoundCallEnabled === true;
-    const shouldShowTurnPreview = isMirielBoardAutoTurnEnabled === true;
+    const shouldShowNewRoundCall = isNewRound === true && gameState.presentation.mirielBoard.newRoundCallEnabled === true;
+    const shouldShowTurnPreview = gameState.presentation.mirielBoard.autoTurnEnabled === true;
 
     if (shouldShowNewRoundCall !== true && shouldShowTurnPreview !== true) {
         return;
@@ -6893,9 +7731,9 @@ function triggerMirielBoardForTurn(isNewRound) {
 
     const activeCard = getActiveCard(getHandCards());
 
-    mirielBoardTriggerId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    mirielBoardAnnouncement = {
-        roundNumber: roundNumber,
+    gameState.presentation.mirielBoard.triggerId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    gameState.presentation.mirielBoard.announcement = {
+        roundNumber: gameState.encounter.roundNumber,
         activeName: activeCard !== null ? activeCard.publicName || activeCard.name : "",
         isNewRound: shouldShowNewRoundCall,
         createdAt: new Date().toISOString()
@@ -6910,7 +7748,7 @@ function setMirielBoardPersistentMode(mode) {
         return;
     }
 
-    mirielBoardPersistentMode = safeMode;
+    gameState.presentation.mirielBoard.persistentMode = safeMode;
     shouldAnimateMirielBoardOnNextRender = safeMode !== "off";
     clearMirielBoardTransientAnnouncement();
     saveAndBroadcastAppState();
@@ -6918,30 +7756,30 @@ function setMirielBoardPersistentMode(mode) {
 }
 
 function hasMirielBoardManualContent() {
-    return mirielBoardManualImageData !== "" || mirielBoardManualText.trim() !== "";
+    return gameState.presentation.mirielBoard.manualImageData !== "" || gameState.presentation.mirielBoard.manualText.trim() !== "";
 }
 
 function ensureMirielBoardPersistentModeIsValid() {
-    if (mirielBoardPersistentMode === "manual" && hasMirielBoardManualContent() !== true) {
-        mirielBoardPersistentMode = "off";
+    if (gameState.presentation.mirielBoard.persistentMode === "manual" && hasMirielBoardManualContent() !== true) {
+        gameState.presentation.mirielBoard.persistentMode = "off";
         clearMirielBoardTransientAnnouncement();
     }
 }
 
 function toggleMirielBoardAutoTurn(isEnabled) {
-    isMirielBoardAutoTurnEnabled = isEnabled === true;
+    gameState.presentation.mirielBoard.autoTurnEnabled = isEnabled === true;
     saveAndBroadcastAppState();
     renderCards();
 }
 
 function setMirielBoardDurationMode(mode) {
-    mirielBoardDurationMode = getSafeMirielBoardDurationMode(mode);
+    gameState.presentation.mirielBoard.durationMode = getSafeMirielBoardDurationMode(mode);
     saveAndBroadcastAppState();
     renderCards();
 }
 
 function toggleMirielBoardNewRoundCall(isEnabled) {
-    isMirielBoardNewRoundCallEnabled = isEnabled === true;
+    gameState.presentation.mirielBoard.newRoundCallEnabled = isEnabled === true;
     saveAndBroadcastAppState();
     renderCards();
 }
@@ -6955,11 +7793,11 @@ function getMirielBoardCurrentStatusText() {
             : "Automatische Initiativefolge";
     }
 
-    if (mirielBoardPersistentMode === "manual" && hasMirielBoardManualContent() === true) {
+    if (gameState.presentation.mirielBoard.persistentMode === "manual" && hasMirielBoardManualContent() === true) {
         return "Eigene Tafel";
     }
 
-    if (mirielBoardPersistentMode === "initiative") {
+    if (gameState.presentation.mirielBoard.persistentMode === "initiative") {
         return "Initiativefolge";
     }
 
@@ -6983,7 +7821,7 @@ function updateMirielBoardControls() {
 
     for (const modeButtonElement of modeButtonElements) {
         const mode = getSafeMirielBoardPersistentMode(modeButtonElement.dataset.mirielBoardPersistentMode);
-        const isActive = mirielBoardPersistentMode === mode;
+        const isActive = gameState.presentation.mirielBoard.persistentMode === mode;
         const isManualButton = mode === "manual";
 
         modeButtonElement.classList.toggle("miriel-board-mode-button-active", isActive);
@@ -6992,27 +7830,27 @@ function updateMirielBoardControls() {
     }
 
     if (autoCheckboxElement !== null) {
-        autoCheckboxElement.checked = isMirielBoardAutoTurnEnabled === true;
+        autoCheckboxElement.checked = gameState.presentation.mirielBoard.autoTurnEnabled === true;
     }
 
     if (durationSelectElement !== null) {
-        durationSelectElement.value = mirielBoardDurationMode;
+        durationSelectElement.value = gameState.presentation.mirielBoard.durationMode;
     }
 
     if (newRoundCheckboxElement !== null) {
-        newRoundCheckboxElement.checked = isMirielBoardNewRoundCallEnabled === true;
+        newRoundCheckboxElement.checked = gameState.presentation.mirielBoard.newRoundCallEnabled === true;
     }
 
-    if (textElement !== null && textElement.value !== mirielBoardManualText) {
-        textElement.value = mirielBoardManualText;
+    if (textElement !== null && textElement.value !== gameState.presentation.mirielBoard.manualText) {
+        textElement.value = gameState.presentation.mirielBoard.manualText;
     }
 
     if (textSizeElement !== null) {
-        textSizeElement.value = mirielBoardManualTextSize;
+        textSizeElement.value = gameState.presentation.mirielBoard.manualTextSize;
     }
 
     if (textPositionElement !== null) {
-        textPositionElement.value = mirielBoardManualTextPosition;
+        textPositionElement.value = gameState.presentation.mirielBoard.manualTextPosition;
     }
 
     renderMirielBoardManualPreview();
@@ -7029,8 +7867,8 @@ function renderMirielBoardManualPreview() {
 }
 
 function createMirielBoardManualPreviewHtml() {
-    const hasImage = mirielBoardManualImageData !== "";
-    const hasText = mirielBoardManualText.trim() !== "";
+    const hasImage = gameState.presentation.mirielBoard.manualImageData !== "";
+    const hasText = gameState.presentation.mirielBoard.manualText.trim() !== "";
     const statusText = getMirielBoardCurrentStatusText();
 
     if (hasImage !== true && hasText !== true) {
@@ -7045,13 +7883,13 @@ function createMirielBoardManualPreviewHtml() {
     }
 
     const imageHtml = hasImage === true
-        ? `<img src="${escapeHtml(mirielBoardManualImageData)}" alt="${escapeHtml(mirielBoardManualImageName || "Eigene Tafel")}">`
+        ? `<img src="${escapeHtml(gameState.presentation.mirielBoard.manualImageData)}" alt="${escapeHtml(gameState.presentation.mirielBoard.manualImageName || "Eigene Tafel")}">`
         : "";
     const textHtml = hasText === true
-        ? `<div class="miriel-board-manual-preview-text miriel-board-manual-text-${mirielBoardManualTextSize} miriel-board-text-position-${mirielBoardManualTextPosition}">${escapeHtml(mirielBoardManualText).replace(/\n/g, "<br>")}</div>`
+        ? `<div class="miriel-board-manual-preview-text miriel-board-manual-text-${gameState.presentation.mirielBoard.manualTextSize} miriel-board-text-position-${gameState.presentation.mirielBoard.manualTextPosition}">${escapeHtml(gameState.presentation.mirielBoard.manualText).replace(/\n/g, "<br>")}</div>`
         : "";
     const fileHtml = hasImage === true
-        ? `<small>Datei: ${escapeHtml(mirielBoardManualImageName || "Eigenes Bild")}</small>`
+        ? `<small>Datei: ${escapeHtml(gameState.presentation.mirielBoard.manualImageName || "Eigenes Bild")}</small>`
         : "<small>Nur Text</small>";
 
     return `
@@ -7076,27 +7914,27 @@ function clearPublicStageSequenceTimer() {
 function getMirielBoardRenderState() {
     ensureMirielBoardPersistentModeIsValid();
 
-    const isEncounterStartAnnouncement = mirielBoardAnnouncement !== null
-        && typeof mirielBoardAnnouncement === "object"
-        && mirielBoardAnnouncement.type === "encounter-start";
+    const isEncounterStartAnnouncement = gameState.presentation.mirielBoard.announcement !== null
+        && typeof gameState.presentation.mirielBoard.announcement === "object"
+        && gameState.presentation.mirielBoard.announcement.type === "encounter-start";
     const blocksAutoTrigger = isEncounterStartAnnouncement !== true
-        && mirielBoardPersistentMode === "manual"
+        && gameState.presentation.mirielBoard.persistentMode === "manual"
         && hasMirielBoardManualContent() === true;
     const hasNewAutoTrigger = blocksAutoTrigger !== true
-        && mirielBoardTriggerId !== ""
-        && mirielBoardTriggerId !== lastRenderedMirielBoardTriggerId
+        && gameState.presentation.mirielBoard.triggerId !== ""
+        && gameState.presentation.mirielBoard.triggerId !== lastRenderedMirielBoardTriggerId
         && isMirielBoardTriggerFresh() === true;
-    const shouldShowBoard = mirielBoardPersistentMode !== "off" || hasNewAutoTrigger === true;
+    const shouldShowBoard = gameState.presentation.mirielBoard.persistentMode !== "off" || hasNewAutoTrigger === true;
     const activeCard = getActiveCard(getHandCards());
-    const announcement = hasNewAutoTrigger === true && mirielBoardAnnouncement !== null
-        ? mirielBoardAnnouncement
+    const announcement = hasNewAutoTrigger === true && gameState.presentation.mirielBoard.announcement !== null
+        ? gameState.presentation.mirielBoard.announcement
         : getCurrentMirielBoardAnnouncement(activeCard);
     const contentMode = hasNewAutoTrigger === true
         ? "overview"
-        : (mirielBoardPersistentMode === "manual" && hasMirielBoardManualContent() === true ? "manual" : "overview");
-    const persistentModeChangedSinceLastRender = mirielBoardPersistentMode !== "off"
+        : (gameState.presentation.mirielBoard.persistentMode === "manual" && hasMirielBoardManualContent() === true ? "manual" : "overview");
+    const persistentModeChangedSinceLastRender = gameState.presentation.mirielBoard.persistentMode !== "off"
         && lastRenderedMirielBoardPersistentMode !== null
-        && lastRenderedMirielBoardPersistentMode !== mirielBoardPersistentMode;
+        && lastRenderedMirielBoardPersistentMode !== gameState.presentation.mirielBoard.persistentMode;
     const shouldAnimateExit = shouldShowBoard !== true
         && lastRenderedMirielBoardPersistentMode !== null
         && lastRenderedMirielBoardPersistentMode !== "off";
@@ -7132,10 +7970,10 @@ function hideMirielBoardAfterAutoPreview() {
         return;
     }
 
-    lastRenderedMirielBoardTriggerId = mirielBoardTriggerId;
-    mirielBoardAnnouncement = null;
+    lastRenderedMirielBoardTriggerId = gameState.presentation.mirielBoard.triggerId;
+    gameState.presentation.mirielBoard.announcement = null;
 
-    if (mirielBoardPersistentMode !== "off") {
+    if (gameState.presentation.mirielBoard.persistentMode !== "off") {
         renderCards();
         return;
     }
@@ -7154,11 +7992,11 @@ function getMirielBoardAutoDisplayDuration(cardCount, isNewRound) {
     const safeCardCount = Math.max(0, Number(cardCount) || 0);
     const newRoundBonus = isNewRound === true ? 1 : 0;
 
-    if (mirielBoardDurationMode === "short") {
+    if (gameState.presentation.mirielBoard.durationMode === "short") {
         return Math.round(clampNumber(2600 + (safeCardCount * 40) + (newRoundBonus * 250), 2600, 3600));
     }
 
-    if (mirielBoardDurationMode === "long") {
+    if (gameState.presentation.mirielBoard.durationMode === "long") {
         return Math.round(clampNumber(5600 + (safeCardCount * 75) + (newRoundBonus * 500), 5600, 7600));
     }
 
@@ -7167,12 +8005,12 @@ function getMirielBoardAutoDisplayDuration(cardCount, isNewRound) {
 
 
 function isMirielBoardTriggerFresh() {
-    if (mirielBoardTriggerId === "") {
+    if (gameState.presentation.mirielBoard.triggerId === "") {
         return false;
     }
 
-    const announcement = mirielBoardAnnouncement !== null && typeof mirielBoardAnnouncement === "object"
-        ? mirielBoardAnnouncement
+    const announcement = gameState.presentation.mirielBoard.announcement !== null && typeof gameState.presentation.mirielBoard.announcement === "object"
+        ? gameState.presentation.mirielBoard.announcement
         : null;
     const createdAtText = announcement !== null ? getSafeOptionalString(announcement.createdAt) : "";
 
@@ -7247,7 +8085,7 @@ function activateMirielBoardAfterRender() {
         }
 
         shouldAnimateMirielBoardOnNextRender = false;
-        lastRenderedMirielBoardPersistentMode = mirielBoardPersistentMode;
+        lastRenderedMirielBoardPersistentMode = gameState.presentation.mirielBoard.persistentMode;
         scheduleMirielBoardAutoHide(false, cardCount, isNewRound);
         return;
     }
@@ -7263,7 +8101,7 @@ function activateMirielBoardAfterRender() {
     }
 
     shouldAnimateMirielBoardOnNextRender = false;
-    lastRenderedMirielBoardPersistentMode = mirielBoardPersistentMode;
+    lastRenderedMirielBoardPersistentMode = gameState.presentation.mirielBoard.persistentMode;
     lastRenderedMirielBoardContentMode = contentMode;
     scheduleMirielBoardAutoHide(shouldAutoShow, cardCount, isNewRound);
 }
@@ -7285,14 +8123,14 @@ function createMirielBoardNoticeHtml(publicCards, activeCard, announcementOverri
 function createMirielBoardAlertHtml(publicCards, announcementOverride) {
     const announcement = announcementOverride !== null && typeof announcementOverride === "object"
         ? announcementOverride
-        : { isNewRound: false, roundNumber: roundNumber };
+        : { isNewRound: false, roundNumber: gameState.encounter.roundNumber };
 
     if (announcement.isNewRound !== true) {
         return "";
     }
 
     const alertCards = getVisibleHealthAlertsForPublicBoard(publicCards);
-    const safeRoundNumber = getSafePositiveInteger(announcement.roundNumber, roundNumber);
+    const safeRoundNumber = getSafePositiveInteger(announcement.roundNumber, gameState.encounter.roundNumber);
 
     if (alertCards.length === 0) {
         return `
@@ -7390,16 +8228,16 @@ function createMirielBoardEntryHtml(publicCard, turnOffset) {
 }
 
 function createMirielBoardManualHtml() {
-    const hasImage = mirielBoardManualImageData !== "";
-    const hasText = mirielBoardManualText.trim() !== "";
-    const textSizeClass = `miriel-board-manual-text-${mirielBoardManualTextSize}`;
-    const textPositionClass = `miriel-board-text-position-${mirielBoardManualTextPosition}`;
+    const hasImage = gameState.presentation.mirielBoard.manualImageData !== "";
+    const hasText = gameState.presentation.mirielBoard.manualText.trim() !== "";
+    const textSizeClass = `miriel-board-manual-text-${gameState.presentation.mirielBoard.manualTextSize}`;
+    const textPositionClass = `miriel-board-text-position-${gameState.presentation.mirielBoard.manualTextPosition}`;
     const mediaClass = hasImage === true ? "has-image" : "text-only";
     const imageHtml = hasImage === true
-        ? `<img src="${escapeHtml(mirielBoardManualImageData)}" alt="${escapeHtml(mirielBoardManualImageName || "Eigene Tafel")}">`
+        ? `<img src="${escapeHtml(gameState.presentation.mirielBoard.manualImageData)}" alt="${escapeHtml(gameState.presentation.mirielBoard.manualImageName || "Eigene Tafel")}">`
         : "";
     const textHtml = hasText === true
-        ? `<div class="miriel-board-manual-text ${textSizeClass} ${textPositionClass}">${escapeHtml(mirielBoardManualText).replace(/\n/g, "<br>")}</div>`
+        ? `<div class="miriel-board-manual-text ${textSizeClass} ${textPositionClass}">${escapeHtml(gameState.presentation.mirielBoard.manualText).replace(/\n/g, "<br>")}</div>`
         : "";
 
     return `
@@ -7715,13 +8553,25 @@ function getPublicTurnWindow(publicCards) {
         };
     }
 
-    if (publicCards.length < 5) {
+    if (publicCards.length === 3) {
         return {
             ghostPreviousCard: null,
             previousCard: publicCards[previousIndex],
             focusedCard: publicCards[focusedIndex],
             nextCard: publicCards[nextIndex],
             ghostNextCard: null
+        };
+    }
+
+    if (publicCards.length === 4) {
+        const afterNextIndex = (focusedIndex + 2) % publicCards.length;
+
+        return {
+            ghostPreviousCard: null,
+            previousCard: publicCards[previousIndex],
+            focusedCard: publicCards[focusedIndex],
+            nextCard: publicCards[nextIndex],
+            ghostNextCard: publicCards[afterNextIndex]
         };
     }
 
@@ -8473,8 +9323,8 @@ function getPublicRibbonCardsForRender(publicCards, activeCard) {
 function createPublicTurnStatusHtml(handCards, activeCard) {
     const activeName = activeCard !== null ? activeCard.publicName || activeCard.name : "Niemand";
     const initiativeCards = getInitiativeCards(handCards);
-    const turnText = activeCard !== null ? `${currentTurnIndex + 1} / ${initiativeCards.length}` : "—";
-    const roundText = activeCard !== null ? `${roundNumber}` : "—";
+    const turnText = activeCard !== null ? `${getCurrentTurnIndex() + 1} / ${initiativeCards.length}` : "—";
+    const roundText = activeCard !== null ? `${gameState.encounter.roundNumber}` : "—";
 
     return `
         <div class="public-turn-status">
@@ -8517,7 +9367,7 @@ function createCardMenuHtml(card) {
         `;
     }
 
-    const isFocusedDeckCard = location === cardLocations.deck && focusedCardId === card.id;
+    const isFocusedDeckCard = location === cardLocations.deck && uiState.focusedCardId === card.id;
     const deckFocusButtonHtml = isFocusedDeckCard
         ? `<button type="button" onclick="showDeckCardFromFocus(${card.id})">Aus Fokus entfernen</button>`
         : `<button type="button" onclick="setFocusedDeckCard(${card.id})">In den Fokus nehmen</button>`;
@@ -8900,7 +9750,7 @@ function updateToolkitHeaderStatus() {
     const activeText = activeCard !== null ? `${activeCard.publicName || activeCard.name} aktiv` : "Keine Handkarte aktiv";
     const targetText = selectedTargets.length === 1 ? "1 Ziel" : `${selectedTargets.length} Ziele`;
     const initiativeCards = getInitiativeCards(handCards);
-    const turnText = initiativeCards.length > 0 ? `Turn ${currentTurnIndex + 1} von ${initiativeCards.length}` : "keine aktive Zugfolge";
+    const turnText = initiativeCards.length > 0 ? `Turn ${getCurrentTurnIndex() + 1} von ${initiativeCards.length}` : "keine aktive Zugfolge";
 
     statusElement.textContent = `${activeText} · ${targetText} · ${turnText}`;
 }
@@ -9367,7 +10217,7 @@ async function handleEditCardSaveButtonClick() {
     setCardLocation(card, isInCombatInputElement.checked ? cardLocations.hand : cardLocations.deck);
     card.encounterStatus = isInCombatInputElement.checked ? encounterStatuses.active : null;
 
-    if (manuallySelectedPublicCardId === card.id && card.isInCombat === false) {
+    if (gameState.presentation.manuallySelectedCardId === card.id && card.isInCombat === false) {
         clearManualPublicSelection();
     }
 
@@ -9655,7 +10505,7 @@ async function handleAddCardButtonClick() {
             deletedAt: null
         };
 
-        cards.push(normalizeCardModel(newCard));
+        gameState.cards.push(normalizeCardModel(newCard));
 
         if (newCard.isInCombat === false) {
             createdDeckCardIds.push(newCardId);
@@ -9738,8 +10588,8 @@ function createInventoryDescriptionHtml(descriptionText) {
 
 function createTurnActionButtonsHtml() {
     const handCards = getHandCards();
-    const turnDisabledAttribute = isEncounterStarted === true && handCards.length > 0 ? "" : " disabled";
-    const stateActionButtonHtml = isEncounterStarted === true
+    const turnDisabledAttribute = gameState.encounter.isStarted === true && handCards.length > 0 ? "" : " disabled";
+    const stateActionButtonHtml = gameState.encounter.isStarted === true
         ? `<button class="round-control-button end-combat-button" onclick="endCombat()" type="button">Beenden</button>`
         : `<button class="round-control-button start-encounter-button" onclick="startEncounter()"${handCards.length > 0 ? "" : " disabled"} title="Encounter starten und den öffentlichen Spieltisch freigeben" type="button">Starten</button>`;
 
@@ -9768,7 +10618,7 @@ function renderTurnInfo(handCards) {
     if (activeCard === null) {
         turnInfoElement.innerHTML = `
             <div class="active-round-summary-card">
-                <strong>Runde ${roundNumber}</strong>
+                <strong>Runde ${gameState.encounter.roundNumber}</strong>
                 <span>Keine Handkarten</span>
             </div>
             <button class="active-round-card active-round-card-empty" type="button" disabled>
@@ -9790,8 +10640,8 @@ function renderTurnInfo(handCards) {
 
     turnInfoElement.innerHTML = `
         <div class="active-round-summary-card">
-            <strong>Runde ${roundNumber}</strong>
-            <span>Turn ${currentTurnIndex + 1} von ${getInitiativeCards(handCards).length}</span>
+            <strong>Runde ${gameState.encounter.roundNumber}</strong>
+            <span>Turn ${getCurrentTurnIndex() + 1} von ${getInitiativeCards(handCards).length}</span>
         </div>
 
         <button
@@ -10002,7 +10852,7 @@ function playPublicStageRailTransition(previousStageState) {
 
     stageElement.classList.add("public-stage-transitioning");
 
-    // Force style application before releasing the cards onto the rail.
+    // Force style application before releasing the gameState.cards onto the rail.
     void stageElement.offsetHeight;
 
     const duration = 1460;
@@ -10224,9 +11074,9 @@ function renderPlayerSide(publicCards, handCards) {
         return;
     }
 
-    document.body.classList.toggle("encounter-not-started", isEncounterStarted !== true);
+    document.body.classList.toggle("encounter-not-started", gameState.encounter.isStarted !== true);
 
-    if (isEncounterStarted !== true) {
+    if (gameState.encounter.isStarted !== true) {
         if (hasPreparedEncounterCards() === true) {
             previewElement.innerHTML = createPublicEncounterWaitingHtml();
         } else {
@@ -10311,7 +11161,7 @@ function renderPlayerSide(publicCards, handCards) {
         }
 
         if (mirielBoardRenderState.hasNewAutoTrigger === true) {
-            lastRenderedMirielBoardTriggerId = mirielBoardTriggerId;
+            lastRenderedMirielBoardTriggerId = gameState.presentation.mirielBoard.triggerId;
         }
 
         activateMirielBoardAfterRender();
@@ -10508,7 +11358,7 @@ function renderFocusedCard(focusedCard, activeCard) {
 }
 
 function getDetailTabButtonHtml(tabName, label) {
-    const activeClass = activeDetailTab === tabName ? "active-detail-tab" : "";
+    const activeClass = uiState.activeDetailTab === tabName ? "active-detail-tab" : "";
 
     return `
         <button
@@ -12108,15 +12958,15 @@ function createDetailTabContentHtml(card) {
         `;
     }
 
-    if (activeDetailTab === "actions") {
+    if (uiState.activeDetailTab === "actions") {
         return createActionDetailTabHtml(card);
     }
 
-    if (activeDetailTab === "traits") {
+    if (uiState.activeDetailTab === "traits") {
         return createTraitDetailTabHtml(card);
     }
 
-    if (activeDetailTab === "notes") {
+    if (uiState.activeDetailTab === "notes") {
         return `
             <div class="active-hand-detail-content active-hand-detail-scroll detail-tab-surface">
                 ${createDetailTextPanelHtml("Notizen", card.notes, "Noch keine DM-Notizen eingetragen.")}
@@ -12124,7 +12974,7 @@ function createDetailTabContentHtml(card) {
         `;
     }
 
-    if (activeDetailTab === "spells") {
+    if (uiState.activeDetailTab === "spells") {
         return `
             <div class="active-hand-detail-content active-hand-detail-scroll active-hand-spell-reference detail-tab-surface">
                 ${createSpellTrackerHtml(card)}
@@ -12132,7 +12982,7 @@ function createDetailTabContentHtml(card) {
         `;
     }
 
-    if (activeDetailTab === "inventory") {
+    if (uiState.activeDetailTab === "inventory") {
         return createInventoryTabHtml(card);
     }
 
@@ -12187,7 +13037,7 @@ function renderCardDetailPanel(focusedCard) {
         return;
     }
 
-    const safeActiveDetailTab = getSafeDetailTab(activeDetailTab);
+    const safeActiveDetailTab = getSafeDetailTab(uiState.activeDetailTab);
 
     detailPanelElement.innerHTML = `
         <article class="active-hand-details-card active-hand-details-card--${safeActiveDetailTab} detail-panel-surface">
@@ -12390,22 +13240,22 @@ function renderDeckControlsState() {
     const typeFilterElement = document.querySelector("#deck-type-filter");
     const sortElement = document.querySelector("#deck-sort-mode");
 
-    if (locationViewElement instanceof HTMLSelectElement && locationViewElement.value !== deckLocationView) {
-        locationViewElement.value = deckLocationView;
+    if (locationViewElement instanceof HTMLSelectElement && locationViewElement.value !== uiState.deck.locationView) {
+        locationViewElement.value = uiState.deck.locationView;
         updateArcaneSelectForElement(locationViewElement);
     }
 
-    if (searchElement instanceof HTMLInputElement && searchElement.value !== deckSearchQuery) {
-        searchElement.value = deckSearchQuery;
+    if (searchElement instanceof HTMLInputElement && searchElement.value !== uiState.deck.searchQuery) {
+        searchElement.value = uiState.deck.searchQuery;
     }
 
-    if (typeFilterElement instanceof HTMLSelectElement && typeFilterElement.value !== deckTypeFilter) {
-        typeFilterElement.value = deckTypeFilter;
+    if (typeFilterElement instanceof HTMLSelectElement && typeFilterElement.value !== uiState.deck.typeFilter) {
+        typeFilterElement.value = uiState.deck.typeFilter;
         updateArcaneSelectForElement(typeFilterElement);
     }
 
-    if (sortElement instanceof HTMLSelectElement && sortElement.value !== deckSortMode) {
-        sortElement.value = deckSortMode;
+    if (sortElement instanceof HTMLSelectElement && sortElement.value !== uiState.deck.sortMode) {
+        sortElement.value = uiState.deck.sortMode;
         updateArcaneSelectForElement(sortElement);
     }
 }
@@ -12423,7 +13273,7 @@ function renderPreparationDeckRibbon(listCards) {
         listElement.innerHTML = `
             <div class="deck-empty-state">
                 <p class="empty-list-message">
-                    ${deckLocationView === cardLocations.trash ? "Der Papierkorb ist leer." : "Keine passenden Karten im Deck."}
+                    ${uiState.deck.locationView === cardLocations.trash ? "Der Papierkorb ist leer." : "Keine passenden Karten im Deck."}
                 </p>
             </div>
         `;
@@ -12440,7 +13290,7 @@ function renderPreparationDeckRibbon(listCards) {
 }
 
 function getPreparationLocationCards() {
-    return deckLocationView === cardLocations.trash ? getTrashCards() : getDeckCards();
+    return uiState.deck.locationView === cardLocations.trash ? getTrashCards() : getDeckCards();
 }
 
 function renderDeckWorkbenchOnly() {
@@ -12453,7 +13303,7 @@ function renderDeckWorkbenchOnly() {
 }
 
 function setDeckLocationView(value) {
-    deckLocationView = value === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
+    uiState.deck.locationView = value === cardLocations.trash ? cardLocations.trash : cardLocations.deck;
     clearDeckSelection();
     preserveViewportWhileRendering(function() {
         renderDeckWorkbenchOnly();
@@ -12461,21 +13311,21 @@ function setDeckLocationView(value) {
 }
 
 function setDeckSearchQuery(value) {
-    deckSearchQuery = getSafeOptionalString(value);
+    uiState.deck.searchQuery = getSafeOptionalString(value);
     preserveViewportWhileRendering(function() {
         renderDeckWorkbenchOnly();
     });
 }
 
 function setDeckTypeFilter(value) {
-    deckTypeFilter = ["all", "player", "npc", "monster"].includes(value) ? value : "all";
+    uiState.deck.typeFilter = ["all", "player", "npc", "monster"].includes(value) ? value : "all";
     preserveViewportWhileRendering(function() {
         renderDeckWorkbenchOnly();
     });
 }
 
 function setDeckSortMode(value) {
-    deckSortMode = ["name", "type", "initiativeModifier", "hp"].includes(value) ? value : "name";
+    uiState.deck.sortMode = ["name", "type", "initiativeModifier", "hp"].includes(value) ? value : "name";
     preserveViewportWhileRendering(function() {
         renderDeckWorkbenchOnly();
     });
@@ -12509,12 +13359,12 @@ function renderCardList(elementId, listCards, activeCard) {
 }
 
 function renderCards() {
-    if (shouldAutoloadDemoCards() === true && cards.length === 0) {
-        cards = createDemoCards().map(normalizeCardModel);
-        encounterName = demoEncounterName;
-        focusedCardId = null;
+    if (shouldAutoloadDemoCards() === true && gameState.cards.length === 0) {
+        gameState.cards = createDemoCards().map(normalizeCardModel);
+        gameState.name = demoEncounterName;
+        uiState.focusedCardId = null;
         resetEncounterStartGateState({ clearLog: true });
-        isMirielBoardAutoTurnEnabled = false;
+        gameState.presentation.mirielBoard.autoTurnEnabled = false;
     }
 
     ensureEncounterStartGateConsistency();
@@ -12571,7 +13421,7 @@ function longRest() {
 
     }
 
-    for (const card of cards) {
+    for (const card of gameState.cards) {
 
         if (card.type === "player") {
 
@@ -13003,11 +13853,11 @@ setupCrossTabSync();
 const wasStateLoaded = loadAppStateFromBrowser();
 
 if (wasStateLoaded === false && shouldAutoloadDemoCards() === true) {
-    cards = createDemoCards().map(normalizeCardModel);
-    encounterName = demoEncounterName;
-    focusedCardId = null;
+    gameState.cards = createDemoCards().map(normalizeCardModel);
+    gameState.name = demoEncounterName;
+    uiState.focusedCardId = null;
     resetEncounterStartGateState({ clearLog: true });
-    isMirielBoardAutoTurnEnabled = false;
+    gameState.presentation.mirielBoard.autoTurnEnabled = false;
     updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
 
     if (appView === "dm") {
