@@ -6,7 +6,7 @@
   <title>
    Miriel's Deck of Encounters
   </title>
-  <link href="style.css?v=0.9.1" rel="stylesheet"/>
+  <link href="style.css?v=0.10.1" rel="stylesheet"/>
  </head>
  <body>
   <main class="app">
@@ -17,7 +17,7 @@
       <div class="app-header-card">
        <div class="app-header-text">
         <p class="app-kicker" id="app-view-kicker">
-         Spielleiter-Ansicht
+         Spielleiterseite
         </p>
         <h1>
          Miriel&rsquo;s Deck of Encounters
@@ -30,11 +30,11 @@
          <span>Optimiert f&uuml;r gr&ouml;&szlig;ere Bildschirme ab etwa 13 Zoll.</span>
         </p>
         <div aria-label="Ansicht wechseln" class="app-view-actions">
-         <button id="open-dm-view-button" onclick="openAppView('dm')" type="button">
-          Spielleiter-Ansicht öffnen
+         <button id="open-dm-side-view-button" onclick="openAppView('dm')" type="button">
+          Spielleiterseite öffnen
          </button>
-         <button id="open-player-view-button" onclick="openAppView('player')" type="button">
-          Spieltisch-Anzeige öffnen
+         <button id="open-player-side-view-button" onclick="openAppView('playerSide')" type="button">
+          Spielerseite öffnen
          </button>
          <span class="app-help-button">
          </span>
@@ -54,10 +54,10 @@
         Miriel&rsquo;s Deck of Encounters verwenden
        </h2>
        <p>
-        Bereite Karten im <strong>Kartendeck</strong> vor, f&uuml;hre den laufenden Encounter am <strong>Spieltisch</strong> und teile ausgew&auml;hlte Informationen &uuml;ber die <strong>Spieltisch-Anzeige</strong>.
+        Bereite Karten im <strong>Kartendeck</strong> vor, f&uuml;hre den laufenden Encounter am <strong>Spieltisch</strong> und teile ausgew&auml;hlte Informationen &uuml;ber die <strong>Spielerseite</strong>.
        </p>
        <p>
-        <strong>Kartendeck</strong> = Vorbereitung &middot; <strong>Spieltisch</strong> = laufender Encounter &middot; <strong>Spielleiter-Atelier</strong> = Werkzeuge, Kartenschmiede und Archiv &middot; <strong>Spieltisch-Anzeige</strong> = passive Anzeige f&uuml;r Spieler, Beamer oder zweiten Bildschirm.
+        <strong>Kartendeck</strong> = Vorbereitung &middot; <strong>Spieltisch</strong> = laufender Encounter &middot; <strong>Spielleiter-Atelier</strong> = Werkzeuge, Kartenschmiede und Archiv &middot; <strong>Spielerseite</strong> = öffentliche Seite des virtuellen Spielleiterschirms f&uuml;r Spieler, Beamer oder zweiten Bildschirm.
        </p>
       </article>
       <article class="app-help-card">
@@ -87,7 +87,7 @@
         Runde und Zugfolge
        </h2>
        <p>
-        In der <strong>Rundensteuerung</strong> wechselst du zwischen vorherigem und n&auml;chstem Zug. <strong>Starten</strong> gibt die Spieltisch-Anzeige frei, <strong>Beenden</strong> sperrt sie wieder.
+        In der <strong>Rundensteuerung</strong> wechselst du zwischen vorherigem und n&auml;chstem Zug. <strong>Starten</strong> gibt die Spielerseite frei, <strong>Beenden</strong> sperrt sie wieder.
        </p>
        <p>
         Die aktive Karte wird <strong class="help-color help-color-blue">blau</strong> markiert; Ziele werden <strong class="help-color help-color-gold">gold</strong> markiert.
@@ -106,10 +106,10 @@
       </article>
       <article class="app-help-card">
        <h2>
-        Spieltisch-Anzeige
+        Spielerseite
        </h2>
        <p>
-        Die <strong>Spieltisch-Anzeige</strong> zeigt nur &ouml;ffentliche Informationen f&uuml;r Spieler, Beamer, Stream oder zweiten Bildschirm.
+        Die <strong>Spielerseite</strong> ist die öffentliche Seite des virtuellen Spielleiterschirms und zeigt nur &ouml;ffentliche Informationen f&uuml;r Spieler, Beamer, Stream oder zweiten Bildschirm.
        </p>
        <p>
         Vor dem Start bleiben Karten und Initiative verborgen. Nach dem Start erscheinen B&uuml;hne, Initiative und <strong>Miriels Schautafel</strong>.
@@ -167,7 +167,7 @@
         Im <strong>Archiv</strong> verwaltest du Browser-Speicher, Import, Export, Demo-Karten und Reset-Funktionen.
        </p>
        <p>
-        Exportierte Encounter-Dateien eignen sich f&uuml;r Backups oder vorbereitete Sessions auf anderen Ger&auml;ten.
+        Exportierte Spielstand-Dateien eignen sich f&uuml;r Backups oder vorbereitete Sessions auf anderen Ger&auml;ten.
        </p>
       </article>
      </div>
@@ -182,37 +182,37 @@
       Diese Ansicht ist noch nicht f&uuml;r kleine Displays optimiert.
      </h2>
      <p>
-      Die Spielleiter-Ansicht ist derzeit f&uuml;r Laptop-, Desktop- und gro&szlig;e Tablet-Displays ausgelegt. Auf Smartphones und kleineren Tablets ist eine kompakte Tablet-Ansicht noch in Arbeit. Bitte nutze f&uuml;r den Beta-Test ein gr&ouml;&szlig;eres Tablet, Laptop oder Desktop-Ger&auml;t.
+      Die Spielleiterseite ist derzeit f&uuml;r Laptop-, Desktop- und gro&szlig;e Tablet-Displays ausgelegt. Auf Smartphones und kleineren Tablets ist eine kompakte Tablet-Ansicht noch in Arbeit. Bitte nutze f&uuml;r den Beta-Test ein gr&ouml;&szlig;eres Tablet, Laptop oder Desktop-Ger&auml;t.
      </p>
     </div>
    </section>
-   <!-- Spieltisch-Anzeige: in der Spielleiter-Ansicht per CSS ausgeblendet, in der Player-View sichtbar -->
-   <details class="public-preview-section" open="">
+   <!-- Spielerseite: in der Spielleiterseite per CSS ausgeblendet, in der Spielerseite sichtbar -->
+   <details class="player-side-section" open="">
     <summary>
-     <div class="public-preview-title-block">
+     <div class="player-side-title-block">
       <h2>
        Miriel&rsquo;s Deck of Encounters
       </h2>
       <span>
-       Spieltisch
+       Spielerseite
       </span>
      </div>
-     <span class="public-preview-toggle-label">
+     <span class="player-side-toggle-label">
      </span>
     </summary>
-    <div class="public-preview-content">
-     <div class="public-preview-list" id="public-preview-list">
+    <div class="player-side-content">
+     <div class="player-side-list" id="player-side-list">
      </div>
      <h3 class="public-initiative-title">
       Initiative
      </h3>
      <div class="public-initiative-shell">
-      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach links scrollen" class="public-initiative-button" onclick="scrollPublicPreview('left')" title="Nach links scrollen">
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach links scrollen" class="public-initiative-button" onclick="scrollPlayerSide('left')" title="Nach links scrollen">
        &lsaquo;
       </button>
-      <div class="public-preview-ribbon" id="public-preview-ribbon">
+      <div class="player-side-ribbon" id="player-side-ribbon">
       </div>
-      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach rechts scrollen" class="public-initiative-button" onclick="scrollPublicPreview('right')" title="Nach rechts scrollen">
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach rechts scrollen" class="public-initiative-button" onclick="scrollPlayerSide('right')" title="Nach rechts scrollen">
        &rsaquo;
       </button>
      </div>
@@ -813,11 +813,11 @@
             <button onclick="clearSavedBrowserState()" type="button">
              Lokale Daten l&ouml;schen
             </button>
-            <button onclick="exportEncounter()" type="button">
-             Encounter exportieren
+            <button onclick="exportGameState()" type="button">
+             Spielstand exportieren
             </button>
-            <button onclick="triggerEncounterImport()" type="button">
-             Encounter importieren
+            <button onclick="triggerGameStateImport()" type="button">
+             Spielstand importieren
             </button>
            </div>
           </section>
@@ -854,39 +854,39 @@
              Conditions entfernen
             </button>
             <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
-             Encounter leeren
+             Spielstand leeren
             </button>
            </div>
           </section>
          </div>
          <p class="archive-legal-note">Importiere nur Texte und Bilder, die du verwenden darfst. Wichtige Daten regelmäßig exportieren; Browserdaten sind kein dauerhaftes Backup.</p>
-         <input accept=".json,application/json" id="encounter-import-file" onchange="handleEncounterImportFileChange(event)" style="display: none;" type="file"/>
+         <input accept=".json,application/json" id="game-state-import-file" onchange="handleGameStateImportFileChange(event)" style="display: none;" type="file"/>
          <div aria-labelledby="deck-import-preview-title" aria-modal="true" class="deck-import-preview deck-import-preview-hidden" id="deck-import-preview" role="dialog">
           <div class="deck-import-preview-card">
            <p class="section-eyebrow">
             Import-Vorschau
            </p>
            <h3 id="deck-import-preview-title">
-            Encounter importieren
+            Spielstand importieren
            </h3>
            <p class="deck-import-preview-file" id="deck-import-preview-file">
             Importdatei
            </p>
            <p class="deck-import-preview-name" id="deck-import-preview-name">
-            Encounter: Unbenannter Encounter
+            Spielstand: Unbenannter Spielstand
            </p>
            <p class="deck-import-preview-summary" id="deck-import-preview-summary">
             0 Karten gefunden.
            </p>
            <p class="deck-import-preview-warning">
-            W&auml;hle, ob die Karten nur zum Deck hinzugef&uuml;gt werden oder ob der aktuelle Encounter durch die Importdatei ersetzt wird.
+            W&auml;hle, ob die Karten nur zum Deck hinzugef&uuml;gt werden oder ob der aktuelle Spielstand durch die Importdatei ersetzt wird.
            </p>
            <div class="deck-import-preview-actions">
             <button onclick="confirmDeckImportAppend()" type="button">
              Zum Deck hinzuf&uuml;gen
             </button>
             <button onclick="confirmDeckImportReplace()" type="button">
-             Aktuellen Zustand ersetzen
+             Spielstand ersetzen
             </button>
             <button onclick="closeDeckImportPreview()" type="button">
              Abbrechen
@@ -1013,11 +1013,11 @@
               <p>
                Speichern &amp; Laden
               </p>
-              <button onclick="exportEncounter()" type="button">
-               Encounter exportieren
+              <button onclick="exportGameState()" type="button">
+               Spielstand exportieren
               </button>
-              <button onclick="triggerEncounterImport()" type="button">
-               Encounter importieren
+              <button onclick="triggerGameStateImport()" type="button">
+               Spielstand importieren
               </button>
              </div>
              <div class="deck-more-menu-group">
@@ -1031,7 +1031,7 @@
                Demo-Karten entfernen
               </button>
               <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
-               Encounter leeren
+               Spielstand leeren
               </button>
              </div>
             </div>
@@ -2098,7 +2098,7 @@
     <div class="app-footer-summary">
      <div>
       <strong>Miriel&rsquo;s Deck of Encounters</strong>
-      <span>Version 0.9.1 &middot; Statisch gehostete Browser-Version</span>
+      <span>Version 0.10.1 &middot; Statisch gehostete Browser-Version</span>
      </div>
      <p>Unabhängige, SRD-5.1-kompatible Begleitapp für Charaktere, Begegnungen und den digitalen Spieltisch.</p>
     </div>
@@ -2113,7 +2113,7 @@
     </nav>
    </footer>
   </main>
-  <script src="app.js?v=0.9.1">
+  <script src="app.js?v=0.10.1">
   </script>
  </body>
 </html>

@@ -3,7 +3,7 @@
 // ============================================================
 
 const useDemoData = true;
-const appVersion = "0.9.1";
+const appVersion = "0.10.1";
 
 const importSecurityLimits = Object.freeze({
     maxFileBytesWithoutEmbeddedImages: 20 * 1024 * 1024,
@@ -20,10 +20,10 @@ const importSecurityLimits = Object.freeze({
 });
 const appOperatingMode = "Statisch gehostete Browser-Version";
 
-const appStorageKey = "miriels-deck-encounter-state-v18";
-const appChannelName = "miriels-deck-encounter-channel";
+const appStorageKey = "miriels-deck-game-state-v1";
+const appChannelName = "miriels-deck-game-state-channel";
 const demoCardsAutoloadStorageKey = `${appStorageKey}-demo-autoload-enabled`;
-const demoEncounterName = "Miriel\'s Demo Encounter";
+const demoEncounterName = "Miriels Demo-Spielstand";
 const mirielBoardAutomationDefaultsVersion = 2;
 
 let appView = getAppViewFromUrl();
@@ -759,10 +759,10 @@ let isEncounterStarted = false;
 
 let manuallySelectedPublicCardId = null;
 
-let publicPreviewTouchStartX = null;
-let publicPreviewTouchStartY = null;
+let playerSideTouchStartX = null;
+let playerSideTouchStartY = null;
 
-let publicPreviewWheelIsCoolingDown = false;
+let playerSideWheelIsCoolingDown = false;
 
 let combatLogMessages = [];
 
@@ -806,8 +806,8 @@ function getAppViewFromUrl() {
     const urlParameters = new URLSearchParams(window.location.search);
     const viewParameter = urlParameters.get("view");
 
-    if (viewParameter === "player") {
-        return "player";
+    if (viewParameter === "player-side") {
+        return "playerSide";
     }
 
     return "dm";
@@ -816,8 +816,8 @@ function getAppViewFromUrl() {
 function openAppView(viewName) {
     const targetUrl = new URL(window.location.href);
 
-    if (viewName === "player") {
-        targetUrl.searchParams.set("view", "player");
+    if (viewName === "playerSide") {
+        targetUrl.searchParams.set("view", "player-side");
     } else {
         targetUrl.searchParams.set("view", "dm");
     }
@@ -826,35 +826,35 @@ function openAppView(viewName) {
 }
 
 function applyAppViewToPage() {
-    if (appView === "player") {
-        document.body.classList.add("player-view");
-        document.body.classList.remove("dm-view");
+    if (appView === "playerSide") {
+        document.body.classList.add("player-side-view");
+        document.body.classList.remove("dm-side-view");
     } else {
-        document.body.classList.add("dm-view");
-        document.body.classList.remove("player-view");
+        document.body.classList.add("dm-side-view");
+        document.body.classList.remove("player-side-view");
     }
 
     const kickerElement = document.querySelector("#app-view-kicker");
 
     if (kickerElement !== null) {
-        kickerElement.textContent = appView === "player"
-            ? "Spieltisch-Anzeige"
-            : "Spielleiter-Ansicht";
+        kickerElement.textContent = appView === "playerSide"
+            ? "Spielerseite"
+            : "Spielleiterseite";
     }
 
-    const dmButtonElement = document.querySelector("#open-dm-view-button");
-    const playerButtonElement = document.querySelector("#open-player-view-button");
+    const dmButtonElement = document.querySelector("#open-dm-side-view-button");
+    const playerSideButtonElement = document.querySelector("#open-player-side-view-button");
 
     if (dmButtonElement !== null) {
         dmButtonElement.hidden = appView === "dm";
         dmButtonElement.classList.toggle("active-view-button", appView === "dm");
-        dmButtonElement.textContent = "Spielleiter-Ansicht öffnen";
+        dmButtonElement.textContent = "Spielleiterseite öffnen";
     }
 
-    if (playerButtonElement !== null) {
-        playerButtonElement.hidden = appView === "player";
-        playerButtonElement.classList.toggle("active-view-button", appView === "player");
-        playerButtonElement.textContent = "Spieltisch-Anzeige öffnen";
+    if (playerSideButtonElement !== null) {
+        playerSideButtonElement.hidden = appView === "playerSide";
+        playerSideButtonElement.classList.toggle("active-view-button", appView === "playerSide");
+        playerSideButtonElement.textContent = "Spielerseite öffnen";
     }
 }
 
@@ -943,7 +943,8 @@ function createPersistentAppState() {
         formatVersion: 2,
         savedAt: new Date().toISOString(),
         demoCardsAutoloadEnabled: demoCardsAutoloadEnabled,
-        encounter: {
+        gameState: {
+            name: encounterName,
             encounterName: encounterName,
             roundNumber: roundNumber,
             currentTurnIndex: currentTurnIndex,
@@ -1058,7 +1059,7 @@ function loadAppStateFromBrowser() {
 }
 
 function applyImportedEncounterState(importData) {
-    const encounterData = getEncounterDataFromImport(importData);
+    const encounterData = getGameStateDataFromImport(importData);
 
     if (encounterData === null) {
         return;
@@ -1138,7 +1139,7 @@ function setupCrossTabSync() {
                 return;
             }
 
-            if (appView === "player") {
+            if (appView === "playerSide") {
                 applyExternalAppStateAndRender();
             }
         });
@@ -1149,14 +1150,14 @@ function setupCrossTabSync() {
             return;
         }
 
-        if (appView === "player") {
+        if (appView === "playerSide") {
             applyExternalAppStateAndRender();
         }
     });
 }
 
-function setupPlayerViewPolling() {
-    if (appView !== "player") {
+function setupPlayerSidePolling() {
+    if (appView !== "playerSide") {
         return;
     }
 
@@ -1187,11 +1188,11 @@ function saveCurrentStateManually() {
 
     if (saveAppStateToBrowser() === true) {
         broadcastAppStateChange();
-        alert("Der aktuelle Zustand wurde im Browser dieses Geräts gespeichert. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Encounter exportieren“.");
+        alert("Der aktuelle Zustand wurde im Browser dieses Geräts gespeichert. Für Backups oder den Wechsel auf ein anderes Gerät nutze „Spielstand exportieren“.");
         return;
     }
 
-    alert("Der aktuelle Zustand konnte nicht im Browser gespeichert werden. Für Backups nutze bitte „Encounter exportieren“.");
+    alert("Der aktuelle Zustand konnte nicht im Browser gespeichert werden. Für Backups nutze bitte „Spielstand exportieren“.");
 }
 
 function reloadDemoCards() {
@@ -1975,7 +1976,7 @@ function hasManualPublicSelection() {
     return manuallySelectedPublicCardId !== null;
 }
 
-function shouldPublicPreviewFollowActiveCard() {
+function shouldPlayerSideFollowActiveCard() {
     return manuallySelectedPublicCardId === null;
 }
 
@@ -2395,8 +2396,8 @@ function scrollCardRow(rowElementId, direction) {
     }
 }
 
-function scrollPublicPreview(direction) {
-    scrollCardRow("public-preview-ribbon", direction);
+function scrollPlayerSide(direction) {
+    scrollCardRow("player-side-ribbon", direction);
 }
 
 function focusPublicCard(publicCardId) {
@@ -2409,7 +2410,7 @@ function resetPublicFocusToActiveCard() {
     renderCards();
 }
 
-function navigatePublicPreview(direction) {
+function navigatePlayerSide(direction) {
     const handCards = getHandCards();
 
     if (handCards.length === 0) {
@@ -2447,7 +2448,7 @@ function navigatePublicPreview(direction) {
     renderCards();
 }
 
-function handlePublicPreviewWheel(event) {
+function handlePlayerSideWheel(event) {
     const absoluteDeltaX = Math.abs(event.deltaX);
     const absoluteDeltaY = Math.abs(event.deltaY);
 
@@ -2460,56 +2461,56 @@ function handlePublicPreviewWheel(event) {
 
     event.preventDefault();
 
-    if (publicPreviewWheelIsCoolingDown === true) {
+    if (playerSideWheelIsCoolingDown === true) {
         return;
     }
 
-    publicPreviewWheelIsCoolingDown = true;
+    playerSideWheelIsCoolingDown = true;
 
     const scrollValue = isHorizontalScroll ? event.deltaX : event.deltaY;
 
     if (scrollValue > 0) {
-        navigatePublicPreview("right");
+        navigatePlayerSide("right");
     } else {
-        navigatePublicPreview("left");
+        navigatePlayerSide("left");
     }
 
     setTimeout(function() {
-        publicPreviewWheelIsCoolingDown = false;
+        playerSideWheelIsCoolingDown = false;
     }, 700);
 }
 
-function handlePublicPreviewTouchStart(event) {
+function handlePlayerSideTouchStart(event) {
     if (event.touches.length === 0) {
         return;
     }
 
-    publicPreviewTouchStartX = event.touches[0].clientX;
-    publicPreviewTouchStartY = event.touches[0].clientY;
+    playerSideTouchStartX = event.touches[0].clientX;
+    playerSideTouchStartY = event.touches[0].clientY;
 }
 
-function handlePublicPreviewTouchEnd(event) {
+function handlePlayerSideTouchEnd(event) {
     if (
-        publicPreviewTouchStartX === null ||
-        publicPreviewTouchStartY === null ||
+        playerSideTouchStartX === null ||
+        playerSideTouchStartY === null ||
         event.changedTouches.length === 0
     ) {
-        publicPreviewTouchStartX = null;
-        publicPreviewTouchStartY = null;
+        playerSideTouchStartX = null;
+        playerSideTouchStartY = null;
         return;
     }
 
     const touchEndX = event.changedTouches[0].clientX;
     const touchEndY = event.changedTouches[0].clientY;
 
-    const deltaX = touchEndX - publicPreviewTouchStartX;
-    const deltaY = touchEndY - publicPreviewTouchStartY;
+    const deltaX = touchEndX - playerSideTouchStartX;
+    const deltaY = touchEndY - playerSideTouchStartY;
 
     const absoluteDeltaX = Math.abs(deltaX);
     const absoluteDeltaY = Math.abs(deltaY);
 
-    publicPreviewTouchStartX = null;
-    publicPreviewTouchStartY = null;
+    playerSideTouchStartX = null;
+    playerSideTouchStartY = null;
 
     const minimumSwipeDistance = 50;
     const isMostlyHorizontalSwipe = absoluteDeltaX > absoluteDeltaY * 1.4;
@@ -2519,25 +2520,25 @@ function handlePublicPreviewTouchEnd(event) {
     }
 
     if (deltaX < 0) {
-        navigatePublicPreview("right");
+        navigatePlayerSide("right");
     } else {
-        navigatePublicPreview("left");
+        navigatePlayerSide("left");
     }
 }
 
-function setupPublicPreviewNavigation() {
-    const publicPreviewElement = document.querySelector("#public-preview-list");
+function setupPlayerSideNavigation() {
+    const playerSideElement = document.querySelector("#player-side-list");
 
-    if (publicPreviewElement === null) {
+    if (playerSideElement === null) {
         return;
     }
 
-    publicPreviewElement.addEventListener("wheel", handlePublicPreviewWheel, {
+    playerSideElement.addEventListener("wheel", handlePlayerSideWheel, {
         passive: false
     });
 
-    publicPreviewElement.addEventListener("touchstart", handlePublicPreviewTouchStart);
-    publicPreviewElement.addEventListener("touchend", handlePublicPreviewTouchEnd);
+    playerSideElement.addEventListener("touchstart", handlePlayerSideTouchStart);
+    playerSideElement.addEventListener("touchend", handlePlayerSideTouchEnd);
 }
 
 function closeFloatingDetailsExcept(keptDetailsElement) {
@@ -2975,7 +2976,7 @@ function longRestPlayerCards() {
 }
 
 function deleteAllCards() {
-    const shouldDeleteAllCards = confirm("Aktuellen Encounter leeren? Alle Karten auf der Hand und im Deck werden entfernt. Exportierte Dateien und lokale Browserdaten bleiben davon unberührt, bis du erneut speicherst.");
+    const shouldDeleteAllCards = confirm("Aktuellen Spielstand leeren? Alle Karten auf der Hand und im Deck werden entfernt. Exportierte Dateien und lokale Browserdaten bleiben davon unberührt, bis du erneut speicherst.");
 
     if (shouldDeleteAllCards === false) {
         return;
@@ -2989,7 +2990,7 @@ function deleteAllCards() {
     roundNumber = 1;
     combatLogMessages = [];
     clearManualPublicSelection();
-    addCombatLogMessage("Encounter geleert. Alle Karten wurden gelöscht.");
+    addCombatLogMessage("Spielstand geleert. Alle Karten wurden gelöscht.");
 
     renderCards();
 }
@@ -4187,13 +4188,13 @@ async function readAndOptimizeImageFileAsDataUrl(file) {
 }
 
 // ============================================================
-// 10. Encounter exportieren und importieren
+// 10. Spielstand exportieren und importieren
 // ============================================================
 
-function createEncounterExportData() {
+function createGameStateExportData() {
     return {
-        formatName: "Miriel\'s Deck of Encounters Encounter",
-        formatVersion: 2,
+        formatName: "Miriel\'s Deck of Encounters Game State",
+        schemaVersion: 1,
         exportedAt: new Date().toISOString(),
         metadata: {
             appVersion: appVersion,
@@ -4201,7 +4202,8 @@ function createEncounterExportData() {
             licenseNotice: "Enthält bearbeitetes Material aus dem SRD 5.1 unter CC BY 4.0.",
             legalDocument: "legal.html"
         },
-        encounter: {
+        gameState: {
+            name: encounterName,
             encounterName: encounterName,
             roundNumber: roundNumber,
             currentTurnIndex: currentTurnIndex,
@@ -4243,7 +4245,7 @@ function createExportTimestampText() {
 }
 
 function createSafeFileNameSegment(rawName) {
-    const fallbackName = "unbenannter-encounter";
+    const fallbackName = "unbenannter-spielstand";
     const normalizedName = getSafeOptionalString(rawName)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -4259,13 +4261,13 @@ function createSafeFileNameSegment(rawName) {
     return normalizedName || fallbackName;
 }
 
-function encounterNameNeedsFileNameWarning(rawName) {
+function gameStateNameNeedsFileNameWarning(rawName) {
     return /[^a-zA-Z0-9äöüÄÖÜß _.-]/.test(getSafeOptionalString(rawName));
 }
 
 function createExportFileName(nameForExport = encounterName) {
     const safeNameSegment = createSafeFileNameSegment(nameForExport);
-    return `miriels-deck-${safeNameSegment}-${createExportTimestampText()}.json`;
+    return `miriels-deck-spielstand-${safeNameSegment}-${createExportTimestampText()}.json`;
 }
 
 function downloadTextFile(fileName, textContent) {
@@ -4286,10 +4288,10 @@ function downloadTextFile(fileName, textContent) {
     URL.revokeObjectURL(temporaryUrl);
 }
 
-function exportEncounter() {
+function exportGameState() {
     const proposedName = getSafeEncounterName(encounterName);
     const inputName = prompt(
-        "Encounter vor dem Export benennen.\nSonderzeichen werden im Dateinamen automatisch vereinfacht.",
+        "Spielstand vor dem Export benennen.\nSonderzeichen werden im Dateinamen automatisch vereinfacht.",
         proposedName
     );
 
@@ -4299,27 +4301,27 @@ function exportEncounter() {
 
     const safeName = getSafeEncounterName(inputName);
 
-    if (encounterNameNeedsFileNameWarning(safeName) === true) {
+    if (gameStateNameNeedsFileNameWarning(safeName) === true) {
         alert("Der Dateiname wird vereinfacht, weil einige Sonderzeichen auf Dateisystemen problematisch sein können.");
     }
 
     setEncounterName(safeName, { silent: true });
 
-    const exportData = createEncounterExportData();
+    const exportData = createGameStateExportData();
     const jsonText = JSON.stringify(exportData, null, 4);
     const fileName = createExportFileName(safeName);
 
     downloadTextFile(fileName, jsonText);
 }
 
-function triggerEncounterImport() {
+function triggerGameStateImport() {
     const mayImport = confirm("Importiere nur Inhalte, die du rechtmäßig verwenden darfst. Importierte Texte und Bilder werden vom Projekt nicht geprüft oder lizenziert. Fortfahren?");
 
     if (mayImport !== true) {
         return;
     }
 
-    const fileInputElement = document.querySelector("#encounter-import-file");
+    const fileInputElement = document.querySelector("#game-state-import-file");
 
     if (fileInputElement === null) {
         alert("Das Import-Dateifeld wurde nicht gefunden.");
@@ -4346,7 +4348,7 @@ function readTextFile(file) {
     });
 }
 
-async function handleEncounterImportFileChange(event) {
+async function handleGameStateImportFileChange(event) {
     const fileInputElement = event.target;
 
     if (fileInputElement.files.length === 0) {
@@ -4376,22 +4378,22 @@ async function handleEncounterImportFileChange(event) {
         }
 
         const importData = JSON.parse(fileText);
-        const validationResult = validateEncounterImport(importData);
+        const validationResult = validateGameStateImport(importData);
 
         if (validationResult.valid !== true) {
             alert(`Die Datei konnte nicht importiert werden: ${validationResult.message}`);
             return;
         }
 
-        showEncounterImportPreview(validationResult.encounter, importFile.name);
+        showGameStateImportPreview(validationResult.gameState, importFile.name);
     } catch (error) {
-        console.error("Encounter-Import fehlgeschlagen.", error);
-        alert("Die Encounter-Datei konnte nicht importiert werden.");
+        console.error("Spielstand-Import fehlgeschlagen.", error);
+        alert("Die Spielstand-Datei konnte nicht importiert werden.");
     }
 }
 
-function showEncounterImportPreview(encounterData, fileName) {
-    pendingDeckImportData = encounterData;
+function showGameStateImportPreview(gameStateData, fileName) {
+    pendingDeckImportData = gameStateData;
     pendingDeckImportFileName = getSafeOptionalString(fileName) || "Importdatei";
 
     openDmActionDrawer("archive");
@@ -4402,19 +4404,19 @@ function showEncounterImportPreview(encounterData, fileName) {
     const summaryElement = document.querySelector("#deck-import-preview-summary");
 
     if (previewElement === null || fileNameElement === null || summaryElement === null) {
-        importEncounterData(encounterData);
+        importGameStateData(gameStateData);
         return;
     }
 
-    const importCount = Array.isArray(encounterData.creatures) ? encounterData.creatures.length : 0;
+    const importCount = Array.isArray(gameStateData.creatures) ? gameStateData.creatures.length : 0;
     const currentDeckCount = getDeckCards().length;
     const currentTotalCount = creatures.length;
-    const importedEncounterName = getSafeEncounterName(encounterData.encounterName || encounterData.name || encounterData.deckName);
+    const importedGameStateName = getSafeEncounterName(gameStateData.name || gameStateData.encounterName || gameStateData.deckName);
 
     fileNameElement.textContent = `Datei: ${pendingDeckImportFileName}`;
 
     if (nameElement !== null) {
-        nameElement.textContent = `Encounter: ${importedEncounterName}`;
+        nameElement.textContent = `Spielstand: ${importedGameStateName}`;
     }
 
     summaryElement.textContent = `${importCount} Karte(n) gefunden. Aktuell: ${currentDeckCount} Karten im Deck, ${currentTotalCount} Karten insgesamt.`;
@@ -4441,7 +4443,7 @@ function confirmDeckImportReplace() {
 
     const importData = pendingDeckImportData;
     closeDeckImportPreview();
-    importEncounterData(importData);
+    importGameStateData(importData);
 }
 
 function confirmDeckImportAppend() {
@@ -4457,7 +4459,7 @@ function confirmDeckImportAppend() {
         creatures.push(importedCard);
     }
 
-    addCombatLogMessage(`${importCount} Karte(n) aus ${pendingDeckImportFileName} zum Deck hinzugefügt. Laufender Encounter bleibt erhalten.`);
+    addCombatLogMessage(`${importCount} Karte(n) aus ${pendingDeckImportFileName} zum Deck hinzugefügt. Laufender Spielstand bleibt erhalten.`);
     closeDeckImportPreview();
 
     preserveViewportWhileRendering(function() {
@@ -4485,52 +4487,52 @@ function createImportedCreaturesForDeckAppend(rawCreatures) {
     return importedCreatures;
 }
 
-function importEncounterData(encounterData) {
+function importGameStateData(gameStateData) {
     if (
-        encounterData === null ||
-        typeof encounterData !== "object" ||
-        Array.isArray(encounterData.creatures) === false
+        gameStateData === null ||
+        typeof gameStateData !== "object" ||
+        Array.isArray(gameStateData.creatures) === false
     ) {
-        alert("Die Datei enthält keinen gültigen Encounter.");
+        alert("Die Datei enthält keinen gültigen Spielstand.");
         return;
     }
 
-    const importedCreatures = createImportedCreatures(encounterData.creatures);
+    const importedCreatures = createImportedCreatures(gameStateData.creatures);
 
-    encounterName = getSafeEncounterName(encounterData.encounterName);
+    encounterName = getSafeEncounterName(gameStateData.name || gameStateData.encounterName);
     creatures = importedCreatures;
-    roundNumber = getSafePositiveInteger(encounterData.roundNumber, 1);
-    currentTurnIndex = getSafeNonNegativeInteger(encounterData.currentTurnIndex, 0);
-    isEncounterStarted = encounterData.isEncounterStarted === true;
+    roundNumber = getSafePositiveInteger(gameStateData.roundNumber, 1);
+    currentTurnIndex = getSafeNonNegativeInteger(gameStateData.currentTurnIndex, 0);
+    isEncounterStarted = gameStateData.isEncounterStarted === true;
 
-    if (isImportedPublicSelectionValid(encounterData.manuallySelectedPublicCardId, creatures)) {
-        manuallySelectedPublicCardId = Number(encounterData.manuallySelectedPublicCardId);
+    if (isImportedPublicSelectionValid(gameStateData.manuallySelectedPublicCardId, creatures)) {
+        manuallySelectedPublicCardId = Number(gameStateData.manuallySelectedPublicCardId);
     } else {
         clearManualPublicSelection();
     }
 
-    if (isImportedPublicSelectionValid(encounterData.focusedCreatureId, creatures)) {
-        focusedCreatureId = Number(encounterData.focusedCreatureId);
+    if (isImportedPublicSelectionValid(gameStateData.focusedCreatureId, creatures)) {
+        focusedCreatureId = Number(gameStateData.focusedCreatureId);
     } else {
         focusedCreatureId = null;
     }
 
-    activeDetailTab = getSafeDetailTab(encounterData.activeDetailTab);
-    activeDmFeedTab = getSafeDmFeedTab(encounterData.activeDmFeedTab);
-    expandedSpellDetailKey = getSafeOptionalString(encounterData.expandedSpellDetailKey);
+    activeDetailTab = getSafeDetailTab(gameStateData.activeDetailTab);
+    activeDmFeedTab = getSafeDmFeedTab(gameStateData.activeDmFeedTab);
+    expandedSpellDetailKey = getSafeOptionalString(gameStateData.expandedSpellDetailKey);
 
-    combatLogMessages = getSafeCombatLogMessages(encounterData.combatLogMessages);
-    mirielBoardManualImageData = getSafeString(encounterData.mirielBoardManualImageData, "");
-    mirielBoardManualImageName = getSafeString(encounterData.mirielBoardManualImageName, "");
-    mirielBoardManualText = getSafeString(encounterData.mirielBoardManualText, "");
-    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(encounterData.mirielBoardManualTextSize);
-    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(encounterData.mirielBoardManualTextPosition);
-    mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(encounterData);
-    isMirielBoardAutoTurnEnabled = encounterData.isMirielBoardAutoTurnEnabled === true;
-    mirielBoardDurationMode = getSafeMirielBoardDurationMode(encounterData.mirielBoardDurationMode);
-    isMirielBoardNewRoundCallEnabled = encounterData.isMirielBoardNewRoundCallEnabled !== false;
-    mirielBoardTriggerId = getSafeOptionalString(encounterData.mirielBoardTriggerId);
-    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(encounterData.mirielBoardAnnouncement);
+    combatLogMessages = getSafeCombatLogMessages(gameStateData.combatLogMessages);
+    mirielBoardManualImageData = getSafeString(gameStateData.mirielBoardManualImageData, "");
+    mirielBoardManualImageName = getSafeString(gameStateData.mirielBoardManualImageName, "");
+    mirielBoardManualText = getSafeString(gameStateData.mirielBoardManualText, "");
+    mirielBoardManualTextSize = getSafeMirielBoardManualTextSize(gameStateData.mirielBoardManualTextSize);
+    mirielBoardManualTextPosition = getSafeMirielBoardManualTextPosition(gameStateData.mirielBoardManualTextPosition);
+    mirielBoardPersistentMode = getSafeMirielBoardPersistentModeFromEncounter(gameStateData);
+    isMirielBoardAutoTurnEnabled = gameStateData.isMirielBoardAutoTurnEnabled === true;
+    mirielBoardDurationMode = getSafeMirielBoardDurationMode(gameStateData.mirielBoardDurationMode);
+    isMirielBoardNewRoundCallEnabled = gameStateData.isMirielBoardNewRoundCallEnabled !== false;
+    mirielBoardTriggerId = getSafeOptionalString(gameStateData.mirielBoardTriggerId);
+    mirielBoardAnnouncement = getSafeMirielBoardAnnouncement(gameStateData.mirielBoardAnnouncement);
 
     const handCards = getHandCards();
     ensureCurrentTurnIndexIsValid(handCards);
@@ -4538,31 +4540,31 @@ function importEncounterData(encounterData) {
     renderCards();
 }
 
-function validateEncounterImport(importData) {
+function validateGameStateImport(importData) {
     if (importData === null || typeof importData !== "object" || Array.isArray(importData)) {
         return { valid: false, message: "Die Hauptstruktur muss ein JSON-Objekt sein." };
     }
 
-    if (importData.formatVersion !== 2) {
+    if (importData.schemaVersion !== 1) {
         return { valid: false, message: "Diese Exportversion wird nicht unterstützt." };
     }
 
-    const encounterData = importData.encounter;
+    const gameStateData = importData.gameState;
 
-    if (encounterData === null || typeof encounterData !== "object" || Array.isArray(encounterData)) {
-        return { valid: false, message: "Encounter-Daten fehlen oder sind beschädigt." };
+    if (gameStateData === null || typeof gameStateData !== "object" || Array.isArray(gameStateData)) {
+        return { valid: false, message: "Spielstand-Daten fehlen oder sind beschädigt." };
     }
 
-    if (Array.isArray(encounterData.creatures) === false) {
+    if (Array.isArray(gameStateData.creatures) === false) {
         return { valid: false, message: "Die Kartenliste fehlt." };
     }
 
-    if (encounterData.creatures.length > importSecurityLimits.maxCreatures) {
+    if (gameStateData.creatures.length > importSecurityLimits.maxCreatures) {
         return { valid: false, message: `Es dürfen höchstens ${importSecurityLimits.maxCreatures} Karten importiert werden.` };
     }
 
-    for (let index = 0; index < encounterData.creatures.length; index += 1) {
-        const rawCreature = encounterData.creatures[index];
+    for (let index = 0; index < gameStateData.creatures.length; index += 1) {
+        const rawCreature = gameStateData.creatures[index];
 
         if (rawCreature === null || typeof rawCreature !== "object" || Array.isArray(rawCreature)) {
             return { valid: false, message: `Karte ${index + 1} hat keine gültige Objektstruktur.` };
@@ -4593,12 +4595,12 @@ function validateEncounterImport(importData) {
         }
     }
 
-    return { valid: true, encounter: encounterData };
+    return { valid: true, gameState: gameStateData };
 }
 
-function getEncounterDataFromImport(importData) {
-    const validationResult = validateEncounterImport(importData);
-    return validationResult.valid === true ? validationResult.encounter : null;
+function getGameStateDataFromImport(importData) {
+    const validationResult = validateGameStateImport(importData);
+    return validationResult.valid === true ? validationResult.gameState : null;
 }
 
 function createImportedCreatures(rawCreatures) {
@@ -8055,7 +8057,7 @@ function createPublicCardData(creature, isActive, isFocused) {
 function shouldPublicCardBeFocused(card, activeCard) {
     const isActive = activeCard !== null && card.id === activeCard.id;
 
-    if (shouldPublicPreviewFollowActiveCard()) {
+    if (shouldPlayerSideFollowActiveCard()) {
         return isActive;
     }
 
@@ -8197,7 +8199,7 @@ function createPublicImageHtml(publicCard, imageContext = "stage") {
     if (publicCard.imageData === "") {
         return `
             <div
-                class="public-preview-image-box public-preview-image-placeholder health-wound-frame ${contextClass} ${health.stateClass}"
+                class="player-side-image-box player-side-image-placeholder health-wound-frame ${contextClass} ${health.stateClass}"
                 style="${health.style}"
             >
                 Bild folgt
@@ -8207,11 +8209,11 @@ function createPublicImageHtml(publicCard, imageContext = "stage") {
 
     return `
         <div
-            class="public-preview-image-box health-wound-frame ${contextClass} ${health.stateClass}"
+            class="player-side-image-box health-wound-frame ${contextClass} ${health.stateClass}"
             style="${health.style}"
         >
             <img
-                class="public-preview-image"
+                class="player-side-image"
                 src="${publicCard.imageData}"
                 alt="Bild von ${publicCard.publicName}"
             >
@@ -8306,7 +8308,7 @@ function getPublicHpPreviewHtml(publicCard) {
             : `<span class="public-vital-empty"><b>Temp HP</b> —</span>`;
 
         return `
-            <div class="public-preview-section-box public-vital-box public-vital-box-full">
+            <div class="player-side-section-box public-vital-box public-vital-box-full">
                 <div class="public-vital-values">
                     <span><b>HP</b> ${publicCard.hp.hp} / ${publicCard.hp.maxHp}</span>
                     ${tempHpHtml}
@@ -8321,7 +8323,7 @@ function getPublicHpPreviewHtml(publicCard) {
 
     if (publicCard.hp.mode === "bar") {
         return `
-            <div class="public-preview-section-box public-vital-box public-vital-box-bar" aria-label="Öffentlicher HP-Balken">
+            <div class="player-side-section-box public-vital-box public-vital-box-bar" aria-label="Öffentlicher HP-Balken">
                 <div class="hp-bar-outer" aria-hidden="true">
                     <div class="hp-bar-inner" style="width: ${publicCard.hp.percent}%;"></div>
                 </div>
@@ -8681,7 +8683,7 @@ function getPublicStageLabel(slotName) {
         return "Danach";
     }
 
-    if (shouldPublicPreviewFollowActiveCard()) {
+    if (shouldPlayerSideFollowActiveCard()) {
         return "Am Zug";
     }
 
@@ -8693,7 +8695,7 @@ function getPublicStageFocusClass(slotName) {
         return "";
     }
 
-    if (shouldPublicPreviewFollowActiveCard()) {
+    if (shouldPlayerSideFollowActiveCard()) {
         return "auto-active-focus";
     }
 
@@ -8715,7 +8717,7 @@ function createEmptyPublicStageCardHtml(slotName) {
                         Keine Karte
                     </h3>
 
-                    <div class="public-preview-image-box public-preview-image-placeholder">
+                    <div class="player-side-image-box player-side-image-placeholder">
                         -
                     </div>
                 </div>
@@ -8736,7 +8738,7 @@ function createPublicStageCardHtml(publicCard, slotName) {
     const focusColorClass = getPublicStageFocusClass(slotName);
     const shouldShowConditionBlock = isGhostSlot !== true && (isFocusedSlot === true || publicCard.conditions.length > 0);
     const conditionBlock = shouldShowConditionBlock ? `
-        <div class="public-preview-section-box public-condition-box">
+        <div class="player-side-section-box public-condition-box">
             <h4>Conditions</h4>
 
             <div class="condition-chip-list">
@@ -8766,7 +8768,7 @@ function createPublicStageCardHtml(publicCard, slotName) {
 
                     ${createPublicImageHtml(publicCard, "stage")}
 
-                    <p class="public-preview-type">
+                    <p class="player-side-type">
                         ${publicCard.type}
                     </p>
 
@@ -10253,7 +10255,7 @@ function prefersReducedPublicMotion() {
 }
 
 function capturePublicStageRailState() {
-    if (document.body.classList.contains("player-view") === false || prefersReducedPublicMotion() === true) {
+    if (document.body.classList.contains("player-side-view") === false || prefersReducedPublicMotion() === true) {
         return null;
     }
 
@@ -10465,12 +10467,12 @@ function playPublicStageRailTransition(previousStageState) {
 }
 
 function scrollPublicInitiativeToActiveCard() {
-    if (document.body.classList.contains("player-view") === false) {
+    if (document.body.classList.contains("player-side-view") === false) {
         return;
     }
 
     window.requestAnimationFrame(function() {
-        const ribbonElement = document.querySelector("#public-preview-ribbon");
+        const ribbonElement = document.querySelector("#player-side-ribbon");
 
         if (ribbonElement === null) {
             return;
@@ -10488,7 +10490,7 @@ function scrollPublicInitiativeToActiveCard() {
 }
 
 function capturePublicRibbonRollState() {
-    if (document.body.classList.contains("player-view") === false) {
+    if (document.body.classList.contains("player-side-view") === false) {
         return null;
     }
 
@@ -10496,7 +10498,7 @@ function capturePublicRibbonRollState() {
         return null;
     }
 
-    const ribbonElement = document.querySelector("#public-preview-ribbon");
+    const ribbonElement = document.querySelector("#player-side-ribbon");
 
     if (ribbonElement === null) {
         return null;
@@ -10584,12 +10586,12 @@ function playPublicRibbonRollAnimation(previousRibbonState) {
     });
 }
 
-function createPublicPreviewFallbackHtml(error) {
+function createPlayerSideFallbackHtml(error) {
     const errorMessage = error instanceof Error ? error.message : "Unbekannter Fehler";
 
     return `
-        <div class="public-preview-error-card">
-            <p class="section-eyebrow">Spieltisch-Anzeige</p>
+        <div class="player-side-error-card">
+            <p class="section-eyebrow">Spielerseite</p>
             <h3>Die öffentliche Anzeige konnte nicht vollständig aufgebaut werden.</h3>
             <p>${escapeHtml(errorMessage)}</p>
         </div>
@@ -10608,7 +10610,7 @@ function getPublicStageCardsForRender(publicCards, activeCard, shouldHoldStage) 
         return publicCard.id === publicStagePresentedCreatureId;
     });
 
-    if (publicStagePresentedCreatureId === null || presentedCardExists === false || shouldPublicPreviewFollowActiveCard() === false) {
+    if (publicStagePresentedCreatureId === null || presentedCardExists === false || shouldPlayerSideFollowActiveCard() === false) {
         publicStagePresentedCreatureId = activeCreatureId;
     }
 
@@ -10619,7 +10621,7 @@ function getPublicStageCardsForRender(publicCards, activeCard, shouldHoldStage) 
         publicStagePendingCreatureId = null;
     }
 
-    if (shouldPublicPreviewFollowActiveCard() === false) {
+    if (shouldPlayerSideFollowActiveCard() === false) {
         return publicCards;
     }
 
@@ -10653,9 +10655,9 @@ function createPublicEncounterWaitingHtml() {
     `;
 }
 
-function renderPublicPreview(publicCards, handCards) {
-    const previewElement = document.querySelector("#public-preview-list");
-    const ribbonElement = document.querySelector("#public-preview-ribbon");
+function renderPlayerSide(publicCards, handCards) {
+    const previewElement = document.querySelector("#player-side-list");
+    const ribbonElement = document.querySelector("#player-side-ribbon");
     const activeCard = getActiveCard(handCards);
 
     if (previewElement === null || ribbonElement === null) {
@@ -10761,7 +10763,7 @@ function renderPublicPreview(publicCards, handCards) {
         scrollPublicInitiativeToActiveCard();
     } catch (error) {
         console.error("Der öffentliche Spieltisch konnte nicht gerendert werden.", error);
-        previewElement.innerHTML = createPublicPreviewFallbackHtml(error);
+        previewElement.innerHTML = createPlayerSideFallbackHtml(error);
         ribbonElement.innerHTML = "";
     }
 }
@@ -12940,8 +12942,8 @@ function renderCards() {
 
     renderTurnInfo(handCards);
 
-    if (appView === "player") {
-        renderPublicPreview(publicCards, handCards);
+    if (appView === "playerSide") {
+        renderPlayerSide(publicCards, handCards);
     }
 
     if (appView === "dm") {
@@ -13426,8 +13428,8 @@ if (wasStateLoaded === false && shouldAutoloadDemoCards() === true) {
     }
 }
 
-setupPlayerViewPolling();
-setupPublicPreviewNavigation();
+setupPlayerSidePolling();
+setupPlayerSideNavigation();
 setupClickAwayBehavior();
 setupArcaneSelects();
 setupInstructionalTextFieldComfort();
