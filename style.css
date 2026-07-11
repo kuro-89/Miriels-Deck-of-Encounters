@@ -16179,3 +16179,33 @@ textarea::-webkit-input-placeholder {
         min-height: 34px !important;
     }
 }
+
+
+/* ============================================================
+   0.23.3 – endliches Itemkarten-Karussell ohne Scheindubletten
+   ============================================================ */
+
+/* Leere Randspuren behalten ihren Platz zur Zentrierung, sind aber unsichtbar. */
+.inventory-stage-rail.is-empty {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.inventory-ghost-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.inventory-ghost-card-header small {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.72;
+}
+
+/* Deaktivierte Randnavigation soll nicht wie eine mögliche Aktion wirken. */
+.inventory-stage-rail.at-edge .inventory-ribbon-scroll {
+    opacity: 0;
+    pointer-events: none;
+}

@@ -5,6 +5,309 @@
 // Sie wird vor app.js geladen. Die eigentliche App-Logik bleibt in app.js.
 // ============================================================
 
+
+/**
+ * SRD-5.1-Demodetails
+ *
+ * Diese zentrale Bibliothek ergänzt ausschließlich eindeutig im deutschen
+ * Systemreferenzdokument 5.1 enthaltene Zauber. Die Texte wurden für die
+ * kompakte Kartenansicht zusammengefasst und redaktionell formuliert.
+ *
+ * Die rechtlich erforderliche Zuschreibung erfolgt zentral in legal.html,
+ * README.md und THIRD_PARTY_NOTICES.md. Sie wird bewusst nicht in jeder
+ * einzelnen Zauberzeile der Benutzeroberfläche wiederholt.
+ *
+ * Nicht in dieser Bibliothek enthaltene Demozauber bleiben unverändert und
+ * werden in CONTENT_REVIEW_SRD_5.1.md zur späteren Prüfung aufgeführt.
+ */
+const demoSrd51SpellDetails = Object.freeze({
+    "minor illusion": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "S, M (etwas Vlies)",
+        duration: "1 Minute",
+        description: "Du erschaffst ein Geräusch oder das unbewegte Bild eines Gegenstands innerhalb der Reichweite. Körperliche Berührung offenbart das Trugbild; eine Kreatur kann es außerdem mit einer erfolgreichen Nachforschungsprobe gegen deinen Zauberrettungswurf-SG durchschauen."
+    },
+    "mage hand": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "V, S",
+        duration: "1 Minute",
+        description: "Eine schwebende spektrale Hand erscheint. Sie kann Gegenstände bis 10 Pfund bewegen, Türen oder Behälter öffnen und einfache Objekte bedienen, aber nicht angreifen, magische Gegenstände aktivieren oder mehr als 10 Pfund tragen."
+    },
+    "druidcraft": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "V, S",
+        duration: "Unmittelbar",
+        description: "Du erzeugst einen kleinen Natureffekt: eine kurze Wettervorhersage, das Erblühen einer Pflanze, einen harmlosen Sinneseindruck oder das Entzünden beziehungsweise Löschen einer kleinen Flamme."
+    },
+    "disguise self": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S",
+        duration: "1 Stunde",
+        description: "Du veränderst dein äußeres Erscheinungsbild einschließlich Kleidung und Ausrüstung. Die Illusion hält einer Berührung nicht stand; eine untersuchende Kreatur kann sie mit Nachforschungen gegen deinen Zauberrettungswurf-SG erkennen."
+    },
+    "disguise selbst": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S",
+        duration: "1 Stunde",
+        description: "Du veränderst dein äußeres Erscheinungsbild einschließlich Kleidung und Ausrüstung. Die Illusion hält einer Berührung nicht stand; eine untersuchende Kreatur kann sie mit Nachforschungen gegen deinen Zauberrettungswurf-SG erkennen."
+    },
+    "silent image": {
+        castingTime: "1 Aktion",
+        range: "60 Fuß",
+        components: "V, S, M (etwas Vlies)",
+        duration: "Konzentration, bis zu 10 Minuten",
+        concentration: true,
+        description: "Du erschaffst das sichtbare Abbild eines Gegenstands, einer Kreatur oder eines Phänomens in einem Würfel mit 15 Fuß Kantenlänge. Das Bild kann bewegt werden, erzeugt aber keine Geräusche oder anderen Sinneseindrücke."
+    },
+    "find familiar": {
+        castingTime: "1 Stunde",
+        range: "10 Fuß",
+        components: "V, S, M (Holzkohle, Weihrauch und Kräuter im Wert von 10 GM, verbraucht)",
+        duration: "Unmittelbar",
+        ritual: true,
+        description: "Du rufst einen vertrauten Geist in Tiergestalt. Der Vertraute kann nicht angreifen, handelt eigenständig, kommuniziert telepathisch innerhalb von 100 Fuß und kann Berührungszauber für dich übermitteln."
+    },
+    "faerie fire": {
+        castingTime: "1 Aktion",
+        range: "60 Fuß",
+        components: "V",
+        duration: "Konzentration, bis zu 1 Minute",
+        concentration: true,
+        saveOrAttack: "GE-Rettungswurf",
+        description: "Objekte und Kreaturen in einem Würfel mit 20 Fuß Kantenlänge werden bei misslungenem Geschicklichkeitsrettungswurf von farbigem Licht umgeben. Angriffe gegen sichtbare betroffene Ziele haben Vorteil, und sie profitieren nicht von Unsichtbarkeit."
+    },
+    "mirror image": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S",
+        duration: "1 Minute",
+        description: "Drei illusorische Doppelbilder bewegen sich mit dir. Wird ein Angriff gegen dich ausgeführt, kann ein W20-Wurf bestimmen, dass stattdessen ein Doppelbild getroffen und zerstört wird."
+    },
+    "enlarge/reduce": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "V, S, M (eine Prise Eisenpulver)",
+        duration: "Konzentration, bis zu 1 Minute",
+        concentration: true,
+        saveOrAttack: "KO-Rettungswurf bei unwilligem Ziel",
+        description: "Du vergrößerst oder verkleinerst eine Kreatur oder einen Gegenstand. Die Größenänderung beeinflusst unter anderem Stärkeproben und -rettungswürfe sowie den Waffenschaden des Ziels."
+    },
+    "poison spray": {
+        castingTime: "1 Aktion",
+        range: "10 Fuß",
+        components: "V, S",
+        duration: "Unmittelbar",
+        saveOrAttack: "KO-Rettungswurf",
+        description: "Du streckst die Hand aus und erzeugst giftigen Nebel. Bei einem misslungenen Konstitutionsrettungswurf erleidet das Ziel 1W12 Giftschaden; der Schaden steigt auf höheren Charakterstufen."
+    },
+    "detect magic": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S",
+        duration: "Konzentration, bis zu 10 Minuten",
+        concentration: true,
+        ritual: true,
+        description: "Du spürst Magie im Umkreis von 30 Fuß. Mit einer Aktion kannst du eine sichtbare Aura um magische Kreaturen oder Gegenstände erkennen und, falls vorhanden, die Schule der Magie bestimmen."
+    },
+    "identify": {
+        castingTime: "1 Minute",
+        range: "Berührung",
+        components: "V, S, M (Perle im Wert von mindestens 100 GM und Eulenfeder)",
+        duration: "Unmittelbar",
+        ritual: true,
+        description: "Du erfährst Eigenschaften, Aktivierung, Ladungen und erforderliche Einstimmung eines magischen Gegenstands. Bei einer Kreatur erkennst du stattdessen gegenwärtig auf ihr wirkende Zauber."
+    },
+    "shield": {
+        castingTime: "1 Reaktion",
+        range: "Selbst",
+        components: "V, S",
+        duration: "1 Runde",
+        description: "Als Reaktion auf einen Treffer oder Magisches Geschoss entsteht eine unsichtbare Barriere. Bis zum Beginn deines nächsten Zuges erhältst du +5 auf die Rüstungsklasse und wirst nicht von Magischem Geschoss getroffen."
+    },
+    "magic missile": {
+        castingTime: "1 Aktion",
+        range: "120 Fuß",
+        components: "V, S",
+        duration: "Unmittelbar",
+        description: "Drei leuchtende Geschosse treffen automatisch Ziele deiner Wahl. Jedes Geschoss verursacht 1W4+1 Energieschaden; mit höheren Zauberplätzen entsteht jeweils ein zusätzliches Geschoss."
+    },
+    "mage armor": {
+        castingTime: "1 Aktion",
+        range: "Berührung",
+        components: "V, S, M (ein Stück gegerbtes Leder)",
+        duration: "8 Stunden",
+        description: "Eine willige ungerüstete Kreatur erhält eine Grund-Rüstungsklasse von 13 plus Geschicklichkeitsmodifikator. Der Zauber endet, wenn das Ziel eine Rüstung anlegt oder du ihn beendest."
+    },
+    "comprehend languages": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S, M (Ruß und Salz)",
+        duration: "1 Stunde",
+        ritual: true,
+        description: "Du verstehst die wörtliche Bedeutung gesprochener Sprachen und kannst geschriebene Sprachen lesen, wenn du die Oberfläche berührst. Das Lesen einer Seite dauert ungefähr eine Minute."
+    },
+    "animal friendship": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "V, S, M (ein Bissen Nahrung)",
+        duration: "24 Stunden",
+        saveOrAttack: "WE-Rettungswurf",
+        description: "Ein Tier mit Intelligenz 3 oder weniger erkennt, dass du keine Gefahr darstellst. Misslingt sein Weisheitsrettungswurf, ist es für die Wirkungsdauer von dir bezaubert."
+    },
+    "detect thoughts": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S, M (eine Kupfermünze)",
+        duration: "Konzentration, bis zu 1 Minute",
+        concentration: true,
+        saveOrAttack: "WE-Rettungswurf beim tieferen Eindringen",
+        description: "Du liest zunächst die oberflächlichen Gedanken einer Kreatur im Umkreis von 30 Fuß. Du kannst tiefer eindringen oder nach denkenden Wesen suchen; ein widerstehendes Ziel kann einen Weisheitsrettungswurf ablegen."
+    },
+    "invisibility": {
+        castingTime: "1 Aktion",
+        range: "Berührung",
+        components: "V, S, M (eine Wimper in Gummiarabikum)",
+        duration: "Konzentration, bis zu 1 Stunde",
+        concentration: true,
+        description: "Eine berührte Kreatur und ihre getragene Ausrüstung werden unsichtbar. Der Zauber endet für ein Ziel, sobald es angreift oder einen Zauber wirkt; höhere Zauberplätze erlauben weitere Ziele."
+    },
+    "suggestion": {
+        castingTime: "1 Aktion",
+        range: "30 Fuß",
+        components: "V, M (Schlangenzunge und etwas Honig oder süßes Öl)",
+        duration: "Konzentration, bis zu 8 Stunden",
+        concentration: true,
+        saveOrAttack: "WE-Rettungswurf",
+        description: "Du formulierst einen vernünftig klingenden Handlungsvorschlag für eine Kreatur, die dich hören und verstehen kann. Bei misslungenem Weisheitsrettungswurf verfolgt sie den vorgeschlagenen Kurs, bis er erfüllt ist oder der Zauber endet."
+    },
+    "prestidigitation": {
+        castingTime: "1 Aktion",
+        range: "10 Fuß",
+        components: "V, S",
+        duration: "Bis zu 1 Stunde",
+        description: "Du erzeugst einen kleinen magischen Trick: einen harmlosen Sinneseffekt, eine kleine Flamme, Reinigung oder Verschmutzung, Erwärmung oder Abkühlung, eine Markierung oder ein kleines nichtmagisches Schmuckstück."
+    },
+    "message": {
+        castingTime: "1 Aktion",
+        range: "120 Fuß",
+        components: "V, S, M (ein kurzes Stück Kupferdraht)",
+        duration: "1 Runde",
+        description: "Du flüsterst einer Kreatur eine Botschaft zu, die nur sie hört; sie kann dir leise antworten. Die Magie kann Hindernisse durchdringen, wird aber durch bestimmte Materialien und große Dicken blockiert."
+    },
+    "sacred flame": {
+        castingTime: "1 Aktion",
+        range: "60 Fuß",
+        components: "V, S",
+        duration: "Unmittelbar",
+        saveOrAttack: "GE-Rettungswurf",
+        description: "Flammenähnliches Leuchten senkt sich auf eine sichtbare Kreatur. Bei misslungenem Geschicklichkeitsrettungswurf erleidet sie 1W8 gleißenden Schaden und erhält keinen Vorteil durch Deckung; der Schaden steigt auf höheren Stufen."
+    },
+    "eldritch blast": {
+        castingTime: "1 Aktion",
+        range: "120 Fuß",
+        components: "V, S",
+        duration: "Unmittelbar",
+        saveOrAttack: "Fernkampf-Zauberangriff",
+        description: "Ein Strahl knisternder Energie trifft bei einem erfolgreichen Fernkampf-Zauberangriff und verursacht 1W10 Energieschaden. Auf höheren Stufen erzeugst du mehrere getrennte Strahlen."
+    },
+    "light": {
+        castingTime: "1 Aktion",
+        range: "Berührung",
+        components: "V, M (Glühwürmchen oder phosphoreszierendes Moos)",
+        duration: "1 Stunde",
+        saveOrAttack: "GE-Rettungswurf bei getragenem Gegenstand",
+        description: "Ein berührter Gegenstand spendet in 20 Fuß Radius helles und weitere 20 Fuß dämmriges Licht. Die Lichtfarbe bestimmst du; ein getragenes Objekt kann einen Geschicklichkeitsrettungswurf erlauben."
+    },
+    "healing word": {
+        castingTime: "1 Bonusaktion",
+        range: "60 Fuß",
+        components: "V",
+        duration: "Unmittelbar",
+        description: "Eine sichtbare Kreatur erhält 1W4 plus deinen Zauberwirken-Modifikator Trefferpunkte zurück. Untote und Konstrukte werden nicht geheilt; höhere Zauberplätze erhöhen die Heilung um jeweils 1W4."
+    },
+    "hex": {
+        castingTime: "1 Bonusaktion",
+        range: "90 Fuß",
+        components: "V, S, M (versteinertes Molchauge)",
+        duration: "Konzentration, bis zu 1 Stunde",
+        concentration: true,
+        description: "Du belegst eine Kreatur mit einem Fluch. Deine Treffer verursachen zusätzlich 1W6 nekrotischen Schaden, und das Ziel hat Nachteil auf Proben eines gewählten Attributs. Fällt es, kannst du den Fluch später auf ein neues Ziel übertragen."
+    },
+    "armor of agathys": {
+        castingTime: "1 Aktion",
+        range: "Selbst",
+        components: "V, S, M (eine Tasse Wasser)",
+        duration: "1 Stunde",
+        description: "Schützender Frost verleiht dir 5 temporäre Trefferpunkte. Solange diese bestehen, erleidet eine Kreatur, die dich mit einem Nahkampfangriff trifft, 5 Kälteschaden; höhere Zauberplätze erhöhen beide Werte."
+    },
+    "protection from evil and good": {
+        castingTime: "1 Aktion",
+        range: "Berührung",
+        components: "V, S, M (Weihwasser oder Silber- und Eisenpulver)",
+        duration: "Konzentration, bis zu 10 Minuten",
+        concentration: true,
+        description: "Eine willige Kreatur wird gegen Aberrationen, Celestische, Elementare, Feenwesen, Unholde und Untote geschützt. Deren Angriffe haben Nachteil, und sie können das Ziel schwerer bezaubern, verängstigen oder in Besitz nehmen."
+    },
+    "darkness": {
+        castingTime: "1 Aktion",
+        range: "60 Fuß",
+        components: "V, M (Fledermausfell und Pech oder Kohle)",
+        duration: "Konzentration, bis zu 10 Minuten",
+        concentration: true,
+        description: "Magische Dunkelheit erfüllt eine Kugel mit 15 Fuß Radius. Normale Dunkelsicht durchdringt sie nicht, und nichtmagisches Licht kann sie nicht erhellen; auf einem Gegenstand kann die Wirkung abgedeckt werden."
+    },
+    "misty step": {
+        castingTime: "1 Bonusaktion",
+        range: "Selbst",
+        components: "V",
+        duration: "Unmittelbar",
+        description: "Silbriger Nebel umgibt dich, und du teleportierst dich bis zu 30 Fuß weit an einen freien Ort, den du sehen kannst."
+    },
+    "fireball": {
+        castingTime: "1 Aktion",
+        range: "150 Fuß",
+        components: "V, S, M (Fledermausguano und Schwefel)",
+        duration: "Unmittelbar",
+        saveOrAttack: "GE-Rettungswurf",
+        description: "Eine Explosion füllt eine Kugel mit 20 Fuß Radius. Kreaturen erleiden bei misslungenem Geschicklichkeitsrettungswurf 8W6 Feuerschaden, bei Erfolg die Hälfte; ungetragene brennbare Gegenstände können sich entzünden."
+    },
+    "hypnotic pattern": {
+        castingTime: "1 Aktion",
+        range: "120 Fuß",
+        components: "S, M (glühender Weihrauch oder phosphoreszierendes Material)",
+        duration: "Konzentration, bis zu 1 Minute",
+        concentration: true,
+        saveOrAttack: "WE-Rettungswurf",
+        description: "Ein verschlungenes Farbmuster erscheint in einem Würfel mit 30 Fuß Kantenlänge. Betroffene Kreaturen sind bei misslungenem Weisheitsrettungswurf bezaubert, kampfunfähig und bewegungsunfähig, bis sie Schaden erleiden oder geweckt werden."
+    },
+    "counterspell": {
+        castingTime: "1 Reaktion",
+        range: "60 Fuß",
+        components: "S",
+        duration: "Unmittelbar",
+        description: "Du versuchst, den Zauber einer sichtbaren Kreatur während des Wirkens zu unterbrechen. Zauber bis zum 3. Grad scheitern automatisch; bei höheren Graden ist eine Probe mit deinem Zauberwirken-Attribut nötig, sofern du keinen ausreichend hohen Zauberplatz verwendest."
+    }
+});
+
+function applyDemoSrd51SpellDetails(spellcasting) {
+    for (const spell of spellcasting.spells) {
+        const details = demoSrd51SpellDetails[spell.name.trim().toLowerCase()];
+
+        if (details === undefined) {
+            continue;
+        }
+
+        Object.assign(spell, details);
+    }
+
+    return spellcasting;
+}
+
 function createDemoCards() {
     const demoCards = [
         {
@@ -428,6 +731,84 @@ function isKnownDemoCardData(rawCard) {
     return demoCardNameSignatures.includes(rawName);
 }
 
+
+/**
+ * SRD-5.1-Aktions- und Traitdetails
+ *
+ * Diese Bibliotheken ergänzen nur Einträge, die eindeutig allgemeinen
+ * Waffenregeln, Kampfregeln oder Klassenmerkmalen des deutschen SRD 5.1
+ * zugeordnet werden konnten. Kartenspezifische Zahlenwerte wie Angriffsbonus,
+ * Schaden oder begrenzte Nutzungen bleiben erhalten.
+ *
+ * Die Quellenangabe erfolgt zentral in legal.html und
+ * THIRD_PARTY_NOTICES.md und erscheint nicht an jedem Eintrag im UI.
+ */
+const demoSrd51ActionDetails = Object.freeze({
+    "rapier": {
+        description: "Kriegsnahkampfwaffe mit Finesse. Für Angriffs- und Schadenswürfe kann statt Stärke Geschicklichkeit verwendet werden."
+    },
+    "dolch": {
+        description: "Einfache Nahkampfwaffe mit Finesse, leicht und Wurfwaffe. Beim Werfen gelten die angegebene Grund- und Maximalreichweite."
+    },
+    "kurzbogen": {
+        description: "Einfache Fernkampfwaffe mit Munition und zweihändiger Führung. Angriffe jenseits der Grundreichweite erfolgen mit Nachteil."
+    },
+    "kampfstab": {
+        description: "Einfache Nahkampfwaffe mit der Eigenschaft Vielseitig. Zweihändig geführt verwendet sie den höheren Schadenswürfel."
+    },
+    "kampf mit zwei waffen": {
+        description: "Nach einem Angriff mit einer leichten Nahkampfwaffe kann als Bonusaktion mit einer anderen leichten Nahkampfwaffe in der zweiten Hand angegriffen werden. Ohne passenden Kampfstil wird der Attributsmodifikator nicht zum Schaden des zweiten Angriffs addiert, sofern er nicht negativ ist."
+    },
+    "eldritch blast": {
+        description: "Ein Strahl knisternder Energie wird als Fernkampf-Zauberangriff abgefeuert. Auf höheren Charakterstufen entstehen mehrere getrennte Strahlen, für die jeweils ein eigener Angriffswurf ausgeführt wird."
+    },
+    "unbewaffneter schlag": {
+        description: "Ein Nahkampfangriff mit dem eigenen Körper. Bei einem Treffer verursacht er normalerweise 1 Punkt plus Stärkemodifikator Wuchtschaden, sofern kein anderes Merkmal den Schaden verändert."
+    }
+});
+
+const demoSrd51TraitDetails = Object.freeze({
+    "hinterhältiger angriff": {
+        description: "Einmal pro Zug verursacht Miriel mit einer Finesse- oder Fernkampfwaffe zusätzlichen Schaden, wenn sie beim Angriff Vorteil hat. Vorteil ist nicht nötig, wenn ein anderer nicht kampfunfähiger Gegner des Ziels innerhalb von 5 Fuß steht und Miriel keinen Nachteil hat."
+    },
+    "listige aktion": {
+        description: "Miriel kann in jedem ihrer Züge eine Bonusaktion einsetzen, um zu Sprinten, sich zurückzuziehen oder sich zu verstecken."
+    },
+    "unheimliches ausweichen": {
+        description: "Trifft ein Angreifer Miriel mit einem Angriff und kann sie ihn sehen, darf sie ihre Reaktion einsetzen, um den Schaden dieses Angriffs zu halbieren."
+    },
+    "entrinnen": {
+        description: "Muss Miriel einen Geschicklichkeitsrettungswurf gegen einen Effekt ablegen, der bei Erfolg halben Schaden verursachen würde, erleidet sie bei Erfolg keinen und bei Misserfolg nur halben Schaden."
+    },
+    "arkane erholung": {
+        description: "Einmal pro langer Rast kann Suica nach einer kurzen Rast verbrauchte Zauberplätze zurückerhalten. Die Summe ihrer Grade darf höchstens der Hälfte ihrer Magierstufe, aufgerundet, entsprechen; kein zurückgewonnener Platz darf Grad 6 oder höher sein."
+    },
+    "quelle der magie: zauberplatz erschaffen": {
+        description: "Liora kann in ihrem Zug als Bonusaktion Zaubereipunkte ausgeben, um einen Zauberplatz zu erschaffen. Die Kosten betragen 2, 3, 5, 6 oder 7 Punkte für einen Platz des 1. bis 5. Grades; erschaffene Plätze verschwinden nach einer langen Rast."
+    },
+    "beschleunigter zauber": {
+        description: "Wirkt Liora einen Zauber mit einer Wirkzeit von einer Aktion, kann sie zwei Zaubereipunkte ausgeben und die Wirkzeit dieses Einsatzes auf eine Bonusaktion verkürzen."
+    },
+    "qualvoller strahl": {
+        description: "Trifft Liora mit Schauriger Strahl beziehungsweise dem in der Demo als Eldritch Blast geführten Zaubertrick, addiert sie ihren Charismamodifikator zum Schaden jedes treffenden Strahls."
+    }
+});
+
+function applyDemoSrd51Details(entries, detailLibrary) {
+    return entries.map(function(entry) {
+        const details = detailLibrary[entry.name.trim().toLowerCase()];
+
+        if (details === undefined) {
+            return entry;
+        }
+
+        return {
+            ...entry,
+            ...details
+        };
+    });
+}
+
 function getDemoActionsForCard(cardId) {
     const demoActions = {
         1: [
@@ -481,7 +862,7 @@ function getDemoActionsForCard(cardId) {
         ]
     };
 
-    return demoActions[cardId] || [];
+    return applyDemoSrd51Details(demoActions[cardId] || [], demoSrd51ActionDetails);
 }
 
 function getDemoTraitsForCard(cardId) {
@@ -554,7 +935,7 @@ function getDemoTraitsForCard(cardId) {
         ]
     };
 
-    return demoTraits[cardId] || [];
+    return applyDemoSrd51Details(demoTraits[cardId] || [], demoSrd51TraitDetails);
 }
 
 function applySpellOverride(spellcasting, spellName, overrides) {
@@ -570,6 +951,7 @@ function getDemoSpellcastingForCard(card) {
     const spellcasting = createDefaultSpellcasting(card);
     spellcasting.spells = parseLegacySpellsText(card.demoSpellSeed);
     applyLegacySlotHints(spellcasting, { spellsText: card.demoSpellSeed, spellSaveDc: card.spellSaveDc });
+    applyDemoSrd51SpellDetails(spellcasting);
 
     if (card.id === 1) {
         applySpellOverride(spellcasting, "Chaossplitter", { castingTime: "1 Reaktion", range: "60 ft.", showAsAction: true, actionType: "reaction" });

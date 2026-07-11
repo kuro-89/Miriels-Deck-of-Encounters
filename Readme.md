@@ -1,6 +1,6 @@
 # Miriel’s Deck of Encounters
 
-v0.9.1 by kuro
+v0.23.5 by kuro
 
 Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
@@ -19,7 +19,7 @@ The current release is a free, ad-free, non-commercial hobby project. It has no 
 
 Original project code, interface elements, editorial text, characters, and project-created assets are proprietary unless expressly stated otherwise. All rights are reserved. A public GitHub repository permits viewing and forking through GitHub as required by GitHub’s Terms of Service, but does not grant a broader open-source license.
 
-The project includes material from the **System Reference Document 5.1** by Wizards of the Coast LLC under the **Creative Commons Attribution 4.0 International License**. The complete attribution and modification notice are maintained in `legal.html`.
+The project includes material from the **System Reference Document 5.1** by Wizards of the Coast LLC under the **Creative Commons Attribution 4.0 International License**. The complete attribution and modification notice are maintained centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`; the interface does not repeat the notice beside every spell.
 
 The project does not use the Wizards Fan Content Policy. It is independent and is not supported, reviewed, or published by Wizards of the Coast.
 
@@ -392,7 +392,7 @@ The bundled demo cards have been revised to reduce reliance on names associated 
 
 Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, **Fluch der Schattenklinge**, **Gunst des Schicksals**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.9.1 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.23.5 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
 The bundled AI-generated and project-created images are documented file by file in `ASSET_PROVENANCE.md`. According to the documented project review, they use no third-party source images, official logos, or intentionally reproduced official artwork.
 
@@ -475,3 +475,10 @@ See [`legal.html`](legal.html) for the complete notice and official source links
 ## Copyright
 
 Copyright © 2026 kuro. All rights reserved for original project material, subject to the separate CC BY 4.0 license and third-party rights described in `legal.html`.
+
+
+## SRD demo detail policy
+
+Version 0.23.5 adds compact German card details for demo spells that were matched to the German SRD 5.1. Existing unmatched or project-created entries were not removed. Items that still need classification are listed in `CONTENT_REVIEW_SRD_5.1.md`.
+
+The legally required SRD attribution is provided centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`. It is intentionally not repeated next to every spell in the application.

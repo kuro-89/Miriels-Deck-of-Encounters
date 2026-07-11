@@ -12,7 +12,7 @@ If this project is published in a public GitHub repository, the limited rights r
 
 This project includes material from the **System Reference Document 5.1** by Wizards of the Coast LLC. That material is available under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**. The proprietary notice above does not restrict rights granted under CC BY 4.0 and does not apply to third-party material.
 
-Full attribution and modification notices are provided in `legal.html`.
+Full attribution and modification notices are provided in `legal.html` and `THIRD_PARTY_NOTICES.md`.
 
 ## User-provided material
 

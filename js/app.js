@@ -23,7 +23,7 @@ function createUniqueId() {
     const hex = Array.from(randomBytes, value => value.toString(16).padStart(2, "0")).join("");
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
-const appVersion = "0.23.2";
+const appVersion = "0.23.5";
 
 const cardKinds = Object.freeze({
     character: "character",
@@ -13304,9 +13304,14 @@ function shiftInventoryStage(cardId, direction) {
 function createInventoryGhostCardHtml(item, side) {
     if (item === undefined || item === null) { return ""; }
     const safeImage = escapeHtml(normalizeInventoryImagePath(item.image, item.category));
+    const quantity = getSafeNonNegativeInteger(item.quantity, 0);
+
     return `
         <article class="inventory-ghost-card inventory-ghost-card-${side}" aria-hidden="true">
-            <div class="inventory-ghost-card-header">${escapeHtml(item.name)}</div>
+            <div class="inventory-ghost-card-header">
+                <span>${escapeHtml(item.name)}</span>
+                <small>Menge ${quantity}</small>
+            </div>
             <div class="inventory-ghost-card-art"><img src="${safeImage}" alt=""></div>
         </article>
     `;
@@ -13317,12 +13322,22 @@ function createInventoryTabHtml(card) {
     const visibleInventoryCardCount = 2;
     const stageStartIndex = getInventoryStageStartIndex(card.id, inventory.cards.length, visibleInventoryCardCount);
     const visibleCards = inventory.cards.slice(stageStartIndex, stageStartIndex + visibleInventoryCardCount);
-    const leftGhostItem = inventory.cards[stageStartIndex - 1] || (inventory.cards.length > visibleInventoryCardCount ? inventory.cards[stageStartIndex] : null);
-    const rightGhostItem = inventory.cards[stageStartIndex + visibleInventoryCardCount] || (inventory.cards.length > visibleInventoryCardCount ? inventory.cards[Math.min(inventory.cards.length - 1, stageStartIndex + visibleCards.length - 1)] : null);
+
+    // Seitliche Vorschauen dürfen nur tatsächlich vorhandene, aktuell nicht sichtbare
+    // Inventarstapel zeigen. Es werden bewusst keine Karten dupliziert, nur um beide
+    // Seiten des Karussells optisch zu füllen.
+    const leftGhostItem = stageStartIndex > 0
+        ? inventory.cards[stageStartIndex - 1]
+        : null;
+    const rightGhostIndex = stageStartIndex + visibleCards.length;
+    const rightGhostItem = rightGhostIndex < inventory.cards.length
+        ? inventory.cards[rightGhostIndex]
+        : null;
+
     const leftGhostHtml = createInventoryGhostCardHtml(leftGhostItem, "left");
     const rightGhostHtml = createInventoryGhostCardHtml(rightGhostItem, "right");
-    const canMoveLeft = stageStartIndex > 0;
-    const canMoveRight = stageStartIndex + visibleInventoryCardCount < inventory.cards.length;
+    const canMoveLeft = leftGhostItem !== null;
+    const canMoveRight = rightGhostItem !== null;
     const hasLeftGhost = leftGhostHtml !== "";
     const hasRightGhost = rightGhostHtml !== "";
     const cardsHtml = inventory.cards.length > 0

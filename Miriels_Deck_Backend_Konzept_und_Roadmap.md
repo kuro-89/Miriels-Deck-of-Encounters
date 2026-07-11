@@ -167,3 +167,10 @@ Zusätzlich zu VPS und Domain:
 - S3
 - Monetarisierung
 - vollständige Regelautomatisierung
+
+
+## 22. Inhaltsquellen und Lizenzen
+- SRD-5.1-basierte Regeltexte werden zentral attribuiert.
+- Herkunftshinweise müssen nicht neben jedem Spell in der Benutzeroberfläche erscheinen.
+- Für gemischte Bibliotheken kann später eine interne, nicht sichtbare Herkunftskennung verwendet werden.
+- Nicht eindeutig klassifizierte Demo-Inhalte werden vor einer öffentlichen oder kommerziellen Veröffentlichung gesondert geprüft.
