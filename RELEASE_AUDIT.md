@@ -1,4 +1,4 @@
-# Release Audit 0.25.1
+# Release Audit 0.25.2
 
 ## Technisch geprüft
 
@@ -29,9 +29,9 @@
 7. `legal.html`, `imprint.html` und `privacy.html` über den Footer öffnen.
 8. Spieleransicht, Local Storage, Import/Export und BroadcastChannel kurz testen.
 
-Ein vollständiger automatisierter Browser-End-to-End-Test ist in diesem Release noch nicht enthalten.
+Die Browser-Suite deckt ausgewählte Kernabläufe ab; eine vollständige End-to-End-Abdeckung ist noch nicht erreicht.
 
-## Testarchitektur 0.25.1
+## Testarchitektur 0.25.2
 
 Neu hinzugefügt wurden Vitest-Unit-Tests, Playwright-Browser-Smoke-Tests und eine ausführliche lokale Anleitung in `TESTING.md`.
 
@@ -47,15 +47,18 @@ Automatisch erfolgreich geprüft:
 
 In dieser Erstellungsumgebung nicht ausführbar:
 
-- Playwright-Browser-Smoke-Tests, weil der Browserdownload per DNS blockiert war und das vorhandene System-Chromium lokale HTTP-Aufrufe administrativ blockierte.
+- Playwright-Browser-Smoke-Tests, weil der Browserdownload per DNS blockiert war.
 
-Dies wird nicht als bestandener Browserablauf gewertet. Die Tests sind für die lokale Ausführung dokumentiert.
+Die 7 bisherigen Browser-Tests wurden vom Nutzer lokal erfolgreich bestätigt. Die 3 neuen Browser-Tests aus 0.25.2 sind syntaktisch geprüft, aber noch lokal auszuführen. Dies wird nicht vorab als bestandener Browserlauf gewertet.
 
-## Patch 0.25.1 – Teststabilisierung und Kernabläufe
+## Patch 0.25.2 – Teststabilisierung und Kernabläufe
 
 - stabiler semantischer Locator für den sichtbaren Kartenschmiede-Button
 - Browser-Test für Kartenanlage mit Local-Storage-Reload
 - Browser-Test für Encounterstart sowie nächsten und vorherigen Zug
 - Browser-Test für Schaden und direktes Undo
-- Testanleitung auf 16 automatische Tests aktualisiert
+- Testanleitung auf 19 automatische Tests aktualisiert
+- Browser-Test für Heilung und temporäre HP
+- Browser-Test für Condition hinzufügen und entfernen
+- Mehrseiten-Test für die Synchronisation des Encounterstarts
 - `package-lock.json` bewusst nicht ausgeliefert, damit `npm install` auf dem Zielsystem eine Registry-neutrale Lockdatei erzeugt

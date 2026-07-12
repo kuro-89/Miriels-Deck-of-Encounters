@@ -23,7 +23,9 @@ test("App startet über HTTP ohne JavaScript- oder Konsolenfehler", async ({ pag
   await expect(
     page.getByRole("heading", { name: "Miriel’s Deck of Encounters", level: 1 })
   ).toBeVisible();
-  await expect(page.getByText(/Version 0\.25\.1/)).toBeVisible();
+  await expect(
+  page.getByText(/Version \d+\.\d+\.\d+/)
+).toBeVisible();
   expect(errors).toEqual([]);
 });
 

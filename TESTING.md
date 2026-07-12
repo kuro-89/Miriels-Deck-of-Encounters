@@ -1,4 +1,4 @@
-# Tests ausführen – Miriel’s Deck of Encounters 0.25.1
+# Tests ausführen – Miriel’s Deck of Encounters 0.25.2
 
 Die App bleibt eine statische HTML/CSS/JavaScript-App. Node.js wird nur lokal für Vitest, Playwright und den automatischen HTTP-Testserver benötigt.
 
@@ -129,6 +129,17 @@ Sie sind in `.gitignore` ausgeschlossen.
 
 ```text
 9 Unit-Tests
-7 Browser-Tests
-16 automatische Tests insgesamt
+10 Browser-Tests
+19 automatische Tests insgesamt
 ```
+
+
+## Erweiterte Browserabläufe in 0.25.2
+
+Zusätzlich werden geprüft:
+
+- temporäre HP setzen
+- Schaden nach temporären HP korrekt auf normale HP übertragen
+- Heilung bis zum Maximalwert
+- Condition hinzufügen und entfernen
+- Encounterstart zwischen DM- und Spielerseite synchronisieren

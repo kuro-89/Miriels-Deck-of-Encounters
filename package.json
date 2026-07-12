@@ -1,6 +1,6 @@
 {
   "name": "miriels-deck-of-encounters",
-  "version": "0.25.1",
+  "version": "0.25.2",
   "private": true,
   "description": "Lokale Testwerkzeuge für die statische App Miriel's Deck of Encounters.",
   "scripts": {

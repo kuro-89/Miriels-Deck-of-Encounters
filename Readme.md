@@ -1,6 +1,6 @@
 # Miriel’s Deck of Encounters
 
-v0.25.1 by kuro
+v0.25.2 by kuro
 
 Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
 
@@ -392,7 +392,7 @@ The bundled demo cards have been revised to reduce reliance on names associated 
 
 Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.25.1 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.25.2 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
 The bundled AI-generated and project-created images are documented file by file in `ASSET_PROVENANCE.md`. According to the documented project review, they use no third-party source images, official logos, or intentionally reproduced official artwork.
 
@@ -479,14 +479,14 @@ Copyright © 2026 kuro. All rights reserved for original project material, subje
 
 ## SRD demo detail policy
 
-Version 0.25.1 includes separate, curated German libraries for SRD 5.1 and SRD 5.2.1. Existing unmatched or project-created entries were not removed. Unmatched or project-created entries remain unassigned to an SRD version unless they are explicitly audited.
+Version 0.25.2 includes separate, curated German libraries for SRD 5.1 and SRD 5.2.1. Existing unmatched or project-created entries were not removed. Unmatched or project-created entries remain unassigned to an SRD version unless they are explicitly audited.
 
 The legally required SRD attribution is provided centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`. It is intentionally not repeated next to every spell in the application.
 
 
 ## SRD-5.1 spell library
 
-Version 0.25.1 adds a curated SRD-5.1 spell picker to both the new-card and edit-card sections of the Kartenschmiede.
+Version 0.25.2 adds a curated SRD-5.1 spell picker to both the new-card and edit-card sections of the Kartenschmiede.
 
 - DMs can search and filter the library by spell level.
 - Selecting a spell copies its structured fields into the current card.
@@ -512,9 +512,9 @@ The Kartenschmiede offers two separate source selections:
 
 The selected source is used only as a template library. Copied spells remain editable. The app does not automatically convert a card or encounter from one rules version to the other.
 
-Version 0.25.1 moves Verwünschung/Hex to the SRD 5.2.1 library and restores the verified SRD 5.2.1 traits **Pakt der Klinge** and **Zurückdrängender Strahl** in the demo. Other previously removed entries were not restored because they were not verified as matching the current demo level and SRD 5.2.1 wording.
+Version 0.25.2 moves Verwünschung/Hex to the SRD 5.2.1 library and restores the verified SRD 5.2.1 traits **Pakt der Klinge** and **Zurückdrängender Strahl** in the demo. Other previously removed entries were not restored because they were not verified as matching the current demo level and SRD 5.2.1 wording.
 
-## Automatisierte Tests (ab 0.25.1)
+## Automatisierte Tests (ab 0.25.2)
 
 Die lokale Testarchitektur verwendet Vitest für isolierte Logik- und Inhaltsprüfungen sowie Playwright für Browser-Smoke-Tests. Installation und Befehle stehen in [`TESTING.md`](TESTING.md).
 
