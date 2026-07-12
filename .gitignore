@@ -1,0 +1,21 @@
+# Installierte Node-Pakete
+node_modules/
+
+# Playwright-Ausgaben
+test-results/
+playwright-report/
+blob-report/
+
+# Vitest-Coverage
+coverage/
+
+# macOS-Dateien
+.DS_Store
+._*
+
+# Lokale Umgebungsdateien
+.env
+.env.*
+
+# Editor-Einstellungen
+.vscode/

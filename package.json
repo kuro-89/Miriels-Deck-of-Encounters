@@ -1,0 +1,23 @@
+{
+  "name": "miriels-deck-of-encounters",
+  "version": "0.25.1",
+  "private": true,
+  "description": "Lokale Testwerkzeuge für die statische App Miriel's Deck of Encounters.",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:browser",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:browser": "playwright test",
+    "test:browser:headed": "playwright test --headed",
+    "test:browser:ui": "playwright test --ui",
+    "test:browser:install": "playwright install chromium",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

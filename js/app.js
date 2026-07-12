@@ -23,7 +23,7 @@ function createUniqueId() {
     const hex = Array.from(randomBytes, value => value.toString(16).padStart(2, "0")).join("");
     return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
-const appVersion = "0.24.3";
+const appVersion = "0.25.1";
 
 const cardKinds = Object.freeze({
     character: "character",

@@ -1,4 +1,4 @@
-# Release Audit 0.24.3
+# Release Audit 0.25.1
 
 ## Technisch geprüft
 
@@ -30,3 +30,32 @@
 8. Spieleransicht, Local Storage, Import/Export und BroadcastChannel kurz testen.
 
 Ein vollständiger automatisierter Browser-End-to-End-Test ist in diesem Release noch nicht enthalten.
+
+## Testarchitektur 0.25.1
+
+Neu hinzugefügt wurden Vitest-Unit-Tests, Playwright-Browser-Smoke-Tests und eine ausführliche lokale Anleitung in `TESTING.md`.
+
+Automatisch erfolgreich geprüft:
+
+- 9 Vitest-Tests in 2 Testdateien
+- Import-JSON-Fehler
+- Schema-Version und Kartenlimit
+- minimale gültige Importstruktur
+- getrennte SRD-5.1-/SRD-5.2.1-Bibliotheken
+- Bibliotheksduplikate und Pflichtfelder
+- `node --check` für Produktivcode, Tests und Konfiguration
+
+In dieser Erstellungsumgebung nicht ausführbar:
+
+- Playwright-Browser-Smoke-Tests, weil der Browserdownload per DNS blockiert war und das vorhandene System-Chromium lokale HTTP-Aufrufe administrativ blockierte.
+
+Dies wird nicht als bestandener Browserablauf gewertet. Die Tests sind für die lokale Ausführung dokumentiert.
+
+## Patch 0.25.1 – Teststabilisierung und Kernabläufe
+
+- stabiler semantischer Locator für den sichtbaren Kartenschmiede-Button
+- Browser-Test für Kartenanlage mit Local-Storage-Reload
+- Browser-Test für Encounterstart sowie nächsten und vorherigen Zug
+- Browser-Test für Schaden und direktes Undo
+- Testanleitung auf 16 automatische Tests aktualisiert
+- `package-lock.json` bewusst nicht ausgeliefert, damit `npm install` auf dem Zielsystem eine Registry-neutrale Lockdatei erzeugt
