@@ -2211,6 +2211,18 @@ function setupClickAwayBehavior() {
             return;
         }
 
+        const delegatedActionElement = targetElement.closest("[data-ui-click]");
+        const delegatedActionExpression = delegatedActionElement instanceof HTMLElement
+            ? delegatedActionElement.getAttribute("data-ui-click") || ""
+            : "";
+
+        // Inline-Handler mit event.stopPropagation() erreichten den Dokument-Listener
+        // früher nicht. Die delegierte Ereignisschicht muss dieses Verhalten vor der
+        // Click-away-Logik nachbilden, sonst schließen Drawer bei internen Aktionen.
+        if (splitUiActionStatements(delegatedActionExpression).includes("event.stopPropagation()")) {
+            return;
+        }
+
         const headerHelpElement = document.querySelector(".app-header-help");
 
         if (headerHelpElement instanceof HTMLDetailsElement && headerHelpElement.open === true && targetElement.closest(".app-header-help") === null) {
@@ -3331,10 +3343,10 @@ function showRecentUndoOffer(event) {
             <strong>Aktion ausgeführt</strong>
             <span>${escapeHtml(event.message)}</span>
         </div>
-        <button type="button" onclick="undoRecentGameEvent()">
+        <button type="button" data-ui-click="undoRecentGameEvent()">
             Rückgängig <span id="recent-undo-countdown">30 s</span>
         </button>
-        <button class="recent-undo-toast-close" type="button" onclick="clearRecentUndoOffer()" aria-label="Hinweis schließen">×</button>
+        <button class="recent-undo-toast-close" type="button" data-ui-click="clearRecentUndoOffer()" aria-label="Hinweis schließen">×</button>
     `;
     document.body.appendChild(toast);
     updateRecentUndoCountdown();
@@ -3506,7 +3518,7 @@ function getDmFeedTabButtonHtml(tabName, label) {
     return `
         <button
             class="dm-feed-tab-button ${activeClass}"
-            onclick="setActiveDmFeedTab('${tabName}')"
+            data-ui-click="setActiveDmFeedTab('${tabName}')"
         >
             ${label}
         </button>
@@ -3714,7 +3726,7 @@ function createCombatLogHtml() {
             ? `<span class="combat-log-status">Rückgängig gemacht</span>`
             : "";
         const actionsHtml = undoable
-            ? `<button type="button" onclick="undoGameEvent('${escapeHtml(logMessage.id)}')">Rückgängig</button>`
+            ? `<button type="button" data-ui-click="undoGameEvent('${escapeHtml(logMessage.id)}')">Rückgängig</button>`
             : "";
 
         html += `
@@ -3730,7 +3742,7 @@ function createCombatLogHtml() {
                     aria-label="Ereignisaktionen und Details öffnen"
                     aria-expanded="false"
                     title="Ereignisaktionen und Details"
-                    onclick="toggleCombatLogInlinePanel('${escapeHtml(logMessage.id)}', this)"
+                    data-ui-click="toggleCombatLogInlinePanel('${escapeHtml(logMessage.id)}', this)"
                 >⋯</button>
                 <div class="combat-log-inline-panel" hidden>
                     <div class="combat-log-inline-actions">
@@ -3739,7 +3751,7 @@ function createCombatLogHtml() {
                             type="button"
                             class="combat-log-details-toggle"
                             aria-expanded="false"
-                            onclick="toggleCombatLogEventDetails(this)"
+                            data-ui-click="toggleCombatLogEventDetails(this)"
                         >Details anzeigen</button>
                     </div>
                     <div class="combat-log-inline-details" hidden>
@@ -4274,7 +4286,7 @@ function getSafeEffects(value) {
 function createEffectChipHtml(effect, cardId, isPublic = false) {
     const duration = getEffectDurationLabel(effect);
     const colorClassName = getConditionClassName(getSafeEffectColorKey(effect.colorKey));
-    const removeButton = isPublic ? "" : `<button class="effect-chip-remove" type="button" title="Effekt entfernen" aria-label="${escapeHtml(effect.name)} entfernen" onclick="event.stopPropagation(); removeCustomEffectFromCard(${JSON.stringify(cardId)}, '${escapeHtml(effect.id)}')">×</button>`;
+    const removeButton = isPublic ? "" : `<button class="effect-chip-remove" type="button" title="Effekt entfernen" aria-label="${escapeHtml(effect.name)} entfernen" data-ui-click="event.stopPropagation(); removeCustomEffectFromCard(${JSON.stringify(cardId)}, '${escapeHtml(effect.id)}')">×</button>`;
     const tooltipParts = [duration, effect.note].filter(Boolean);
     return `<span class="condition-chip custom-effect-chip ${colorClassName}" title="${escapeHtml(tooltipParts.join(" · "))}"><span class="condition-chip-name">${escapeHtml(effect.name)}</span>${removeButton}</span>`;
 }
@@ -5485,18 +5497,18 @@ function renderForgeNoteManager(prefix) {
                     <div class="forge-note-title-controls">
                         <label class="form-field forge-note-title-field">
                             <span>Abschnitt</span>
-                            <select class="forge-note-title-select" onchange="handleForgeNoteTitleChange('${prefix}', ${index})">${optionsHtml}</select>
+                            <select class="forge-note-title-select" data-ui-change="handleForgeNoteTitleChange('${prefix}', ${index})">${optionsHtml}</select>
                         </label>
                         <label class="form-field forge-note-custom-title-field ${customTitleClass}">
                             <span>Eigene Überschrift</span>
-                            <input class="forge-note-custom-title" type="text" value="${escapeHtml(customTitleValue)}" placeholder="z. B. Verbündete" oninput="syncForgeNotesTextarea('${prefix}')">
+                            <input class="forge-note-custom-title" type="text" value="${escapeHtml(customTitleValue)}" placeholder="z. B. Verbündete" data-ui-input="syncForgeNotesTextarea('${prefix}')">
                         </label>
                     </div>
-                    <button class="forge-note-delete-button" type="button" onclick="deleteForgeNoteSection('${prefix}', ${index})" title="Abschnitt löschen" aria-label="Notizabschnitt löschen">×</button>
+                    <button class="forge-note-delete-button" type="button" data-ui-click="deleteForgeNoteSection('${prefix}', ${index})" title="Abschnitt löschen" aria-label="Notizabschnitt löschen">×</button>
                 </div>
                 <label class="form-field forge-note-body-field">
                     <span>Text</span>
-                    <textarea class="forge-note-body" rows="4" oninput="syncForgeNotesTextarea('${prefix}')">${escapeHtml(section.body)}</textarea>
+                    <textarea class="forge-note-body" rows="4" data-ui-input="syncForgeNotesTextarea('${prefix}')">${escapeHtml(section.body)}</textarea>
                 </label>
             </article>
         `;
@@ -6012,7 +6024,7 @@ function createSpellSlotButtonsHtml(cardId, level, slotData) {
             <button
                 class="spell-slot-orb ${isAvailable ? "spell-slot-orb-available" : "spell-slot-orb-used"}"
                 type="button"
-                onclick="toggleSpellSlot(${cardId}, ${level}, ${index})"
+                data-ui-click="toggleSpellSlot(${cardId}, ${level}, ${index})"
                 title="Spell Slot ${index + 1} umschalten"
                 aria-label="Spell Slot ${index + 1} von ${spellLevelLabels[level]} umschalten"
             >
@@ -6064,7 +6076,7 @@ function createSpellDetailHtml(cardId, spell) {
             ${rowsHtml !== "" ? `<div class="spell-detail-grid">${rowsHtml}</div>` : ""}
             ${text !== "" ? `<p class="spell-detail-description">${escapeHtml(text).replace(/\n/g, "<br>")}</p>` : `<p class="spell-detail-description spell-detail-empty">Keine Kartendetails eingetragen.</p>`}
             <div class="spell-detail-actions">
-                ${spell.level > 0 && getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)].max > 0 ? `<button type="button" onclick="toggleSpellSlot(${cardId}, ${spell.level}, ${Math.max(0, getAvailableSpellSlotCount(getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)]) - 1)})">Slot verwenden</button>` : ""}
+                ${spell.level > 0 && getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)].max > 0 ? `<button type="button" data-ui-click="toggleSpellSlot(${cardId}, ${spell.level}, ${Math.max(0, getAvailableSpellSlotCount(getCardSpellcasting(findCardById(cardId)).slots[String(spell.level)]) - 1)})">Slot verwenden</button>` : ""}
             </div>
         </div>
     `;
@@ -6077,10 +6089,10 @@ function createSpellRowHtml(cardId, spell) {
     return `
         <article class="spell-row-card ${spell.prepared === true ? "spell-prepared" : "spell-unprepared"} ${isExpanded ? "spell-row-expanded" : ""}" data-spell-key="${escapeHtml(`${cardId}:${spell.id}`)}">
             <div class="spell-row-shell">
-                <button class="spell-prepared-toggle" type="button" onclick="toggleSpellPrepared(${cardId}, '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">
+                <button class="spell-prepared-toggle" type="button" data-ui-click="toggleSpellPrepared(${cardId}, '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">
                     ${preparedSymbol}
                 </button>
-                <button class="spell-row-button" type="button" onclick="toggleSpellDetail(${cardId}, '${spell.id}')" aria-expanded="${isExpanded ? "true" : "false"}">
+                <button class="spell-row-button" type="button" data-ui-click="toggleSpellDetail(${cardId}, '${spell.id}')" aria-expanded="${isExpanded ? "true" : "false"}">
                     <span class="spell-row-chevron" aria-hidden="true">›</span>
                     <span class="spell-row-name">${escapeHtml(spell.name)}</span>
                 </button>
@@ -6504,7 +6516,7 @@ function createForgeSrdSpellLibraryHtml(prefix) {
                     <span>${escapeHtml(spellLevelLabels[spell.level])}${flags !== "" ? ` · ${escapeHtml(flags)}` : ""}</span>
                     <p>${escapeHtml(spell.description)}</p>
                 </div>
-                <button type="button" onclick="addForgeSrdSpell('${prefix}', '${spell.id}')">Hinzufügen</button>
+                <button type="button" data-ui-click="addForgeSrdSpell('${prefix}', '${spell.id}')">Hinzufügen</button>
             </article>
         `;
     }).join("");
@@ -6516,23 +6528,23 @@ function createForgeSrdSpellLibraryHtml(prefix) {
                     <p class="section-eyebrow">Regelbibliothek</p>
                     <h5>${escapeHtml(activeLibrary.meta.label)} auswählen</h5>
                 </div>
-                <button type="button" class="forge-srd-library-close" onclick="closeForgeSrdSpellLibrary('${prefix}')" aria-label="Bibliothek schließen">×</button>
+                <button type="button" class="forge-srd-library-close" data-ui-click="closeForgeSrdSpellLibrary('${prefix}')" aria-label="Bibliothek schließen">×</button>
             </div>
             <div class="forge-srd-library-filters">
                 <label class="form-field">
                     <span>Regelstand</span>
-                    <select id="${prefix}-srd-spell-source" onchange="updateForgeSrdSpellLibrary('${prefix}')">
+                    <select id="${prefix}-srd-spell-source" data-ui-change="updateForgeSrdSpellLibrary('${prefix}')">
                         <option value="${srd51ContentMeta.key}"${filters.source === srd51ContentMeta.key ? " selected" : ""}>${escapeHtml(srd51ContentMeta.label)}</option>
                         <option value="${srd521ContentMeta.key}"${filters.source === srd521ContentMeta.key ? " selected" : ""}>${escapeHtml(srd521ContentMeta.label)}</option>
                     </select>
                 </label>
                 <label class="form-field">
                     <span>Suche</span>
-                    <input id="${prefix}-srd-spell-search" type="search" value="${escapeHtml(filters.search)}" placeholder="Name, Schule oder Wirkung" oninput="updateForgeSrdSpellLibrary('${prefix}')">
+                    <input id="${prefix}-srd-spell-search" type="search" value="${escapeHtml(filters.search)}" placeholder="Name, Schule oder Wirkung" data-ui-input="updateForgeSrdSpellLibrary('${prefix}')">
                 </label>
                 <label class="form-field">
                     <span>Grad</span>
-                    <select id="${prefix}-srd-spell-level" onchange="updateForgeSrdSpellLibrary('${prefix}')">${levelOptions}</select>
+                    <select id="${prefix}-srd-spell-level" data-ui-change="updateForgeSrdSpellLibrary('${prefix}')">${levelOptions}</select>
                 </label>
             </div>
             <div class="forge-srd-library-results">
@@ -6704,11 +6716,11 @@ function createForgeSpellRowHtml(prefix, spell) {
 
     return `
         <div class="forge-spell-row ${spell.prepared === true ? "forge-spell-prepared" : "forge-spell-unprepared"} ${editorIsOpen ? "forge-spell-row-active" : ""}">
-            <button class="forge-spell-prepared-toggle" type="button" onclick="toggleForgeSpellPrepared('${prefix}', '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">${preparedSymbol}</button>
+            <button class="forge-spell-prepared-toggle" type="button" data-ui-click="toggleForgeSpellPrepared('${prefix}', '${spell.id}')" title="Prepared umschalten" aria-label="Prepared für ${escapeHtml(spell.name)} umschalten">${preparedSymbol}</button>
             <span class="forge-spell-name">${escapeHtml(spell.name)}</span>
             <div class="forge-spell-row-actions">
-                <button class="forge-spell-edit-button" type="button" onclick="openForgeSpellEditor('${prefix}', '${spell.id}')">Edit</button>
-                <button class="forge-spell-delete-button" type="button" onclick="deleteForgeSpell('${prefix}', '${spell.id}')" title="Spell löschen" aria-label="${escapeHtml(spell.name)} löschen">×</button>
+                <button class="forge-spell-edit-button" type="button" data-ui-click="openForgeSpellEditor('${prefix}', '${spell.id}')">Edit</button>
+                <button class="forge-spell-delete-button" type="button" data-ui-click="deleteForgeSpell('${prefix}', '${spell.id}')" title="Spell löschen" aria-label="${escapeHtml(spell.name)} löschen">×</button>
             </div>
         </div>
         ${editorIsOpen ? createForgeSpellEditorHtml(prefix, spell) : ""}
@@ -6790,8 +6802,8 @@ function createForgeSpellEditorHtml(prefix, spell) {
                 <label class="form-field forge-spell-editor-wide"><span>Description</span><textarea id="${prefix}-forge-spell-description" rows="5">${escapeHtml(safeSpell.description || safeSpell.notes)}</textarea></label>
             </div>
             <div class="forge-spell-editor-actions">
-                <button type="button" onclick="saveForgeSpell('${prefix}', '${safeSpell.id}')">Spell speichern</button>
-                <button type="button" onclick="cancelForgeSpellEditor('${prefix}')">Abbrechen</button>
+                <button type="button" data-ui-click="saveForgeSpell('${prefix}', '${safeSpell.id}')">Spell speichern</button>
+                <button type="button" data-ui-click="cancelForgeSpellEditor('${prefix}')">Abbrechen</button>
             </div>
         </section>
     `;
@@ -6830,8 +6842,8 @@ function renderForgeSpellManager(prefix) {
 
             </div>
             <div class="forge-spell-manager-actions">
-                <button type="button" class="forge-spell-library-button" onclick="openForgeSrdSpellLibrary('${prefix}')">Aus SRD-Bibliothek</button>
-                <button type="button" class="forge-spell-add-button forge-add-button" onclick="addForgeSpell('${prefix}')">Eigener Spell</button>
+                <button type="button" class="forge-spell-library-button" data-ui-click="openForgeSrdSpellLibrary('${prefix}')">Aus SRD-Bibliothek</button>
+                <button type="button" class="forge-spell-add-button forge-add-button" data-ui-click="addForgeSpell('${prefix}')">Eigener Spell</button>
             </div>
         </div>
         ${createForgeSrdSpellLibraryHtml(prefix)}
@@ -7333,8 +7345,8 @@ function createForgeActionRowHtml(prefix, action) {
             <span class="forge-action-type-pill forge-action-type-${escapeHtml(action.type)}">${label}</span>
             <span class="forge-action-name">${escapeHtml(action.name)}</span>
             <div class="forge-action-row-actions">
-                <button class="forge-action-edit-button" type="button" onclick="openForgeActionEditor('${prefix}', '${action.id}')">Edit</button>
-                <button class="forge-action-delete-button" type="button" onclick="deleteForgeAction('${prefix}', '${action.id}')" title="Aktion löschen" aria-label="${escapeHtml(action.name)} löschen">×</button>
+                <button class="forge-action-edit-button" type="button" data-ui-click="openForgeActionEditor('${prefix}', '${action.id}')">Edit</button>
+                <button class="forge-action-delete-button" type="button" data-ui-click="deleteForgeAction('${prefix}', '${action.id}')" title="Aktion löschen" aria-label="${escapeHtml(action.name)} löschen">×</button>
             </div>
         </div>
         ${editorIsOpen ? createForgeActionEditorHtml(prefix, action) : ""}
@@ -7398,8 +7410,8 @@ function createForgeActionEditorHtml(prefix, action) {
                 <label class="form-field forge-action-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-action-description" rows="5">${escapeHtml(safeAction.description)}</textarea></label>
             </div>
             <div class="forge-action-editor-actions">
-                <button type="button" onclick="saveForgeAction('${prefix}', '${safeAction.id}')">Aktion speichern</button>
-                <button type="button" onclick="cancelForgeActionEditor('${prefix}')">Abbrechen</button>
+                <button type="button" data-ui-click="saveForgeAction('${prefix}', '${safeAction.id}')">Aktion speichern</button>
+                <button type="button" data-ui-click="cancelForgeActionEditor('${prefix}')">Abbrechen</button>
             </div>
         </section>
     `;
@@ -7430,7 +7442,7 @@ function renderForgeActionManager(prefix) {
                 <p class="section-eyebrow">Aktionsliste</p>
                 
             </div>
-            <button type="button" class="forge-action-add-button forge-add-button" onclick="addForgeAction('${prefix}')">Aktion hinzufügen</button>
+            <button type="button" class="forge-action-add-button forge-add-button" data-ui-click="addForgeAction('${prefix}')">Aktion hinzufügen</button>
         </div>
         <div class="forge-action-list">
             ${createForgeActionDraftGroupHtml(prefix, newDraftAction)}
@@ -8983,8 +8995,8 @@ function createForgeTraitRowHtml(prefix, trait) {
             <span class="forge-action-type-pill">${escapeHtml(cardTraitCategoryLabels[trait.category] || "Trait")}</span>
             <span class="forge-action-name">${escapeHtml(trait.name)}${escapeHtml(actionHint)}</span>
             <div class="forge-action-row-actions">
-                <button class="forge-trait-edit-button" type="button" onclick="openForgeTraitEditor('${prefix}', '${trait.id}')">Edit</button>
-                <button class="forge-trait-delete-button" type="button" onclick="deleteForgeTrait('${prefix}', '${trait.id}')" title="Trait löschen" aria-label="${escapeHtml(trait.name)} löschen">×</button>
+                <button class="forge-trait-edit-button" type="button" data-ui-click="openForgeTraitEditor('${prefix}', '${trait.id}')">Edit</button>
+                <button class="forge-trait-delete-button" type="button" data-ui-click="deleteForgeTrait('${prefix}', '${trait.id}')" title="Trait löschen" aria-label="${escapeHtml(trait.name)} löschen">×</button>
             </div>
         </div>
         ${editorIsOpen ? createForgeTraitEditorHtml(prefix, trait) : ""}
@@ -9039,8 +9051,8 @@ function createForgeTraitEditorHtml(prefix, trait) {
                 <label class="form-field forge-action-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-trait-description" rows="5">${escapeHtml(safeTrait.description)}</textarea></label>
             </div>
             <div class="forge-action-editor-actions">
-                <button type="button" onclick="saveForgeTrait('${prefix}', '${safeTrait.id}')">Trait speichern</button>
-                <button type="button" onclick="cancelForgeTraitEditor('${prefix}')">Abbrechen</button>
+                <button type="button" data-ui-click="saveForgeTrait('${prefix}', '${safeTrait.id}')">Trait speichern</button>
+                <button type="button" data-ui-click="cancelForgeTraitEditor('${prefix}')">Abbrechen</button>
             </div>
         </section>
     `;
@@ -9067,7 +9079,7 @@ function renderForgeTraitManager(prefix) {
                 <p class="section-eyebrow">Traitliste</p>
                 
             </div>
-            <button type="button" class="forge-trait-add-button forge-add-button" onclick="addForgeTrait('${prefix}')">Trait hinzufügen</button>
+            <button type="button" class="forge-trait-add-button forge-add-button" data-ui-click="addForgeTrait('${prefix}')">Trait hinzufügen</button>
         </div>
         <div class="forge-action-row-list">
             ${createForgeTraitDraftGroupHtml(prefix, newDraftTrait)}
@@ -9178,7 +9190,7 @@ function createPublicStageCardHtml(publicCard, slotName) {
                 class="public-stage-card ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
                 data-card-id="${publicCard.id}"
                 data-public-stage-card-id="${publicCard.id}"
-                onclick="focusPublicCard(${publicCard.id})"
+                data-ui-click="focusPublicCard(${publicCard.id})"
                 title="Diese Karte groß anzeigen"
             >
                 ${createOutOfActionStampHtml(publicCard)}
@@ -9265,7 +9277,7 @@ function createPublicRibbonCardHtml(publicCard) {
             class="public-ribbon-card ${activeTurnClass} ${selectedCardClass} ${publicCard.hp.health.stateClass} hp-mode-${publicCard.hp.mode} ${publicCard.isOutOfAction ? "is-out-of-action" : ""}"
             data-card-id="${publicCard.id}"
             data-public-ribbon-card-id="${publicCard.id}"
-            onclick="focusPublicCard(${publicCard.id})"
+            data-ui-click="focusPublicCard(${publicCard.id})"
             title="Diese Karte groß anzeigen"
             style="${publicCard.hp.health.style} --ribbon-index: ${ribbonIndex};"
         >
@@ -9348,11 +9360,11 @@ function createCardMenuHtml(card) {
 
     if (isInTrash) {
         return `
-            <details class="card-menu" onclick="event.stopPropagation()">
+            <details class="card-menu" data-ui-click="event.stopPropagation()">
                 <summary class="card-menu-summary" title="Kartenmenü öffnen" aria-label="Kartenmenü öffnen">☰</summary>
                 <div class="card-menu-panel">
-                    <button type="button" onclick="restoreCardFromTrash(${card.id})">Ins Deck wiederherstellen</button>
-                    <button class="card-menu-danger" type="button" onclick="permanentlyDeleteCard(${card.id})">Endgültig löschen</button>
+                    <button type="button" data-ui-click="restoreCardFromTrash(${card.id})">Ins Deck wiederherstellen</button>
+                    <button class="card-menu-danger" type="button" data-ui-click="permanentlyDeleteCard(${card.id})">Endgültig löschen</button>
                 </div>
             </details>
         `;
@@ -9360,23 +9372,23 @@ function createCardMenuHtml(card) {
 
     const isFocusedDeckCard = location === cardLocations.deck && uiState.focusedCardId === card.id;
     const deckFocusButtonHtml = isFocusedDeckCard
-        ? `<button type="button" onclick="showDeckCardFromFocus(${card.id})">Aus Fokus entfernen</button>`
-        : `<button type="button" onclick="setFocusedDeckCard(${card.id})">In den Fokus nehmen</button>`;
+        ? `<button type="button" data-ui-click="showDeckCardFromFocus(${card.id})">Aus Fokus entfernen</button>`
+        : `<button type="button" data-ui-click="setFocusedDeckCard(${card.id})">In den Fokus nehmen</button>`;
     const turnOrderButtonHtml = isOnHand
-        ? `<button type="button" onclick="toggleCardTurnOrder(${card.id})">${getEncounterStatus(card) === encounterStatuses.eliminated ? "Wieder in die Zugfolge aufnehmen" : "Aus der Zugfolge nehmen"}</button>`
+        ? `<button type="button" data-ui-click="toggleCardTurnOrder(${card.id})">${getEncounterStatus(card) === encounterStatuses.eliminated ? "Wieder in die Zugfolge aufnehmen" : "Aus der Zugfolge nehmen"}</button>`
         : "";
     const movementButtonHtml = isOnHand
-        ? `${turnOrderButtonHtml}<button type="button" onclick="moveCardToDeck(${card.id})">Karte ins Deck verschieben</button>`
-        : `${deckFocusButtonHtml}<button type="button" onclick="moveCardToHand(${card.id})">Karte auf die Hand nehmen</button>`;
+        ? `${turnOrderButtonHtml}<button type="button" data-ui-click="moveCardToDeck(${card.id})">Karte ins Deck verschieben</button>`
+        : `${deckFocusButtonHtml}<button type="button" data-ui-click="moveCardToHand(${card.id})">Karte auf die Hand nehmen</button>`;
 
     return `
-        <details class="card-menu" onclick="event.stopPropagation()">
+        <details class="card-menu" data-ui-click="event.stopPropagation()">
             <summary class="card-menu-summary" title="Kartenmenü öffnen" aria-label="Kartenmenü öffnen">☰</summary>
             <div class="card-menu-panel">
-                <button type="button" onclick="openEditCardForm(${card.id})">Karte bearbeiten</button>
-                <button type="button" onclick="copyCardToDeck(${card.id})">Karte kopieren</button>
+                <button type="button" data-ui-click="openEditCardForm(${card.id})">Karte bearbeiten</button>
+                <button type="button" data-ui-click="copyCardToDeck(${card.id})">Karte kopieren</button>
                 ${movementButtonHtml}
-                <button class="card-menu-danger" onclick="moveCardToTrash(${card.id})" type="button">In den Papierkorb</button>
+                <button class="card-menu-danger" data-ui-click="moveCardToTrash(${card.id})" type="button">In den Papierkorb</button>
             </div>
         </details>
     `;
@@ -9395,7 +9407,7 @@ function createCardHtml(card, isActive) {
         ? "selected-deck-card"
         : "";
 
-    const selectionClickAttribute = `onclick="toggleCardSelection(${card.id})"`;
+    const selectionClickAttribute = `data-ui-click="toggleCardSelection(${card.id})"`;
 
     let selectedTargetLabelHtml = "";
 
@@ -10592,13 +10604,13 @@ function createTurnActionButtonsHtml() {
     const handCards = getHandCards();
     const turnDisabledAttribute = gameState.encounter.isStarted === true && handCards.length > 0 ? "" : " disabled";
     const stateActionButtonHtml = gameState.encounter.isStarted === true
-        ? `<button class="round-control-button end-combat-button" onclick="endCombat()" type="button">Beenden</button>`
-        : `<button class="round-control-button start-encounter-button" onclick="startEncounter()"${handCards.length > 0 ? "" : " disabled"} title="Encounter starten und den öffentlichen Spieltisch freigeben" type="button">Starten</button>`;
+        ? `<button class="round-control-button end-combat-button" data-ui-click="endCombat()" type="button">Beenden</button>`
+        : `<button class="round-control-button start-encounter-button" data-ui-click="startEncounter()"${handCards.length > 0 ? "" : " disabled"} title="Encounter starten und den öffentlichen Spieltisch freigeben" type="button">Starten</button>`;
 
     return `
-        <button class="round-control-button" onclick="previousTurn()"${turnDisabledAttribute} type="button" aria-label="Vorheriger Zug"><span class="round-control-label-long">Vorheriger Zug</span><span class="round-control-label-tablet" aria-hidden="true">‹ Zug</span></button>
-        <button class="round-control-button" onclick="nextTurn()"${turnDisabledAttribute} type="button" aria-label="Nächster Zug"><span class="round-control-label-long">Nächster Zug</span><span class="round-control-label-tablet" aria-hidden="true">Zug ›</span></button>
-        <button class="round-control-button" onclick="resetCombatTurnCounter()" type="button"><span class="round-control-label-long">Zähler reset</span><span class="round-control-label-tablet" aria-hidden="true">Reset</span></button>
+        <button class="round-control-button" data-ui-click="previousTurn()"${turnDisabledAttribute} type="button" aria-label="Vorheriger Zug"><span class="round-control-label-long">Vorheriger Zug</span><span class="round-control-label-tablet" aria-hidden="true">‹ Zug</span></button>
+        <button class="round-control-button" data-ui-click="nextTurn()"${turnDisabledAttribute} type="button" aria-label="Nächster Zug"><span class="round-control-label-long">Nächster Zug</span><span class="round-control-label-tablet" aria-hidden="true">Zug ›</span></button>
+        <button class="round-control-button" data-ui-click="resetCombatTurnCounter()" type="button"><span class="round-control-label-long">Zähler reset</span><span class="round-control-label-tablet" aria-hidden="true">Reset</span></button>
         ${stateActionButtonHtml}
     `;
 }
@@ -10649,7 +10661,7 @@ function renderTurnInfo(handCards) {
         <button
             class="active-round-card"
             type="button"
-            onclick="focusActiveCard()"
+            data-ui-click="focusActiveCard()"
             title="Aktive Karte als Fokuskarte anzeigen: ${escapeHtml(activeDisplayName)}"
             aria-label="Aktive Karte als Fokuskarte anzeigen: ${escapeHtml(activeDisplayName)}"
         >
@@ -11149,7 +11161,7 @@ function renderPlayerSide(publicCards, handCards) {
 
                 <button
                     class="public-focus-reset-button"
-                    onclick="resetPublicFocusToActiveCard()"
+                    data-ui-click="resetPublicFocusToActiveCard()"
                 >
                     Aktive Karte anzeigen
                 </button>
@@ -11208,8 +11220,8 @@ function createFocusedCardHtml(card, activeCard) {
     const targetButtonText = card.isSelected === true ? "Ziel entfernen" : "Ziel setzen";
     const targetButtonStateClass = card.isSelected === true ? "focus-target-toggle-button-selected" : "";
     const focusActionButtonHtml = isDeckFocus
-        ? `<button class="focus-target-toggle-button deck-focus-hand-button" onclick="event.stopPropagation(); moveCardToHand(${card.id})" type="button">Auf die Hand</button>`
-        : `<button class="focus-target-toggle-button ${targetButtonStateClass}" onclick="event.stopPropagation(); toggleCardSelection(${card.id})" type="button">${targetButtonText}</button>`;
+        ? `<button class="focus-target-toggle-button deck-focus-hand-button" data-ui-click="event.stopPropagation(); moveCardToHand(${card.id})" type="button">Auf die Hand</button>`
+        : `<button class="focus-target-toggle-button ${targetButtonStateClass}" data-ui-click="event.stopPropagation(); toggleCardSelection(${card.id})" type="button">${targetButtonText}</button>`;
     const conditionCount = Array.isArray(card.conditions) ? card.conditions.length : 0;
     const conditionChipsHtml = createConditionChipsHtml(card);
     const conditionMarqueeClass = conditionCount > 3 ? "focus-condition-marquee is-scrolling" : "focus-condition-marquee";
@@ -11365,7 +11377,7 @@ function getDetailTabButtonHtml(tabName, label) {
     return `
         <button
             class="detail-tab-button ${activeClass}"
-            onclick="setActiveDetailTab('${tabName}')"
+            data-ui-click="setActiveDetailTab('${tabName}')"
             type="button"
         >
             ${label}
@@ -11617,7 +11629,7 @@ function createActionUsageButtonsHtml(cardId, action) {
             <button
                 class="action-use-orb ${isAvailable ? "action-use-orb-available" : "action-use-orb-used"}"
                 type="button"
-                onclick="event.preventDefault(); event.stopPropagation(); toggleActionUsage(${cardId}, '${action.id}', ${index})"
+                data-ui-click="event.preventDefault(); event.stopPropagation(); toggleActionUsage(${cardId}, '${action.id}', ${index})"
                 title="${escapeHtml(action.name)}: Nutzung ${index + 1} umschalten${resetTitle !== "" ? ` (${escapeHtml(resetTitle)})` : ""}"
                 aria-label="Nutzung ${index + 1} von ${escapeHtml(action.name)} umschalten${resetTitle !== "" ? `, ${escapeHtml(resetTitle)}` : ""}"
             >
@@ -12397,12 +12409,12 @@ function createInventoryAddMenuHtml(cardId, context = "details", prefix = "") {
         <details class="section-menu inventory-add-menu">
             <summary class="section-menu-summary">Itemkarte hinzufügen</summary>
             <div class="section-menu-panel inventory-add-menu-panel">
-                <button type="button" onclick="${actionPrefix} 'healing')">Heiltrank</button>
-                <button type="button" onclick="${actionPrefix} 'greaterHealing')">Starker Heiltrank</button>
-                <button type="button" onclick="${actionPrefix} 'superiorHealing')">Großer Heiltrank</button>
-                <button type="button" onclick="${actionPrefix} 'supremeHealing')">Meisterlicher Heiltrank</button>
-                <button type="button" onclick="${customPotionAction}">Eigene Potion …</button>
-                <button type="button" onclick="${customScrollAction}">Eigene Scroll …</button>
+                <button type="button" data-ui-click="${actionPrefix} 'healing')">Heiltrank</button>
+                <button type="button" data-ui-click="${actionPrefix} 'greaterHealing')">Starker Heiltrank</button>
+                <button type="button" data-ui-click="${actionPrefix} 'superiorHealing')">Großer Heiltrank</button>
+                <button type="button" data-ui-click="${actionPrefix} 'supremeHealing')">Meisterlicher Heiltrank</button>
+                <button type="button" data-ui-click="${customPotionAction}">Eigene Potion …</button>
+                <button type="button" data-ui-click="${customScrollAction}">Eigene Scroll …</button>
             </div>
         </details>
     `;
@@ -12427,11 +12439,11 @@ function createInventoryCardHtml(cardId, item) {
                 <details class="inventory-item-menu">
                     <summary class="inventory-item-menu-summary" aria-label="Aktionen für ${escapeHtml(item.name)}">☰</summary>
                     <div class="inventory-item-menu-panel">
-                        ${hasExecutableEffect ? `<button type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${item.category === "potion" ? "Selbst verwenden" : useLabel}</button>` : `<button type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'self')">${useLabel}</button>`}
-                        ${hasExecutableEffect ? `<button class="inventory-item-target-menu-button" type="button" ${isConsumed ? "disabled" : ""} onclick="useInventoryCard(${cardId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
-                        <button type="button" ${isConsumed ? "disabled" : ""} onclick="transferInventoryCard(${cardId}, '${item.id}')">Übertragen …</button>
-                        <button type="button" onclick="openDetailInventoryCardEditor(${cardId}, '${item.id}')">Edit</button>
-                        <button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${cardId}, '${item.id}', true)">Entfernen</button>
+                        ${hasExecutableEffect ? `<button type="button" ${isConsumed ? "disabled" : ""} data-ui-click="useInventoryCard(${cardId}, '${item.id}', 'self')">${item.category === "potion" ? "Selbst verwenden" : useLabel}</button>` : `<button type="button" ${isConsumed ? "disabled" : ""} data-ui-click="useInventoryCard(${cardId}, '${item.id}', 'self')">${useLabel}</button>`}
+                        ${hasExecutableEffect ? `<button class="inventory-item-target-menu-button" type="button" ${isConsumed ? "disabled" : ""} data-ui-click="useInventoryCard(${cardId}, '${item.id}', 'target')">Auf Ziel anwenden</button>` : ""}
+                        <button type="button" ${isConsumed ? "disabled" : ""} data-ui-click="transferInventoryCard(${cardId}, '${item.id}')">Übertragen …</button>
+                        <button type="button" data-ui-click="openDetailInventoryCardEditor(${cardId}, '${item.id}')">Edit</button>
+                        <button class="card-menu-danger" type="button" data-ui-click="removeInventoryCardFromDetails(${cardId}, '${item.id}', true)">Entfernen</button>
                     </div>
                 </details>
             </div>
@@ -12479,10 +12491,10 @@ function createDetailInventoryCardEditorHtml(card) {
                 <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-item-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
-                <button type="button" onclick="saveDetailInventoryCardEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
-                <button type="button" onclick="saveDetailInventoryCardEditor(${card.id}, true)">In Kartenschmiede verfeinern</button>
-                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryCardFromDetails(${card.id}, '${item.id}')">Löschen</button>`}
-                <button type="button" onclick="cancelDetailInventoryEditor()">Abbrechen</button>
+                <button type="button" data-ui-click="saveDetailInventoryCardEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
+                <button type="button" data-ui-click="saveDetailInventoryCardEditor(${card.id}, true)">In Kartenschmiede verfeinern</button>
+                ${isNew ? "" : `<button class="card-menu-danger" type="button" data-ui-click="removeInventoryCardFromDetails(${card.id}, '${item.id}')">Löschen</button>`}
+                <button type="button" data-ui-click="cancelDetailInventoryEditor()">Abbrechen</button>
             </div>
         </section>
     `;
@@ -12508,9 +12520,9 @@ function createInventoryListHtml(cardId, list) {
                         <div class="inventory-list-row-body">
                             <p>${escapeHtml(item.description || "Keine Beschreibung eingetragen.")}</p>
                             <div class="inventory-list-row-actions">
-                                ${item.consumable === true ? `<button type="button" ${item.quantity <= 0 ? "disabled" : ""} onclick="useInventoryListItem(${cardId}, '${item.id}')">Verwenden</button>` : ""}
-                                <button type="button" onclick="openDetailInventoryListEditor(${cardId}, '${item.id}')">Edit</button>
-                                <button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${cardId}, '${item.id}')" title="Eintrag entfernen" aria-label="${escapeHtml(item.name)} entfernen">Löschen</button>
+                                ${item.consumable === true ? `<button type="button" ${item.quantity <= 0 ? "disabled" : ""} data-ui-click="useInventoryListItem(${cardId}, '${item.id}')">Verwenden</button>` : ""}
+                                <button type="button" data-ui-click="openDetailInventoryListEditor(${cardId}, '${item.id}')">Edit</button>
+                                <button class="card-menu-danger" type="button" data-ui-click="removeInventoryListItem(${cardId}, '${item.id}')" title="Eintrag entfernen" aria-label="${escapeHtml(item.name)} entfernen">Löschen</button>
                             </div>
                         </div>
                     </details>
@@ -12540,9 +12552,9 @@ function createDetailInventoryListEditorHtml(card) {
                 <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="detail-list-description-${card.id}" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
             </div>
             <div class="inventory-inline-editor-actions">
-                <button type="button" onclick="saveDetailInventoryListEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
-                ${isNew ? "" : `<button class="card-menu-danger" type="button" onclick="removeInventoryListItem(${card.id}, '${item.id}')">Löschen</button>`}
-                <button type="button" onclick="cancelDetailInventoryEditor()">Abbrechen</button>
+                <button type="button" data-ui-click="saveDetailInventoryListEditor(${card.id})">${isNew ? "Hinzufügen" : "Speichern"}</button>
+                ${isNew ? "" : `<button class="card-menu-danger" type="button" data-ui-click="removeInventoryListItem(${card.id}, '${item.id}')">Löschen</button>`}
+                <button type="button" data-ui-click="cancelDetailInventoryEditor()">Abbrechen</button>
             </div>
         </section>
     `;
@@ -12637,14 +12649,14 @@ function createInventoryTabHtml(card) {
                 <div class="inventory-consumable-shell">
                     <div class="inventory-stage-rail inventory-stage-rail-left ${hasLeftGhost ? "has-ghost-card" : "is-empty"} ${canMoveLeft ? "can-scroll" : "at-edge"}">
                         ${leftGhostHtml}
-                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-left" type="button" onclick="shiftInventoryStage(${card.id}, -1)" aria-label="Vorherige Itemkarten anzeigen" ${canMoveLeft ? "" : "disabled"}>‹</button>
+                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-left" type="button" data-ui-click="shiftInventoryStage(${card.id}, -1)" aria-label="Vorherige Itemkarten anzeigen" ${canMoveLeft ? "" : "disabled"}>‹</button>
                     </div>
                     <div class="inventory-card-ribbon-viewport">
                         <div class="inventory-card-ribbon inventory-card-ribbon-static" id="inventory-card-ribbon-${card.id}">${cardsHtml}</div>
                     </div>
                     <div class="inventory-stage-rail inventory-stage-rail-right ${hasRightGhost ? "has-ghost-card" : "is-empty"} ${canMoveRight ? "can-scroll" : "at-edge"}">
                         ${rightGhostHtml}
-                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-right" type="button" onclick="shiftInventoryStage(${card.id}, 1)" aria-label="Weitere Itemkarten anzeigen" ${canMoveRight ? "" : "disabled"}>›</button>
+                        <button class="inventory-ribbon-scroll inventory-ribbon-scroll-right" type="button" data-ui-click="shiftInventoryStage(${card.id}, 1)" aria-label="Weitere Itemkarten anzeigen" ${canMoveRight ? "" : "disabled"}>›</button>
                     </div>
                 </div>
                 `}
@@ -12657,7 +12669,7 @@ function createInventoryTabHtml(card) {
                         <p class="section-eyebrow">Inventarliste</p>
                         <p class="inventory-section-hint">Normale Ausrüstung, Loot und Questgegenstände. Details öffnen sich per Klick.</p>
                     </div>
-                    <button class="inventory-list-add-button forge-add-button" type="button" onclick="openDetailInventoryListEditor(${card.id})">Gegenstand hinzufügen</button>
+                    <button class="inventory-list-add-button forge-add-button" type="button" data-ui-click="openDetailInventoryListEditor(${card.id})">Gegenstand hinzufügen</button>
                 </div>
                 ${createDetailInventoryListEditorHtml(card)}
                 ${createInventoryListHtml(card.id, inventory.list)}
@@ -12665,9 +12677,9 @@ function createInventoryTabHtml(card) {
             <section class="active-hand-detail-section inventory-currency-section">
                 <div class="inventory-currency-card">
                     <div class="inventory-currency-title">Geldbeutel</div>
-                    <label><span>Gold</span><input id="inventory-gp-${card.id}" type="number" min="0" value="${inventory.currency.gp}" onchange="updateInventoryCurrency(${card.id})"></label>
-                    <label><span>Silber</span><input id="inventory-sp-${card.id}" type="number" min="0" value="${inventory.currency.sp}" onchange="updateInventoryCurrency(${card.id})"></label>
-                    <label><span>Kupfer</span><input id="inventory-cp-${card.id}" type="number" min="0" value="${inventory.currency.cp}" onchange="updateInventoryCurrency(${card.id})"></label>
+                    <label><span>Gold</span><input id="inventory-gp-${card.id}" type="number" min="0" value="${inventory.currency.gp}" data-ui-change="updateInventoryCurrency(${card.id})"></label>
+                    <label><span>Silber</span><input id="inventory-sp-${card.id}" type="number" min="0" value="${inventory.currency.sp}" data-ui-change="updateInventoryCurrency(${card.id})"></label>
+                    <label><span>Kupfer</span><input id="inventory-cp-${card.id}" type="number" min="0" value="${inventory.currency.cp}" data-ui-change="updateInventoryCurrency(${card.id})"></label>
                 </div>
             </section>
 
@@ -12867,9 +12879,9 @@ function createForgeInventoryCardRowHtml(prefix, item) {
                     <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-item-description" rows="4" placeholder="Kurze Beschreibung nach Bedarf ergänzen">${escapeHtml(item.description)}</textarea></label>
                 </div>
                 <div class="forge-spell-editor-actions forge-inventory-editor-actions">
-                    <button type="button" onclick="saveForgeInventoryCard('${prefix}', '${item.id}')">Speichern</button>
-                    <button class="card-menu-danger" type="button" onclick="deleteForgeInventoryCard('${prefix}', '${item.id}')">Löschen</button>
-                    <button type="button" onclick="cancelForgeInventoryEditor('${prefix}')">Abbrechen</button>
+                    <button type="button" data-ui-click="saveForgeInventoryCard('${prefix}', '${item.id}')">Speichern</button>
+                    <button class="card-menu-danger" type="button" data-ui-click="deleteForgeInventoryCard('${prefix}', '${item.id}')">Löschen</button>
+                    <button type="button" data-ui-click="cancelForgeInventoryEditor('${prefix}')">Abbrechen</button>
                 </div>
             </section>
         `;
@@ -12880,8 +12892,8 @@ function createForgeInventoryCardRowHtml(prefix, item) {
             <span class="forge-spell-name">${escapeHtml(item.name)}</span>
             <span class="forge-item-meta">${escapeHtml(inventoryCategoryLabels[item.category] || "Item")}</span>
             <div class="forge-spell-row-actions">
-                <button class="forge-inventory-edit-button" type="button" onclick="openForgeInventoryEditor('${prefix}', '${item.id}', 'card')">Edit</button>
-                <button class="forge-inventory-delete-button" type="button" onclick="deleteForgeInventoryCard('${prefix}', '${item.id}')" title="Item löschen">×</button>
+                <button class="forge-inventory-edit-button" type="button" data-ui-click="openForgeInventoryEditor('${prefix}', '${item.id}', 'card')">Edit</button>
+                <button class="forge-inventory-delete-button" type="button" data-ui-click="deleteForgeInventoryCard('${prefix}', '${item.id}')" title="Item löschen">×</button>
             </div>
         </div>
     `;
@@ -12903,9 +12915,9 @@ function createForgeInventoryListRowHtml(prefix, item) {
                     <label class="form-field forge-spell-editor-wide"><span>Beschreibung</span><textarea id="${prefix}-forge-list-description" rows="4">${escapeHtml(item.description)}</textarea></label>
                 </div>
                 <div class="forge-spell-editor-actions forge-inventory-editor-actions">
-                    <button type="button" onclick="saveForgeInventoryListItem('${prefix}', '${item.id}')">Speichern</button>
-                    <button class="card-menu-danger" type="button" onclick="deleteForgeInventoryListItem('${prefix}', '${item.id}')">Löschen</button>
-                    <button type="button" onclick="cancelForgeInventoryEditor('${prefix}')">Abbrechen</button>
+                    <button type="button" data-ui-click="saveForgeInventoryListItem('${prefix}', '${item.id}')">Speichern</button>
+                    <button class="card-menu-danger" type="button" data-ui-click="deleteForgeInventoryListItem('${prefix}', '${item.id}')">Löschen</button>
+                    <button type="button" data-ui-click="cancelForgeInventoryEditor('${prefix}')">Abbrechen</button>
                 </div>
             </section>
         `;
@@ -12916,8 +12928,8 @@ function createForgeInventoryListRowHtml(prefix, item) {
             <span class="forge-spell-name">${escapeHtml(item.name)}${item.quantity > 1 ? ` x${item.quantity}` : ""}</span>
             <span class="forge-item-meta">${escapeHtml(inventoryCategoryLabels[item.category] || "Sonstiges")}</span>
             <div class="forge-spell-row-actions">
-                <button class="forge-inventory-edit-button" type="button" onclick="openForgeInventoryEditor('${prefix}', '${item.id}', 'list')">Edit</button>
-                <button class="forge-inventory-delete-button" type="button" onclick="deleteForgeInventoryListItem('${prefix}', '${item.id}')">×</button>
+                <button class="forge-inventory-edit-button" type="button" data-ui-click="openForgeInventoryEditor('${prefix}', '${item.id}', 'list')">Edit</button>
+                <button class="forge-inventory-delete-button" type="button" data-ui-click="deleteForgeInventoryListItem('${prefix}', '${item.id}')">×</button>
             </div>
         </div>
     `;
@@ -12982,7 +12994,7 @@ function renderForgeInventoryManager(prefix) {
             <div class="forge-spell-row-list forge-inventory-card-list">${cardRows}</div>
         </div>
         <div class="forge-input-section inventory-forge-list-section">
-            <div class="forge-spell-draft-header"><div><h4>Inventarliste</h4></div><button class="forge-inventory-add-button forge-add-button" type="button" onclick="addForgeInventoryListItem('${prefix}')">Gegenstand hinzufügen</button></div>
+            <div class="forge-spell-draft-header"><div><h4>Inventarliste</h4></div><button class="forge-inventory-add-button forge-add-button" type="button" data-ui-click="addForgeInventoryListItem('${prefix}')">Gegenstand hinzufügen</button></div>
             <div class="forge-spell-row-list forge-inventory-list">${listRows}</div>
         </div>
     `;
@@ -13123,7 +13135,7 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
             ${createOutOfActionStampHtml(card)}
             <button
                 class="active-hand-mini-main"
-                onclick="setFocusedCard(${card.id})"
+                data-ui-click="setFocusedCard(${card.id})"
                 title="Diese Karte groß anzeigen"
             >
                 <span class="active-hand-mini-image">
@@ -13139,7 +13151,7 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
 
             <button
                 class="active-hand-mini-target"
-                onclick="event.stopPropagation(); toggleCardSelection(${card.id});"
+                data-ui-click="event.stopPropagation(); toggleCardSelection(${card.id});"
                 title="Als Ziel markieren oder abwählen"
             >
                 ${targetButtonText}
@@ -13219,11 +13231,11 @@ function createPreparationDeckCardHtml(card) {
     const publicNameText = getSafeOptionalString(card.publicName) !== "" ? card.publicName : "Öffentlicher Name offen";
     const deckStateLabel = isInTrash ? "Im Papierkorb" : isSelected ? "Gewählt" : "Im Deck";
     const deckStateClass = isInTrash ? "deck-status-trash" : isSelected ? "deck-status-selected" : "deck-status-position";
-    const cardClickAttribute = isInTrash ? "" : `onclick="toggleCardSelection(${card.id})"`;
+    const cardClickAttribute = isInTrash ? "" : `data-ui-click="toggleCardSelection(${card.id})"`;
     const cardTitle = isInTrash ? "Gelöschte Karte" : "Deckkarte auswählen";
     const focusButtonHtml = isInTrash
         ? ""
-        : `<button class="deck-focus-button" onclick="event.stopPropagation(); setFocusedDeckCard(${card.id});" type="button">Fokus</button>`;
+        : `<button class="deck-focus-button" data-ui-click="event.stopPropagation(); setFocusedDeckCard(${card.id});" type="button">Fokus</button>`;
     const deletedAtText = isInTrash && getSafeOptionalString(card.deletedAt) !== ""
         ? `<p class="deck-trash-date">Gelöscht: ${escapeHtml(new Date(card.deletedAt).toLocaleString("de-DE"))}</p>`
         : "";
@@ -13666,7 +13678,7 @@ function createArcaneSelectOptionHtml(selectId, optionElement, selectElement) {
             role="option"
             aria-selected="${isSelected ? "true" : "false"}"
             data-value="${escapeHtml(value)}"
-            onclick="selectArcaneOption('${escapeAttribute(selectId)}', '${escapeAttribute(value)}', event)"
+            data-ui-click="selectArcaneOption('${escapeAttribute(selectId)}', '${escapeAttribute(value)}', event)"
         >
             <span class="arcane-select-option-label">${escapeHtml(label)}</span>
         </button>
@@ -13708,7 +13720,7 @@ function enhanceArcaneSelect(selectElement) {
 
     wrapperElement.dataset.selectId = selectId;
     wrapperElement.innerHTML = `
-        <button class="arcane-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" onclick="toggleArcaneSelect('${escapeAttribute(selectId)}', event)">
+        <button class="arcane-select-button" type="button" aria-haspopup="listbox" aria-expanded="false" data-ui-click="toggleArcaneSelect('${escapeAttribute(selectId)}', event)">
             <span class="arcane-select-current">${escapeHtml(getArcaneSelectLabel(selectElement))}</span>
             <span class="arcane-select-chevron" aria-hidden="true">⌄</span>
         </button>
@@ -13942,9 +13954,10 @@ document.addEventListener("click", function(event) {
 updateTabletConsoleUnreadBadge();
 
 
-// Übergangsweise globale Oberfläche für bestehende Inline-Handler.
-// Neue Module bleiben intern; diese Liste wird in späteren Releases schrittweise abgebaut.
-Object.assign(window, {
+
+// Zentrale, modulinterne Ereignisoberfläche. HTML und dynamisch erzeugte
+// Oberfläche referenzieren Aktionen über data-ui-* statt über Inline-JavaScript.
+const uiActionHandlers = Object.freeze({
   handleMirielBoardManualImageInput,
   handleGameStateImportFileChange,
   handleEditCardSaveButtonClick,
@@ -14086,5 +14099,105 @@ Object.assign(window, {
   updateForgeSrdSpellLibrary,
   updateInventoryCurrency,
   useInventoryCard,
-  useInventoryListItem
+  useInventoryListItem,
+  removeCustomEffectFromCard,
+  toggleActionUsage,
+  addInventoryTemplateToCard,
+  addForgeInventoryTemplate
 });
+
+function splitUiActionStatements(expression) {
+    const statements = [];
+    let current = "";
+    let quote = "";
+    let depth = 0;
+
+    for (const character of expression) {
+        if (quote !== "") {
+            current += character;
+            if (character === quote && current.at(-2) !== "\\") quote = "";
+            continue;
+        }
+        if (character === "'" || character === '"') { quote = character; current += character; continue; }
+        if (character === "(") depth += 1;
+        if (character === ")") depth -= 1;
+        if (character === ";" && depth === 0) {
+            if (current.trim() !== "") statements.push(current.trim());
+            current = "";
+            continue;
+        }
+        current += character;
+    }
+    if (current.trim() !== "") statements.push(current.trim());
+    return statements;
+}
+
+function splitUiActionArguments(argumentText) {
+    if (argumentText.trim() === "") return [];
+    const argumentsList = [];
+    let current = "";
+    let quote = "";
+    let depth = 0;
+
+    for (const character of argumentText) {
+        if (quote !== "") {
+            current += character;
+            if (character === quote && current.at(-2) !== "\\") quote = "";
+            continue;
+        }
+        if (character === "'" || character === '"') { quote = character; current += character; continue; }
+        if (character === "(" || character === "[") depth += 1;
+        if (character === ")" || character === "]") depth -= 1;
+        if (character === "," && depth === 0) {
+            argumentsList.push(current.trim());
+            current = "";
+            continue;
+        }
+        current += character;
+    }
+    argumentsList.push(current.trim());
+    return argumentsList;
+}
+
+function parseUiActionArgument(token, event, element) {
+    if (token === "event") return event;
+    if (token === "this") return element;
+    if (token === "this.value") return element.value;
+    if (token === "this.checked") return element.checked;
+    if (token === "true") return true;
+    if (token === "false") return false;
+    if (token === "null") return null;
+    if (token === "undefined") return undefined;
+    if (/^-?\d+(?:\.\d+)?$/.test(token)) return Number(token);
+    if ((token.startsWith("'") && token.endsWith("'")) || (token.startsWith('"') && token.endsWith('"'))) {
+        return token.slice(1, -1).replace(/\\(['"\\])/g, "$1");
+    }
+    throw new Error(`Nicht unterstütztes UI-Aktionsargument: ${token}`);
+}
+
+function runUiActionExpression(expression, event, element) {
+    for (const statement of splitUiActionStatements(expression)) {
+        if (statement === "event.stopPropagation()") { event.stopPropagation(); continue; }
+        if (statement === "event.preventDefault()") { event.preventDefault(); continue; }
+
+        const match = statement.match(/^([A-Za-z_$][\w$]*)\((.*)\)$/s);
+        if (match === null) throw new Error(`Ungültige UI-Aktion: ${statement}`);
+        const handler = uiActionHandlers[match[1]];
+        if (typeof handler !== "function") throw new Error(`Unbekannte UI-Aktion: ${match[1]}`);
+        const args = splitUiActionArguments(match[2]).map((token) => parseUiActionArgument(token, event, element));
+        handler(...args);
+    }
+}
+
+function handleDelegatedUiEvent(event) {
+    if (!(event.target instanceof Element)) return;
+    const attributeName = `data-ui-${event.type}`;
+    const element = event.target.closest(`[${attributeName}]`);
+    if (!(element instanceof HTMLElement) || element.hasAttribute(attributeName) === false) return;
+    runUiActionExpression(element.getAttribute(attributeName) || "", event, element);
+}
+
+for (const eventType of ["click", "change", "input", "submit"]) {
+    document.addEventListener(eventType, handleDelegatedUiEvent);
+}
+

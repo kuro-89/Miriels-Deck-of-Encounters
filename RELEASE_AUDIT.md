@@ -138,3 +138,9 @@ Prüfstand dieses Schritts:
 - `node --check` für alle JavaScript-Dateien: bestanden
 - Vitest: 18 von 18 Tests bestanden
 - Playwright: nicht gestartet, weil das zur installierten Playwright-Version gehörende Chromium-Binary in der Ausführungsumgebung fehlt
+
+## UI-Ereignisse ohne globale Browser-Brücke
+
+Die statischen und dynamisch erzeugten Inline-Handler (`onclick`, `onchange`, `oninput`, `onsubmit`) wurden entfernt. Die Oberfläche verwendet nun `data-ui-*`-Attribute und eine zentrale modulinterne Ereignisdelegation in `js/app.js`. Der frühere `Object.assign(window, { ... })`-Kompatibilitätsblock wurde vollständig entfernt.
+
+Diese Änderung betrifft ausschließlich die Ereignisverdrahtung. Die aufgerufenen Fachfunktionen und ihr Verhalten wurden nicht absichtlich verändert.

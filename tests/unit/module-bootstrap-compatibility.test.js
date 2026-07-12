@@ -54,6 +54,14 @@ describe("ES-Modul-Bootstrap", () => {
     expect(srd521Source).toContain("export const srd521SpellLibrary");
   });
 
+  test("verwendet keine Inline-Handler und keine globale UI-Brücke", () => {
+    expect(indexSource).not.toMatch(/\s(?:onclick|onchange|oninput|onsubmit)=/);
+    expect(appSource).not.toMatch(/\s(?:onclick|onchange|oninput|onsubmit)=/);
+    expect(appSource).not.toContain("Object.assign(window");
+    expect(appSource).toContain("const uiActionHandlers = Object.freeze");
+    expect(appSource).toContain('document.addEventListener(eventType, handleDelegatedUiEvent)');
+  });
+
   test("stellt gemeinsam genutzte Modellfabriken direkt als Modul-Exports bereit", () => {
     expect(modelSource).toContain("export function createCardAction");
     expect(modelSource).toContain("export function createCardTrait");
@@ -64,4 +72,9 @@ describe("ES-Modul-Bootstrap", () => {
     expect(createDefaultSpellcasting({}).spells).toEqual([]);
     expect(createInventoryDataFromLegacyText("Heiltrank x2").cards[0].quantity).toBe(2);
   });
+  test("respektiert stopPropagation vor der Click-away-Logik", () => {
+    expect(appSource).toContain('targetElement.closest("[data-ui-click]")');
+    expect(appSource).toContain('includes("event.stopPropagation()")');
+  });
+
 });

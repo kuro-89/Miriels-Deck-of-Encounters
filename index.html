@@ -30,10 +30,10 @@
          <span>Optimiert f&uuml;r gr&ouml;&szlig;ere Bildschirme ab etwa 13 Zoll.</span>
         </p>
         <div aria-label="Ansicht wechseln" class="app-view-actions">
-         <button id="open-dm-side-view-button" onclick="openAppView('dm')" type="button">
+         <button id="open-dm-side-view-button" data-ui-click="openAppView('dm')" type="button">
           Spielleiterseite öffnen
          </button>
-         <button id="open-player-side-view-button" onclick="openAppView('playerSide')" type="button">
+         <button id="open-player-side-view-button" data-ui-click="openAppView('playerSide')" type="button">
           Spielerseite öffnen
          </button>
          <span class="app-help-button">
@@ -207,12 +207,12 @@
       Initiative
      </h3>
      <div class="public-initiative-shell">
-      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach links scrollen" class="public-initiative-button" onclick="scrollPlayerSide('left')" title="Nach links scrollen">
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach links scrollen" class="public-initiative-button" data-ui-click="scrollPlayerSide('left')" title="Nach links scrollen">
        &lsaquo;
       </button>
       <div class="player-side-ribbon" id="player-side-ribbon">
       </div>
-      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach rechts scrollen" class="public-initiative-button" onclick="scrollPlayerSide('right')" title="Nach rechts scrollen">
+      <button aria-label="&Ouml;ffentliche Initiative-Leiste nach rechts scrollen" class="public-initiative-button" data-ui-click="scrollPlayerSide('right')" title="Nach rechts scrollen">
        &rsaquo;
       </button>
      </div>
@@ -264,10 +264,10 @@
           Encounter-Steuerung
          </p>
          <div class="tablet-command-actions">
-          <button class="dm-actions-open-button" onclick="openDmActionDrawer()" type="button">
+          <button class="dm-actions-open-button" data-ui-click="openDmActionDrawer()" type="button">
            Atelier &ouml;ffnen
           </button>
-          <button class="tablet-console-open-button" id="tablet-console-open-button" onclick="openTabletConsole()" type="button" aria-controls="tablet-dm-console" aria-expanded="false">
+          <button class="tablet-console-open-button" id="tablet-console-open-button" data-ui-click="openTabletConsole()" type="button" aria-controls="tablet-dm-console" aria-expanded="false">
            <span>Konsole</span>
            <span class="tablet-chat-unread-badge" id="tablet-chat-unread-badge" hidden>0</span>
           </button>
@@ -279,7 +279,7 @@
          </p>
          <div class="focus-stage-shell">
           <div class="focus-stage-rail focus-stage-rail-left">
-           <button aria-label="Vorherige Fokuskarte" class="focus-stage-arrow focus-stage-arrow-left" onclick="focusAdjacentHandCard('previous')" title="Vorherige Karte fokussieren">
+           <button aria-label="Vorherige Fokuskarte" class="focus-stage-arrow focus-stage-arrow-left" data-ui-click="focusAdjacentHandCard('previous')" title="Vorherige Karte fokussieren">
             &lsaquo;
            </button>
           </div>
@@ -288,7 +288,7 @@
            </div>
           </div>
           <div class="focus-stage-rail focus-stage-rail-right">
-           <button aria-label="N&auml;chste Fokuskarte" class="focus-stage-arrow focus-stage-arrow-right" onclick="focusAdjacentHandCard('next')" title="N&auml;chste Karte fokussieren">
+           <button aria-label="N&auml;chste Fokuskarte" class="focus-stage-arrow focus-stage-arrow-right" data-ui-click="focusAdjacentHandCard('next')" title="N&auml;chste Karte fokussieren">
             &rsaquo;
            </button>
           </div>
@@ -301,7 +301,7 @@
           <p class="section-eyebrow">
            Spielleiter-Konsole
           </p>
-          <button class="tablet-console-close-button" onclick="closeTabletConsole()" type="button" aria-label="Spielleiter-Konsole schließen" title="Schließen">&times;</button>
+          <button class="tablet-console-close-button" data-ui-click="closeTabletConsole()" type="button" aria-label="Spielleiter-Konsole schließen" title="Schließen">&times;</button>
          </div>
          <div aria-label="Encounter Chronik" class="dm-console-zone dm-console-log-section">
           <div class="dm-console-section-title-row">
@@ -346,28 +346,28 @@
            Hand verwalten
           </summary>
           <div class="section-menu-panel">
-           <button onclick="moveAllHandCardsToDeck()">
+           <button data-ui-click="moveAllHandCardsToDeck()">
             Alle Karten ins Deck verschieben
            </button>
-           <button onclick="moveHandCardsOfTypeToDeck('player')">
+           <button data-ui-click="moveHandCardsOfTypeToDeck('player')">
             Alle Spieler ins Deck
            </button>
-           <button onclick="moveHandCardsOfTypeToDeck('npc')">
+           <button data-ui-click="moveHandCardsOfTypeToDeck('npc')">
             Alle NPCs ins Deck
            </button>
-           <button onclick="moveHandCardsOfTypeToDeck('monster')">
+           <button data-ui-click="moveHandCardsOfTypeToDeck('monster')">
             Alle Monster ins Deck
            </button>
           </div>
          </details>
         </div>
         <div class="active-hand-lane-shell">
-         <button aria-label="Handband nach links scrollen" class="active-hand-lane-scroll" onclick="scrollCardRow('hand-ribbon-list', 'left')" title="Nach links scrollen">
+         <button aria-label="Handband nach links scrollen" class="active-hand-lane-scroll" data-ui-click="scrollCardRow('hand-ribbon-list', 'left')" title="Nach links scrollen">
           &lsaquo;
          </button>
          <div class="active-hand-lane-list" id="hand-ribbon-list">
          </div>
-         <button aria-label="Handband nach rechts scrollen" class="active-hand-lane-scroll" onclick="scrollCardRow('hand-ribbon-list', 'right')" title="Nach rechts scrollen">
+         <button aria-label="Handband nach rechts scrollen" class="active-hand-lane-scroll" data-ui-click="scrollCardRow('hand-ribbon-list', 'right')" title="Nach rechts scrollen">
           &rsaquo;
          </button>
         </div>
@@ -387,10 +387,10 @@
           </h2>
          </div>
          <div class="toolkit-header-actions">
-          <button aria-label="Hilfe zum Spielleiter-Atelier &ouml;ffnen" class="toolkit-help-toggle" onclick="toggleAtelierHelp()" title="Hilfe" type="button">
+          <button aria-label="Hilfe zum Spielleiter-Atelier &ouml;ffnen" class="toolkit-help-toggle" data-ui-click="toggleAtelierHelp()" title="Hilfe" type="button">
            ?
           </button>
-          <button aria-label="Spielleiter-Atelier schlie&szlig;en" class="dm-drawer-close-button" onclick="closeDmActionDrawer()" title="Schlie&szlig;en" type="button">
+          <button aria-label="Spielleiter-Atelier schlie&szlig;en" class="dm-drawer-close-button" data-ui-click="closeDmActionDrawer()" title="Schlie&szlig;en" type="button">
            &times;
           </button>
          </div>
@@ -430,16 +430,16 @@
          </div>
         </div>
         <nav aria-label="Atelier-Bereiche" class="atelier-nav">
-         <button aria-controls="atelier-panel-toolbox" class="atelier-nav-button atelier-nav-button-active" onclick="setAtelierPanel('toolbox')" type="button">
+         <button aria-controls="atelier-panel-toolbox" class="atelier-nav-button atelier-nav-button-active" data-ui-click="setAtelierPanel('toolbox')" type="button">
           Werkzeugkiste
          </button>
-         <button aria-controls="atelier-panel-forge" class="atelier-nav-button" onclick="setAtelierPanel('forge')" type="button">
+         <button aria-controls="atelier-panel-forge" class="atelier-nav-button" data-ui-click="setAtelierPanel('forge')" type="button">
           Kartenschmiede
          </button>
-         <button aria-controls="atelier-panel-board" class="atelier-nav-button" onclick="setAtelierPanel('board')" type="button">
+         <button aria-controls="atelier-panel-board" class="atelier-nav-button" data-ui-click="setAtelierPanel('board')" type="button">
           Miriels Schautafel
          </button>
-         <button aria-controls="atelier-panel-archive" class="atelier-nav-button" onclick="setAtelierPanel('archive')" type="button">
+         <button aria-controls="atelier-panel-archive" class="atelier-nav-button" data-ui-click="setAtelierPanel('archive')" type="button">
           Archiv
          </button>
         </nav>
@@ -463,10 +463,10 @@
              </div>
             </div>
             <div class="selection-actions toolkit-inline-actions">
-             <button onclick="selectAllHandCards()" type="button">
+             <button data-ui-click="selectAllHandCards()" type="button">
               Alle w&auml;hlen
              </button>
-             <button onclick="clearCardSelection()" type="button">
+             <button data-ui-click="clearCardSelection()" type="button">
               Leeren
              </button>
             </div>
@@ -487,13 +487,13 @@
             <input aria-label="HP-Wert" id="group-action-amount" min="0" type="number" value="0"/>
            </div>
            <div class="mass-action-buttons toolkit-button-row toolkit-hp-button-row">
-            <button class="damage-action-button" onclick="applyDamageToSelectedCards()" title="Schaden auf ausgew&auml;hlte Handkarten anwenden" type="button">
+            <button class="damage-action-button" data-ui-click="applyDamageToSelectedCards()" title="Schaden auf ausgew&auml;hlte Handkarten anwenden" type="button">
              Schaden
             </button>
-            <button onclick="applyHealingToSelectedCards()" title="Heilung auf ausgew&auml;hlte Handkarten anwenden" type="button">
+            <button data-ui-click="applyHealingToSelectedCards()" title="Heilung auf ausgew&auml;hlte Handkarten anwenden" type="button">
              Heilung
             </button>
-            <button onclick="applyTempHpToSelectedCards()" title="Tempor&auml;re HP auf ausgew&auml;hlte Handkarten setzen" type="button">
+            <button data-ui-click="applyTempHpToSelectedCards()" title="Tempor&auml;re HP auf ausgew&auml;hlte Handkarten setzen" type="button">
              Temp HP
             </button>
            </div>
@@ -589,10 +589,10 @@
             </select>
            </div>
            <div class="mass-action-buttons toolkit-two-button-row">
-            <button onclick="addConditionToSelectedCards()" title="Condition hinzuf&uuml;gen" type="button">
+            <button data-ui-click="addConditionToSelectedCards()" title="Condition hinzuf&uuml;gen" type="button">
              Hinzuf&uuml;gen
             </button>
-            <button onclick="removeConditionFromSelectedCards()" title="Condition entfernen" type="button">
+            <button data-ui-click="removeConditionFromSelectedCards()" title="Condition entfernen" type="button">
              Entfernen
             </button>
            </div>
@@ -609,7 +609,7 @@
             <div class="custom-effect-panel">
              <div class="custom-effect-grid">
             <label class="custom-effect-field custom-effect-name-field"><span>Name</span><input id="custom-effect-name" maxlength="80" placeholder="z. B. Brennt" type="text"/></label>
-            <label class="custom-effect-field custom-effect-duration-field"><span>Dauer</span><select id="custom-effect-duration" onchange="updateCustomEffectDurationFields()">
+            <label class="custom-effect-field custom-effect-duration-field"><span>Dauer</span><select id="custom-effect-duration" data-ui-change="updateCustomEffectDurationFields()">
              <option value="manual">Manuell entfernen</option>
              <option value="rounds">X Runden</option>
              <option value="turn_start">Bis Beginn des aktuellen Zuges</option>
@@ -649,7 +649,7 @@
             <label class="custom-effect-field custom-effect-visibility-field"><span>Sichtbarkeit</span><select id="custom-effect-visibility"><option value="public">Öffentlich</option><option value="controller">Nur Controller</option><option value="dm">Nur DM</option></select></label>
             <label class="custom-effect-field custom-effect-note-field"><span>Notiz</span><input id="custom-effect-note" maxlength="500" placeholder="Optional" type="text"/></label>
            </div>
-           <button class="custom-effect-add-button" onclick="addCustomEffectToSelectedCards()" type="button">Effekt hinzufügen</button>
+           <button class="custom-effect-add-button" data-ui-click="addCustomEffectToSelectedCards()" type="button">Effekt hinzufügen</button>
             </div>
            </details>
           </section>
@@ -666,13 +666,13 @@
              Initiative
             </label>
             <input aria-label="Initiative" id="initiative-action-value" type="number" value="0"/>
-            <button onclick="applyInitiativeToSelectedCards()" type="button">
+            <button data-ui-click="applyInitiativeToSelectedCards()" type="button">
              Set
             </button>
-            <button onclick="rollInitiativeForSelectedCards()" type="button">
+            <button data-ui-click="rollInitiativeForSelectedCards()" type="button">
              Ziele w&uuml;rfeln
             </button>
-            <button onclick="rollInitiativeForHandEnemies()" type="button">
+            <button data-ui-click="rollInitiativeForHandEnemies()" type="button">
              Gegner w&uuml;rfeln
             </button>
            </div>
@@ -686,7 +686,7 @@
             </div>
            </div>
            <div class="drawer-action-buttons drawer-action-buttons-single">
-            <button class="long-rest-button" onclick="longRest()" type="button">
+            <button class="long-rest-button" data-ui-click="longRest()" type="button">
              Lange Rast durchf&uuml;hren
             </button>
            </div>
@@ -702,13 +702,13 @@
             </div>
            </div>
            <div class="drawer-action-buttons drawer-action-buttons-readable toolkit-cardforge-actions">
-            <button class="toolkit-primary-action card-forge-open-button" onclick="openFocusedCardForgeFromToolkit()" type="button">
+            <button class="toolkit-primary-action card-forge-open-button" data-ui-click="openFocusedCardForgeFromToolkit()" type="button">
              Fokuskarte bearbeiten
             </button>
-            <button class="card-forge-open-button" onclick="openNewCardForgeFromToolkit()" type="button">
+            <button class="card-forge-open-button" data-ui-click="openNewCardForgeFromToolkit()" type="button">
              Neue Karte schmieden
             </button>
-            <button onclick="openDeckLibraryFromToolkit()" type="button">
+            <button data-ui-click="openDeckLibraryFromToolkit()" type="button">
              Kartendeck anzeigen
             </button>
            </div>
@@ -732,13 +732,13 @@
               </div>
              </div>
              <div aria-label="Schautafel zeigt dauerhaft" class="miriel-board-mode-switch">
-              <button aria-pressed="true" class="miriel-board-mode-button miriel-board-mode-button-active" data-miriel-board-persistent-mode="off" onclick="setMirielBoardPersistentMode('off')" type="button">
+              <button aria-pressed="true" class="miriel-board-mode-button miriel-board-mode-button-active" data-miriel-board-persistent-mode="off" data-ui-click="setMirielBoardPersistentMode('off')" type="button">
                Nichts
               </button>
-              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="initiative" onclick="setMirielBoardPersistentMode('initiative')" type="button">
+              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="initiative" data-ui-click="setMirielBoardPersistentMode('initiative')" type="button">
                Initiativefolge
               </button>
-              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="manual" onclick="setMirielBoardPersistentMode('manual')" type="button">
+              <button aria-pressed="false" class="miriel-board-mode-button" data-miriel-board-persistent-mode="manual" data-ui-click="setMirielBoardPersistentMode('manual')" type="button">
                Eigene Tafel
               </button>
              </div>
@@ -758,12 +758,12 @@
                <small>W&auml;hle ein Bild oder schreibe Text.</small>
               </div>
              </div>
-             <input class="miriel-board-manual-image-input" id="miriel-board-manual-image-input" accept="image/*" onchange="handleMirielBoardManualImageInput(event)" type="file"/>
+             <input class="miriel-board-manual-image-input" id="miriel-board-manual-image-input" accept="image/*" data-ui-change="handleMirielBoardManualImageInput(event)" type="file"/>
              <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable miriel-board-image-actions">
               <label class="miriel-board-image-picker" for="miriel-board-manual-image-input">
                Bild w&auml;hlen
               </label>
-              <button onclick="clearMirielBoardManualImage()" type="button">
+              <button data-ui-click="clearMirielBoardManualImage()" type="button">
                Bild entfernen
               </button>
              </div>
@@ -775,7 +775,7 @@
                <div class="miriel-board-text-tools">
                 <label class="miriel-board-inline-select" for="miriel-board-manual-text-size">
                  <span>Schriftgr&ouml;&szlig;e</span>
-                 <select id="miriel-board-manual-text-size" onchange="setMirielBoardManualTextSize(this.value)">
+                 <select id="miriel-board-manual-text-size" data-ui-change="setMirielBoardManualTextSize(this.value)">
                   <option value="small">
                    klein
                   </option>
@@ -792,7 +792,7 @@
                 </label>
                 <label class="miriel-board-inline-select" for="miriel-board-manual-text-position">
                  <span>Position</span>
-                 <select id="miriel-board-manual-text-position" onchange="setMirielBoardManualTextPosition(this.value)">
+                 <select id="miriel-board-manual-text-position" data-ui-change="setMirielBoardManualTextPosition(this.value)">
                   <option value="top">
                    oben
                   </option>
@@ -804,12 +804,12 @@
                   </option>
                  </select>
                 </label>
-                <button onclick="clearMirielBoardManualText()" type="button">
+                <button data-ui-click="clearMirielBoardManualText()" type="button">
                  Text leeren
                 </button>
                </div>
               </div>
-              <textarea id="miriel-board-manual-text" maxlength="700" oninput="setMirielBoardManualText(this.value)" placeholder="Was sollen die Spieler sehen?"></textarea>
+              <textarea id="miriel-board-manual-text" maxlength="700" data-ui-input="setMirielBoardManualText(this.value)" placeholder="Was sollen die Spieler sehen?"></textarea>
              </div>
             </section>
             <section class="miriel-board-subsection miriel-board-automation-section" aria-label="Schautafel-Automatik">
@@ -820,7 +820,7 @@
               </div>
               <label class="miriel-board-inline-select" for="miriel-board-duration-select">
                <span>Dauer</span>
-               <select id="miriel-board-duration-select" onchange="setMirielBoardDurationMode(this.value)">
+               <select id="miriel-board-duration-select" data-ui-change="setMirielBoardDurationMode(this.value)">
                 <option value="short">
                  kurz
                 </option>
@@ -834,7 +834,7 @@
               </label>
              </div>
              <label class="toolkit-checkbox-card" for="miriel-board-auto-turn-checkbox">
-              <input id="miriel-board-auto-turn-checkbox" onchange="toggleMirielBoardAutoTurn(this.checked)" type="checkbox"/>
+              <input id="miriel-board-auto-turn-checkbox" data-ui-change="toggleMirielBoardAutoTurn(this.checked)" type="checkbox"/>
               <span>
                <strong>
                 Nach jedem Zug Initiativefolge einblenden
@@ -842,7 +842,7 @@
               </span>
              </label>
              <label class="toolkit-checkbox-card" for="miriel-board-new-round-checkbox">
-              <input checked="" id="miriel-board-new-round-checkbox" onchange="toggleMirielBoardNewRoundCall(this.checked)" type="checkbox"/>
+              <input checked="" id="miriel-board-new-round-checkbox" data-ui-change="toggleMirielBoardNewRoundCall(this.checked)" type="checkbox"/>
               <span>
                <strong>
                 Bei neuer Runde Rundenruf einblenden
@@ -863,22 +863,22 @@
             </div>
            </div>
            <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
-            <button onclick="saveCurrentStateManually()" type="button">
+            <button data-ui-click="saveCurrentStateManually()" type="button">
              Im Browser speichern
             </button>
-            <button onclick="clearSavedBrowserState()" type="button">
+            <button data-ui-click="clearSavedBrowserState()" type="button">
              Lokale Daten l&ouml;schen
             </button>
-            <button onclick="exportGameState()" type="button">
+            <button data-ui-click="exportGameState()" type="button">
              Spielstand exportieren
             </button>
-            <button onclick="triggerGameStateImport()" type="button">
+            <button data-ui-click="triggerGameStateImport()" type="button">
              Spielstand importieren
             </button>
-            <button class="encounter-export-button" onclick="exportEncounterReportHtml()" title="Lesbaren Encounter-Bericht als HTML exportieren" type="button">
+            <button class="encounter-export-button" data-ui-click="exportEncounterReportHtml()" title="Lesbaren Encounter-Bericht als HTML exportieren" type="button">
              Bericht exportieren
             </button>
-            <button class="encounter-export-button" onclick="exportEncounterChronicleJson()" title="Strukturierte Encounter-Chronik als JSON exportieren" type="button">
+            <button class="encounter-export-button" data-ui-click="exportEncounterChronicleJson()" title="Strukturierte Encounter-Chronik als JSON exportieren" type="button">
              Chronikdaten exportieren
             </button>
            </div>
@@ -892,10 +892,10 @@
             </div>
            </div>
            <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
-            <button onclick="reloadDemoCards()" type="button">
+            <button data-ui-click="reloadDemoCards()" type="button">
              Demo-Karten laden
             </button>
-            <button onclick="removeDemoCards()" type="button">
+            <button data-ui-click="removeDemoCards()" type="button">
              Demo-Karten entfernen
             </button>
            </div>
@@ -909,20 +909,20 @@
             </div>
            </div>
            <div class="drawer-action-buttons drawer-action-buttons-two drawer-action-buttons-readable">
-            <button onclick="clearAllTempHp()" type="button">
+            <button data-ui-click="clearAllTempHp()" type="button">
              Temp HP entfernen
             </button>
-            <button onclick="clearConditionsFromHandCards()" type="button">
+            <button data-ui-click="clearConditionsFromHandCards()" type="button">
              Conditions entfernen
             </button>
-            <button class="card-menu-danger" onclick="deleteAllCards()" type="button">
+            <button class="card-menu-danger" data-ui-click="deleteAllCards()" type="button">
              Spielstand leeren
             </button>
            </div>
           </section>
          </div>
          <p class="archive-legal-note">Importiere nur Texte und Bilder, die du verwenden darfst. Wichtige Daten regelmäßig exportieren; Browserdaten sind kein dauerhaftes Backup.</p>
-         <input accept=".json,application/json" id="game-state-import-file" onchange="handleGameStateImportFileChange(event)" style="display: none;" type="file"/>
+         <input accept=".json,application/json" id="game-state-import-file" data-ui-change="handleGameStateImportFileChange(event)" style="display: none;" type="file"/>
          <div aria-labelledby="deck-import-preview-title" aria-modal="true" class="deck-import-preview deck-import-preview-hidden" id="deck-import-preview" role="dialog">
           <div class="deck-import-preview-card">
            <p class="section-eyebrow">
@@ -944,13 +944,13 @@
             W&auml;hle, ob die Karten nur zum Deck hinzugef&uuml;gt werden oder ob der aktuelle Spielstand durch die Importdatei ersetzt wird.
            </p>
            <div class="deck-import-preview-actions">
-            <button onclick="confirmDeckImportAppend()" type="button">
+            <button data-ui-click="confirmDeckImportAppend()" type="button">
              Zum Deck hinzuf&uuml;gen
             </button>
-            <button onclick="confirmDeckImportReplace()" type="button">
+            <button data-ui-click="confirmDeckImportReplace()" type="button">
              Spielstand ersetzen
             </button>
-            <button onclick="closeDeckImportPreview()" type="button">
+            <button data-ui-click="closeDeckImportPreview()" type="button">
              Abbrechen
             </button>
            </div>
@@ -987,7 +987,7 @@
           <strong data-encounter-name-display="">
            Unbenannter Encounter
           </strong>
-          <button onclick="renameEncounter()" type="button">
+          <button data-ui-click="renameEncounter()" type="button">
            Umbenennen
           </button>
          </div>
@@ -996,18 +996,18 @@
          <div class="deck-toolbar-fields">
           <label class="deck-filter-field deck-location-field" for="deck-location-view">
            <span>Bereich</span>
-           <select id="deck-location-view" onchange="setDeckLocationView(this.value)">
+           <select id="deck-location-view" data-ui-change="setDeckLocationView(this.value)">
             <option value="deck">Kartendeck</option>
             <option value="trash">Papierkorb</option>
            </select>
           </label>
           <label class="deck-search-field" for="deck-search-input">
            <span>Suche</span>
-           <input autocomplete="off" id="deck-search-input" oninput="setDeckSearchQuery(this.value)" placeholder="Karten suchen …" type="search"/>
+           <input autocomplete="off" id="deck-search-input" data-ui-input="setDeckSearchQuery(this.value)" placeholder="Karten suchen …" type="search"/>
           </label>
           <label class="deck-filter-field deck-type-field" for="deck-type-filter">
            <span>Typ</span>
-           <select id="deck-type-filter" onchange="setDeckTypeFilter(this.value)">
+           <select id="deck-type-filter" data-ui-change="setDeckTypeFilter(this.value)">
             <option value="all">Alle</option>
             <option value="player">Player</option>
             <option value="npc">NPC</option>
@@ -1016,7 +1016,7 @@
           </label>
           <label class="deck-filter-field deck-sort-field" for="deck-sort-mode">
            <span>Sortierung</span>
-           <select id="deck-sort-mode" onchange="setDeckSortMode(this.value)">
+           <select id="deck-sort-mode" data-ui-change="setDeckSortMode(this.value)">
             <option value="name">Name A–Z</option>
             <option value="type">Typ</option>
             <option value="initiativeModifier">Initiative-Modifikator</option>
@@ -1025,28 +1025,28 @@
           </label>
          </div>
          <div class="deck-manage-actions deck-toolbar-actions">
-          <button class="deck-to-hand-bulk-button" onclick="moveSelectedDeckCardsToHand()" type="button">Auswahl auf die Hand</button>
-          <button class="card-forge-open-button" onclick="openNewCardForge()" type="button">Kartenschmiede</button>
+          <button class="deck-to-hand-bulk-button" data-ui-click="moveSelectedDeckCardsToHand()" type="button">Auswahl auf die Hand</button>
+          <button class="card-forge-open-button" data-ui-click="openNewCardForge()" type="button">Kartenschmiede</button>
           <details class="section-menu deck-more-menu">
            <summary class="section-menu-summary" role="button">Mehr</summary>
            <div class="section-menu-panel deck-more-menu-panel">
             <div class="deck-more-menu-group">
              <p>Auswahl</p>
-             <button onclick="selectVisibleDeckCards()" type="button">Sichtbare wählen</button>
-             <button onclick="clearDeckSelection()" type="button">Auswahl leeren</button>
+             <button data-ui-click="selectVisibleDeckCards()" type="button">Sichtbare wählen</button>
+             <button data-ui-click="clearDeckSelection()" type="button">Auswahl leeren</button>
             </div>
             <div class="deck-more-menu-group">
              <p>Speichern &amp; Laden</p>
-             <button onclick="exportGameState()" type="button">Spielstand exportieren</button>
-             <button onclick="triggerGameStateImport()" type="button">Spielstand importieren</button>
-             <button class="encounter-export-button" onclick="exportEncounterReportHtml()" title="Lesbaren Encounter-Bericht als HTML exportieren" type="button">Bericht exportieren</button>
-             <button class="encounter-export-button" onclick="exportEncounterChronicleJson()" title="Strukturierte Encounter-Chronik als JSON exportieren" type="button">Chronikdaten exportieren</button>
+             <button data-ui-click="exportGameState()" type="button">Spielstand exportieren</button>
+             <button data-ui-click="triggerGameStateImport()" type="button">Spielstand importieren</button>
+             <button class="encounter-export-button" data-ui-click="exportEncounterReportHtml()" title="Lesbaren Encounter-Bericht als HTML exportieren" type="button">Bericht exportieren</button>
+             <button class="encounter-export-button" data-ui-click="exportEncounterChronicleJson()" title="Strukturierte Encounter-Chronik als JSON exportieren" type="button">Chronikdaten exportieren</button>
             </div>
             <div class="deck-more-menu-group">
              <p>Demo &amp; Reset</p>
-             <button onclick="reloadDemoCards()" type="button">Demo-Karten laden</button>
-             <button onclick="removeDemoCards()" type="button">Demo-Karten entfernen</button>
-             <button class="card-menu-danger" onclick="deleteAllCards()" type="button">Spielstand leeren</button>
+             <button data-ui-click="reloadDemoCards()" type="button">Demo-Karten laden</button>
+             <button data-ui-click="removeDemoCards()" type="button">Demo-Karten entfernen</button>
+             <button class="card-menu-danger" data-ui-click="deleteAllCards()" type="button">Spielstand leeren</button>
             </div>
            </div>
           </details>
@@ -1061,12 +1061,12 @@
          </div>
         </div>
         <div class="deck-card-ribbon-shell">
-         <button aria-label="Kartendeck nach links scrollen" class="deck-card-scroll-button" onclick="scrollCardRow('deck-card-list', 'left')" title="Nach links scrollen" type="button">
+         <button aria-label="Kartendeck nach links scrollen" class="deck-card-scroll-button" data-ui-click="scrollCardRow('deck-card-list', 'left')" title="Nach links scrollen" type="button">
           &lsaquo;
          </button>
          <div class="deck-card-grid" id="deck-card-list">
          </div>
-         <button aria-label="Kartendeck nach rechts scrollen" class="deck-card-scroll-button" onclick="scrollCardRow('deck-card-list', 'right')" title="Nach rechts scrollen" type="button">
+         <button aria-label="Kartendeck nach rechts scrollen" class="deck-card-scroll-button" data-ui-click="scrollCardRow('deck-card-list', 'right')" title="Nach rechts scrollen" type="button">
           &rsaquo;
          </button>
         </div>
@@ -1082,7 +1082,7 @@
           Kartenschmiede
          </h3>
         </div>
-        <button onclick="closeCardForgeDrawer()" type="button">
+        <button data-ui-click="closeCardForgeDrawer()" type="button">
          Schlie&szlig;en
         </button>
        </div>
@@ -1096,7 +1096,7 @@
            Karte bearbeiten
           </h2>
          </div>
-         <button onclick="openNewCardForge()" type="button">
+         <button data-ui-click="openNewCardForge()" type="button">
           Neue Karte
          </button>
         </div>
@@ -1104,25 +1104,25 @@
         </p>
         <div class="add-card-form edit-card-form card-forge-form">
          <div aria-label="Bearbeitungsbereiche" class="forge-tab-bar" role="tablist">
-          <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
+          <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" data-ui-click="setForgeTab('basis')" role="tab" type="button">
            Fokuskarte
           </button>
-          <button class="forge-tab-button" data-forge-tab="values" onclick="setForgeTab('values')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="values" data-ui-click="setForgeTab('values')" role="tab" type="button">
            Profil
           </button>
-          <button class="forge-tab-button" data-forge-tab="actions" onclick="setForgeTab('actions')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="actions" data-ui-click="setForgeTab('actions')" role="tab" type="button">
            Aktionen
           </button>
-          <button class="forge-tab-button" data-forge-tab="traits" onclick="setForgeTab('traits')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="traits" data-ui-click="setForgeTab('traits')" role="tab" type="button">
            Traits
           </button>
-          <button class="forge-tab-button" data-forge-tab="notes" onclick="setForgeTab('notes')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="notes" data-ui-click="setForgeTab('notes')" role="tab" type="button">
            Notizen
           </button>
-          <button class="forge-tab-button" data-forge-tab="spells" onclick="setForgeTab('spells')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="spells" data-ui-click="setForgeTab('spells')" role="tab" type="button">
            Spells
           </button>
-          <button class="forge-tab-button" data-forge-tab="inventory" onclick="setForgeTab('inventory')" role="tab" type="button">
+          <button class="forge-tab-button" data-forge-tab="inventory" data-ui-click="setForgeTab('inventory')" role="tab" type="button">
            Inventar
           </button>
          </div>
@@ -1441,7 +1441,7 @@
                Notizabschnitte
               </h4>
              </div>
-             <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('edit-card')" type="button">
+             <button class="forge-note-add-button forge-add-button" data-ui-click="addForgeNoteSection('edit-card')" type="button">
               Abschnitt hinzuf&uuml;gen
              </button>
             </div>
@@ -1575,19 +1575,19 @@
               <span>
                Gold
               </span>
-              <input id="edit-card-currency-gp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
+              <input id="edit-card-currency-gp" min="0" data-ui-input="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
              <label class="form-field">
               <span>
                Silber
               </span>
-              <input id="edit-card-currency-sp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
+              <input id="edit-card-currency-sp" min="0" data-ui-input="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
              <label class="form-field">
               <span>
                Kupfer
               </span>
-              <input id="edit-card-currency-cp" min="0" oninput="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
+              <input id="edit-card-currency-cp" min="0" data-ui-input="commitForgeInventoryIfEditing('edit-card')" type="number" value="0"/>
              </label>
             </div>
            </div>
@@ -1598,10 +1598,10 @@
           </fieldset>
          </div>
          <div class="edit-card-actions">
-          <button onclick="handleEditCardSaveButtonClick()" type="button">
+          <button data-ui-click="handleEditCardSaveButtonClick()" type="button">
            &Auml;nderungen speichern
           </button>
-          <button onclick="closeCardForgeDrawer()" type="button">
+          <button data-ui-click="closeCardForgeDrawer()" type="button">
            Abbrechen
           </button>
          </div>
@@ -1623,25 +1623,25 @@
          </p>
          <div class="add-card-form card-forge-form">
           <div aria-label="Eingabebereiche" class="forge-tab-bar" role="tablist">
-           <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" onclick="setForgeTab('basis')" role="tab" type="button">
+           <button class="forge-tab-button active-detail-tab" data-forge-tab="basis" data-ui-click="setForgeTab('basis')" role="tab" type="button">
             Fokuskarte
            </button>
-           <button class="forge-tab-button" data-forge-tab="values" onclick="setForgeTab('values')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="values" data-ui-click="setForgeTab('values')" role="tab" type="button">
             Profil
            </button>
-           <button class="forge-tab-button" data-forge-tab="actions" onclick="setForgeTab('actions')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="actions" data-ui-click="setForgeTab('actions')" role="tab" type="button">
             Aktionen
            </button>
-           <button class="forge-tab-button" data-forge-tab="traits" onclick="setForgeTab('traits')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="traits" data-ui-click="setForgeTab('traits')" role="tab" type="button">
             Traits
            </button>
-           <button class="forge-tab-button" data-forge-tab="notes" onclick="setForgeTab('notes')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="notes" data-ui-click="setForgeTab('notes')" role="tab" type="button">
             Notizen
            </button>
-           <button class="forge-tab-button" data-forge-tab="spells" onclick="setForgeTab('spells')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="spells" data-ui-click="setForgeTab('spells')" role="tab" type="button">
             Spells
            </button>
-           <button class="forge-tab-button" data-forge-tab="inventory" onclick="setForgeTab('inventory')" role="tab" type="button">
+           <button class="forge-tab-button" data-forge-tab="inventory" data-ui-click="setForgeTab('inventory')" role="tab" type="button">
             Inventar
            </button>
           </div>
@@ -1960,7 +1960,7 @@
                 Notizabschnitte
                </h4>
               </div>
-              <button class="forge-note-add-button forge-add-button" onclick="addForgeNoteSection('new-card')" type="button">
+              <button class="forge-note-add-button forge-add-button" data-ui-click="addForgeNoteSection('new-card')" type="button">
                Abschnitt hinzuf&uuml;gen
               </button>
              </div>
@@ -2116,7 +2116,7 @@
             </div>
            </fieldset>
           </div>
-          <button class="add-card-button" onclick="handleAddCardButtonClick()" type="button">
+          <button class="add-card-button" data-ui-click="handleAddCardButtonClick()" type="button">
            Karte hinzuf&uuml;gen
           </button>
          </div>
