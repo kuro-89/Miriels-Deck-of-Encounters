@@ -1,6 +1,6 @@
 /**
  * Playwright-Konfiguration für reproduzierbare Browser-Smoke-Tests.
- * Die statische App wird über einen lokalen HTTP-Server gestartet.
+ * Die statische App wird über denselben lokalen Node-Server wie bei npm start gestartet.
  */
 import { defineConfig, devices } from "@playwright/test";
 
@@ -25,7 +25,7 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: "python3 -m http.server 4173 --bind 127.0.0.1",
+    command: "node server.js --port 4173 --host 127.0.0.1",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: !process.env.CI,
     timeout: 30_000

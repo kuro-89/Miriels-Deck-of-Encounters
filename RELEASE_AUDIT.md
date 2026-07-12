@@ -1,64 +1,140 @@
-# Release Audit 0.25.2
+# Release Audit 0.26.0
 
-## Technisch geprüft
+## Umfang
 
-- JavaScript-Syntax aller Skripte
-- lokale Datei- und Asset-Verweise
-- keine macOS-Metadaten im Release
-- kein Ordnername mit abschließendem Punkt
-- keine Verweise auf die entfernte interne Review-Datei
-- getrennte Lade-Reihenfolge für SRD 5.1 und SRD 5.2.1
-- Hex/Verwünschung nicht mehr als SRD-5.1-Inhalt geführt
+Release 0.26.0 führt einen bewusst kleinen ES-Modul-Schnitt ein. Die fachliche Hauptlogik bleibt in `js/app.js`; es gab keine große Zerlegung und keine neue größere SRD-Inhaltsübernahme.
 
-## Inhaltlich umgesetzt
+## Neue Modulgrenzen
 
-- SRD 5.1 bleibt als 2014-Regelbibliothek erhalten.
-- SRD 5.2.1 ist als getrennte 2024-Regelbibliothek ergänzt.
-- Verwünschung ist der SRD-5.2.1-Bibliothek zugeordnet.
-- Pakt der Klinge und Zurückdrängender Strahl wurden als geprüfte SRD-5.2.1-Merkmale wieder in die Demo aufgenommen.
-- Andere zuvor entfernte Merkmale wurden nicht automatisch wiederhergestellt.
+- `js/config.js`: Version, Karten-/Encounter-Konstanten, Speicherkennungen, Sicherheitslimits und allgemeine App-Konfiguration
+- `js/utils.js`: DOM-unabhängige ID-Erzeugung
+- `js/access.js`: Rollen, Sichtbarkeit, Zugriffsrichtlinien und Aktionsberechtigungen
+- `js/state.js`: Fabriken für initialen Spiel- und UI-Zustand
+- `js/content-metadata.js`: strikt getrennte Metadaten für SRD 5.1 und SRD 5.2.1
+- `js/app.js`: importiert diese Module und behält Rendering sowie fachliche Abläufe
 
-## Manuell vor dem Push testen
+`index.html` lädt `js/app.js` nun mit `type="module"`. Die bestehenden Inline-Handler bleiben über eine ausdrücklich markierte globale Kompatibilitätsschicht verfügbar. Damit wird ihr Verhalten in diesem Release nicht still geändert.
 
-1. App über einen lokalen HTTP-Server öffnen.
-2. Kartenschmiede → Spells → Aus SRD-Bibliothek.
-3. Zwischen SRD 5.1 und SRD 5.2.1 wechseln.
-4. In SRD 5.2.1 nach „Verwünschung“ suchen und hinzufügen.
-5. Prüfen, dass freie eigene Spells weiterhin erstellt werden können.
-6. Lioras Traits auf Pakt der Klinge und Zurückdrängender Strahl prüfen.
-7. `legal.html`, `imprint.html` und `privacy.html` über den Footer öffnen.
-8. Spieleransicht, Local Storage, Import/Export und BroadcastChannel kurz testen.
+## Importgraph
 
-Die Browser-Suite deckt ausgewählte Kernabläufe ab; eine vollständige End-to-End-Abdeckung ist noch nicht erreicht.
+```text
+index.html
+├── js/srd-spell-library.js              (klassisches Datenskript, SRD 5.1)
+├── js/srd-5.2.1-spell-library.js        (klassisches Datenskript, SRD 5.2.1)
+├── js/demo-data.js                      (klassisches Datenskript)
+├── js/game-state-schema.js              (ES-Modul für Import, Validierung und Normalisierung)
+└── js/app.js                            (ES-Modul)
+    ├── js/config.js
+    ├── js/utils.js
+    ├── js/access.js
+    ├── js/state.js
+    │   ├── js/config.js
+    │   └── js/utils.js
+    └── js/content-metadata.js
+```
 
-## Testarchitektur 0.25.2
+## Automatische Prüfungen
 
-Neu hinzugefügt wurden Vitest-Unit-Tests, Playwright-Browser-Smoke-Tests und eine ausführliche lokale Anleitung in `TESTING.md`.
+Erfolgreich in der Erstellungsumgebung:
 
-Automatisch erfolgreich geprüft:
+- `node --check` für alle JavaScript-Dateien einschließlich Tests und Konfiguration
+- 9 Vitest-Unit-Tests in 2 Testdateien
+- `npm ci` aus dem mitgelieferten Lockfile, 0 gemeldete Sicherheitslücken
 
-- 9 Vitest-Tests in 2 Testdateien
-- Import-JSON-Fehler
-- Schema-Version und Kartenlimit
-- minimale gültige Importstruktur
-- getrennte SRD-5.1-/SRD-5.2.1-Bibliotheken
-- Bibliotheksduplikate und Pflichtfelder
-- `node --check` für Produktivcode, Tests und Konfiguration
+Nicht als bestanden gewertet:
 
-In dieser Erstellungsumgebung nicht ausführbar:
+- Die 10 Playwright-Browser-Tests konnten in dieser isolierten Erstellungsumgebung nicht bis zur App ausgeführt werden. Der vorhandene System-Chromium blockiert Zugriffe auf `127.0.0.1` und `localhost` administrativ mit `ERR_BLOCKED_BY_ADMINISTRATOR`. Der Playwright-eigene Chromium-Download war zusätzlich durch DNS-Sperre nicht möglich.
+- Dies ist ein Umgebungsblocker, kein beobachteter fachlicher Testfehler. Die Suite muss lokal erneut vollständig ausgeführt werden; ein grüner Browserlauf wird hier ausdrücklich nicht behauptet.
 
-- Playwright-Browser-Smoke-Tests, weil der Browserdownload per DNS blockiert war.
+## Rechtliche Trennung
 
-Die 7 bisherigen Browser-Tests wurden vom Nutzer lokal erfolgreich bestätigt. Die 3 neuen Browser-Tests aus 0.25.2 sind syntaktisch geprüft, aber noch lokal auszuführen. Dies wird nicht vorab als bestandener Browserlauf gewertet.
+- SRD 5.1 und SRD 5.2.1 bleiben getrennte Datenskripte und getrennte Metadatensätze.
+- Es wurde kein neuer SRD-Inhalt übernommen oder umklassifiziert.
+- Die Änderung beansprucht keine vollständige Rechtssicherheit; bestehende Attributionen und Prüfhinweise bleiben maßgeblich.
 
-## Patch 0.25.2 – Teststabilisierung und Kernabläufe
+## Bekannte Risiken
 
-- stabiler semantischer Locator für den sichtbaren Kartenschmiede-Button
-- Browser-Test für Kartenanlage mit Local-Storage-Reload
-- Browser-Test für Encounterstart sowie nächsten und vorherigen Zug
-- Browser-Test für Schaden und direktes Undo
-- Testanleitung auf 19 automatische Tests aktualisiert
-- Browser-Test für Heilung und temporäre HP
-- Browser-Test für Condition hinzufügen und entfernen
-- Mehrseiten-Test für die Synchronisation des Encounterstarts
-- `package-lock.json` bewusst nicht ausgeliefert, damit `npm install` auf dem Zielsystem eine Registry-neutrale Lockdatei erzeugt
+- Klassische Inhalts-/Schema-Skripte und das ES-Modul laufen vorerst gemeinsam. Diese Übergangsarchitektur ist absichtlich klein, aber noch kein vollständig modularer Aufbau.
+- Die Inhaltsmetadaten werden im neuen Modul separat gespiegelt. Änderungen an den klassischen Bibliotheksmetadaten müssen bis zu deren späterer Modulmigration synchron gehalten werden.
+- Die globale Handler-Kompatibilitätsschicht ist umfangreich und soll erst in späteren, getesteten Schritten durch `addEventListener` ersetzt werden.
+- `app.js` bleibt groß; dieser Release reduziert nur klar abgrenzbare Verantwortlichkeiten.
+
+## Manuelle Resttests
+
+1. App über einen lokalen HTTP-Server öffnen; Start ohne Konsolen- oder Modulfehler prüfen.
+2. Alle 10 Playwright-Tests lokal ausführen.
+3. Kartenanlage, Bearbeitung, Löschen, Reload und Local Storage prüfen.
+4. Encounter starten, Zug vor/zurück, Schaden, Heilung, Temp-HP, Conditions und Undo prüfen.
+5. Spieleransicht in zweitem Tab und BroadcastChannel-Synchronisation prüfen.
+6. Import/Export sowie lesbaren Encounter-Bericht prüfen.
+7. Kartenschmiede: freie Spells und beide getrennten SRD-Bibliotheken prüfen.
+8. Footer-Links zu `legal.html`, `imprint.html` und `privacy.html` öffnen.
+
+## Zusätzliche Kosten
+
+- Keine neuen Laufzeitdienste, APIs, Backends oder kostenpflichtigen Abhängigkeiten.
+- Keine zusätzlichen direkten Nutzungskosten durch Release 0.26.0.
+- Für lokale Entwicklung bleiben lediglich die üblichen eigenen Infrastruktur-/Internetkosten für `npm ci` und gegebenenfalls `npx playwright install chromium`.
+
+## Ergänzung: einheitlicher HTTP-Start
+
+- Der vorübergehende, manuell zu synchronisierende Offline-Fallback `js/app-offline.js` wurde entfernt.
+- `index.html` lädt ausschließlich `js/app.js` als natives ES-Modul.
+- `server.js` stellt lokal die unveränderten statischen Projektdateien über HTTP bereit.
+- `npm start` und `npm run dev` starten diesen Server auf `127.0.0.1:3000`.
+- Playwright verwendet denselben Server auf Port 4173.
+- GitHub Pages bleibt kompatibel, weil der Browsercode keine Node.js-Module importiert und weiterhin rein statisch ausgeliefert werden kann.
+- Es wurden keine API, Datenbank, Konten oder serverseitige Spielstandsablage eingeführt.
+- Zusätzliche Laufzeitkosten: keine. Der lokale Server verwendet ausschließlich in Node.js enthaltene Module.
+
+## Korrektur und Ausbau des ES-Modul-Bootstraps
+
+Die erste 0.26.0-Migration ließ eine bestehende Laufzeitkopplung zwischen `demo-data.js` und Modellfabriken aus `app.js` unberücksichtigt. Diese Kopplung ist nun vollständig als Modulbeziehung abgebildet.
+
+- `demo-data.js` ist ein ES-Modul und exportiert `createDemoCards` ausdrücklich.
+- `card-model.js` enthält die gemeinsam von App und Demo verwendeten Karten-, Zauber-, Trait- und Inventarfabriken samt eng gekoppelten Validierungshelfern.
+- `demo-data.js` importiert diese Funktionen direkt aus `card-model.js`.
+- Die vorübergehende Datei `demo-model-api.js` wurde entfernt.
+- Es gibt keine globale Demo-Brücke über `window` oder `globalThis` mehr.
+- `app.js` bleibt die zentrale UI- und Ablaufdatei; es wurde nicht großflächig zerlegt.
+
+### Ergänzter Importgraph
+
+```text
+index.html
+└── js/app.js
+    ├── js/demo-data.js
+    │   └── js/card-model.js
+    │       ├── js/config.js
+    │       └── js/utils.js
+    ├── js/card-model.js
+    ├── js/config.js
+    ├── js/utils.js
+    ├── js/access.js
+    ├── js/state.js
+    │   ├── js/config.js
+    │   └── js/utils.js
+    └── js/content-metadata.js
+```
+
+### Prüfung
+
+- `node --check` für alle JavaScript-Dateien: bestanden.
+- Vitest: 15 von 15 Tests bestanden.
+- Playwright konnte in der Ausführungsumgebung nicht fachlich laufen, weil der von der installierten Playwright-Version erwartete Chromium-Testbrowser nicht vorhanden war. Die Suite brach vor dem ersten App-Test beim Browserstart ab.
+
+
+
+## SRD-Bibliotheken als ES-Module
+
+- `js/srd-spell-library.js` exportiert Metadaten und Bibliothek für SRD 5.1.
+- `js/srd-5.2.1-spell-library.js` exportiert Metadaten und Bibliothek für SRD 5.2.1.
+- `js/app.js` importiert beide Bibliotheken ausdrücklich.
+- Die beiden Regelstände bleiben in getrennten Dateien und getrennten Datenbeständen.
+- Die klassischen `<script>`-Einträge wurden aus `index.html` entfernt.
+
+Prüfstand dieses Schritts:
+
+- `node --check` für alle JavaScript-Dateien: bestanden
+- Vitest: 18 von 18 Tests bestanden
+- Playwright: nicht gestartet, weil das zur installierten Playwright-Version gehörende Chromium-Binary in der Ausführungsumgebung fehlt

@@ -19,7 +19,7 @@
  * - legal.html
  * - THIRD_PARTY_NOTICES.md
  */
-const srd51SpellLibraryMeta = Object.freeze({
+export const srd51SpellLibraryMeta = Object.freeze({
     key: "srd51-de",
     label: "SRD 5.1 · 2014-Regeln",
     shortLabel: "SRD 5.1",
@@ -27,7 +27,7 @@ const srd51SpellLibraryMeta = Object.freeze({
     noticeHref: "legal.html#srd-license"
 });
 
-const srd51SpellLibrary = Object.freeze([
+export const srd51SpellLibrary = Object.freeze([
     {
         "id": "srd51-de-minor-illusion",
         "name": "Kleine Illusion",

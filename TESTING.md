@@ -1,4 +1,4 @@
-# Tests ausführen – Miriel’s Deck of Encounters 0.25.2
+# Tests ausführen – Miriel’s Deck of Encounters 0.26.0
 
 Die App bleibt eine statische HTML/CSS/JavaScript-App. Node.js wird nur lokal für Vitest, Playwright und den automatischen HTTP-Testserver benötigt.
 
@@ -128,13 +128,13 @@ Sie sind in `.gitignore` ausgeschlossen.
 ## Aktueller erwarteter Umfang
 
 ```text
-9 Unit-Tests
+12 Unit-Tests
 10 Browser-Tests
-19 automatische Tests insgesamt
+22 automatische Tests insgesamt
 ```
 
 
-## Erweiterte Browserabläufe in 0.25.2
+## Erweiterte Browserabläufe in 0.26.0
 
 Zusätzlich werden geprüft:
 
@@ -143,3 +143,19 @@ Zusätzlich werden geprüft:
 - Heilung bis zum Maximalwert
 - Condition hinzufügen und entfernen
 - Encounterstart zwischen DM- und Spielerseite synchronisieren
+
+## Lokaler Node-Server
+
+Die Browser-Tests starten nicht mehr einen separaten Python-Server, sondern den Projektserver selbst:
+
+```bash
+node server.js --port 4173 --host 127.0.0.1
+```
+
+Der normale manuelle Start erfolgt mit:
+
+```bash
+npm start
+```
+
+Die App wird anschließend unter `http://127.0.0.1:3000` geöffnet. Ein Start durch Doppelklick auf `index.html` ist wegen der nativen ES-Module nicht Teil des unterstützten Testpfads.

@@ -1,8 +1,8 @@
 # Miriel’s Deck of Encounters
 
-v0.25.2 by kuro
+v0.26.0 by kuro
 
-Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It can run directly in a browser and is prepared for publication through GitHub Pages.
+Miriel’s Deck of Encounters is a static, card-based encounter manager for fantasy pen-and-paper roleplaying sessions. It runs as a browser application over HTTP or HTTPS and is prepared for publication through GitHub Pages.
 
 The current release is a free, ad-free, non-commercial hobby project. It has no accounts, no backend, no project-operated uploads, and no server-side storage of card content.
 
@@ -25,11 +25,25 @@ The project is independent and not official.
 
 ## Current status
 
-The project is a static browser application built with HTML, CSS, and JavaScript. It may be opened locally or deployed through GitHub Pages.
+The project is a static browser application built with HTML, CSS, and JavaScript. Locally it is served by a small Node.js development server; online it can be deployed unchanged through GitHub Pages.
 
 Cards, settings, and imported images are stored locally in the browser. GitHub may process technical connection data when the hosted website is visited; see `privacy.html`.
 
 There is currently no backend, database, account system, server-side save system, analytics service, advertising, or project-operated tracking.
+
+
+## Local start with Node.js
+
+Node.js 20 or newer is required for local development.
+
+```bash
+npm install
+npm start
+```
+
+Then open `http://127.0.0.1:3000` in the browser. Stop the server with `Ctrl+C`. Directly opening `index.html` through `file://` is no longer a supported start method because the app now uses native ES modules.
+
+The Node server only serves static files. It is not yet a data backend: cards and settings remain in browser storage, and GitHub Pages continues to work without Node.js. A detailed German explanation is available in `NODE_SERVER_GUIDE.md`.
 
 ## Main Views
 
@@ -392,7 +406,7 @@ The bundled demo cards have been revised to reduce reliance on names associated 
 
 Examples of project-created replacements include **Chaosfee**, **Arkane Kartenmeisterin**, **Resonanzschnitt**, **Chaossplitter**, **Schlangenblütige**, **Arkane Schreibfeder**, **Sternengeborene**, and **Sternenbrand**. These names and their project-written descriptions are not presented as official Dungeons & Dragons content.
 
-Die mitgelieferten Demo-Inhalte wurden für Version 0.25.2 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
+Die mitgelieferten Demo-Inhalte wurden für Version 0.26.0 redaktionell geprüft und überwiegend einheitlich auf Deutsch formuliert. Etablierte SRD-5.1-Regelbegriffe und interne Import-Aliase können dort bestehen bleiben, wo sie für Regelverständnis oder Rückwärtskompatibilität erforderlich sind.
 
 The bundled AI-generated and project-created images are documented file by file in `ASSET_PROVENANCE.md`. According to the documented project review, they use no third-party source images, official logos, or intentionally reproduced official artwork.
 
@@ -479,14 +493,14 @@ Copyright © 2026 kuro. All rights reserved for original project material, subje
 
 ## SRD demo detail policy
 
-Version 0.25.2 includes separate, curated German libraries for SRD 5.1 and SRD 5.2.1. Existing unmatched or project-created entries were not removed. Unmatched or project-created entries remain unassigned to an SRD version unless they are explicitly audited.
+Version 0.26.0 includes separate, curated German libraries for SRD 5.1 and SRD 5.2.1. Existing unmatched or project-created entries were not removed. Unmatched or project-created entries remain unassigned to an SRD version unless they are explicitly audited.
 
 The legally required SRD attribution is provided centrally in `legal.html` and `THIRD_PARTY_NOTICES.md`. It is intentionally not repeated next to every spell in the application.
 
 
 ## SRD-5.1 spell library
 
-Version 0.25.2 adds a curated SRD-5.1 spell picker to both the new-card and edit-card sections of the Kartenschmiede.
+Version 0.26.0 adds a curated SRD-5.1 spell picker to both the new-card and edit-card sections of the Kartenschmiede.
 
 - DMs can search and filter the library by spell level.
 - Selecting a spell copies its structured fields into the current card.
@@ -512,9 +526,9 @@ The Kartenschmiede offers two separate source selections:
 
 The selected source is used only as a template library. Copied spells remain editable. The app does not automatically convert a card or encounter from one rules version to the other.
 
-Version 0.25.2 moves Verwünschung/Hex to the SRD 5.2.1 library and restores the verified SRD 5.2.1 traits **Pakt der Klinge** and **Zurückdrängender Strahl** in the demo. Other previously removed entries were not restored because they were not verified as matching the current demo level and SRD 5.2.1 wording.
+Version 0.26.0 moves Verwünschung/Hex to the SRD 5.2.1 library and restores the verified SRD 5.2.1 traits **Pakt der Klinge** and **Zurückdrängender Strahl** in the demo. Other previously removed entries were not restored because they were not verified as matching the current demo level and SRD 5.2.1 wording.
 
-## Automatisierte Tests (ab 0.25.2)
+## Automatisierte Tests (ab 0.26.0)
 
 Die lokale Testarchitektur verwendet Vitest für isolierte Logik- und Inhaltsprüfungen sowie Playwright für Browser-Smoke-Tests. Installation und Befehle stehen in [`TESTING.md`](TESTING.md).
 

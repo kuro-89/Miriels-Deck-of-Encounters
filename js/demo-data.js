@@ -1,8 +1,31 @@
+import {
+    applyLegacySlotHints,
+    createCardAction,
+    createCardTrait,
+    createDefaultSpellcasting,
+    createInventoryCardFromTemplate,
+    createInventoryDataFromLegacyText,
+    getSafeOptionalString,
+    parseLegacySpellsText
+} from "./card-model.js";
+const demoCardNameSignatures = [
+    "miriel dunkelschön",
+    "suica",
+    "animierter besen",
+    "nebelzahn-mandrake",
+    "glimmerkrähe",
+    "liora veyth",
+    "moosgruft-koloss",
+    "veyra mondfaden",
+    "spiegelmolch"
+];
+
+
 // ============================================================
 // Demo-Daten für Miriel's Deck of Encounters
 //
 // Diese Datei enthält ausschließlich den vorbereiteten Demo-Spielstand.
-// Sie wird vor app.js geladen. Die eigentliche App-Logik bleibt in app.js.
+// Sie wird von app.js als ES-Modul importiert.
 // ============================================================
 
 
@@ -334,7 +357,7 @@ function applyDemoSrd51SpellDetails(spellcasting) {
     return spellcasting;
 }
 
-function createDemoCards() {
+export function createDemoCards() {
     const demoCards = [
         {
             id: 1,
@@ -743,7 +766,7 @@ function addDemoStructuredCardData(card) {
     };
 }
 
-function isKnownDemoCardData(rawCard) {
+export function isKnownDemoCardData(rawCard) {
     if (rawCard === null || typeof rawCard !== "object") {
         return false;
     }

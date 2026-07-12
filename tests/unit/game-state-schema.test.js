@@ -1,7 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { runClassicScript } from "../helpers/load-classic-script.js";
-
-const { MirielsGameStateSchema: schema } = runClassicScript("js/game-state-schema.js");
+import { gameStateSchema as schema } from "../../js/game-state-schema.js";
 
 const limits = {
   maxCards: 100,

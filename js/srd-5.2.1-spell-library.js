@@ -18,7 +18,7 @@
  * - legal.html
  * - THIRD_PARTY_NOTICES.md
  */
-const srd521SpellLibraryMeta = Object.freeze({
+export const srd521SpellLibraryMeta = Object.freeze({
     key: "srd521-de",
     label: "SRD 5.2.1 · 2024-Regeln",
     shortLabel: "SRD 5.2.1",
@@ -26,7 +26,7 @@ const srd521SpellLibraryMeta = Object.freeze({
     noticeHref: "legal.html#srd-521-license"
 });
 
-const srd521SpellLibrary = Object.freeze([
+export const srd521SpellLibrary = Object.freeze([
     {
         "id": "srd521-de-verwuenschung",
         "name": "Verwünschung",
