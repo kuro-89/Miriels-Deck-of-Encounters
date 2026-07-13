@@ -597,10 +597,6 @@ textarea {
     opacity:.9;
 }
 
-.card-forge-drawer.card-forge-drawer-open::before {
-    pointer-events:none;
-}
-
 .card-forge-drawer > * {
     position:relative;
     z-index:1;
@@ -863,10 +859,6 @@ textarea {
     inset:-18px 100% -18px -100vw;
     pointer-events:none;
     background:linear-gradient(90deg, rgba(7,6,11,.10), rgba(7,6,11,.54));
-}
-
-.dm-action-drawer.dm-action-drawer-open::before {
-    pointer-events:none;
 }
 
 .dm-action-drawer > * {
@@ -2987,10 +2979,6 @@ textarea {
     inset: -18px 100% -18px -100vw;
     pointer-events: none;
     background: linear-gradient(90deg, rgba(7,6,11,.10), rgba(7,6,11,.54));
-}
-
-.ah-dm-action-drawer.dm-action-drawer-open::before {
-    pointer-events: none;
 }
 
 .ah-dm-action-drawer > * {
@@ -16407,30 +16395,4 @@ textarea::-webkit-input-placeholder {
     .focus-stage-ghost-card-next {
         left: calc(50% + 92px);
     }
-}
-
-/*
- * Drawer-Sichtbarkeit
- *
- * Die geschlossenen Drawer werden nicht nur aus dem Viewport verschoben und
- * transparent gemacht, sondern auch semantisch ausgeblendet. Das verhindert,
- * dass Browser-Automation und assistive Technologien einen geschlossenen
- * Drawer weiterhin als sichtbar behandeln. Die verzögerte Sichtbarkeit erhält
- * die bestehende Ausblendanimation; beim Öffnen wird sie sofort aufgehoben.
- */
-.card-forge-drawer,
-.dm-action-drawer,
-.ah-dm-action-drawer {
-    visibility: hidden;
-    transition:
-        transform .22s ease,
-        opacity .18s ease,
-        visibility 0s linear .22s;
-}
-
-.card-forge-drawer.card-forge-drawer-open,
-.dm-action-drawer.dm-action-drawer-open,
-.ah-dm-action-drawer.dm-action-drawer-open {
-    visibility: visible;
-    transition-delay: 0s;
 }

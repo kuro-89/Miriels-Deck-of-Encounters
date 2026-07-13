@@ -541,3 +541,7 @@ npm test
 ```
 
 Die Tests erzeugen kein Backend und verändern das statische Hostingmodell nicht.
+
+### JavaScript-Architektur 0.26.0
+
+Die Anwendung verwendet native ES-Module. Neben den Daten- und Modellmodulen sind Ansichtsrouting, Browser-Speicher, Fokusstage und delegierte UI-Ereignisse in eigenen Dateien gekapselt. Die Kopfkommentare dieser Dateien beschreiben jeweils Zweck, Abhängigkeiten und Lieferbeziehungen.

@@ -144,3 +144,30 @@ Prüfstand dieses Schritts:
 Die statischen und dynamisch erzeugten Inline-Handler (`onclick`, `onchange`, `oninput`, `onsubmit`) wurden entfernt. Die Oberfläche verwendet nun `data-ui-*`-Attribute und eine zentrale modulinterne Ereignisdelegation in `js/app.js`. Der frühere `Object.assign(window, { ... })`-Kompatibilitätsblock wurde vollständig entfernt.
 
 Diese Änderung betrifft ausschließlich die Ereignisverdrahtung. Die aufgerufenen Fachfunktionen und ihr Verhalten wurden nicht absichtlich verändert.
+
+## Architekturabschluss: UI-Grundmodule und Fokusstage
+
+Für den abschließenden 0.26.0-Architekturschritt wurden vier klar abgegrenzte Bereiche aus `app.js` extrahiert:
+
+- `js/app-view.js`: URL-basierte DM-/Spieleransicht und statische Ansichtsumschaltung.
+- `js/browser-storage.js`: fehlertoleranter Zugriff auf `localStorage`.
+- `js/focus-stage.js`: Rendering der Fokuskarte und ihrer linken/rechten Geisterkarten.
+- `js/ui-events.js`: zentrale Ereignisdelegation für `data-ui-*` ohne globale Handler.
+
+Jede neue Datei dokumentiert Zweck, Abhängigkeiten und bereitgestellte Funktionen. Die zuvor unsichtbaren Geisterkarten wurden repariert: Ihre Elemente waren vorhanden, besaßen aber keine explizite linke/rechte Positionierung und lagen deshalb hinter der Hauptkarte.
+
+### Zusätzlicher Importgraph
+
+```text
+app.js
+├── app-view.js
+├── browser-storage.js
+├── focus-stage.js
+└── ui-events.js
+```
+
+### Tests
+
+- 22 Vitest-Unit-Tests bestanden.
+- Neuer Playwright-Test prüft per Bounding-Box, dass beide Geisterkarten links bzw. rechts der Hauptkarte stehen.
+- Der Browserlauf konnte in der bereitgestellten Umgebung nicht fachlich ausgeführt werden, weil das zur Playwright-Version gehörende Chromium-Binary fehlt; der System-Chromium ist administrativ eingeschränkt.

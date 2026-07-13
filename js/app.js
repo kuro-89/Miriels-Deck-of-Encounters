@@ -53,6 +53,10 @@ import {
   createCustomConsumableCardFromEntry,
   createInventoryDataFromLegacyText
 } from "./card-model.js";
+import { getAppViewFromUrl, openAppView, applyAppViewToPage } from "./app-view.js";
+import { getBrowserStorageItem, setBrowserStorageItem, removeBrowserStorageItem } from "./browser-storage.js";
+import { createFocusStageController } from "./focus-stage.js";
+import { registerDelegatedUiEvents, splitUiActionStatements } from "./ui-events.js";
 
 let appView = getAppViewFromUrl();
 let appBroadcastChannel = null;
@@ -133,91 +137,16 @@ let publicStagePresentedCardId = null;
 let publicStagePendingCardId = null;
 let publicRibbonPresentedFirstCardId = null;
 
+const { renderFocusedCard } = createFocusStageController({
+    getHandCards,
+    createCardImageHtml,
+    createFocusedCardHtml,
+    escapeHtml
+});
+
 // ============================================================
 // 2. Ansichtsmodus, Browser-Speicher und Tab-Synchronisation
 // ============================================================
-
-function getAppViewFromUrl() {
-    const urlParameters = new URLSearchParams(window.location.search);
-    const viewParameter = urlParameters.get("view");
-
-    if (viewParameter === "player-side") {
-        return "playerSide";
-    }
-
-    return "dm";
-}
-
-function openAppView(viewName) {
-    const targetUrl = new URL(window.location.href);
-
-    if (viewName === "playerSide") {
-        targetUrl.searchParams.set("view", "player-side");
-    } else {
-        targetUrl.searchParams.set("view", "dm");
-    }
-
-    window.open(targetUrl.toString(), "_blank");
-}
-
-function applyAppViewToPage() {
-    if (appView === "playerSide") {
-        document.body.classList.add("player-side-view");
-        document.body.classList.remove("dm-side-view");
-    } else {
-        document.body.classList.add("dm-side-view");
-        document.body.classList.remove("player-side-view");
-    }
-
-    const kickerElement = document.querySelector("#app-view-kicker");
-
-    if (kickerElement !== null) {
-        kickerElement.textContent = appView === "playerSide"
-            ? "Spielerseite"
-            : "Spielleiterseite";
-    }
-
-    const dmButtonElement = document.querySelector("#open-dm-side-view-button");
-    const playerSideButtonElement = document.querySelector("#open-player-side-view-button");
-
-    if (dmButtonElement !== null) {
-        dmButtonElement.hidden = appView === "dm";
-        dmButtonElement.classList.toggle("active-view-button", appView === "dm");
-        dmButtonElement.textContent = "Spielleiterseite öffnen";
-    }
-
-    if (playerSideButtonElement !== null) {
-        playerSideButtonElement.hidden = appView === "playerSide";
-        playerSideButtonElement.classList.toggle("active-view-button", appView === "playerSide");
-        playerSideButtonElement.textContent = "Spielerseite öffnen";
-    }
-}
-
-function getBrowserStorageItem(storageKey) {
-    try {
-        return localStorage.getItem(storageKey);
-    } catch (error) {
-        return null;
-    }
-}
-
-function setBrowserStorageItem(storageKey, storageValue) {
-    try {
-        localStorage.setItem(storageKey, storageValue);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
-
-function removeBrowserStorageItem(storageKey) {
-    try {
-        localStorage.removeItem(storageKey);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
 
 function getDemoCardsAutoloadEnabled() {
     return getBrowserStorageItem(demoCardsAutoloadStorageKey) !== "false";
@@ -2204,6 +2133,59 @@ function closeFloatingDetailsExcept(keptDetailsElement) {
 }
 
 function setupClickAwayBehavior() {
+    /**
+     * Behandelt ausschließlich das Schließen der beiden großen Drawer.
+     *
+     * pointerdown in der Capture-Phase ist absichtlich gewählt: Der Außenklick
+     * wird erkannt, bevor nachgelagerte Click-Handler oder stopPropagation()
+     * eingreifen. Bedienelemente, die bei geöffnetem Atelier außerhalb des
+     * Drawers nutzbar bleiben müssen (insbesondere Ziel-Buttons), sind durch
+     * ihre bestehende stopPropagation-Aktion ausdrücklich geschützt.
+     */
+    window.addEventListener("pointerdown", function(event) {
+        const targetElement = event.target;
+
+        if (!(targetElement instanceof Element)) {
+            return;
+        }
+
+        const delegatedActionElement = targetElement.closest("[data-ui-click]");
+        const delegatedActionExpression = delegatedActionElement instanceof HTMLElement
+            ? delegatedActionElement.getAttribute("data-ui-click") || ""
+            : "";
+        const preservesOpenDrawer = splitUiActionStatements(delegatedActionExpression)
+            .includes("event.stopPropagation()");
+
+        if (preservesOpenDrawer === true) {
+            return;
+        }
+
+        const cardForgeDrawer = getCardForgeDrawerElement();
+        if (cardForgeDrawer !== null && cardForgeDrawer.classList.contains("card-forge-drawer-open")) {
+            const clickedInsideCardForge = cardForgeDrawer.contains(targetElement);
+            const clickedCardForgeTrigger = targetElement.closest(
+                ".card-forge-open-button, .card-forge-edit-button"
+            ) !== null;
+
+            if (clickedInsideCardForge === false && clickedCardForgeTrigger === false) {
+                closeCardForgeDrawer();
+            }
+        }
+
+        const dmActionDrawer = getDmActionDrawerElement();
+        if (dmActionDrawer !== null && dmActionDrawer.classList.contains("dm-action-drawer-open")) {
+            const clickedInsideDmDrawer = dmActionDrawer.contains(targetElement);
+            const clickedDmDrawerTrigger = targetElement.closest(".dm-actions-open-button") !== null;
+
+            if (clickedInsideDmDrawer === false && clickedDmDrawerTrigger === false) {
+                closeDmActionDrawer();
+            }
+        }
+    }, { capture: true });
+
+    // Die übrigen Click-away-Aufgaben bleiben auf click: Menüs und Inline-
+    // Editoren sollen erst nach einem tatsächlich abgeschlossenen Klick
+    // reagieren und sind unabhängig von den großen Drawern.
     document.addEventListener("click", function(event) {
         const targetElement = event.target;
 
@@ -2216,9 +2198,6 @@ function setupClickAwayBehavior() {
             ? delegatedActionElement.getAttribute("data-ui-click") || ""
             : "";
 
-        // Inline-Handler mit event.stopPropagation() erreichten den Dokument-Listener
-        // früher nicht. Die delegierte Ereignisschicht muss dieses Verhalten vor der
-        // Click-away-Logik nachbilden, sonst schließen Drawer bei internen Aktionen.
         if (splitUiActionStatements(delegatedActionExpression).includes("event.stopPropagation()")) {
             return;
         }
@@ -2255,12 +2234,9 @@ function setupClickAwayBehavior() {
             }
         }
 
-        const clickPath = typeof event.composedPath === "function" ? event.composedPath() : [];
         const drawerElement = getCardForgeDrawerElement();
 
-        if (drawerElement !== null && drawerElement.classList.contains("card-forge-drawer-open") === true) {
-            const clickedInsideDrawer = drawerElement.contains(targetElement) || clickPath.includes(drawerElement);
-            const clickedDrawerTrigger = targetElement.closest(".card-forge-open-button, .card-forge-edit-button") !== null;
+        if (drawerElement !== null && drawerElement.classList.contains("card-forge-drawer-open") === true && drawerElement.contains(targetElement)) {
             const clickedForgeSpellAction = targetElement.closest(".forge-spell-add-button, .forge-spell-edit-button, .forge-spell-delete-button, .forge-spell-prepared-toggle, .forge-spell-editor, .forge-spell-editor-actions") !== null;
             const clickedForgeActionAction = targetElement.closest(".forge-action-add-button, .forge-action-edit-button, .forge-action-delete-button, .forge-action-editor, .forge-action-editor-actions") !== null;
             const clickedForgeTraitAction = targetElement.closest(".forge-trait-add-button, .forge-trait-edit-button, .forge-trait-delete-button, .forge-trait-editor, .forge-trait-editor-actions") !== null;
@@ -2268,27 +2244,14 @@ function setupClickAwayBehavior() {
 
             if (suppressCardForgeClickAwayOnce === true || clickedForgeSpellAction === true || clickedForgeActionAction === true || clickedForgeTraitAction === true || clickedForgeInventoryAction === true) {
                 suppressCardForgeClickAwayOnce = false;
-            } else if (clickedInsideDrawer === false && clickedDrawerTrigger === false) {
-                closeCardForgeDrawer();
-            } else if (clickedInsideDrawer === true && hasOpenForgeSpellEditor() === true) {
+            } else if (hasOpenForgeSpellEditor() === true) {
                 cancelForgeSpellEditor(getVisibleForgePrefix(), { keepDrawerOpen: true, skipClickAwayGuard: true });
-            } else if (clickedInsideDrawer === true && hasOpenForgeActionEditor() === true) {
+            } else if (hasOpenForgeActionEditor() === true) {
                 cancelForgeActionEditor(getVisibleForgePrefix(), { keepDrawerOpen: true, skipClickAwayGuard: true });
-            } else if (clickedInsideDrawer === true && hasOpenForgeTraitEditor() === true) {
+            } else if (hasOpenForgeTraitEditor() === true) {
                 cancelForgeTraitEditor(getVisibleForgePrefix(), { keepDrawerOpen: true, skipClickAwayGuard: true });
-            } else if (clickedInsideDrawer === true && hasOpenForgeInventoryEditor() === true) {
+            } else if (hasOpenForgeInventoryEditor() === true) {
                 cancelForgeInventoryEditor(getVisibleForgePrefix(), { keepDrawerOpen: true, skipClickAwayGuard: true });
-            }
-        }
-
-        const dmActionDrawerElement = getDmActionDrawerElement();
-
-        if (dmActionDrawerElement !== null && dmActionDrawerElement.classList.contains("dm-action-drawer-open") === true) {
-            const clickedInsideDmDrawer = dmActionDrawerElement.contains(targetElement) || clickPath.includes(dmActionDrawerElement);
-            const clickedDmDrawerTrigger = targetElement.closest(".dm-actions-open-button") !== null;
-
-            if (clickedInsideDmDrawer === false && clickedDmDrawerTrigger === false) {
-                closeDmActionDrawer();
             }
         }
     });
@@ -11298,79 +11261,6 @@ function createFocusedCardHtml(card, activeCard) {
     `;
 }
 
-function getFocusStageSiblingCards(focusedCard) {
-    const handCards = getHandCards();
-
-    if (handCards.length === 0 || focusedCard === null) {
-        return {
-            previousCard: null,
-            nextCard: null
-        };
-    }
-
-    const focusedIndex = handCards.findIndex(function(card) {
-        return card.id === focusedCard.id;
-    });
-
-    if (focusedIndex === -1 || handCards.length < 2) {
-        return {
-            previousCard: null,
-            nextCard: null
-        };
-    }
-
-    return {
-        previousCard: handCards[(focusedIndex - 1 + handCards.length) % handCards.length],
-        nextCard: handCards[(focusedIndex + 1) % handCards.length]
-    };
-}
-
-function createFocusStagePreviewCardHtml(card, positionLabel) {
-    if (card === null) {
-        return `<div class="focus-stage-ghost-card focus-stage-ghost-card-empty" aria-hidden="true"></div>`;
-    }
-
-    return `
-        <div
-            class="focus-stage-ghost-card focus-stage-ghost-card-${positionLabel}"
-            aria-hidden="true"
-        >
-            <span class="focus-stage-ghost-image">
-                ${createCardImageHtml(card)}
-            </span>
-            <span class="focus-stage-ghost-title">${escapeHtml(card.name)}</span>
-            <span class="focus-stage-ghost-meta">Ini ${card.initiative} · HP ${card.hp}/${card.maxHp}</span>
-        </div>
-    `;
-}
-
-function renderFocusedCard(focusedCard, activeCard) {
-    const focusedCardElement = document.querySelector("#focused-card-panel");
-
-    if (focusedCardElement === null) {
-        return;
-    }
-
-    const siblingCards = getFocusStageSiblingCards(focusedCard);
-    const hasFocusedCard = focusedCard !== null;
-
-    focusedCardElement.innerHTML = `
-        <div class="focus-stage-card-stack ${hasFocusedCard ? "" : "focus-stage-card-stack-empty"}">
-            ${createFocusStagePreviewCardHtml(siblingCards.previousCard, "previous")}
-            <div class="focus-stage-main-card">
-                ${createFocusedCardHtml(focusedCard, activeCard)}
-            </div>
-            ${createFocusStagePreviewCardHtml(siblingCards.nextCard, "next")}
-        </div>
-    `;
-
-    const focusArrowElements = document.querySelectorAll(".focus-stage-arrow");
-    focusArrowElements.forEach(function(buttonElement) {
-        buttonElement.disabled = hasFocusedCard !== true;
-        buttonElement.setAttribute("aria-disabled", hasFocusedCard === true ? "false" : "true");
-    });
-}
-
 function getDetailTabButtonHtml(tabName, label) {
     const activeClass = uiState.activeDetailTab === tabName ? "active-detail-tab" : "";
 
@@ -13905,7 +13795,7 @@ function setupInstructionalTextFieldComfort() {
 // 17. Start der App
 // ============================================================
 
-applyAppViewToPage();
+applyAppViewToPage(appView);
 setupCrossTabSync();
 
 const wasStateLoaded = loadAppStateFromBrowser();
@@ -14106,98 +13996,10 @@ const uiActionHandlers = Object.freeze({
   addForgeInventoryTemplate
 });
 
-function splitUiActionStatements(expression) {
-    const statements = [];
-    let current = "";
-    let quote = "";
-    let depth = 0;
+registerDelegatedUiEvents({
+    handlers: uiActionHandlers,
+    eventTypes: ["click", "change", "input", "submit"]
+});
 
-    for (const character of expression) {
-        if (quote !== "") {
-            current += character;
-            if (character === quote && current.at(-2) !== "\\") quote = "";
-            continue;
-        }
-        if (character === "'" || character === '"') { quote = character; current += character; continue; }
-        if (character === "(") depth += 1;
-        if (character === ")") depth -= 1;
-        if (character === ";" && depth === 0) {
-            if (current.trim() !== "") statements.push(current.trim());
-            current = "";
-            continue;
-        }
-        current += character;
-    }
-    if (current.trim() !== "") statements.push(current.trim());
-    return statements;
-}
 
-function splitUiActionArguments(argumentText) {
-    if (argumentText.trim() === "") return [];
-    const argumentsList = [];
-    let current = "";
-    let quote = "";
-    let depth = 0;
-
-    for (const character of argumentText) {
-        if (quote !== "") {
-            current += character;
-            if (character === quote && current.at(-2) !== "\\") quote = "";
-            continue;
-        }
-        if (character === "'" || character === '"') { quote = character; current += character; continue; }
-        if (character === "(" || character === "[") depth += 1;
-        if (character === ")" || character === "]") depth -= 1;
-        if (character === "," && depth === 0) {
-            argumentsList.push(current.trim());
-            current = "";
-            continue;
-        }
-        current += character;
-    }
-    argumentsList.push(current.trim());
-    return argumentsList;
-}
-
-function parseUiActionArgument(token, event, element) {
-    if (token === "event") return event;
-    if (token === "this") return element;
-    if (token === "this.value") return element.value;
-    if (token === "this.checked") return element.checked;
-    if (token === "true") return true;
-    if (token === "false") return false;
-    if (token === "null") return null;
-    if (token === "undefined") return undefined;
-    if (/^-?\d+(?:\.\d+)?$/.test(token)) return Number(token);
-    if ((token.startsWith("'") && token.endsWith("'")) || (token.startsWith('"') && token.endsWith('"'))) {
-        return token.slice(1, -1).replace(/\\(['"\\])/g, "$1");
-    }
-    throw new Error(`Nicht unterstütztes UI-Aktionsargument: ${token}`);
-}
-
-function runUiActionExpression(expression, event, element) {
-    for (const statement of splitUiActionStatements(expression)) {
-        if (statement === "event.stopPropagation()") { event.stopPropagation(); continue; }
-        if (statement === "event.preventDefault()") { event.preventDefault(); continue; }
-
-        const match = statement.match(/^([A-Za-z_$][\w$]*)\((.*)\)$/s);
-        if (match === null) throw new Error(`Ungültige UI-Aktion: ${statement}`);
-        const handler = uiActionHandlers[match[1]];
-        if (typeof handler !== "function") throw new Error(`Unbekannte UI-Aktion: ${match[1]}`);
-        const args = splitUiActionArguments(match[2]).map((token) => parseUiActionArgument(token, event, element));
-        handler(...args);
-    }
-}
-
-function handleDelegatedUiEvent(event) {
-    if (!(event.target instanceof Element)) return;
-    const attributeName = `data-ui-${event.type}`;
-    const element = event.target.closest(`[${attributeName}]`);
-    if (!(element instanceof HTMLElement) || element.hasAttribute(attributeName) === false) return;
-    runUiActionExpression(element.getAttribute(attributeName) || "", event, element);
-}
-
-for (const eventType of ["click", "change", "input", "submit"]) {
-    document.addEventListener(eventType, handleDelegatedUiEvent);
-}
 

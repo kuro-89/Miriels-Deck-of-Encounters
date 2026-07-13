@@ -15,6 +15,10 @@ const modelSource = await readFile(new URL("../../js/card-model.js", import.meta
 const schemaSource = await readFile(new URL("../../js/game-state-schema.js", import.meta.url), "utf8");
 const srd51Source = await readFile(new URL("../../js/srd-spell-library.js", import.meta.url), "utf8");
 const srd521Source = await readFile(new URL("../../js/srd-5.2.1-spell-library.js", import.meta.url), "utf8");
+const uiEventsSource = await readFile(new URL("../../js/ui-events.js", import.meta.url), "utf8");
+const focusStageSource = await readFile(new URL("../../js/focus-stage.js", import.meta.url), "utf8");
+const appViewSource = await readFile(new URL("../../js/app-view.js", import.meta.url), "utf8");
+const browserStorageSource = await readFile(new URL("../../js/browser-storage.js", import.meta.url), "utf8");
 
 describe("ES-Modul-Bootstrap", () => {
   test("lädt Demo-Daten als Modul statt als klassisches Skript", () => {
@@ -59,7 +63,8 @@ describe("ES-Modul-Bootstrap", () => {
     expect(appSource).not.toMatch(/\s(?:onclick|onchange|oninput|onsubmit)=/);
     expect(appSource).not.toContain("Object.assign(window");
     expect(appSource).toContain("const uiActionHandlers = Object.freeze");
-    expect(appSource).toContain('document.addEventListener(eventType, handleDelegatedUiEvent)');
+    expect(appSource).toContain('registerDelegatedUiEvents({');
+    expect(uiEventsSource).toContain('document.addEventListener(eventType');
   });
 
   test("stellt gemeinsam genutzte Modellfabriken direkt als Modul-Exports bereit", () => {
@@ -77,4 +82,37 @@ describe("ES-Modul-Bootstrap", () => {
     expect(appSource).toContain('includes("event.stopPropagation()")');
   });
 
+  test("dokumentiert die neuen Fachmodule mit Abhängigkeiten und Lieferbeziehungen", () => {
+    for (const moduleSource of [uiEventsSource, focusStageSource, appViewSource, browserStorageSource]) {
+      expect(moduleSource).toContain("Abhängigkeiten:");
+      expect(moduleSource).toContain("Liefert an:");
+    }
+    expect(appSource).toContain('from "./ui-events.js"');
+    expect(appSource).toContain('from "./focus-stage.js"');
+    expect(appSource).toContain('from "./app-view.js"');
+    expect(appSource).toContain('from "./browser-storage.js"');
+  });
+
+  test("positioniert beide Geisterkarten explizit links und rechts", async () => {
+    const styleSource = await readFile(new URL("../../style.css", import.meta.url), "utf8");
+    expect(focusStageSource).toContain('createFocusStagePreviewCardHtml(siblingCards.previousCard, "previous")');
+    expect(focusStageSource).toContain('createFocusStagePreviewCardHtml(siblingCards.nextCard, "next")');
+    expect(styleSource).toContain('.focus-stage-ghost-card-previous');
+    expect(styleSource).toContain('.focus-stage-ghost-card-next');
+  });
+
+});
+
+test("geschlossene Drawer sind per visibility ausgeblendet", async () => {
+  const styleSource = await readFile(
+    new URL("../../style.css", import.meta.url),
+    "utf8"
+  );
+
+  expect(styleSource).toMatch(
+    /\.card-forge-drawer,\s*\.dm-action-drawer,\s*\.ah-dm-action-drawer\s*\{[\s\S]*?visibility:\s*hidden;/
+  );
+  expect(styleSource).toMatch(
+    /\.card-forge-drawer\.card-forge-drawer-open,[\s\S]*?visibility:\s*visible;/
+  );
 });

@@ -54,6 +54,49 @@ async function openDmAtelier(page) {
   return damageRegion;
 }
 
+
+test("Geisterkarten stehen sichtbar links und rechts der Fokuskarte", async ({ page }) => {
+  await page.goto("/");
+
+  const focusStage = page.getByRole("region", { name: "Fokuskarte" });
+  const mainCard = focusStage.locator(".focus-stage-main-card");
+  const previousGhost = focusStage.locator(".focus-stage-ghost-card-previous");
+  const nextGhost = focusStage.locator(".focus-stage-ghost-card-next");
+
+  await expect(mainCard).toBeVisible();
+  await expect(previousGhost).toBeAttached();
+  await expect(nextGhost).toBeAttached();
+
+  const [mainBox, previousBox, nextBox] = await Promise.all([
+    mainCard.boundingBox(),
+    previousGhost.boundingBox(),
+    nextGhost.boundingBox(),
+  ]);
+
+  expect(mainBox).not.toBeNull();
+  expect(previousBox).not.toBeNull();
+  expect(nextBox).not.toBeNull();
+  expect(previousBox.x).toBeLessThan(mainBox.x);
+  expect(nextBox.x).toBeGreaterThan(mainBox.x);
+});
+
+
+test("Atelier und Kartenschmiede schließen bei Klick auf eine freie Fläche", async ({ page }) => {
+  await page.goto("/");
+
+  const freeArea = page.getByRole("heading", { name: "Spieltisch", exact: true });
+  const atelier = page.getByRole("complementary", { name: "Spielleiter-Atelier" });
+  const cardEditor = page.getByRole("complementary", { name: "Karteneditor" });
+
+  await openDmAtelier(page);
+  await freeArea.click();
+  await expect(atelier).not.toBeVisible();
+
+  await openCardForge(page);
+  await freeArea.click();
+  await expect(cardEditor).not.toBeVisible();
+});
+
 test("eine eigene Karte kann erstellt und nach Reload wiedergefunden werden", async ({
   page,
 }) => {
