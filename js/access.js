@@ -1,4 +1,19 @@
-/** Rollen, Sichtbarkeit und Aktionsberechtigungen. */
+/**
+ * Zugriffsrollen und Sichtbarkeitsregeln
+ * =====================================
+ *
+ * Aufgabe:
+ * Definiert Rollen, Feldsichtbarkeit und Aktionsrechte für Spielleitung,
+ * Controller, Zuschauer und öffentliche Anzeige. Das Modul enthält keine DOM-
+ * oder Speicherlogik und kann deshalb unabhängig getestet werden.
+ *
+ * Abhängigkeiten:
+ * - Keine Projektmodule und keine Browser-APIs.
+ *
+ * Liefert an:
+ * - `app.js` Rollen, Zugriffskontexte und Prüfungen für Sichtbarkeit und Rechte.
+ */
+
 export const accessRoles = Object.freeze({ dm: "dm", controller: "controller", viewer: "viewer", publicDisplay: "public_display" });
 export const cardPublicProfiles = Object.freeze({ standard: "standard", minimal: "minimal", full: "full" });
 export const cardFieldVisibility = Object.freeze({

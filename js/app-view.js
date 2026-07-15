@@ -1,4 +1,5 @@
 /**
+ * Aufgabe:
  * Steuert ausschließlich die Auswahl zwischen Spielleiter- und Spielerseite.
  *
  * Abhängigkeiten:

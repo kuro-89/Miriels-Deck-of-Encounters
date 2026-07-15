@@ -1,4 +1,5 @@
 /**
+ * Aufgabe:
  * Rendert die Fokuskarte und ihre beiden kleinen Nachbarkarten („Geisterkarten“).
  *
  * Abhängigkeiten:

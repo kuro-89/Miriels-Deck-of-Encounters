@@ -1,4 +1,5 @@
 /**
+ * Aufgabe:
  * Kapselt den fehlertoleranten Zugriff auf den Browser-Speicher.
  *
  * Abhängigkeiten:

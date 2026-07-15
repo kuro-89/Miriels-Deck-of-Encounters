@@ -1,3 +1,18 @@
+/**
+ * Spielstandschema, Validierung und Migration
+ * ===========================================
+ *
+ * Aufgabe:
+ * Prüft importierte Spielstände, migriert ältere Schemafassungen und erzeugt
+ * sichere Normalformen. Das Modul kennt weder DOM noch Browser-Speicher.
+ *
+ * Abhängigkeiten:
+ * - `utils.js` für neue IDs während Migrationen.
+ *
+ * Liefert an:
+ * - `app.js` das versionierte Schema für Import, Export und Wiederherstellung.
+ */
+
 import { createUniqueId } from "./utils.js";
 
 export const supportedSchemaVersion = 10;

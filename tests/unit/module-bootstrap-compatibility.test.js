@@ -19,6 +19,11 @@ const uiEventsSource = await readFile(new URL("../../js/ui-events.js", import.me
 const focusStageSource = await readFile(new URL("../../js/focus-stage.js", import.meta.url), "utf8");
 const appViewSource = await readFile(new URL("../../js/app-view.js", import.meta.url), "utf8");
 const browserStorageSource = await readFile(new URL("../../js/browser-storage.js", import.meta.url), "utf8");
+const drawerEventsSource = await readFile(new URL("../../js/drawer-events.js", import.meta.url), "utf8");
+const encounterNavigationSource = await readFile(new URL("../../js/encounter-navigation.js", import.meta.url), "utf8");
+const renderLifecycleSource = await readFile(new URL("../../js/render-lifecycle.js", import.meta.url), "utf8");
+const atelierControllerSource = await readFile(new URL("../../js/atelier-controller.js", import.meta.url), "utf8");
+const cardForgeControllerSource = await readFile(new URL("../../js/card-forge-controller.js", import.meta.url), "utf8");
 
 describe("ES-Modul-Bootstrap", () => {
   test("lädt Demo-Daten als Modul statt als klassisches Skript", () => {
@@ -78,8 +83,8 @@ describe("ES-Modul-Bootstrap", () => {
     expect(createInventoryDataFromLegacyText("Heiltrank x2").cards[0].quantity).toBe(2);
   });
   test("respektiert stopPropagation vor der Click-away-Logik", () => {
-    expect(appSource).toContain('targetElement.closest("[data-ui-click]")');
-    expect(appSource).toContain('includes("event.stopPropagation()")');
+    expect(drawerEventsSource).toContain('targetElement.closest("[data-ui-click]")');
+    expect(drawerEventsSource).toContain('includes("event.stopPropagation()")');
   });
 
   test("dokumentiert die neuen Fachmodule mit Abhängigkeiten und Lieferbeziehungen", () => {
@@ -91,6 +96,25 @@ describe("ES-Modul-Bootstrap", () => {
     expect(appSource).toContain('from "./focus-stage.js"');
     expect(appSource).toContain('from "./app-view.js"');
     expect(appSource).toContain('from "./browser-storage.js"');
+    expect(appSource).toContain('from "./drawer-events.js"');
+    expect(appSource).toContain('from "./encounter-navigation.js"');
+    expect(appSource).toContain('from "./render-lifecycle.js"');
+    expect(appSource).toContain('from "./atelier-controller.js"');
+    expect(appSource).toContain('from "./card-forge-controller.js"');
+
+    for (const moduleSource of [drawerEventsSource, encounterNavigationSource, renderLifecycleSource, atelierControllerSource, cardForgeControllerSource]) {
+      expect(moduleSource).toContain("Abhängigkeiten:");
+      expect(moduleSource).toContain("Liefert an:");
+    }
+  });
+
+  test("delegiert Atelier und Kartenschmiede an eigene Controller", () => {
+    expect(appSource).toContain("createAtelierController({");
+    expect(appSource).toContain("createCardForgeController({");
+    expect(atelierControllerSource).toContain("export function createAtelierController");
+    expect(cardForgeControllerSource).toContain("export function createCardForgeController");
+    expect(atelierControllerSource).toContain("Abhängigkeiten:");
+    expect(cardForgeControllerSource).toContain("Liefert an:");
   });
 
   test("positioniert beide Geisterkarten explizit links und rechts", async () => {
@@ -99,6 +123,26 @@ describe("ES-Modul-Bootstrap", () => {
     expect(focusStageSource).toContain('createFocusStagePreviewCardHtml(siblingCards.nextCard, "next")');
     expect(styleSource).toContain('.focus-stage-ghost-card-previous');
     expect(styleSource).toContain('.focus-stage-ghost-card-next');
+  });
+
+  test("alle JavaScript-Module erklären Aufgabe, Abhängigkeiten und Lieferbeziehungen", async () => {
+    const moduleUrls = [
+      "access.js", "app-view.js", "app.js", "atelier-controller.js",
+      "browser-storage.js", "card-forge-controller.js", "card-model.js",
+      "config.js", "content-metadata.js", "demo-data.js", "drawer-events.js",
+      "encounter-navigation.js", "focus-stage.js", "game-state-schema.js",
+      "render-lifecycle.js", "srd-5.2.1-spell-library.js",
+      "srd-spell-library.js", "state.js", "ui-events.js", "utils.js",
+      "encounter-actions.js", "persistence-controller.js", "card-rendering.js",
+      "encounter-rendering.js", "app-bootstrap.js"
+    ];
+
+    for (const fileName of moduleUrls) {
+      const source = await readFile(new URL(`../../js/${fileName}`, import.meta.url), "utf8");
+      expect(source, fileName).toContain("Aufgabe:");
+      expect(source, fileName).toContain("Abhängigkeiten:");
+      expect(source, fileName).toMatch(/Liefert an(?::| app\.js:| andere Module:)/);
+    }
   });
 
 });

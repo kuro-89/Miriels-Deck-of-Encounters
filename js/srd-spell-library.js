@@ -18,6 +18,12 @@
  * Zentrale Attribution:
  * - legal.html
  * - THIRD_PARTY_NOTICES.md
+  *
+ * Abhängigkeiten:
+ * - Keine Projektmodule; die Daten sind bewusst eigenständig.
+ *
+ * Liefert an:
+ * - `app.js` die eigenständige SRD-5.1-Zauberauswahl.
  */
 export const srd51SpellLibraryMeta = Object.freeze({
     key: "srd51-de",

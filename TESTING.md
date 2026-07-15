@@ -159,3 +159,13 @@ npm start
 ```
 
 Die App wird anschließend unter `http://127.0.0.1:3000` geöffnet. Ein Start durch Doppelklick auf `index.html` ist wegen der nativen ES-Module nicht Teil des unterstützten Testpfads.
+
+## Architekturprüfung
+
+```bash
+npm run test:architecture
+```
+
+Die Prüfung liest alle lokalen ES-Modulimporte unter `js/` und meldet fehlende Importziele oder zyklische Abhängigkeiten. Sie stellt außerdem über Unit-Tests sicher, dass Fachmodule `app.js` nicht zurückimportieren und die beiden SRD-Inhaltsmodule unabhängig bleiben.
+
+`npm test` führt die Architekturprüfung vor Unit- und Browser-Tests aus.

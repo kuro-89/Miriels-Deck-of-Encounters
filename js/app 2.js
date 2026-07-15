@@ -81,21 +81,6 @@ import { createEncounterNavigation } from "./encounter-navigation.js";
 import { registerDrawerAndClickAwayEvents } from "./drawer-events.js";
 import { createAtelierController } from "./atelier-controller.js";
 import { createCardForgeController } from "./card-forge-controller.js";
-import {
-  applyDamageToCard,
-  applyHealingToCard,
-  applyTemporaryHpToCard,
-  addConditionToCardState,
-  removeConditionFromCardState,
-  createHpSnapshot,
-  createConditionSnapshot,
-  createTargetNamesText,
-  createActionTargetLogText
-} from "./encounter-actions.js";
-import { createPersistenceController } from "./persistence-controller.js";
-import { renderHtmlCollection } from "./card-rendering.js";
-import { formatSelectedTargetCount, formatCurrentTurnText } from "./encounter-rendering.js";
-import { bootstrapApplication } from "./app-bootstrap.js";
 
 let appView = getAppViewFromUrl();
 let appBroadcastChannel = null;
@@ -112,17 +97,16 @@ let pendingDeckImportFileName = "";
 let demoCardsAutoloadEnabled = getDemoCardsAutoloadEnabled();
 
 
+
+
+
+
+
+
+
 // Zentrale Zustandsobjekte bleiben die einzigen mutablen Quellen der App.
 const gameState = createInitialGameState((useDemoData ? createDemoCards() : []).map(normalizeCardModel));
 const uiState = createInitialUiState();
-
-const persistenceController = createPersistenceController({
-  storageKey: appStorageKey,
-  readItem: getBrowserStorageItem,
-  writeItem: setBrowserStorageItem,
-  removeItem: removeBrowserStorageItem,
-  formatVersion: 5
-});
 
 // Fachmodul für die reine Position in der Initiative-Reihenfolge.
 const {
@@ -285,7 +269,8 @@ function createPersistentAppState() {
 
 function saveAppStateToBrowser() {
     const persistentState = createPersistentAppState();
-    const { success: wasSaved, text: stateText } = persistenceController.save(persistentState);
+    const stateText = JSON.stringify(persistentState);
+    const wasSaved = setBrowserStorageItem(appStorageKey, stateText);
 
     if (wasSaved === false) {
         updateStorageStatus("Browser-Speicher: nicht verfügbar");
@@ -327,27 +312,20 @@ function saveAndBroadcastAppState() {
 }
 
 function loadAppStateFromBrowser() {
-    const storedState = persistenceController.read();
+    const savedStateText = getBrowserStorageItem(appStorageKey);
 
-    if (storedState.status === "empty") {
+    if (savedStateText === null) {
         updateStorageStatus("Browser-Speicher: leer");
         return false;
     }
 
-    if (storedState.status === "outdated") {
-        updateStorageStatus("Browser-Speicher: veraltet – bitte zurücksetzen");
-        return false;
-    }
-
-    if (storedState.status === "invalid") {
-        updateStorageStatus("Browser-Speicher: fehlerhaft");
-        return false;
-    }
-
-    const savedStateText = storedState.text;
-
     try {
-        const savedState = storedState.value;
+        const savedState = JSON.parse(savedStateText);
+
+        if (savedState.formatVersion !== 5) {
+            updateStorageStatus("Browser-Speicher: veraltet – bitte zurücksetzen");
+            return false;
+        }
 
         if (typeof savedState.demoCardsAutoloadEnabled === "boolean") {
             setDemoCardsAutoloadEnabled(savedState.demoCardsAutoloadEnabled);
@@ -1497,7 +1475,11 @@ function updateSelectionStatus() {
     const selectedTargets = getSelectedHandCards();
     const selectedCount = selectedTargets.length;
 
-    selectionStatusElement.textContent = formatSelectedTargetCount(selectedCount);
+    if (selectedCount === 1) {
+        selectionStatusElement.textContent = "1 Ziel ausgewählt";
+    } else {
+        selectionStatusElement.textContent = `${selectedCount} Ziele ausgewählt`;
+    }
 
     if (selectionTargetNamesElement === null) {
         return;
@@ -2862,15 +2844,47 @@ function getHpChangeAmount(cardId) {
 }
 
 function applyDamage(card, amount) {
-    return applyDamageToCard(card, amount);
+    if (card === null) {
+        return;
+    }
+
+    if (amount < 0) {
+        return;
+    }
+
+    if (amount <= card.tempHp) {
+        card.tempHp = card.tempHp - amount;
+        return;
+    }
+
+    const remainingDamage = amount - card.tempHp;
+
+    card.tempHp = 0;
+    card.hp = Math.max(0, card.hp - remainingDamage);
 }
 
 function applyHealing(card, amount) {
-    return applyHealingToCard(card, amount);
+    if (card === null) {
+        return;
+    }
+
+    if (amount < 0) {
+        return;
+    }
+
+    card.hp = Math.min(card.maxHp, card.hp + amount);
 }
 
 function applyTempHp(card, amount) {
-    return applyTemporaryHpToCard(card, amount);
+    if (card === null) {
+        return;
+    }
+
+    if (amount < 0) {
+        return;
+    }
+
+    card.tempHp = amount;
 }
 
 function handleDamageButtonClick(cardId) {
@@ -2925,6 +2939,22 @@ function getCurrentTimeText() {
         minute: "2-digit",
         second: "2-digit"
     });
+}
+
+function createTargetNamesText(targets) {
+    return targets.map(function(card) {
+        return card.name;
+    }).join(", ");
+}
+
+function createActionTargetLogText(targets) {
+    const targetNamesText = createTargetNamesText(targets);
+
+    if (targets.length === 1) {
+        return targetNamesText;
+    }
+
+    return `: ${targetNamesText}`;
 }
 
 const eventLogRetention = Object.freeze({
@@ -3758,13 +3788,17 @@ function applyDamageToSelectedCards() {
         return;
     }
 
-    const before = createHpSnapshot(selectedTargets);
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
 
     for (const card of selectedTargets) {
         applyDamage(card, amount);
     }
 
-    const after = createHpSnapshot(selectedTargets);
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
 
     recordGameEvent({
         type: "damage",
@@ -3790,13 +3824,17 @@ function applyHealingToSelectedCards() {
         return;
     }
 
-    const before = createHpSnapshot(selectedTargets);
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
 
     for (const card of selectedTargets) {
         applyHealing(card, amount);
     }
 
-    const after = createHpSnapshot(selectedTargets);
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, hp: card.hp, tempHp: card.tempHp };
+    });
 
     recordGameEvent({
         type: "healing",
@@ -3822,13 +3860,17 @@ function applyTempHpToSelectedCards() {
         return;
     }
 
-    const before = createHpSnapshot(selectedTargets);
+    const before = selectedTargets.map(function(card) {
+        return { cardId: card.id, tempHp: card.tempHp };
+    });
 
     for (const card of selectedTargets) {
         applyTempHp(card, amount);
     }
 
-    const after = createHpSnapshot(selectedTargets);
+    const after = selectedTargets.map(function(card) {
+        return { cardId: card.id, tempHp: card.tempHp };
+    });
 
     recordGameEvent({
         type: "temporary_hp",
@@ -3855,10 +3897,12 @@ function addConditionToSelectedCards() {
         return;
     }
 
-    const before = createConditionSnapshot(selectedTargets);
+    const before = selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] }));
 
     for (const card of selectedTargets) {
-        addConditionToCardState(card, conditionName);
+        if (cardHasCondition(card, conditionName) === false) {
+            card.conditions.push(conditionName);
+        }
     }
 
     recordGameEvent({
@@ -3866,7 +3910,7 @@ function addConditionToSelectedCards() {
         targetCardIds: selectedTargets.map(card => card.id),
         condition: conditionName,
         before,
-        after: createConditionSnapshot(selectedTargets),
+        after: selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] })),
         message: `Condition ${conditionName} auf ${selectedTargets.length} Ziel(e) angewendet: ${createTargetNamesText(selectedTargets)}.`
     });
     renderCardsPreservingViewport();
@@ -3886,10 +3930,12 @@ function removeConditionFromSelectedCards() {
         return;
     }
 
-    const before = createConditionSnapshot(selectedTargets);
+    const before = selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] }));
 
     for (const card of selectedTargets) {
-        removeConditionFromCardState(card, conditionName);
+        card.conditions = card.conditions.filter(function(condition) {
+            return condition !== conditionName;
+        });
     }
 
     recordGameEvent({
@@ -3897,7 +3943,7 @@ function removeConditionFromSelectedCards() {
         targetCardIds: selectedTargets.map(card => card.id),
         condition: conditionName,
         before,
-        after: createConditionSnapshot(selectedTargets),
+        after: selectedTargets.map(card => ({ cardId: card.id, conditions: [...card.conditions] })),
         message: `Condition ${conditionName} von ${selectedTargets.length} Ziel(e) entfernt: ${createTargetNamesText(selectedTargets)}.`
     });
     renderCardsPreservingViewport();
@@ -4047,6 +4093,7 @@ function getSafeEffectDurationMode(value) {
 }
 
 
+
 function getSafeEffectColorKey(value) {
     return availableConditions.includes(value) ? value : "magical-effect";
 }
@@ -4190,6 +4237,7 @@ function expireEffectsForTrigger(trigger, triggerCardId = null) {
     }
     for (const item of expired) removeCustomEffectFromCard(item.cardId, item.effectId, "expired");
 }
+
 
 
 function getConditionLabel(conditionName) {
@@ -5022,6 +5070,7 @@ function getSafeString(value, fallbackValue, maximumLength = importSecurityLimit
 }
 
 
+
 function getSafeImageSource(value) {
     const source = getSafeOptionalString(value, 4 * 1024 * 1024);
 
@@ -5425,6 +5474,7 @@ function getSafePositiveInteger(value, fallbackValue) {
 }
 
 
+
 // ============================================================
 // Spellcasting-Modell, Spell-Slot-Tracker und Forge-Parser
 // ============================================================
@@ -5441,6 +5491,12 @@ const spellLevelLabels = {
     8: "8th Level",
     9: "9th Level"
 };
+
+
+
+
+
+
 
 
 function getSafeSpellcasting(rawSpellcasting, rawCard = {}) {
@@ -5526,6 +5582,17 @@ function getSafeSpell(rawSpell, index) {
         used: getSafeNonNegativeInteger(rawSpell.used, 0)
     }, index);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 function getCardSpellcasting(card) {
@@ -6630,6 +6697,7 @@ function renderForgeSpellManager(prefix) {
 }
 
 
+
 // ============================================================
 // Gemeinsame Nutzungs-/Verbrauchslogik
 // ============================================================
@@ -6655,6 +6723,11 @@ const usageResetShortLabels = {
     charges: "Ladungen",
     manual: "manuell"
 };
+
+
+
+
+
 
 
 function getUsageMax(item) {
@@ -6786,6 +6859,9 @@ const cardActionTypeSingularLabels = {
     reaction: "Reaktion",
     special: "Sonstiges"
 };
+
+
+
 
 
 function getActionTextFromStructuredAction(action) {
@@ -8100,6 +8176,7 @@ function createMirielBoardHtml(publicCards, handCards, activeCard, renderState) 
 // ============================================================
 // 11. Öffentliche Spieler-Daten
 // ============================================================
+
 
 
 function getHealthPresentation(card, shouldRevealHealth) {
@@ -9445,7 +9522,7 @@ function updateToolkitHeaderStatus() {
     const activeText = activeCard !== null ? `${activeCard.publicName || activeCard.name} aktiv` : "Keine Handkarte aktiv";
     const targetText = selectedTargets.length === 1 ? "1 Ziel" : `${selectedTargets.length} Ziele`;
     const initiativeCards = getInitiativeCards(handCards);
-    const turnText = formatCurrentTurnText(gameState.encounter.roundNumber, getCurrentTurnIndex(), initiativeCards.length);
+    const turnText = initiativeCards.length > 0 ? `Turn ${getCurrentTurnIndex() + 1} von ${initiativeCards.length}` : "keine aktive Zugfolge";
 
     statusElement.textContent = `${activeText} · ${targetText} · ${turnText}`;
 }
@@ -10999,6 +11076,12 @@ function createDetailTextPanelHtml(label, value, emptyText) {
 }
 
 
+
+
+
+
+
+
 // ============================================================
 // Trait-Modell und Trait-Editor
 // ============================================================
@@ -11013,6 +11096,9 @@ const cardTraitCategoryLabels = {
     passive: "Passiv",
     other: "Sonstiges"
 };
+
+
+
 
 
 function getSafeCardTraits(value) {
@@ -11068,6 +11154,7 @@ function createDetailEntryCardsHtml(value, emptyText, fallbackLabel, splitCommaL
         `;
     }).join("");
 }
+
 
 
 function getActionUsageMax(action) {
@@ -11348,6 +11435,7 @@ function createActionDetailTabHtml(card) {
 }
 
 
+
 // ============================================================
 // Inventar-Modell, Itemkarten und direkter Inventar-Editor
 // ============================================================
@@ -11361,6 +11449,13 @@ function createEmptyInventoryData() {
 }
 
 
+
+
+
+
+
+
+
 function getSafeCurrency(value) {
     if (value === null || typeof value !== "object") {
         return { gp: 0, sp: 0, cp: 0 };
@@ -11372,6 +11467,15 @@ function getSafeCurrency(value) {
         cp: getSafeNonNegativeInteger(value.cp, 0)
     };
 }
+
+
+
+
+
+
+
+
+
 
 
 function getInventoryStackKey(item) {
@@ -12712,12 +12816,28 @@ function createHandRibbonCardHtml(card, activeCard, focusedCard) {
 }
 
 function renderHandRibbon(handCards, activeCard, focusedCard) {
-    renderHtmlCollection({
-        selector: "#hand-ribbon-list",
-        items: handCards,
-        createHtml: card => createHandRibbonCardHtml(card, activeCard, focusedCard),
-        emptyHtml: `<p class="empty-list-message">Keine Karten auf der Hand.</p>`
-    });
+    const ribbonElement = document.querySelector("#hand-ribbon-list");
+
+    if (ribbonElement === null) {
+        return;
+    }
+
+    if (handCards.length === 0) {
+        ribbonElement.innerHTML = `
+            <p class="empty-list-message">
+                Keine Karten auf der Hand.
+            </p>
+        `;
+        return;
+    }
+
+    let html = "";
+
+    for (const card of handCards) {
+        html += createHandRibbonCardHtml(card, activeCard, focusedCard);
+    }
+
+    ribbonElement.innerHTML = html;
 }
 
 function getDeckTypeLabel(type) {
@@ -12854,16 +12974,32 @@ function renderDeckControlsState() {
 }
 
 function renderPreparationDeckRibbon(listCards) {
-    const emptyText = uiState.deck.locationView === cardLocations.trash
-        ? "Der Papierkorb ist leer."
-        : "Keine Karten entsprechen der aktuellen Deckansicht.";
+    const listElement = document.querySelector("#deck-card-list");
 
-    renderHtmlCollection({
-        selector: "#deck-card-list",
-        items: listCards,
-        createHtml: createPreparationDeckCardHtml,
-        emptyHtml: `<div class="empty-list-message"><strong>${emptyText}</strong></div>`
-    });
+    if (listElement === null) {
+        return;
+    }
+
+    renderDeckControlsState();
+
+    if (listCards.length === 0) {
+        listElement.innerHTML = `
+            <div class="deck-empty-state">
+                <p class="empty-list-message">
+                    ${uiState.deck.locationView === cardLocations.trash ? "Der Papierkorb ist leer." : "Keine passenden Karten im Deck."}
+                </p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = "";
+
+    for (const card of listCards) {
+        html += createPreparationDeckCardHtml(card);
+    }
+
+    listElement.innerHTML = html;
 }
 
 function getPreparationLocationCards() {
@@ -12909,12 +13045,30 @@ function setDeckSortMode(value) {
 }
 
 function renderCardList(elementId, listCards, activeCard) {
-    renderHtmlCollection({
-        selector: elementId,
-        items: listCards,
-        createHtml: card => createCardHtml(card, activeCard !== null && card.id === activeCard.id),
-        emptyHtml: `<p class="empty-list-message">Keine Karten vorhanden.</p>`
-    });
+    const listElement = document.querySelector(elementId);
+
+    if (listElement === null) {
+        return;
+    }
+
+    if (listCards.length === 0) {
+        listElement.innerHTML = `
+            <p class="empty-list-message">
+                Keine Karten vorhanden.
+            </p>
+        `;
+        return;
+    }
+
+    let html = "";
+
+    for (const card of listCards) {
+        const isActive = activeCard !== null && card.id === activeCard.id;
+
+        html += createCardHtml(card, isActive);
+    }
+
+    listElement.innerHTML = html;
 }
 
 function renderCards() {
@@ -13406,33 +13560,33 @@ function setupInstructionalTextFieldComfort() {
 // 17. Start der App
 // ============================================================
 
-bootstrapApplication({
-    applyView: () => applyAppViewToPage(appView),
-    setupCrossTabSync,
-    loadState: loadAppStateFromBrowser,
-    initializeFallbackState: () => {
-        if (shouldAutoloadDemoCards() === false) return;
+applyAppViewToPage(appView);
+setupCrossTabSync();
 
-        gameState.cards = createDemoCards().map(normalizeCardModel);
-        gameState.name = demoEncounterName;
-        uiState.focusedCardId = null;
-        resetEncounterStartGateState({ clearLog: true });
-        gameState.presentation.mirielBoard.autoTurnEnabled = false;
-        updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
+const wasStateLoaded = loadAppStateFromBrowser();
 
-        if (appView === "dm") {
-            saveAppStateToBrowser();
-            broadcastAppStateChange();
-        }
-    },
-    setupPlayerPolling: setupPlayerSidePolling,
-    setupPlayerNavigation: setupPlayerSideNavigation,
-    setupClickAway: setupClickAwayBehavior,
-    setupArcaneSelects,
-    setupInstructionalFields: setupInstructionalTextFieldComfort,
-    render: renderCards,
-    enhanceArcaneSelects
-});
+if (wasStateLoaded === false && shouldAutoloadDemoCards() === true) {
+    gameState.cards = createDemoCards().map(normalizeCardModel);
+    gameState.name = demoEncounterName;
+    uiState.focusedCardId = null;
+    resetEncounterStartGateState({ clearLog: true });
+    gameState.presentation.mirielBoard.autoTurnEnabled = false;
+    updateStorageStatus("Browser-Speicher: leer, Demo-Karten geladen");
+
+    if (appView === "dm") {
+        saveAppStateToBrowser();
+        broadcastAppStateChange();
+    }
+}
+
+setupPlayerSidePolling();
+setupPlayerSideNavigation();
+setupClickAwayBehavior();
+setupArcaneSelects();
+setupInstructionalTextFieldComfort();
+renderCards();
+enhanceArcaneSelects();
+
 
 
 // Experimenteller Tablet-Modus: sichere Rückkehr aus Drawern und Erhalt der Seitenposition.
@@ -13453,6 +13607,7 @@ document.addEventListener("click", function(event) {
 });
 
 updateTabletConsoleUnreadBadge();
+
 
 
 // Zentrale, modulinterne Ereignisoberfläche. HTML und dynamisch erzeugte
@@ -13610,5 +13765,6 @@ registerDelegatedUiEvents({
     handlers: uiActionHandlers,
     eventTypes: ["click", "change", "input", "submit"]
 });
+
 
 

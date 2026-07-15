@@ -6,14 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "npm run test:unit && npm run test:browser",
+    "test": "npm run test:architecture && npm run test:unit && npm run test:browser",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:browser": "playwright test",
     "test:browser:headed": "playwright test --headed",
     "test:browser:ui": "playwright test --ui",
     "test:browser:install": "playwright install chromium",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "test:architecture": "node scripts/check-module-graph.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",

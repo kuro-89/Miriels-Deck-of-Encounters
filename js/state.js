@@ -1,3 +1,19 @@
+/**
+ * Initiale Anwendungs- und UI-Zustände
+ * ====================================
+ *
+ * Aufgabe:
+ * Erzeugt die zentralen mutablen Zustandsobjekte mit sicheren Ausgangswerten.
+ * Die Datei verändert den Zustand nicht selbst und enthält kein Rendering.
+ *
+ * Abhängigkeiten:
+ * - `config.js` für Demo- und Standardwerte.
+ * - `utils.js` für die Spielstand-ID.
+ *
+ * Liefert an:
+ * - `app.js` die Fabriken `createInitialGameState` und `createInitialUiState`.
+ */
+
 import { cardLocations, demoEncounterName, mirielBoardAutomationDefaultsVersion, useDemoData } from "./config.js";
 import { createUniqueId } from "./utils.js";
 

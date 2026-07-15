@@ -1,4 +1,18 @@
-/** Allgemeine, DOM-unabhängige Hilfsfunktionen. */
+/**
+ * Allgemeine DOM-unabhängige Hilfsfunktionen
+ * ==========================================
+ *
+ * Aufgabe:
+ * Stellt kleine, fachübergreifende Hilfen bereit. Aktuell ist dies die robuste
+ * Erzeugung eindeutiger IDs mit Browser-/Node-Fallback.
+ *
+ * Abhängigkeiten:
+ * - Standard-API `globalThis.crypto`, sofern verfügbar.
+ *
+ * Liefert an:
+ * - Modell-, Zustands- und Schema-Module eindeutige IDs.
+ */
+
 export function createUniqueId() {
   if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") return globalThis.crypto.randomUUID();
   const randomBytes = new Uint8Array(16);

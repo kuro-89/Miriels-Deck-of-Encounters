@@ -1,7 +1,19 @@
 /**
- * Zentrale, verhaltensneutrale Konfiguration der statischen App.
- * SRD-Inhalte und ihre Regelstände werden hier nicht vermischt.
+ * Zentrale Anwendungskonfiguration
+ * ===============================
+ *
+ * Aufgabe:
+ * Bündelt Versionsnummer, Speicherkennungen, erlaubte Werte und statische
+ * Grenzwerte. SRD-Inhalte selbst liegen nicht hier und bleiben in getrennten
+ * Inhaltsmodulen.
+ *
+ * Abhängigkeiten:
+ * - Keine Projektmodule und keine Browser-APIs.
+ *
+ * Liefert an:
+ * - Nahezu allen Fachmodulen gemeinsame Konstanten und erlaubte Werte.
  */
+
 export const useDemoData = true;
 export const appVersion = "0.26.0";
 

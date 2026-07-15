@@ -360,6 +360,18 @@ Use only images that you have the right to use.
 
 Do not add copyrighted artwork directly to this project unless you have explicit permission to do so.
 
+## Aktuelle Modulgrenzen in 0.26.0
+
+Der große Architektur-Schritt trennt nun zusätzlich:
+
+- `encounter-actions.js`: reine Kampf- und Condition-Mutationen ohne DOM.
+- `persistence-controller.js`: Serialisierung und lokale Speicherzugriffe.
+- `card-rendering.js`: gemeinsame DOM-Bausteine für Kartenlisten.
+- `encounter-rendering.js`: kleine darstellungsbezogene Encounter-Formatierungen.
+- `app-bootstrap.js`: explizite und testbare Startreihenfolge.
+
+`app.js` bleibt die Orchestrierungsschicht und verbindet diese Fachmodule mit dem bestehenden Zustand und der Oberfläche.
+
 ## Current Architecture
 
 The project is currently a static browser app.
@@ -544,4 +556,25 @@ Die Tests erzeugen kein Backend und verändern das statische Hostingmodell nicht
 
 ### JavaScript-Architektur 0.26.0
 
-Die Anwendung verwendet native ES-Module. Neben den Daten- und Modellmodulen sind Ansichtsrouting, Browser-Speicher, Fokusstage und delegierte UI-Ereignisse in eigenen Dateien gekapselt. Die Kopfkommentare dieser Dateien beschreiben jeweils Zweck, Abhängigkeiten und Lieferbeziehungen.
+Die Anwendung verwendet native ES-Module. Neben Datenmodell, Ansichtsrouting, Browser-Speicher, Fokusstage und delegierten UI-Ereignissen sind nun auch Encounter-Navigation, Render-Lebenszyklus sowie Drawer- und Click-away-Ereignisse getrennt gekapselt. `app.js` bleibt die zentrale Orchestrierung, während die neuen Fachmodule klar abgegrenzte Aufgaben übernehmen. Ihre Kopfkommentare beschreiben jeweils Zweck, Abhängigkeiten und Lieferbeziehungen.
+
+## Entwicklerdokumentation
+
+Eine verständliche Übersicht über Zuständigkeiten, Ereignisfluss, Zustand,
+Speicherung, Rendering und Tests steht in
+[`docs/ENTWICKLERLEITFADEN.md`](docs/ENTWICKLERLEITFADEN.md).
+
+Die Drawer-Navigation ist zusätzlich in zwei Fachcontroller aufgeteilt:
+
+- `js/atelier-controller.js` für das Spielleiter-Atelier
+- `js/card-forge-controller.js` für die äußere Kartenschmiede und ihre Tabs
+
+## Development architecture
+
+The browser entry point is `js/app.js`. Domain rules, persistence, drawer controllers, rendering helpers, and application bootstrap are maintained in separate native ES modules. Run the architecture guard with:
+
+```bash
+npm run test:architecture
+```
+
+It verifies local import targets, prevents circular dependencies, and keeps the SRD 5.1 and SRD 5.2.1 content modules independent. A more detailed German developer guide exists locally at `docs/ENTWICKLERLEITFADEN.md`; that file is intentionally ignored by Git.

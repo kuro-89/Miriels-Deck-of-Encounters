@@ -1,3 +1,19 @@
+/**
+ * Kuratierte Demo-Karten und Demo-Spielstandsdaten
+ * ================================================
+ *
+ * Aufgabe:
+ * Erzeugt ausschließlich die mitgelieferten Beispielkarten. Die Daten werden
+ * über die gleichen Modellfabriken aufgebaut wie benutzerdefinierte Karten,
+ * damit Demo- und Produktivpfade konsistent bleiben.
+ *
+ * Abhängigkeiten:
+ * - `card-model.js` für Kartenaktionen, Traits, Zauber und Inventarstrukturen.
+ *
+ * Liefert an:
+ * - `app.js` die Demo-Karten sowie eine Erkennung bekannter Demo-Datensätze.
+ */
+
 import {
     applyLegacySlotHints,
     createCardAction,

@@ -1,3 +1,20 @@
+/**
+ * Karten-, Zauber- und Inventarmodell
+ * ==================================
+ *
+ * Aufgabe:
+ * Enthält die DOM-unabhängigen Fabriken, Normalisierungen und Parser für Karten,
+ * Aktionen, Traits, Zauber und Inventar. UI-Rendering und Speicherung gehören
+ * ausdrücklich nicht in dieses Modul.
+ *
+ * Abhängigkeiten:
+ * - `config.js` für erlaubte Modi und Sicherheitsgrenzen.
+ * - `utils.js` für stabile eindeutige IDs.
+ *
+ * Liefert an:
+ * - `app.js`, `demo-data.js` und Tests die gemeinsamen Datenfabriken und Parser.
+ */
+
 import {
   effectVisibilityModes,
   importSecurityLimits,
